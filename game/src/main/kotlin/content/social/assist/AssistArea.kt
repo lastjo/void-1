@@ -4,7 +4,7 @@ import world.gregs.voidps.engine.client.ui.closeMenu
 import world.gregs.voidps.engine.entity.character.mode.move.move
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.temporaryMoveType
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.network.login.protocol.visual.update.player.MoveType
 import world.gregs.voidps.type.Tile
 @Script

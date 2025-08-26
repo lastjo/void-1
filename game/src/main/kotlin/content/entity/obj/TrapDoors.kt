@@ -2,7 +2,7 @@ package content.entity.obj
 
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.entity.obj.replace
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.timer.toTicks
 import java.util.concurrent.TimeUnit
 @Script

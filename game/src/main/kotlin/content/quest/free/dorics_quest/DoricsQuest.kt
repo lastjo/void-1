@@ -5,7 +5,7 @@ import content.quest.quest
 import content.quest.questJournal
 import net.pearx.kasechange.toTitleCase
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inv.inventory
 @Script
 class DoricsQuest {

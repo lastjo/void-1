@@ -5,7 +5,7 @@ import content.entity.sound.sound
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.timer.*
 import java.util.concurrent.TimeUnit
 @Script

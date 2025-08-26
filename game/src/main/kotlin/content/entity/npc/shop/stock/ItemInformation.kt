@@ -6,7 +6,7 @@ import world.gregs.voidps.engine.client.ui.close
 import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.menu
 import world.gregs.voidps.engine.client.ui.open
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inv.inventoryChanged
 @Script
 class ItemInformation {

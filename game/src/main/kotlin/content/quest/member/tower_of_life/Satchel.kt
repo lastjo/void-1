@@ -6,7 +6,7 @@ import net.pearx.kasechange.toLowerSpaceCase
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.interact.itemOnItem
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inv.charges
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add

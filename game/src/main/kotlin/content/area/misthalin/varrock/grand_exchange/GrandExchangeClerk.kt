@@ -11,7 +11,7 @@ import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.npcApproach
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.male
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 @Script
 class GrandExchangeClerk {
 

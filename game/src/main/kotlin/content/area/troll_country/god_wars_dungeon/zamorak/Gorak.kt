@@ -7,7 +7,7 @@ import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.type.random
 @Script
 class Gorak {

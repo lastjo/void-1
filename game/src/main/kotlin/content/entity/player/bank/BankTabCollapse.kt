@@ -2,7 +2,7 @@ package content.entity.player.bank
 
 import content.entity.player.bank.Bank.tabIndex
 import world.gregs.voidps.engine.client.ui.interfaceOption
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inv.transact.operation.ShiftItem.shiftToFreeIndex
 @Script
 class BankTabCollapse {

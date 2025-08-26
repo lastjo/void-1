@@ -6,7 +6,7 @@ import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.character.mode.interact.Interaction
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.flagAppearance
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.timer.timerStart
 import world.gregs.voidps.engine.timer.timerStop
 import world.gregs.voidps.engine.timer.timerTick

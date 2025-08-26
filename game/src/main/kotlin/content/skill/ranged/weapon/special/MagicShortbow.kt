@@ -5,7 +5,7 @@ import content.entity.player.combat.special.specialAttack
 import content.entity.proj.shoot
 import content.entity.sound.sound
 import world.gregs.voidps.engine.entity.distanceTo
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 @Script
 class MagicShortbow {
 

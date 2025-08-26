@@ -6,7 +6,7 @@ import world.gregs.voidps.engine.client.variable.hasClock
 import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.timer.toTicks
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import java.util.concurrent.TimeUnit

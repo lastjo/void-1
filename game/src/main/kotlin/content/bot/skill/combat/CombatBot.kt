@@ -36,7 +36,7 @@ import world.gregs.voidps.engine.entity.character.player.skill.level.levelChange
 import world.gregs.voidps.engine.entity.distanceTo
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
 import world.gregs.voidps.engine.entity.worldSpawn
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory

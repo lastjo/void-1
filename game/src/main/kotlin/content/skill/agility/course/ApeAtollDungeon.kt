@@ -7,7 +7,7 @@ import content.quest.questCompleted
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.Direction
 @Script

@@ -5,7 +5,7 @@ import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.event.Context
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.suspend.StringSuspension
 
 suspend fun Context<Player>.warning(id: String): Boolean {

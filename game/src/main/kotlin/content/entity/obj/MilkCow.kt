@@ -11,7 +11,7 @@ import content.entity.sound.sound
 import content.quest.quest
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inv.holdsItem
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.replace

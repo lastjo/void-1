@@ -5,7 +5,7 @@ import content.entity.player.equip.Equipment
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 @Script
 class AberrantSpectre {

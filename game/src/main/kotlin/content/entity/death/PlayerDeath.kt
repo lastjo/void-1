@@ -30,7 +30,7 @@ import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.characterSpawn
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.*
 import world.gregs.voidps.engine.map.Spiral

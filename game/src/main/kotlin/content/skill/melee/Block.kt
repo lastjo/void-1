@@ -13,7 +13,7 @@ import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.entity.character.player.male
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.random

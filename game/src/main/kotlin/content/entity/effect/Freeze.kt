@@ -6,7 +6,7 @@ import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.client.variable.stop
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.timer.characterTimerStart
 import world.gregs.voidps.engine.timer.characterTimerStop
 import world.gregs.voidps.engine.timer.characterTimerTick

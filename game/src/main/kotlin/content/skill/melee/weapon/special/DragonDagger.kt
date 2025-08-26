@@ -2,7 +2,7 @@ package content.skill.melee.weapon.special
 
 import content.entity.combat.hit.hit
 import content.entity.player.combat.special.specialAttackDamage
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 @Script
 class DragonDagger {
 

@@ -4,7 +4,7 @@ import content.bot.isBot
 import kotlinx.coroutines.CancellableContinuation
 import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.floorItemDespawn
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inject
 import kotlin.coroutines.resume
 @Script

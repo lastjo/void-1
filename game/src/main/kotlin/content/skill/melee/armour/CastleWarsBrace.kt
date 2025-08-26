@@ -4,7 +4,7 @@ import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.entity.character.mode.move.enterArea
 import world.gregs.voidps.engine.entity.character.mode.move.exitArea
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.itemAdded
 import world.gregs.voidps.engine.inv.itemRemoved

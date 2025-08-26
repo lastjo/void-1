@@ -64,7 +64,7 @@ import world.gregs.voidps.engine.entity.item.floor.loadItemSpawns
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.loadObjectSpawns
 import world.gregs.voidps.engine.entity.worldSpawn
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.*

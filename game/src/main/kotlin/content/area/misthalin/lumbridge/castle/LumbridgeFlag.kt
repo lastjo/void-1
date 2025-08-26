@@ -1,7 +1,7 @@
 package content.area.misthalin.lumbridge.castle
 
 import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 @Script
 class LumbridgeFlag {
 

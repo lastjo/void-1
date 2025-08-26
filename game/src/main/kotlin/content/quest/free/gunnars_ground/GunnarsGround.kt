@@ -6,7 +6,7 @@ import content.quest.letterScroll
 import content.quest.quest
 import content.quest.questJournal
 import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inv.holdsItem
 @Script
 class GunnarsGround {

@@ -5,7 +5,7 @@ import world.gregs.voidps.engine.client.publicStatus
 import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 
 var Player.publicStatus: String
     get() = get("public_status", "on")

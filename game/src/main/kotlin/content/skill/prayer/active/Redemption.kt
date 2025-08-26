@@ -3,7 +3,7 @@ package content.skill.prayer.active
 import content.skill.prayer.praying
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.levelChange
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 @Script
 class Redemption {
 

@@ -7,7 +7,7 @@ import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.chat.plural
 import world.gregs.voidps.engine.client.ui.interact.itemOnItem
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.charges
 import world.gregs.voidps.engine.inv.inventory

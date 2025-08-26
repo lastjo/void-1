@@ -5,7 +5,7 @@ import content.entity.player.combat.special.specialAttack
 import content.entity.proj.shoot
 import content.skill.ranged.ammo
 import world.gregs.voidps.engine.client.variable.start
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 @Script
 class MorrigansThrowingAxe {
 

@@ -16,7 +16,7 @@ import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.mode.move.enterArea
 import world.gregs.voidps.engine.entity.character.mode.move.exitArea
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inject
 @Script
 class TaskSystem {

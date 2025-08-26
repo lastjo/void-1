@@ -7,7 +7,7 @@ import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 @Script
 class Arheins {
 

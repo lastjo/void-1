@@ -8,7 +8,7 @@ import content.skill.summoning.isFamiliar
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.timer.CLIENT_TICKS
 import world.gregs.voidps.engine.timer.characterTimerStart
 import world.gregs.voidps.engine.timer.characterTimerStop

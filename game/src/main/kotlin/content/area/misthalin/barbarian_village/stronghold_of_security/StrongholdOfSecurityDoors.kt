@@ -11,7 +11,7 @@ import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.obj.ObjectOption
 import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.type.random
 @Script
 class StrongholdOfSecurityDoors {

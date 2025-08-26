@@ -11,7 +11,7 @@ import world.gregs.voidps.engine.data.definition.EnumDefinitions
 import world.gregs.voidps.engine.entity.character.mode.move.move
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inject
 @Script
 class Music {

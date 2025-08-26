@@ -6,7 +6,7 @@ import world.gregs.voidps.engine.data.definition.InventoryDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.req.hasRequest
 import world.gregs.voidps.engine.entity.character.player.req.removeRequest
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.*
 @Script

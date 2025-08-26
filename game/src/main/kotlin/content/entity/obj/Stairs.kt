@@ -4,7 +4,7 @@ import content.entity.player.dialogue.type.choice
 import world.gregs.voidps.engine.client.variable.remaining
 import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inject
 @Script
 class Stairs {

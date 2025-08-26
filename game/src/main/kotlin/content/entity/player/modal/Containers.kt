@@ -3,7 +3,7 @@ package content.entity.player.modal
 import world.gregs.voidps.engine.client.sendInterfaceItemUpdate
 import world.gregs.voidps.engine.data.definition.InventoryDefinitions
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventoryUpdate
 @Script

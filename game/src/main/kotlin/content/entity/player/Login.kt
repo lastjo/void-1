@@ -5,7 +5,7 @@ import world.gregs.voidps.engine.entity.character.player.flagAppearance
 import world.gregs.voidps.engine.entity.character.player.flagMovementType
 import world.gregs.voidps.engine.entity.character.player.flagTemporaryMoveType
 import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 @Script
 class Login {
 

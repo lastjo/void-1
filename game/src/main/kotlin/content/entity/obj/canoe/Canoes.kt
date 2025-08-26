@@ -21,7 +21,7 @@ import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.ObjectOption
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.suspend.StringSuspension
 import world.gregs.voidps.type.Direction

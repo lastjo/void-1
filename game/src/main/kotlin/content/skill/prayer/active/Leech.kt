@@ -15,7 +15,7 @@ import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.queue.queue
 import world.gregs.voidps.engine.timer.timerStart
 import world.gregs.voidps.engine.timer.timerTick

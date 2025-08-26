@@ -4,7 +4,7 @@ import content.entity.combat.hit.hit
 import content.entity.sound.sound
 import content.skill.melee.weapon.weapon
 import world.gregs.voidps.engine.client.variable.variableSet
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 @Script
 class SpecialAttacks {
 

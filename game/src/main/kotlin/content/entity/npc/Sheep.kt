@@ -7,7 +7,7 @@ import world.gregs.voidps.engine.data.Settings
 import world.gregs.voidps.engine.entity.character.mode.Retreat
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.holdsItem

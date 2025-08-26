@@ -8,7 +8,7 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.PlayerOption
 import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.character.player.name
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.map.collision.random
 import world.gregs.voidps.engine.queue.softQueue

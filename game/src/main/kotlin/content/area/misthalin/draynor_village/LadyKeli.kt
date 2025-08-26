@@ -15,7 +15,7 @@ import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.PlayerOption
 import world.gregs.voidps.engine.entity.character.player.chat.noInterest
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove

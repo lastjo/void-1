@@ -15,7 +15,7 @@ import world.gregs.voidps.engine.data.definition.AreaDefinition
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCs
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.network.client.instruction.InteractInterface
 import world.gregs.voidps.network.client.instruction.InteractNPC

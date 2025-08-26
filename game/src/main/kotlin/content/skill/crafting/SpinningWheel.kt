@@ -15,7 +15,7 @@ import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.replace
 import world.gregs.voidps.engine.queue.weakQueue

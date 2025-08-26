@@ -1,4 +1,4 @@
-package world.gregs.voidps.engine.event
+package world.gregs.voidps.engine.script
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.SOURCE)

@@ -16,7 +16,7 @@ import world.gregs.voidps.engine.entity.character.player.chat.friend.PrivateChat
 import world.gregs.voidps.engine.entity.character.player.chat.global.PublicChatMessage
 import world.gregs.voidps.engine.entity.character.player.name
 import world.gregs.voidps.engine.entity.character.player.rights
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.event.onEvent
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.network.client.instruction.ChatPrivate

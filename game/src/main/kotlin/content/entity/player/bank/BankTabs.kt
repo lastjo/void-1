@@ -3,7 +3,7 @@ package content.entity.player.bank
 import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.interfaceSwap
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inv.Inventory
 import world.gregs.voidps.engine.inv.inventoryUpdate
 import world.gregs.voidps.engine.inv.shift

@@ -7,7 +7,7 @@ import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import content.entity.player.dialogue.type.statement
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.queue.queue

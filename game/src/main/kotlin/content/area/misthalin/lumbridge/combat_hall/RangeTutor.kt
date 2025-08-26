@@ -9,7 +9,7 @@ import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.inventoryFull
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.equipment
 import world.gregs.voidps.engine.inv.inventory

@@ -22,7 +22,7 @@ import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
 import world.gregs.voidps.engine.entity.npcSpawn
 import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.timer.*
 import world.gregs.voidps.type.Tile

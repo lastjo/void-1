@@ -7,7 +7,7 @@ import world.gregs.voidps.engine.entity.character.mode.Wander
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.npcSpawn
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.engine.timer.npcTimerStart

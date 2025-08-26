@@ -5,7 +5,7 @@ import content.entity.player.dialogue.type.statement
 import content.entity.player.inv.inventoryItem
 import content.quest.questCompleted
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inject
 @Script
 class GamesNecklace {
