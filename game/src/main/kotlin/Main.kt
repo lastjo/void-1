@@ -20,6 +20,7 @@ import world.gregs.voidps.engine.entity.Despawn
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.item.drop.DropTables
 import world.gregs.voidps.engine.map.collision.CollisionDecoder
+import world.gregs.voidps.engine.script.Scripts
 import world.gregs.voidps.network.GameServer
 import world.gregs.voidps.network.LoginServer
 import world.gregs.voidps.network.login.protocol.decoders
@@ -93,7 +94,7 @@ object Main {
                 cache(cache, configFiles),
             )
         }
-        ContentLoader.load()
+        Scripts.load()
         Runtime.getRuntime().addShutdownHook(
             thread(start = false) {
                 World.emit(Despawn)

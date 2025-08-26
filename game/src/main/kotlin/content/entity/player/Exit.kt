@@ -5,8 +5,8 @@ import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.AccountManager
-import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inject
+import world.gregs.voidps.engine.script.Script
 @Script
 class Exit {
 

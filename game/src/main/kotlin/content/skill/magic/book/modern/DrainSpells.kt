@@ -4,8 +4,8 @@ import content.entity.combat.characterCombatPrepare
 import content.skill.magic.spell.Spell
 import content.skill.magic.spell.spell
 import world.gregs.voidps.engine.data.definition.SpellDefinitions
-import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inject
+import world.gregs.voidps.engine.script.Script
 @Script
 class DrainSpells {
 

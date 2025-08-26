@@ -20,11 +20,11 @@ import world.gregs.voidps.engine.entity.character.player.sex
 import world.gregs.voidps.engine.entity.worldSpawn
 import world.gregs.voidps.engine.event.Event
 import world.gregs.voidps.engine.event.Events
-import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.timer.toTicks
 import world.gregs.voidps.engine.timer.worldTimerStart
 import world.gregs.voidps.engine.timer.worldTimerTick

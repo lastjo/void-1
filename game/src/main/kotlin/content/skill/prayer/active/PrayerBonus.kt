@@ -6,8 +6,8 @@ import content.skill.prayer.Prayer
 import content.skill.prayer.prayerStart
 import content.skill.prayer.prayerStop
 import world.gregs.voidps.engine.data.definition.PrayerDefinitions
-import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inject
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.type.random
 @Script
 class PrayerBonus {

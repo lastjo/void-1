@@ -8,11 +8,11 @@ import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.playerDespawn
 import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.entity.worldSpawn
-import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.Inventory
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.remove
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.timer.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs

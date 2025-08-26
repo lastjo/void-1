@@ -3,8 +3,8 @@ package content.quest.free.rune_mysteries
 import content.entity.player.modal.tab.questJournalOpen
 import content.quest.quest
 import content.quest.questJournal
-import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inv.holdsItem
+import world.gregs.voidps.engine.script.Script
 @Script
 class RuneMysteries {
 

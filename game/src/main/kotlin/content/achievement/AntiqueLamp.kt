@@ -4,9 +4,9 @@ import content.entity.player.dialogue.type.skillLamp
 import content.entity.player.dialogue.type.statement
 import content.entity.player.inv.inventoryItem
 import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
-import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
+import world.gregs.voidps.engine.script.Script
 @Script
 class AntiqueLamp {
 

@@ -3,8 +3,8 @@ package content.skill.magic.jewellery
 import content.entity.player.dialogue.type.choice
 import content.entity.player.inv.inventoryItem
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
-import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inject
+import world.gregs.voidps.engine.script.Script
 @Script
 class RingOfDuelling {
 

@@ -5,8 +5,8 @@ import content.entity.player.inv.inventoryItem
 import net.pearx.kasechange.toKebabCase
 import net.pearx.kasechange.toSentenceCase
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.inject
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.area.Rectangle
 @Script

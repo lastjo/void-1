@@ -3,9 +3,9 @@ package content.skill.fishing
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.npcSpawn
-import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.map.collision.random
 import world.gregs.voidps.engine.queue.softQueue
+import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.type.Area
 import world.gregs.voidps.type.random
 @Script
