@@ -222,6 +222,8 @@ class Events(
             this.events = events
         }
 
+        val handlers = mutableSetOf<String>()
+
         @JvmName("handleDispatcher")
         fun <D : EventDispatcher, E : Event> handle(vararg parameters: Any?, handler: suspend E.(D) -> Unit) {
             handle(parameters, handler as suspend Event.(EventDispatcher) -> Unit)
