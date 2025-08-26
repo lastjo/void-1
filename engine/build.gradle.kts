@@ -16,6 +16,9 @@ dependencies {
 
     implementation("it.unimi.dsi:fastutil:${findProperty("fastUtilVersion")}")
     implementation("net.pearx.kasechange:kasechange:${findProperty("kaseChangeVersion")}")
+    implementation("com.google.devtools.ksp:symbol-processing-api:${findProperty("kspVersion")}")
+    implementation("com.squareup:kotlinpoet:${findProperty("kotlinPoetVersion")}")
+    implementation("com.squareup:kotlinpoet-ksp:${findProperty("kotlinPoetVersion")}")
 
     implementation("io.insert-koin:koin-core:${findProperty("koinVersion")}")
     implementation("org.rsmod:rsmod-pathfinder:${findProperty("pathfinderVersion")}")

@@ -3,9 +3,11 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
     application
     id("com.github.johnrengelman.shadow")
+    id("com.google.devtools.ksp") version "1.9.22-1.0.18"
 }
 
 dependencies {
+    ksp(project(":engine"))
     implementation(project(":engine"))
     implementation(project(":cache"))
     implementation(project(":network"))
@@ -37,41 +39,7 @@ application {
 }
 
 tasks {
-
-    named("build") {
-        dependsOn("collectSourcePaths")
-    }
-
-    named("classes") {
-        dependsOn("collectSourcePaths")
-    }
-
-    register("collectSourcePaths") {
-        doLast {
-            val start = System.nanoTime()
-            val main = sourceSets.getByName("main")
-            val outputFile = main.resources.srcDirs.first { it.name == "resources" }.resolve("scripts.txt")
-            var count = 0
-            outputFile.writer().buffered().use { output ->
-                for (file in main.allSource.srcDirs.first { it.name == "kotlin" }.walkTopDown()) {
-                    if (file.extension == "kts") {
-                        output.write(
-                            file.absolutePath
-                                .substringAfter("kotlin${File.separatorChar}")
-                                .replace(File.separatorChar, '.')
-                                .removeSuffix(".kts"),
-                        )
-                        output.write('\n'.code)
-                        count++
-                    }
-                }
-            }
-            println("Collected $count source file paths to ${outputFile.path} in ${System.nanoTime() - start} ms")
-        }
-    }
-
     named<ShadowJar>("shadowJar") {
-        dependsOn("collectSourcePaths")
         from(layout.buildDirectory.file("scripts.txt"))
         minimize {
             exclude("world/gregs/voidps/engine/log/**")
@@ -105,7 +73,6 @@ distributions {
     create("bundle") {
         distributionBaseName = "void"
         contents {
-            from(tasks["collectSourcePaths"])
             from(tasks["shadowJar"])
 
             val emptyDirs = setOf("cache", "saves")
