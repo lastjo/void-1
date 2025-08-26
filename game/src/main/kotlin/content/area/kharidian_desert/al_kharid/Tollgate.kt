@@ -30,6 +30,7 @@ import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Distance.nearestTo
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.area.Rectangle
+
 @Script
 class Tollgate {
 

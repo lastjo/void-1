@@ -6,6 +6,7 @@ import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class Stairs {
 

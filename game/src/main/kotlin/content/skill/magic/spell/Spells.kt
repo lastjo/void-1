@@ -9,6 +9,7 @@ import content.skill.melee.weapon.multiTargets
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.type.random
 import kotlin.random.nextInt
+
 @Script
 class Spells {
 

@@ -17,6 +17,7 @@ import world.gregs.voidps.engine.entity.objectDespawn
 import world.gregs.voidps.engine.entity.objectSpawn
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class SlayerTower {
 

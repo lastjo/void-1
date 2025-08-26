@@ -12,6 +12,7 @@ import world.gregs.voidps.engine.inv.transact.operation.AddItemLimit.addToLimit
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItemLimit.removeToLimit
 import world.gregs.voidps.engine.inv.transact.operation.ReplaceItem.replace
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class Sack {
 

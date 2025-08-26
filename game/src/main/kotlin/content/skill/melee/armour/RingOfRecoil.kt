@@ -11,6 +11,7 @@ import world.gregs.voidps.engine.inv.discharge
 import world.gregs.voidps.engine.inv.equipment
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
+
 @Script
 class RingOfRecoil {
 

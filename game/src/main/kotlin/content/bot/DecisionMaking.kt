@@ -12,6 +12,7 @@ import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.event.onEvent
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class DecisionMaking {
 

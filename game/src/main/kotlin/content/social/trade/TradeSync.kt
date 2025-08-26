@@ -9,6 +9,7 @@ import world.gregs.voidps.engine.entity.character.player.req.removeRequest
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.*
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class TradeSync {
 

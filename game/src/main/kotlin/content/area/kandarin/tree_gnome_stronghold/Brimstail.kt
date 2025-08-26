@@ -12,6 +12,7 @@ import content.skill.runecrafting.EssenceMine
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class Brimstail {
 

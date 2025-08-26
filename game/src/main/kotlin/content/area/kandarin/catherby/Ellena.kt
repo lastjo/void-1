@@ -5,6 +5,7 @@ import content.entity.player.dialogue.Talk
 import content.entity.player.dialogue.type.*
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class Ellena {
 

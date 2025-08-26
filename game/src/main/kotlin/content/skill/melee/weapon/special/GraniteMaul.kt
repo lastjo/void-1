@@ -5,6 +5,7 @@ import content.entity.combat.target
 import content.entity.player.combat.special.SpecialAttack
 import content.entity.player.combat.special.specialAttackPrepare
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class GraniteMaul {
 

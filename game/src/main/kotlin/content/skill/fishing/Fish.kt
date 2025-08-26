@@ -8,6 +8,7 @@ import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.type.Area
 import world.gregs.voidps.type.random
+
 @Script
 class Fish {
 

@@ -24,6 +24,7 @@ import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.network.client.instruction.FriendAdd
 import world.gregs.voidps.network.client.instruction.FriendDelete
 import world.gregs.voidps.network.login.protocol.encode.*
+
 @Script
 class FriendsList {
 

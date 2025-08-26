@@ -30,6 +30,7 @@ import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.timer.TICKS
 import java.util.concurrent.TimeUnit
 import kotlin.math.min
+
 @Script
 class RequestAssist {
 

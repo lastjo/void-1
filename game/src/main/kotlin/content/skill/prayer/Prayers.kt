@@ -8,6 +8,7 @@ import world.gregs.voidps.engine.entity.character.player.flagAppearance
 import world.gregs.voidps.engine.entity.character.player.headIcon
 import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class Prayers {
 

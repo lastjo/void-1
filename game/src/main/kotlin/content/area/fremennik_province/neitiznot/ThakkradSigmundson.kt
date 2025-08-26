@@ -16,6 +16,7 @@ import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItemLimit.removeToLimit
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.suspend.SuspendableContext
+
 @Script
 class ThakkradSigmundson {
 

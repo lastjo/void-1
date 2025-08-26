@@ -4,6 +4,7 @@ import content.entity.combat.hit.combatAttack
 import content.skill.prayer.praying
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class Smite {
 

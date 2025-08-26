@@ -22,6 +22,7 @@ import world.gregs.voidps.network.client.instruction.ClanChatRank
 import world.gregs.voidps.network.login.protocol.encode.appendClanChat
 import world.gregs.voidps.network.login.protocol.encode.updateClanChat
 import java.util.concurrent.TimeUnit
+
 @Script
 class ClanChat {
 

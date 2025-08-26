@@ -9,6 +9,7 @@ import world.gregs.voidps.engine.entity.character.mode.move.target.CharacterTarg
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.type.random
+
 @Script
 class ColourDragon {
 

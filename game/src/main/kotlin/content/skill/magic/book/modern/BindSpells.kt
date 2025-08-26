@@ -7,6 +7,7 @@ import world.gregs.voidps.engine.data.definition.SpellDefinitions
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class BindSpells {
 

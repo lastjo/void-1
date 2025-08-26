@@ -12,6 +12,7 @@ import world.gregs.voidps.engine.inv.equipment
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.timer.toTicks
 import java.util.concurrent.TimeUnit
+
 @Script
 class GodwarsAltars {
 

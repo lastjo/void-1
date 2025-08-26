@@ -10,6 +10,7 @@ import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.timer.toTicks
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import java.util.concurrent.TimeUnit
+
 @Script
 class SkillcapeBoost {
 

@@ -7,6 +7,7 @@ import world.gregs.voidps.engine.entity.character.player.temporaryMoveType
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.network.login.protocol.visual.update.player.MoveType
 import world.gregs.voidps.type.Tile
+
 @Script
 class AssistArea {
 

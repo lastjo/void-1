@@ -14,6 +14,7 @@ import world.gregs.voidps.engine.entity.character.npc.hunt.huntPlayer
 import world.gregs.voidps.engine.entity.character.player.PlayerOption
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class Aggression {
 

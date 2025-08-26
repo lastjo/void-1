@@ -15,6 +15,7 @@ import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.network.client.instruction.ExamineItem
 import world.gregs.voidps.network.client.instruction.ExamineNpc
 import world.gregs.voidps.network.client.instruction.ExamineObject
+
 @Script
 class Examines {
 

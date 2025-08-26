@@ -13,6 +13,7 @@ import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.network.login.protocol.visual.update.HitSplat
 import kotlin.collections.set
 import kotlin.math.floor
+
 @Script
 class CombatHitsplats {
 

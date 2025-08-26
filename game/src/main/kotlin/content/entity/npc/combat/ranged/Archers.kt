@@ -3,6 +3,7 @@ package content.entity.npc.combat.ranged
 import content.entity.combat.npcCombatPrepare
 import content.skill.ranged.ammo
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class Archers {
 

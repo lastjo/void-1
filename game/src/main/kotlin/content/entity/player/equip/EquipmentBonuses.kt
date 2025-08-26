@@ -24,6 +24,7 @@ import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.network.login.protocol.visual.VisualMask.APPEARANCE_MASK
 import java.math.RoundingMode
 import java.text.DecimalFormat
+
 @Script
 class EquipmentBonuses {
 

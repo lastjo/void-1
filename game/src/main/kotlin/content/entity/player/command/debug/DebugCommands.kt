@@ -41,6 +41,7 @@ import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.Zone
 import kotlin.system.measureNanoTime
 import kotlin.system.measureTimeMillis
+
 @Script
 class DebugCommands {
 

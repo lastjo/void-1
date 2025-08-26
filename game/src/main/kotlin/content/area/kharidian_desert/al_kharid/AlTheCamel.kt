@@ -24,6 +24,7 @@ import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.random
 import java.util.concurrent.TimeUnit
+
 @Script
 class AlTheCamel {
 

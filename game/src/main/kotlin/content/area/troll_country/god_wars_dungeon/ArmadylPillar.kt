@@ -19,6 +19,7 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Tile
+
 @Script
 class ArmadylPillar {
 

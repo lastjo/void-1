@@ -17,6 +17,7 @@ import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.equals
 import world.gregs.voidps.type.random
+
 @Script
 class BarbarianOutpost {
 

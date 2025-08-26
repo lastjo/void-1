@@ -8,6 +8,7 @@ import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.timer.*
 import java.util.concurrent.TimeUnit
+
 @Script
 class GodBows {
 

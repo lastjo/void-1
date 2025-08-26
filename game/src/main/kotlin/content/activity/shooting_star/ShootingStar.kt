@@ -44,6 +44,7 @@ import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.random
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
+
 @Script
 class ShootingStar {
 

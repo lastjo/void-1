@@ -4,6 +4,7 @@ import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.equals
+
 @Script
 class WildernessWall {
 

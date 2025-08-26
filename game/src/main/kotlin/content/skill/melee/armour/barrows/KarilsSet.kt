@@ -8,6 +8,7 @@ import world.gregs.voidps.engine.inv.itemAdded
 import world.gregs.voidps.engine.inv.itemRemoved
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.type.random
+
 @Script
 class KarilsSet {
 

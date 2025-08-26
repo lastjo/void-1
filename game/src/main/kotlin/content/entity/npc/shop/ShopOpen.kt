@@ -16,6 +16,7 @@ import world.gregs.voidps.engine.inv.Inventory
 import world.gregs.voidps.engine.inv.inventoryChanged
 import world.gregs.voidps.engine.inv.sendInventory
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class ShopOpen {
 

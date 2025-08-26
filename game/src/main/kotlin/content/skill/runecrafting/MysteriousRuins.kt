@@ -23,6 +23,7 @@ import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.equals
+
 @Script
 class MysteriousRuins {
 

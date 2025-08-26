@@ -18,6 +18,7 @@ import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.type.Tile
+
 @Script
 class SpiritTree {
 

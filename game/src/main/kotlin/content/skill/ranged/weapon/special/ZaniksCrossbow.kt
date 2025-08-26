@@ -5,6 +5,7 @@ import content.entity.player.combat.special.specialAttack
 import content.entity.proj.shoot
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class ZaniksCrossbow {
 

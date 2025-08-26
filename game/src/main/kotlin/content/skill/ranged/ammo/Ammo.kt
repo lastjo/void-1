@@ -19,6 +19,7 @@ import world.gregs.voidps.engine.entity.character.player.skill.level.Level.hasUs
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
+
 @Script
 class Ammo {
 

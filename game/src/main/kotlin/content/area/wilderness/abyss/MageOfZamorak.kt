@@ -27,6 +27,7 @@ import world.gregs.voidps.engine.queue.ActionPriority
 import world.gregs.voidps.engine.queue.queue
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.type.random
+
 @Script
 class MageOfZamorak {
 

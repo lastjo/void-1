@@ -12,6 +12,7 @@ import world.gregs.voidps.engine.entity.obj.replace
 import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.inv.*
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class Mill {
 

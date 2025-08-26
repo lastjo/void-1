@@ -16,6 +16,7 @@ import world.gregs.voidps.engine.map.zone.DynamicZones
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.type.Delta
 import world.gregs.voidps.type.Direction
+
 @Script
 class PlayerUpdatingCommands {
 

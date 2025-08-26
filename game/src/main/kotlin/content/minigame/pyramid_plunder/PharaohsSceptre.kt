@@ -6,6 +6,7 @@ import content.skill.magic.jewellery.itemTeleport
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class PharaohsSceptre {
 

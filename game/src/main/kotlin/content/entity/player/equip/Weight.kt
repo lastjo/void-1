@@ -8,6 +8,7 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.inventoryUpdate
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.network.login.protocol.encode.weight
+
 @Script
 class Weight {
 

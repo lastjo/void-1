@@ -5,6 +5,7 @@ import content.entity.player.combat.special.specialAttackPrepare
 import content.entity.sound.sound
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class DragonBattleaxe {
 

@@ -22,6 +22,7 @@ import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.equals
+
 @Script
 class WildernessCourse {
 

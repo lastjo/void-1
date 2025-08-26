@@ -6,6 +6,7 @@ import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.network.login.protocol.visual.update.player.Body
 import world.gregs.voidps.network.login.protocol.visual.update.player.BodyPart
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
+
 @Script
 class Appearance {
 

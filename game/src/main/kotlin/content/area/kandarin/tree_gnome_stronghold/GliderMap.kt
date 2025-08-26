@@ -8,6 +8,7 @@ import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.type.Tile
+
 @Script
 class GliderMap {
 

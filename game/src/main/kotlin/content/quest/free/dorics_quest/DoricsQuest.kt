@@ -7,6 +7,7 @@ import net.pearx.kasechange.toTitleCase
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class DoricsQuest {
 

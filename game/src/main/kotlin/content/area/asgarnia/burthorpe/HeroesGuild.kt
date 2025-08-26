@@ -6,6 +6,7 @@ import world.gregs.voidps.engine.client.ui.interact.itemOnObjectOperate
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.replace
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class HeroesGuild {
 

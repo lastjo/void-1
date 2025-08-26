@@ -4,6 +4,7 @@ import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.timer.characterTimerStart
 import world.gregs.voidps.engine.timer.characterTimerStop
 import world.gregs.voidps.engine.timer.characterTimerTick
+
 @Script
 class ColourOverlay {
 

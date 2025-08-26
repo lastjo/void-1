@@ -7,6 +7,7 @@ import content.entity.player.dialogue.type.npc
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.male
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class Iffie {
 

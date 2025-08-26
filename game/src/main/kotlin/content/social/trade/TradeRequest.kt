@@ -19,6 +19,7 @@ import world.gregs.voidps.engine.inv.clear
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.moveAll
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class TradeRequest {
 

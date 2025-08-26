@@ -4,6 +4,7 @@ import content.entity.combat.combatPrepare
 import content.skill.magic.spell.hasSpellItems
 import content.skill.magic.spell.spell
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class SpellRunes {
 

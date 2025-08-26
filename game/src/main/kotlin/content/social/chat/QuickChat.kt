@@ -26,6 +26,7 @@ import world.gregs.voidps.network.login.protocol.encode.clanQuickChat
 import world.gregs.voidps.network.login.protocol.encode.privateQuickChatFrom
 import world.gregs.voidps.network.login.protocol.encode.privateQuickChatTo
 import world.gregs.voidps.network.login.protocol.encode.publicQuickChat
+
 @Script
 class QuickChat {
 

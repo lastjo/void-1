@@ -18,6 +18,7 @@ import world.gregs.voidps.engine.inv.sendInventory
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.ClearItem.clear
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class DiangoItemRetrieval {
 

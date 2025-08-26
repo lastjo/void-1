@@ -10,6 +10,7 @@ import world.gregs.voidps.engine.entity.obj.ObjectOption
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.type.Direction
+
 @Script
 class Stiles {
 

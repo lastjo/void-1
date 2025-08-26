@@ -13,6 +13,7 @@ import world.gregs.voidps.engine.inv.holdsItem
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class Sheep {
 

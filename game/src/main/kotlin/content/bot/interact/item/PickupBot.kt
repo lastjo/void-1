@@ -7,6 +7,7 @@ import world.gregs.voidps.engine.entity.floorItemDespawn
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.script.Script
 import kotlin.coroutines.resume
+
 @Script
 class PickupBot {
 

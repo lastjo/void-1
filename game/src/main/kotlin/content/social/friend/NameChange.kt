@@ -16,6 +16,7 @@ import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.timer.epochSeconds
 import world.gregs.voidps.network.login.protocol.encode.Friend
 import java.util.concurrent.TimeUnit
+
 @Script
 class NameChange {
 

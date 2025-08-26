@@ -6,6 +6,7 @@ import content.entity.proj.shoot
 import content.entity.sound.sound
 import world.gregs.voidps.engine.entity.distanceTo
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class MagicShortbow {
 

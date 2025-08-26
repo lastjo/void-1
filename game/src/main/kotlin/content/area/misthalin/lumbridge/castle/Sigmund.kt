@@ -8,6 +8,7 @@ import content.entity.player.dialogue.type.player
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class Sigmund {
 

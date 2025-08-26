@@ -6,6 +6,7 @@ import world.gregs.voidps.engine.entity.worldSpawn
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.network.client.instruction.Walk
+
 @Script
 class WalkingBot {
 

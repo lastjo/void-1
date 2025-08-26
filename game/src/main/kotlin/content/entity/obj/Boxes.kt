@@ -3,6 +3,7 @@ package content.entity.obj
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class Boxes {
 

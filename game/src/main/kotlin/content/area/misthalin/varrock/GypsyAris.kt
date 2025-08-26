@@ -34,6 +34,7 @@ import world.gregs.voidps.engine.timer.npcTimerStart
 import world.gregs.voidps.engine.timer.npcTimerTick
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Region
+
 @Script
 class GypsyAris {
 

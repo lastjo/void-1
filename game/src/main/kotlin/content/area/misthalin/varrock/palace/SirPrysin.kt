@@ -20,6 +20,7 @@ import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Tile
+
 @Script
 class SirPrysin {
 

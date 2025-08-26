@@ -10,6 +10,7 @@ import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class Fadli {
 

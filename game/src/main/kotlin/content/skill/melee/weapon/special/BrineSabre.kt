@@ -3,6 +3,7 @@ package content.skill.melee.weapon.special
 import content.entity.player.combat.special.specialAttackPrepare
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class BrineSabre {
 

@@ -6,6 +6,7 @@ import content.entity.player.combat.special.specialAttack
 import content.entity.sound.areaSound
 import content.skill.melee.weapon.weapon
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class SaradominSword {
 

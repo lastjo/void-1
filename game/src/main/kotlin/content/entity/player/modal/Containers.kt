@@ -6,6 +6,7 @@ import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventoryUpdate
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class Containers {
 

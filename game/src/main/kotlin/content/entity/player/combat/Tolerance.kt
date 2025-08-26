@@ -6,6 +6,7 @@ import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.timer.epochSeconds
 import java.util.concurrent.TimeUnit
+
 @Script
 class Tolerance {
 

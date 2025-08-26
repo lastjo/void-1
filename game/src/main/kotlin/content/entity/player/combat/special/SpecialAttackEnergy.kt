@@ -6,6 +6,7 @@ import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.timer.timerStart
 import world.gregs.voidps.engine.timer.timerTick
 import kotlin.math.min
+
 @Script
 class SpecialAttackEnergy {
 

@@ -20,6 +20,7 @@ import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import kotlin.math.min
+
 @Script
 class CelestialSurgeBox {
 

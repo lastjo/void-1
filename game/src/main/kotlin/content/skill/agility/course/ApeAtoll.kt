@@ -22,6 +22,7 @@ import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.random
+
 @Script
 class ApeAtoll {
 

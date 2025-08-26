@@ -8,6 +8,7 @@ import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.timer.npcTimerStart
 import world.gregs.voidps.engine.timer.npcTimerTick
 import world.gregs.voidps.type.random
+
 @Script
 class Cows {
 

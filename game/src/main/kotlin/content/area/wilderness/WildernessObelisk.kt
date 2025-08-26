@@ -14,6 +14,7 @@ import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.area.Rectangle
 import world.gregs.voidps.type.random
+
 @Script
 class WildernessObelisk {
 

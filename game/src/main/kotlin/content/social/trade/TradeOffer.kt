@@ -14,6 +14,7 @@ import world.gregs.voidps.engine.inv.restrict.ItemRestrictionRule
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItemLimit.removeToLimit
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class TradeOffer {
 

@@ -5,6 +5,7 @@ import content.entity.player.modal.tab.questJournalOpen
 import content.quest.quest
 import content.quest.questJournal
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class TheRestlessGhost {
 

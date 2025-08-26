@@ -12,6 +12,7 @@ import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.type.Distance.nearestTo
 import world.gregs.voidps.type.area.Rectangle
 import kotlin.collections.set
+
 @Script
 class BorderGuard {
 

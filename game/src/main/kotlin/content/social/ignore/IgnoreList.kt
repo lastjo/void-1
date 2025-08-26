@@ -18,6 +18,7 @@ import world.gregs.voidps.network.client.instruction.IgnoreAdd
 import world.gregs.voidps.network.client.instruction.IgnoreDelete
 import world.gregs.voidps.network.login.protocol.encode.Friend
 import world.gregs.voidps.network.login.protocol.encode.sendIgnoreList
+
 @Script
 class IgnoreList {
 

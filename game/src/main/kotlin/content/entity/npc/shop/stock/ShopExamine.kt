@@ -4,6 +4,7 @@ import content.entity.npc.shop.shopInventory
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class ShopExamine {
 

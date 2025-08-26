@@ -6,6 +6,7 @@ import content.skill.magic.spell.spell
 import world.gregs.voidps.engine.data.definition.SpellDefinitions
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class DrainSpells {
 

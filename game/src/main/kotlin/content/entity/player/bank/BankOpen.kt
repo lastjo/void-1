@@ -13,6 +13,7 @@ import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.inv.sendInventory
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class BankOpen {
 

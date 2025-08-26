@@ -20,6 +20,7 @@ import world.gregs.voidps.network.client.instruction.Walk
 import world.gregs.voidps.type.Distance.nearestTo
 import world.gregs.voidps.type.Zone
 import world.gregs.voidps.type.area.Rectangle
+
 @Script
 class Movement {
 

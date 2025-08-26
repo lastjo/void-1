@@ -12,6 +12,7 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.queue.weakQueue
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.network.client.instruction.ChangeDisplayMode
+
 @Script
 class GameFrame {
 

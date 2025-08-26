@@ -12,6 +12,7 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.restrict.ItemRestrictionRule
 import world.gregs.voidps.engine.inv.transact.operation.SwapItem.swap
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class TradeLending {
 

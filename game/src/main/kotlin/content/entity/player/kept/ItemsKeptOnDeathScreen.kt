@@ -12,6 +12,7 @@ import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.timer.timerStart
 import world.gregs.voidps.engine.timer.timerStop
+
 @Script
 class ItemsKeptOnDeathScreen {
 

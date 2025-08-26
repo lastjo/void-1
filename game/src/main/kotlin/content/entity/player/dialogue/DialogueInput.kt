@@ -10,6 +10,7 @@ import world.gregs.voidps.engine.suspend.StringSuspension
 import world.gregs.voidps.network.client.instruction.EnterInt
 import world.gregs.voidps.network.client.instruction.EnterName
 import world.gregs.voidps.network.client.instruction.EnterString
+
 @Script
 class DialogueInput {
 

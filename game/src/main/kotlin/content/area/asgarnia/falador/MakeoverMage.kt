@@ -32,6 +32,7 @@ import world.gregs.voidps.network.login.protocol.visual.update.player.BodyColour
 import world.gregs.voidps.network.login.protocol.visual.update.player.BodyPart
 import world.gregs.voidps.type.random
 import java.util.concurrent.TimeUnit
+
 @Script
 class MakeoverMage {
 

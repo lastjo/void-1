@@ -23,6 +23,7 @@ import world.gregs.voidps.network.login.protocol.encode.mapRegion
 import world.gregs.voidps.type.Distance
 import world.gregs.voidps.type.Region
 import world.gregs.voidps.type.Zone
+
 @Script
 class RegionLoading {
 

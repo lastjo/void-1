@@ -11,6 +11,7 @@ import world.gregs.voidps.engine.entity.character.player.rights
 import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class Rights {
 

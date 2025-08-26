@@ -16,6 +16,7 @@ import world.gregs.voidps.engine.event.Context
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.suspend.SuspendableContext
+
 @Script
 class Banker {
 

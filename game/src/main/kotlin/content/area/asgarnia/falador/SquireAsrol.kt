@@ -20,6 +20,7 @@ import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.suspend.SuspendableContext
+
 @Script
 class SquireAsrol {
 

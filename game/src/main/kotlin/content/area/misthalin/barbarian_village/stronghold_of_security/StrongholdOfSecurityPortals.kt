@@ -5,6 +5,7 @@ import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.combatLevel
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class StrongholdOfSecurityPortals {
 

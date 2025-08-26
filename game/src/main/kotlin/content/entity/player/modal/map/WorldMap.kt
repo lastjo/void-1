@@ -17,6 +17,7 @@ import world.gregs.voidps.engine.timer.timerStart
 import world.gregs.voidps.engine.timer.timerTick
 import world.gregs.voidps.network.client.instruction.WorldMapClick
 import world.gregs.voidps.network.login.protocol.encode.updateInterface
+
 @Script
 class WorldMap {
 

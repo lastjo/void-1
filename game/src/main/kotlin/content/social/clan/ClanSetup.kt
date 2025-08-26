@@ -15,6 +15,7 @@ import world.gregs.voidps.engine.entity.character.player.chat.clan.LeaveClanChat
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.network.login.protocol.encode.leaveClanChat
 import world.gregs.voidps.network.login.protocol.encode.updateClanChat
+
 @Script
 class ClanSetup {
 

@@ -3,6 +3,7 @@ package content.skill.constitution.food
 import content.entity.combat.hit.directHit
 import content.skill.constitution.consume
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class PoisonKarambwan {
 

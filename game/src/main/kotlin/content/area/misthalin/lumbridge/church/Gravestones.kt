@@ -27,6 +27,7 @@ import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.timer.*
 import world.gregs.voidps.type.Tile
 import java.util.concurrent.TimeUnit
+
 @Script
 class Gravestones {
 

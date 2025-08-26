@@ -27,6 +27,7 @@ import world.gregs.voidps.engine.inv.replace
 import world.gregs.voidps.engine.queue.weakQueue
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
+
 @Script
 class Cooking {
 

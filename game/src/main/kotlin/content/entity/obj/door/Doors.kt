@@ -11,6 +11,7 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.timer.epochSeconds
+
 @Script
 class Doors {
 

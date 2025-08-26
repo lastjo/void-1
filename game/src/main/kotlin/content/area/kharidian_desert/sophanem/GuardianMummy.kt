@@ -21,6 +21,7 @@ import world.gregs.voidps.engine.inv.transact.operation.RemoveItemLimit.removeTo
 import world.gregs.voidps.engine.inv.transact.operation.ReplaceItem.replace
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.suspend.SuspendableContext
+
 @Script
 class GuardianMummy {
 

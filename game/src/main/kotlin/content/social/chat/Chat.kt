@@ -26,6 +26,7 @@ import world.gregs.voidps.network.login.protocol.encode.clanChat
 import world.gregs.voidps.network.login.protocol.encode.privateChatFrom
 import world.gregs.voidps.network.login.protocol.encode.privateChatTo
 import world.gregs.voidps.network.login.protocol.encode.publicChat
+
 @Script
 class Chat {
 

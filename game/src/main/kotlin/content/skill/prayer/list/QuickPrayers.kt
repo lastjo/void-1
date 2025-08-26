@@ -22,6 +22,7 @@ import world.gregs.voidps.engine.entity.character.player.skill.level.Level.hasMa
 import world.gregs.voidps.engine.entity.playerDespawn
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class QuickPrayers {
 

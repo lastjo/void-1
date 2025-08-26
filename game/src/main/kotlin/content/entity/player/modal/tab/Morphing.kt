@@ -11,6 +11,7 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.queue.queue
 import world.gregs.voidps.engine.script.Script
 import kotlin.random.Random
+
 @Script
 class Morphing {
 

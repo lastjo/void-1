@@ -23,6 +23,7 @@ import world.gregs.voidps.engine.map.collision.blocked
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Direction
+
 @Script
 class Traiborn {
 

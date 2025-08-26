@@ -16,6 +16,7 @@ import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.equals
 import world.gregs.voidps.type.random
+
 @Script
 class LogBalance {
 

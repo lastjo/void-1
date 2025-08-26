@@ -18,6 +18,7 @@ import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.queue.Action
 import world.gregs.voidps.engine.queue.strongQueue
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class EnchantedGem {
 

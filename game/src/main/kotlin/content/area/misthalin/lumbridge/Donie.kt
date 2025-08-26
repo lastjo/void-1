@@ -17,6 +17,7 @@ import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.name
 import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.type.random
+
 @Script
 class Donie {
 

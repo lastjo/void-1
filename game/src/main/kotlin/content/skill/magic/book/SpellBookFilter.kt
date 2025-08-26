@@ -6,6 +6,7 @@ import world.gregs.voidps.engine.client.ui.event.interfaceOpen
 import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.script.Script
+
 @Script
 class SpellBookFilter {
 
