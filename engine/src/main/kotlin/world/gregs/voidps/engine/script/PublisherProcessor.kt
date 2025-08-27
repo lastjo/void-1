@@ -40,6 +40,7 @@ class PublisherProcessor(
             for ((schema, methods) in subscriptions) {
                 // Create a class per schema
                 val classBuilder = TypeSpec.classBuilder(schema.name)
+                // TODO logger
                 val constructor = FunSpec.constructorBuilder()
                 val dependencies = TreeMap<String, ClassName>()
                 for (method in methods) {
@@ -146,10 +147,14 @@ class PublisherProcessor(
         val params = fn.parameters.map { it.name!!.getShortName() to it.type.resolve().declaration.simpleName.asString() }
         val schema = findSchema(annoType, params)
         if (fn.modifiers.contains(Modifier.SUSPEND) && !schema.suspendable) {
-            error("Method ${fn.simpleName} in ${parentClass.simpleName} cannot be suspendable.")
+            error("Method ${parentClass.simpleName.asString()}.${fn.simpleName.asString()} cannot be suspendable.")
+        }
+        val returnType = fn.returnType?.resolve()?.declaration?.qualifiedName?.asString()
+        if (schema.returnsDefault != false && returnType != "kotlin.Unit" && returnType != schema.returnsDefault::class.qualifiedName) {
+            error("Method ${parentClass.simpleName.asString()}.${fn.simpleName.asString()} must return ${schema.returnsDefault::class.simpleName}.")
         }
         val classParams: List<Pair<String, TypeName>> = parentClass.primaryConstructor?.parameters?.map { param ->
-            val name = param.name?.asString() ?: error("Unnamed ctor param in ${parentClass.qualifiedName?.asString()}")
+            val name = param.name?.asString() ?: error("Unnamed class param in ${parentClass.qualifiedName?.asString()}")
             name to param.type.resolve().toTypeName()
         } ?: emptyList()
         return Subscriber(
@@ -171,12 +176,23 @@ class PublisherProcessor(
             funSpec.addParameter(name, type)
         }
 
-        val builder = CodeBlock.builder().beginControlFlow("when")
-
+        val returns = schema.returnsDefault
+        val returnSomething = returns != false
+        val builder = CodeBlock.builder().beginControlFlow(if (returnSomething) "return when" else "when")
+        var addedElse = false
         for (method in methods) {
             val methodName = method.className.simpleName.replaceFirstChar { it.lowercase() }
             val comparisons = schema.comparisons(builder, method, methodName)
+            logger.info(comparisons.toString())
             if (comparisons.isEmpty()) {
+                val args = arguments(method, schema)
+                // TODO support for multiple - aka notifications
+
+                builder.addStatement(
+                    "else -> ${if (returnSomething) "" else "return "}$methodName.%L(${args.joinToString(", ")})",
+                    method.methodName
+                )
+                addedElse = true
                 continue
             }
             for (comparison in comparisons) {
@@ -204,8 +220,15 @@ class PublisherProcessor(
                 )
             }
         }
+        if (!addedElse) {
+            builder.addStatement("else -> ${if (returnSomething) "" else "return "}%L", returns)
+        }
         builder.endControlFlow()
+        if (!returnSomething && !addedElse) {
+            builder.addStatement("return true")
+        }
         funSpec.addCode(builder.build())
+        funSpec.returns(returns::class)
         return funSpec.build()
     }
 

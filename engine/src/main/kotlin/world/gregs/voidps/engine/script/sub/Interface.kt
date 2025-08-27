@@ -1,8 +1,12 @@
-package world.gregs.voidps.engine.script
+package world.gregs.voidps.engine.script.sub
 
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.INT
 import com.squareup.kotlinpoet.STRING
+import world.gregs.voidps.engine.script.ITEM
+import world.gregs.voidps.engine.script.PLAYER
+import world.gregs.voidps.engine.script.Publisher
+import world.gregs.voidps.engine.script.Subscriber
 
 @Repeatable
 @Target(AnnotationTarget.FUNCTION)

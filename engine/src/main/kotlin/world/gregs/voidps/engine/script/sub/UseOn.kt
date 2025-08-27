@@ -1,9 +1,13 @@
-package world.gregs.voidps.engine.script
+package world.gregs.voidps.engine.script.sub
 
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.INT
 import com.squareup.kotlinpoet.STRING
+import world.gregs.voidps.engine.script.ITEM
+import world.gregs.voidps.engine.script.PLAYER
+import world.gregs.voidps.engine.script.Publisher
+import world.gregs.voidps.engine.script.Subscriber
 
 @Repeatable
 @Target(AnnotationTarget.FUNCTION)
@@ -13,6 +17,7 @@ annotation class UseOn(
     val on: String = "*",
     val id: String = "*",
     val component: String = "*",
+    val approach: Boolean = false
 )
 
 class InterfaceOnPublisher(target: ClassName): Publisher(
@@ -33,8 +38,9 @@ class InterfaceOnPublisher(target: ClassName): Publisher(
         val on = method.annotationArgs["on"] as String
         val id = method.annotationArgs["id"] as String
         val component = method.annotationArgs["component"] as String
+        val approach = method.annotationArgs["approach"] as Boolean
 
-        val list = mutableListOf<Pair<String, String>>()
+        val list = mutableListOf<Pair<String, Any>>()
         if (item != "*") {
             list.add("item.id" to item)
         }
@@ -46,6 +52,9 @@ class InterfaceOnPublisher(target: ClassName): Publisher(
         }
         if (component != "*") {
             list.add("component" to component)
+        }
+        if (approach) {
+            list.add("approach" to true)
         }
         return listOf(list)
     }
