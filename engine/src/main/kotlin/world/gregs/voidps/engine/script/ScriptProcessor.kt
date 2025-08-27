@@ -2,12 +2,13 @@ package world.gregs.voidps.engine.script
 
 import com.github.michaelbull.logging.InlineLogger
 import com.google.devtools.ksp.processing.*
-import com.google.devtools.ksp.symbol.KSAnnotated
-import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.*
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ksp.toClassName
+import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
 import world.gregs.voidps.engine.client.ui.chat.plural
+import java.util.*
 
 class ScriptProcessor(
     private val codeGenerator: CodeGenerator,
@@ -56,4 +57,5 @@ class ScriptProcessor(
         logger.info("ScriptProcessor took ${System.currentTimeMillis() - start} ms")
         return emptyList()
     }
+
 }
