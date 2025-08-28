@@ -4,7 +4,7 @@ import world.gregs.voidps.engine.client.ui.chat.toDigitGroupString
 import world.gregs.voidps.engine.client.ui.event.interfaceOpen
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.inject
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import kotlin.math.absoluteValue
 
 @Script

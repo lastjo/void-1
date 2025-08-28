@@ -3,7 +3,7 @@ package content.social.trade.exchange
 import world.gregs.voidps.engine.client.ui.event.interfaceOpen
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.sendInventory
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class CollectionBox {

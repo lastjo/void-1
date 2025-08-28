@@ -12,7 +12,7 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.SetCharge.setCharge
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class ItemTake {

@@ -17,7 +17,7 @@ import world.gregs.voidps.engine.inv.moveToLimit
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItemLimit.addToLimit
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import kotlin.math.min
 
 @Script

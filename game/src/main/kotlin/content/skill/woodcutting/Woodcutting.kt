@@ -27,7 +27,7 @@ import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.equipment
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.map.collision.random
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.suspend.awaitDialogues
 import world.gregs.voidps.type.random
 

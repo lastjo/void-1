@@ -2,7 +2,7 @@ package content.skill.magic.book.ancient
 
 import content.entity.combat.hit.characterCombatAttack
 import content.skill.magic.spell.Spell
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class ShadowSpells {

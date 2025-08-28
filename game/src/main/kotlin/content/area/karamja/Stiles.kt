@@ -9,7 +9,7 @@ import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.inv.*
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItemLimit.removeToLimit
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class Stiles {

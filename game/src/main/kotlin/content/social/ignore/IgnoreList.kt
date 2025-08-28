@@ -13,7 +13,7 @@ import world.gregs.voidps.engine.data.definition.AccountDefinitions
 import world.gregs.voidps.engine.entity.character.player.*
 import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.inject
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.network.client.instruction.IgnoreAdd
 import world.gregs.voidps.network.client.instruction.IgnoreDelete
 import world.gregs.voidps.network.login.protocol.encode.Friend

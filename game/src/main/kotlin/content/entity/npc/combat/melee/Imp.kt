@@ -10,7 +10,7 @@ import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.npcSpawn
 import world.gregs.voidps.engine.map.collision.random
 import world.gregs.voidps.engine.queue.softQueue
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.npcTimerStart
 import world.gregs.voidps.engine.timer.npcTimerTick
 import world.gregs.voidps.type.Tile

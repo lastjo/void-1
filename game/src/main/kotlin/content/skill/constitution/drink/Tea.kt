@@ -15,7 +15,7 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.operation.AddCharge.charge
 import world.gregs.voidps.engine.inv.transact.operation.RemoveCharge.discharge
 import world.gregs.voidps.engine.inv.transact.operation.ReplaceItem.replace
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
 
 @Script

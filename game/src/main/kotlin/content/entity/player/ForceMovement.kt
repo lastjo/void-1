@@ -1,7 +1,7 @@
 package content.entity.player
 
 import world.gregs.voidps.engine.entity.character.mode.move.characterMove
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class ForceMovement {

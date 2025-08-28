@@ -9,7 +9,7 @@ import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class Karim {

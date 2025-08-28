@@ -10,7 +10,7 @@ import world.gregs.voidps.engine.entity.character.mode.combat.CombatMovement
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.sendInventory
 import world.gregs.voidps.engine.inv.swap
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class Inventory {

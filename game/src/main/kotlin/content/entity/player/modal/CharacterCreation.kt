@@ -12,7 +12,7 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.flagAppearance
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.sendInventory
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.network.login.protocol.visual.update.player.BodyColour
 import world.gregs.voidps.network.login.protocol.visual.update.player.BodyPart
 

@@ -7,7 +7,7 @@ import content.entity.sound.sound
 import kotlinx.coroutines.delay
 import world.gregs.voidps.engine.entity.character.mode.move.target.CharacterTargetStrategy
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
 
 @Script

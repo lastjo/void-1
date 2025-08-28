@@ -4,7 +4,7 @@ import content.entity.combat.hit.Damage
 import content.entity.combat.hit.combatAttack
 import content.entity.combat.hit.hit
 import content.skill.ranged.ammo
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.CLIENT_TICKS
 import world.gregs.voidps.type.random
 

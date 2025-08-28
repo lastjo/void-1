@@ -24,6 +24,7 @@ import world.gregs.voidps.engine.data.definition.PatrolDefinitions
 import world.gregs.voidps.engine.entity.character.mode.Patrol
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.npc.NPCs
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.isAdmin
@@ -33,10 +34,11 @@ import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.map.collision.CollisionFlags
 import world.gregs.voidps.engine.map.collision.Collisions
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.TimerQueue
 import world.gregs.voidps.engine.timer.timerTick
 import world.gregs.voidps.network.login.protocol.encode.*
+import world.gregs.voidps.type.PlayerRights
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.Zone
 import kotlin.system.measureNanoTime
@@ -49,12 +51,13 @@ class DebugCommands {
     val objects: GameObjects by inject()
     val npcs: NPCs by inject()
 
-    init {
-        modCommand("test") {
-            player.sendInterfaceItemUpdate(645, listOf(Triple(0, 995, 100)), false)
-            //    player.interfaces.sendItem("exchange_item_sets")
-        }
+    @world.gregs.voidps.type.sub.Command("test", rights = PlayerRights.MOD)
+    fun test(player: Player) {
+        player.sendInterfaceItemUpdate(645, listOf(Triple(0, 995, 100)), false)
+        //    player.interfaces.sendItem("exchange_item_sets")
+    }
 
+    init {
         modCommand("commands [list]") {
             val commands = if (player.isAdmin()) Command.adminCommands else Command.modCommands
             val list = listOf(

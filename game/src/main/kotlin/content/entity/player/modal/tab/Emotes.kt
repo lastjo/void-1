@@ -19,7 +19,7 @@ import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventoryChanged
 import world.gregs.voidps.engine.map.collision.blocked
 import world.gregs.voidps.engine.queue.strongQueue
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.Direction

@@ -5,7 +5,7 @@ import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.entity.character.mode.move.*
 import world.gregs.voidps.engine.entity.npcSpawn
 import world.gregs.voidps.engine.inject
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class MultiCombat {

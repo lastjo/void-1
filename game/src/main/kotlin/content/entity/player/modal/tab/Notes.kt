@@ -1,7 +1,7 @@
 package content.entity.player.modal.tab
 
 import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class Notes {

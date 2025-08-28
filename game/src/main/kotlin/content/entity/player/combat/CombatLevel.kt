@@ -7,7 +7,7 @@ import world.gregs.voidps.engine.entity.character.player.skill.level.Levels
 import world.gregs.voidps.engine.entity.character.player.skill.level.maxLevelChange
 import world.gregs.voidps.engine.entity.character.player.summoningCombatLevel
 import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import kotlin.math.max
 
 @Script

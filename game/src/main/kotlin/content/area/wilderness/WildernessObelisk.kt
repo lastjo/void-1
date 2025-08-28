@@ -10,7 +10,7 @@ import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.inject
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.area.Rectangle
 import world.gregs.voidps.type.random

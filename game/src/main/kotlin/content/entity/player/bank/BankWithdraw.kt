@@ -12,7 +12,7 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.MoveItemLimit.moveToLimit
 import world.gregs.voidps.engine.inv.transact.operation.ShiftItem.shiftToFreeIndex
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class BankWithdraw {

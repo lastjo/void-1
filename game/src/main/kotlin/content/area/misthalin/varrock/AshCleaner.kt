@@ -3,7 +3,7 @@ package content.area.misthalin.varrock
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
 import world.gregs.voidps.engine.entity.character.npc.hunt.huntFloorItem
 import world.gregs.voidps.engine.entity.item.floor.FloorItemOption
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class AshCleaner {

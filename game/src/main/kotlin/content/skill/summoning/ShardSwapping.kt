@@ -16,7 +16,7 @@ import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import kotlin.math.min
 
 @Script

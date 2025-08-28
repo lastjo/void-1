@@ -10,7 +10,7 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Interpolation
 import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.timerTick
 
 const val MAX_RUN_ENERGY = 10000

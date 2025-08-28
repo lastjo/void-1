@@ -5,7 +5,7 @@ import content.skill.prayer.PrayerConfigs.SELECTING_QUICK_PRAYERS
 import content.skill.prayer.PrayerConfigs.USING_QUICK_PRAYERS
 import world.gregs.voidps.engine.client.ui.event.interfaceOpen
 import world.gregs.voidps.engine.client.ui.event.interfaceRefresh
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class PrayerList {

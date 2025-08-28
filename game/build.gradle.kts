@@ -7,7 +7,7 @@ plugins {
 }
 
 dependencies {
-    ksp(project(":engine"))
+    ksp(project(":events"))
     implementation(project(":engine"))
     implementation(project(":cache"))
     implementation(project(":network"))

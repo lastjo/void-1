@@ -24,7 +24,7 @@ import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.toTicks
 import world.gregs.voidps.engine.timer.worldTimerStart
 import world.gregs.voidps.engine.timer.worldTimerTick

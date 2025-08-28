@@ -11,7 +11,7 @@ import world.gregs.voidps.engine.entity.item.floor.FloorItems
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
 
 @Script

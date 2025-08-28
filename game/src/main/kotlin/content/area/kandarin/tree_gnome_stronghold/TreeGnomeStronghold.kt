@@ -10,7 +10,7 @@ import world.gregs.voidps.engine.entity.obj.ObjectShape
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.entity.obj.replace
 import world.gregs.voidps.engine.inject
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Tile
 

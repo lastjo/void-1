@@ -9,7 +9,7 @@ import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.menu
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.playerDespawn
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class TradeDecline {

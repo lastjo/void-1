@@ -20,7 +20,7 @@ import world.gregs.voidps.engine.inv.moveAll
 import world.gregs.voidps.engine.inv.sendInventory
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.MoveItemLimit.moveToLimit
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class PriceChecker {

@@ -17,7 +17,7 @@ import world.gregs.voidps.engine.entity.character.mode.move.move
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.event.Event
 import world.gregs.voidps.engine.event.onEvent
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.TICKS
 import kotlin.collections.set
 import kotlin.coroutines.resume

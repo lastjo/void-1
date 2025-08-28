@@ -15,7 +15,7 @@ import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 internal suspend fun PlayerChoice.fighters(): Unit = option<Uncertain>("Do you see a lot of injured fighters?") {
     npc<Neutral>("Yes I do. Thankfully we can cope with almost anything. Jaraah really is a wonderful surgeon, his methods are a little unorthodox but he gets the job done.")

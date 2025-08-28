@@ -11,7 +11,7 @@ import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.charges
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.replace
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class Camulet {

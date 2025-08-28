@@ -10,7 +10,7 @@ import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.addToLimit
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.removeToLimit
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class CoalBag {

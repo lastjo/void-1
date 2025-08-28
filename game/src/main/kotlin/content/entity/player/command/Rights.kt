@@ -4,13 +4,13 @@ import net.pearx.kasechange.toSentenceCase
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.event.adminCommand
 import world.gregs.voidps.engine.data.Settings
-import world.gregs.voidps.engine.entity.character.player.PlayerRights
 import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.character.player.name
 import world.gregs.voidps.engine.entity.character.player.rights
 import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.get
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.PlayerRights
+import world.gregs.voidps.type.Script
 
 @Script
 class Rights {

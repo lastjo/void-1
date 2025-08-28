@@ -2,7 +2,7 @@ package content.skill.melee.weapon.special
 
 import content.entity.player.combat.special.specialAttackDamage
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class DragonHatchet {

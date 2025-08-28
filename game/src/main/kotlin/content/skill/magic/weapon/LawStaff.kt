@@ -13,7 +13,7 @@ import world.gregs.voidps.engine.inv.transact.charge
 import world.gregs.voidps.engine.inv.transact.discharge
 import world.gregs.voidps.engine.inv.transact.operation.AddItemLimit.addToLimit
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class LawStaff {

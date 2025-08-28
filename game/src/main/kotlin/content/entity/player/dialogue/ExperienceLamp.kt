@@ -1,7 +1,7 @@
 package content.entity.player.dialogue
 
 import world.gregs.voidps.engine.client.ui.interfaceOption
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.suspend.StringSuspension
 
 @Script

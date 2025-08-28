@@ -2,7 +2,7 @@ package content.entity.npc.combat.melee
 
 import content.entity.combat.npcCombatPrepare
 import content.entity.effect.toxin.poison
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
 
 @Script

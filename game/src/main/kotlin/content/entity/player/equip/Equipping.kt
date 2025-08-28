@@ -21,7 +21,7 @@ import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.*
 import world.gregs.voidps.engine.inv.transact.TransactionError
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 
 @Script

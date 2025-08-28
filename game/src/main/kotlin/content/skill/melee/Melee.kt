@@ -10,7 +10,7 @@ import content.skill.melee.weapon.weapon
 import world.gregs.voidps.engine.data.definition.WeaponAnimationDefinitions
 import world.gregs.voidps.engine.data.definition.WeaponStyleDefinitions
 import world.gregs.voidps.engine.inject
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class Melee {

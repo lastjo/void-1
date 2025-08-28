@@ -5,7 +5,7 @@ import content.entity.combat.hit.Hit
 import content.entity.combat.hit.hit
 import content.entity.player.combat.special.specialAttack
 import content.skill.melee.weapon.weapon
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
 
 @Script

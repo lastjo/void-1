@@ -2,7 +2,7 @@ package content.skill.summoning
 
 import content.entity.npc.shop.openShop
 import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class WishingWell {

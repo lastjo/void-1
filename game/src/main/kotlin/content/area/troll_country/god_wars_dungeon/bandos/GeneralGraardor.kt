@@ -14,7 +14,7 @@ import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.npcDespawn
 import world.gregs.voidps.engine.entity.npcSpawn
 import world.gregs.voidps.engine.inject
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.random
 

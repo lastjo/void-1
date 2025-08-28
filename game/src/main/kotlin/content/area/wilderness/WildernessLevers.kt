@@ -15,7 +15,7 @@ import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.queue.strongQueue
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.suspend.SuspendableContext
 
 @Script

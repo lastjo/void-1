@@ -9,7 +9,7 @@ import world.gregs.voidps.engine.client.variable.variableSet
 import world.gregs.voidps.engine.data.definition.QuestDefinitions
 import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.inject
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.timerStart
 import world.gregs.voidps.engine.timer.timerStop
 

@@ -2,7 +2,7 @@ package content.area.misthalin.lumbridge
 
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
 
 @Script

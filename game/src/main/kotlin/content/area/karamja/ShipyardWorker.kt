@@ -6,7 +6,7 @@ import content.entity.player.dialogue.type.player
 import content.entity.player.dialogue.type.statement
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
 
 @Script

@@ -21,7 +21,7 @@ import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.*
 import world.gregs.voidps.engine.queue.weakQueue
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class SilverCasting {

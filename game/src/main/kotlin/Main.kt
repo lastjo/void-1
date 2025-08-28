@@ -1,5 +1,6 @@
 import com.github.michaelbull.logging.InlineLogger
 import content.entity.obj.ObjectTeleports
+import content.quest.member.fairy_tale_part_2.fairy_ring.FairyRingCodes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
 import org.koin.core.context.startKoin
@@ -20,6 +21,7 @@ import world.gregs.voidps.engine.entity.Despawn
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.item.drop.DropTables
 import world.gregs.voidps.engine.map.collision.CollisionDecoder
+import world.gregs.voidps.engine.script.Publishers
 import world.gregs.voidps.engine.script.Scripts
 import world.gregs.voidps.network.GameServer
 import world.gregs.voidps.network.LoginServer
@@ -95,6 +97,11 @@ object Main {
             )
         }
         Scripts.load()
+        val fairyCodes = get<FairyRingCodes>()
+        val variableDefinitions = get<VariableDefinitions>()
+        val start = System.currentTimeMillis()
+        Publishers(fairyCodes, variableDefinitions)
+        println("Loaded publishers in ${System.currentTimeMillis() - start} ms")
         Runtime.getRuntime().addShutdownHook(
             thread(start = false) {
                 World.emit(Despawn)

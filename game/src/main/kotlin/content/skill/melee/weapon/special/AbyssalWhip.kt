@@ -4,7 +4,7 @@ import content.entity.player.combat.special.specialAttackDamage
 import content.entity.player.effect.energy.runEnergy
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class AbyssalWhip {

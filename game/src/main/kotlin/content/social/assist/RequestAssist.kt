@@ -26,7 +26,7 @@ import world.gregs.voidps.engine.entity.character.player.req.request
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.exp.BlockedExperience
 import world.gregs.voidps.engine.event.onEvent
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.TICKS
 import java.util.concurrent.TimeUnit
 import kotlin.math.min

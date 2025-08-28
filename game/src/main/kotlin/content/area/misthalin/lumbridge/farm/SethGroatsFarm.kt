@@ -9,7 +9,7 @@ import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.entity.obj.replace
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.toTicks
 import java.util.concurrent.TimeUnit
 

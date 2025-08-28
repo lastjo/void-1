@@ -16,7 +16,7 @@ import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.inv.Inventory
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.operation.MoveItem.moveAll
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class TradeConfirm {

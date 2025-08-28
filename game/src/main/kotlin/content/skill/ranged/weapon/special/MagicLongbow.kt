@@ -4,7 +4,7 @@ import content.entity.combat.hit.hit
 import content.entity.player.combat.special.specialAttack
 import content.entity.proj.shoot
 import content.entity.sound.sound
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class MagicLongbow {

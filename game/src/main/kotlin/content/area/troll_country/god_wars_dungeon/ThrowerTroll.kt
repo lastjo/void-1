@@ -6,7 +6,7 @@ import content.entity.combat.npcCombatSwing
 import content.entity.proj.shoot
 import content.entity.sound.areaSound
 import content.entity.sound.sound
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
 
 @Script

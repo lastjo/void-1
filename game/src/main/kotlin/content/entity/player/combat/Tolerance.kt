@@ -3,7 +3,7 @@ package content.entity.player.combat
 import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.entity.character.mode.move.move
 import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.epochSeconds
 import java.util.concurrent.TimeUnit
 

@@ -5,7 +5,7 @@ import world.gregs.voidps.engine.client.ui.hasMenuOpen
 import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class Options {

@@ -23,7 +23,7 @@ import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.map.collision.random
 import world.gregs.voidps.engine.queue.queue
 import world.gregs.voidps.engine.queue.weakQueue
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.epochSeconds
 import java.util.concurrent.TimeUnit
 

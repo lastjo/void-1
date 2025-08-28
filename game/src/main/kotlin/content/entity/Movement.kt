@@ -15,7 +15,7 @@ import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.map.collision.Collisions
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.network.client.instruction.Walk
 import world.gregs.voidps.type.Distance.nearestTo
 import world.gregs.voidps.type.Zone

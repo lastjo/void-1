@@ -11,7 +11,7 @@ import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class SaradominRock {

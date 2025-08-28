@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import world.gregs.voidps.cache.secure.Huffman
-import world.gregs.voidps.engine.entity.character.player.PlayerRights
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.chat.clan.ClanRank
 import world.gregs.voidps.engine.entity.character.player.rights
@@ -17,6 +16,7 @@ import world.gregs.voidps.engine.get
 import world.gregs.voidps.network.client.instruction.*
 import world.gregs.voidps.network.login.protocol.encode.clanChat
 import world.gregs.voidps.network.login.protocol.encode.message
+import world.gregs.voidps.type.PlayerRights
 import kotlin.collections.set
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

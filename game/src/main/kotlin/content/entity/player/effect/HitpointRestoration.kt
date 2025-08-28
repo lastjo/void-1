@@ -6,7 +6,7 @@ import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.levelChange
 import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.timerStart
 import world.gregs.voidps.engine.timer.timerTick
 import world.gregs.voidps.engine.timer.toTicks

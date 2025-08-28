@@ -7,7 +7,7 @@ import world.gregs.voidps.engine.inv.Inventory
 import world.gregs.voidps.engine.inv.inventoryUpdate
 import world.gregs.voidps.engine.inv.shift
 import world.gregs.voidps.engine.inv.swap
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class BankTabs {

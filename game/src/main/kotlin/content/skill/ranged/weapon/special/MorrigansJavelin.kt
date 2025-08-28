@@ -7,7 +7,7 @@ import content.entity.proj.shoot
 import content.skill.ranged.ammo
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.characterTimerStart
 import world.gregs.voidps.engine.timer.characterTimerTick
 import world.gregs.voidps.engine.timer.npcTimerStop

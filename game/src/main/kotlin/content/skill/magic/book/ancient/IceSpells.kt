@@ -4,7 +4,7 @@ import content.entity.combat.hit.characterCombatAttack
 import content.entity.effect.freeze
 import world.gregs.voidps.engine.data.definition.SpellDefinitions
 import world.gregs.voidps.engine.inject
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class IceSpells {

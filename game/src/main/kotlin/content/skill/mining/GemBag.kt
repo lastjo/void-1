@@ -8,7 +8,7 @@ import world.gregs.voidps.engine.client.ui.interact.itemOnItems
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.removeToLimit
 import world.gregs.voidps.engine.inv.transact.operation.AddItemLimit.addToLimit
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class GemBag {

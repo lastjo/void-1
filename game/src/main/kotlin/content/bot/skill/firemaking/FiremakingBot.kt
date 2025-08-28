@@ -18,7 +18,7 @@ import world.gregs.voidps.engine.entity.obj.ObjectLayer
 import world.gregs.voidps.engine.entity.worldSpawn
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.timerStop
 import world.gregs.voidps.network.client.instruction.InteractInterfaceItem
 

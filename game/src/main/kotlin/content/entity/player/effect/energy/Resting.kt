@@ -4,7 +4,7 @@ import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.entity.character.mode.Rest
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class Resting {

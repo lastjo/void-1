@@ -6,7 +6,7 @@ import world.gregs.voidps.engine.entity.character.npc.hunt.huntNPC
 import world.gregs.voidps.engine.entity.character.npc.hunt.huntPlayer
 import world.gregs.voidps.engine.entity.character.player.PlayerOption
 import world.gregs.voidps.engine.entity.npcSpawn
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.npcTimerTick
 import world.gregs.voidps.engine.timer.timerStart
 import world.gregs.voidps.type.random

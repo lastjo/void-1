@@ -6,7 +6,7 @@ import content.entity.player.combat.special.specialAttackPrepare
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.inv.itemRemoved
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.timerStart
 import world.gregs.voidps.engine.timer.timerStop
 import world.gregs.voidps.engine.timer.timerTick

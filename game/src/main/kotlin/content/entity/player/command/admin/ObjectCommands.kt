@@ -5,7 +5,7 @@ import world.gregs.voidps.engine.client.ui.event.adminCommand
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.inject
-import world.gregs.voidps.engine.script.Script
+import world.gregs.voidps.type.Script
 
 @Script
 class ObjectCommands {
