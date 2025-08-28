@@ -11,7 +11,13 @@ abstract class Publisher(
     val suspendable: Boolean = false,
     val parameters: List<Pair<String, ClassName>>,
     var returnsDefault: Any = false,
+    var notification: Boolean = false
 ) {
+    init {
+        if (notification) {
+            assert(returnsDefault is Boolean) { "Notification methods must return cancellation boolean." }
+        }
+    }
     abstract fun comparisons(builder: CodeBlock.Builder, method: Subscriber, methodName: String): List<List<Pair<String, Any>>>
 }
 

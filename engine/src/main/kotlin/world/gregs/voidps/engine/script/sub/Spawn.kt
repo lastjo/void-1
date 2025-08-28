@@ -16,11 +16,12 @@ class SpawnPublisher(val field: String, target: ClassName): Publisher(
     parameters = listOf(
         field to target
     ),
+    notification = true
 ) {
     override fun comparisons(builder: CodeBlock.Builder, method: Subscriber, methodName: String): List<List<Pair<String, Any>>> {
         val ids = method.annotationArgs["ids"] as List<String>
         if (ids.isEmpty()) {
-            return listOf(listOf("true" to true)) // FIXME: hack
+            return listOf()
         }
         return ids.map { listOf("${field}.id" to it) }
     }

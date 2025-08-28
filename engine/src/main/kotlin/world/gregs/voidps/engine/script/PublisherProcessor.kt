@@ -40,7 +40,6 @@ class PublisherProcessor(
             for ((schema, methods) in subscriptions) {
                 // Create a class per schema
                 val classBuilder = TypeSpec.classBuilder(schema.name)
-                // TODO logger
                 val constructor = FunSpec.constructorBuilder()
                 val dependencies = TreeMap<String, ClassName>()
                 for (method in methods) {
@@ -172,65 +171,177 @@ class PublisherProcessor(
         if (schema.suspendable) {
             funSpec.addModifiers(KModifier.SUSPEND)
         }
+        var player: String? = null
         for ((name, type) in schema.parameters) {
+            if (player == null && type == PLAYER) {
+                player = name
+            }
             funSpec.addParameter(name, type)
         }
 
         val returns = schema.returnsDefault
         val returnSomething = returns != false
-        val builder = CodeBlock.builder().beginControlFlow(if (returnSomething) "return when" else "when")
-        var addedElse = false
-        for (method in methods) {
-            val methodName = method.className.simpleName.replaceFirstChar { it.lowercase() }
-            val comparisons = schema.comparisons(builder, method, methodName)
-            logger.info(comparisons.toString())
-            if (comparisons.isEmpty()) {
-                val args = arguments(method, schema)
-                // TODO support for multiple - aka notifications
+        val builder: CodeBlock.Builder
+        if (schema.notification) {
+            builder = CodeBlock.builder()
+            val root = ConditionNode(null)
+            for (method in methods) {
+                val methodName = method.className.simpleName.replaceFirstChar { it.lowercase() }
+                val comparisons = schema.comparisons(builder, method, methodName)
+                buildConditionTree(root, comparisons, method)
+            }
 
-                builder.addStatement(
-                    "else -> ${if (returnSomething) "" else "return "}$methodName.%L(${args.joinToString(", ")})",
-                    method.methodName
-                )
-                addedElse = true
-                continue
-            }
-            for (comparison in comparisons) {
-                // If statement
-                for (i in comparison.indices) {
-                    if (i > 0) {
-                        builder.add(" && ")
-                    }
-                    val (key, value) = comparison[i]
-                    when (value) {
-                        is String -> when {
-                            value == "*" -> continue
-                            value.startsWith("*") -> builder.add("$key.endsWith(%S)", value)
-                            value.endsWith("*") -> builder.add("$key.startsWith(%S)", value)
-                            value.contains("*") -> builder.add("%T($key, %S)", ClassName("world.gregs.voidps.engine.event", "wildcardEquals"), value)
-                            else -> builder.add("$key == %S", value)
-                        }
-                        else -> builder.add("$key == %L", value)
-                    }
+            builder.addStatement("var handled = false")
+            emitConditions(builder, root, schema)
+            builder.addStatement("return handled")
+
+        } else {
+            builder = CodeBlock.builder().beginControlFlow(if (returnSomething) "return when" else "when")
+            var addedElse = false
+            for (method in methods) {
+                val methodName = method.className.simpleName.replaceFirstChar { it.lowercase() }
+                val comparisons = schema.comparisons(builder, method, methodName)
+                logger.info(comparisons.toString())
+                if (comparisons.isEmpty()) {
+                    val args = arguments(method, schema)
+                    builder.addStatement(
+                        "else -> ${if (returnSomething) "" else "return "}$methodName.%L(${args.joinToString(", ")})",
+                        method.methodName
+                    )
+                    addedElse = true
+                    continue
                 }
-                val args = arguments(method, schema)
-                builder.addStatement(
-                    " -> $methodName.%L(${args.joinToString(", ")})",
-                    method.methodName
-                )
+                for (comparison in comparisons) {
+                    // If statement
+                    for (i in comparison.indices) {
+                        if (i > 0) {
+                            builder.add(" && ")
+                        }
+                        val (key, value) = comparison[i]
+                        when (value) {
+                            is String -> when {
+                                value == "*" -> continue
+                                value.startsWith("*") -> builder.add("$key.endsWith(%S)", value)
+                                value.endsWith("*") -> builder.add("$key.startsWith(%S)", value)
+                                value.contains("*") -> builder.add("%T($key, %S)", ClassName("world.gregs.voidps.engine.event", "wildcardEquals"), value)
+                                else -> builder.add("$key == %S", value)
+                            }
+                            else -> builder.add("$key == %L", value)
+                        }
+                    }
+                    val args = arguments(method, schema)
+                    builder.addStatement(
+                        " -> $methodName.%L(${args.joinToString(", ")})",
+                        method.methodName
+                    )
+                }
+            }
+            if (!addedElse) {
+                builder.addStatement("else -> ${if (returnSomething) "" else "return "}%L", returns)
+            }
+            builder.endControlFlow()
+            if (!returnSomething && !addedElse) {
+                builder.addStatement("return true")
             }
         }
-        if (!addedElse) {
-            builder.addStatement("else -> ${if (returnSomething) "" else "return "}%L", returns)
+        val errorHandling = CodeBlock.builder().beginControlFlow("try")
+        if (player != null) {
+            errorHandling.add("%L.debug { %P }\n", player, "${schema.name.removeSuffix("Publisher")}[${schema.parameters.joinToString(", ") { "\$${it.first}" }}]")
         }
-        builder.endControlFlow()
-        if (!returnSomething && !addedElse) {
-            builder.addStatement("return true")
-        }
-        funSpec.addCode(builder.build())
+        funSpec.addCode(
+            errorHandling
+                .add(builder.build())
+                .endControlFlow()
+                .beginControlFlow("catch (e: %T)", Exception::class)
+                .addStatement(if (player != null) "$player.warn(e) { \"Failed to publish ${schema.name.removeSuffix("Publisher")}\" }" else "e.printStackTrace()")
+                .addStatement("return %L", schema.returnsDefault)
+                .endControlFlow()
+                .build()
+        )
         funSpec.returns(returns::class)
         return funSpec.build()
     }
+
+    data class ConditionNode(
+        val condition: Pair<String, Any>?,        // null for root
+        val children: MutableList<ConditionNode> = mutableListOf(),
+        val subscribers: MutableList<Subscriber> = mutableListOf()
+    )
+
+    fun buildConditionTree(root: ConditionNode, comparisons: List<List<Pair<String, Any>>>, subscriber: Subscriber): ConditionNode {
+        if (comparisons.isEmpty()) {
+            root.subscribers.add(subscriber)
+            return root
+        }
+        for (chain in comparisons) {
+            var node = root
+            for (pair in chain) {
+                val child = node.children.find { it.condition == pair }
+                    ?: ConditionNode(pair).also { node.children.add(it) }
+                node = child
+            }
+            node.subscribers.add(subscriber)
+        }
+        return root
+    }
+
+    private fun emitConditions(builder: CodeBlock.Builder, node: ConditionNode, schema: Publisher) {
+        if (node.children.isEmpty()) {
+            // Leaf node, emit subscriber calls
+            leaf(node, schema, builder)
+            return
+        }
+
+        // If all children use the same key → generate when
+        val firstKey = node.children.first().condition?.first
+        if (node.children.all { it.condition?.first == firstKey }) {
+            builder.beginControlFlow("when (%L)", firstKey)
+            for (child in node.children) {
+                val (_, value) = child.condition!!
+                builder.beginControlFlow("%S ->", value.toString())
+                emitConditions(builder, child, schema)
+                builder.endControlFlow()
+            }
+            builder.addStatement("else -> {}")
+            builder.endControlFlow()
+        } else {
+            // Mixed keys → fall back to if chains
+            for (child in node.children) {
+                val (key, value) = child.condition!!
+                when (value) {
+                    is String -> when {
+                        value == "*" -> continue
+                        value.startsWith("*") -> builder.beginControlFlow("if ($key.endsWith(%S))", value)
+                        value.endsWith("*") -> builder.beginControlFlow("if ($key.startsWith(%S))", value)
+                        value.contains("*") -> builder.beginControlFlow("if (%T($key, %S))", ClassName("world.gregs.voidps.engine.event", "wildcardEquals"), value)
+                        else -> builder.beginControlFlow("if ($key == %S)", value)
+                    }
+                    else -> builder.beginControlFlow("if ($key == %L)", value)
+                }
+                emitConditions(builder, child, schema)
+                builder.endControlFlow()
+            }
+        }
+
+        // Emit leaf subscribers if any
+        if (node.subscribers.isNotEmpty()) {
+            leaf(node, schema, builder)
+        }
+    }
+
+    private fun leaf(node: ConditionNode, schema: Publisher, builder: CodeBlock.Builder) {
+        builder.add("handled = handled")
+        for (sub in node.subscribers) {
+            val args = arguments(sub, schema)
+            val methodName = sub.className.simpleName.replaceFirstChar { it.lowercase() }
+            builder.addStatement(
+                " || %L.%L(${args.joinToString(", ")})",
+                methodName,
+                sub.methodName
+            )
+        }
+    }
+
 
     /**
      * Map arguments between what the [method] wants and what the [schema] has.

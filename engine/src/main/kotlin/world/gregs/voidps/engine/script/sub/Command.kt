@@ -35,6 +35,6 @@ class CommandPublisher: Publisher(
         if (ids.isEmpty()) {
             throw IllegalArgumentException("Command ids cannot be empty")
         }
-        return ids.map { listOf("prefix" to it) }
+        return ids.map { listOf("prefix" to it.substringBefore("[").substringBefore("(").trim()) }
     }
 }

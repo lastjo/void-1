@@ -1,5 +1,6 @@
 package world.gregs.voidps.engine.entity.character.player
 
+import com.github.michaelbull.logging.InlineLogger
 import kotlinx.coroutines.channels.Channel
 import org.rsmod.game.pathfinder.collision.CollisionStrategy
 import org.rsmod.game.pathfinder.flag.CollisionFlag
@@ -80,6 +81,16 @@ class Player(
     override lateinit var collision: CollisionStrategy
     val area: AreaQueue = AreaQueue(this)
 
+    inline fun debug(message: () -> Any?) {
+        if (this["debug", false]) {
+            logger.info(message)
+        }
+    }
+
+    inline fun warn(t: Throwable?, message: () -> Any?) {
+        logger.warn(t, message)
+    }
+
     val networked: Boolean
         get() = client != null && viewport != null
 
@@ -115,4 +126,8 @@ class Player(
     override fun hashCode(): Int = index
 
     override fun toString(): String = "Player($accountName, index=$index, tile=$tile)"
+
+    companion object {
+        val logger = InlineLogger()
+    }
 }

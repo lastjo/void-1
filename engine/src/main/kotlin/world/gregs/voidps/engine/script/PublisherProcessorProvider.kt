@@ -33,6 +33,7 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
             Spawn::class.qualifiedName!! to listOf(
                 listOf("Player") to SpawnPublisher("player", PLAYER),
                 listOf("NPC") to SpawnPublisher("npc", NPC),
+                listOf("Character") to SpawnPublisher("character", CHARACTER),
                 listOf("GameObject") to SpawnPublisher("obj", OBJECT),
                 listOf("FloorItem") to SpawnPublisher("floorItem", FLOOR_ITEM),
                 listOf("World") to SpawnPublisher("world", WORLD),
