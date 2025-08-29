@@ -3,7 +3,6 @@ package world.gregs.voidps.event.sub
 import com.squareup.kotlinpoet.BOOLEAN
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.STRING
-import world.gregs.voidps.event.PLAYER
 import world.gregs.voidps.event.Publisher
 import world.gregs.voidps.event.Subscriber
 
@@ -16,7 +15,7 @@ class OptionPublisher(field: String, source: ClassName, target: ClassName): Publ
         "approach" to BOOLEAN,
     ),
     suspendable = true,
-    overrideMethod = "${target.simpleName.replaceFirstChar { it.lowercase() }}Option",
+    overrideMethod = "${source.simpleName.replaceFirstChar { it.lowercase() }}${target.simpleName}Option",
 ) {
     override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val option = method.annotationArgs["option"] as String

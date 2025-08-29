@@ -11,16 +11,57 @@ import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.type.PlayerRights
 
 abstract class Publishers {
-    open suspend fun gameObjectOption(player: Player, target: GameObject, option: String, approach: Boolean = false): Boolean = false
+    suspend fun option(character: Character, target: Player, option: String, approach: Boolean = false): Boolean {
+        return when(character) {
+            is Player -> playerPlayerOption(character, target, option, approach) || characterPlayerOption(character, target, option, approach)
+            is NPC -> npcPlayerOption(character, target, option, approach) || characterPlayerOption(character, target, option, approach)
+            else -> false
+        }
+    }
 
-    open suspend fun gameObjectOption(character: Character, target: GameObject, option: String, approach: Boolean = false): Boolean = false
+    suspend fun option(character: Character, target: NPC, option: String, approach: Boolean = false): Boolean {
+        return when(character) {
+            is Player -> playerNPCOption(character, target, option, approach) || characterNPCOption(character, target, option, approach)
+            is NPC -> npcNPCOption(character, target, option, approach) || characterNPCOption(character, target, option, approach)
+            else -> false
+        }
+    }
+
+    suspend fun option(character: Character, target: GameObject, option: String, approach: Boolean = false): Boolean {
+        return when(character) {
+            is Player -> playerGameObjectOption(character, target, option, approach) || characterGameObjectOption(character, target, option, approach)
+            is NPC -> npcGameObjectOption(character, target, option, approach) || characterGameObjectOption(character, target, option, approach)
+            else -> false
+        }
+    }
+
+    suspend fun option(character: Character, target: FloorItem, option: String, approach: Boolean = false): Boolean {
+        return when(character) {
+            is Player -> playerFloorItemOption(character, target, option, approach) || characterFloorItemOption(character, target, option, approach)
+            is NPC -> npcFloorItemOption(character, target, option, approach) || characterFloorItemOption(character, target, option, approach)
+            else -> false
+        }
+    }
+
+    open suspend fun playerGameObjectOption(player: Player, target: GameObject, option: String, approach: Boolean = false): Boolean = false
+    open suspend fun playerPlayerOption(player: Player, target: Player, option: String, approach: Boolean = false): Boolean = false
+    open suspend fun playerNPCOption(player: Player, target: NPC, option: String, approach: Boolean = false): Boolean = false
+    open suspend fun playerFloorItemOption(player: Player, target: FloorItem, option: String, approach: Boolean = false): Boolean = false
+    open suspend fun npcGameObjectOption(npc: NPC, target: GameObject, option: String, approach: Boolean = false): Boolean = false
+    open suspend fun npcPlayerOption(npc: NPC, target: Player, option: String, approach: Boolean = false): Boolean = false
+    open suspend fun npcNPCOption(npc: NPC, target: NPC, option: String, approach: Boolean = false): Boolean = false
+    open suspend fun npcFloorItemOption(npc: NPC, target: FloorItem, option: String, approach: Boolean = false): Boolean = false
+    open suspend fun characterGameObjectOption(character: Character, target: GameObject, option: String, approach: Boolean = false): Boolean = false
+    open suspend fun characterPlayerOption(character: Character, target: Player, option: String, approach: Boolean = false): Boolean = false
+    open suspend fun characterNPCOption(character: Character, target: NPC, option: String, approach: Boolean = false): Boolean = false
+    open suspend fun characterFloorItemOption(character: Character, target: FloorItem, option: String, approach: Boolean = false): Boolean = false
 
     open fun interfaceClosed(player: Player, id: String): Boolean = false
 
     open fun command(player: Player, prefix: String, content: String = "", rights: Int = PlayerRights.NONE): Boolean = false
 
-    open suspend fun interfaceOn(player: Player, target: Any, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean {
-        return when(target) {
+    suspend fun interfaceOn(player: Player, target: Any, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean {
+        return when (target) {
             is Player -> interfaceOnPlayer(player, target, id, component, item, itemSlot, inventory) || interfaceOnCharacter(player, target, id, component, item, itemSlot, inventory)
             is NPC -> interfaceOnNPC(player, target, id, component, item, itemSlot, inventory) || interfaceOnCharacter(player, target, id, component, item, itemSlot, inventory)
             is Item -> interfaceOnItem(player, target, id, component, item, itemSlot, inventory)

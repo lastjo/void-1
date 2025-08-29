@@ -1,3 +1,6 @@
+@file:Suppress("USELESS_CAST")
+
+import com.github.michaelbull.logging.InlineLogger
 import content.bot.TaskManager
 import content.bot.interact.navigation.graph.NavigationGraph
 import content.bot.interact.path.Dijkstra
@@ -12,8 +15,12 @@ import kotlinx.io.pool.DefaultPool
 import org.koin.dsl.module
 import world.gregs.voidps.engine.client.instruction.InstructionHandlers
 import world.gregs.voidps.engine.client.instruction.InterfaceHandler
+import world.gregs.voidps.engine.client.ui.chat.plural
 import world.gregs.voidps.engine.data.*
+import world.gregs.voidps.engine.data.definition.VariableDefinitions
 import world.gregs.voidps.engine.entity.item.floor.ItemSpawns
+import world.gregs.voidps.engine.event.Publishers
+import world.gregs.voidps.engine.script.PublishersImpl
 
 fun gameModule(files: ConfigFiles) = module {
     single { ItemSpawns() }
@@ -43,6 +50,7 @@ fun gameModule(files: ConfigFiles) = module {
             get(),
             get(),
             InterfaceHandler(get(), get(), get(), get()),
+            get()
         )
     }
     single(createdAtStart = true) {
@@ -53,5 +61,14 @@ fun gameModule(files: ConfigFiles) = module {
     }
     single(createdAtStart = true) {
         GrandExchange(get(), get(), get<Storage>().claims().toMutableMap(), get(), get(), get(), get())
+    }
+    single(createdAtStart = true) {
+        val fairyCodes = get<FairyRingCodes>()
+        val variableDefinitions = get<VariableDefinitions>()
+        val logger = InlineLogger("Publishers")
+        val start = System.currentTimeMillis()
+        val publishers = PublishersImpl(fairyCodes, variableDefinitions)
+        logger.info { "Loaded ${publishers.subscriptions} publisher ${"subscriptions".plural(publishers.subscriptions)} in ${System.currentTimeMillis() - start} ms" }
+        publishers as Publishers
     }
 }

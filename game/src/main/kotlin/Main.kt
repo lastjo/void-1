@@ -3,6 +3,7 @@ import content.entity.obj.ObjectTeleports
 import content.quest.member.fairy_tale_part_2.fairy_ring.FairyRingCodes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
+import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
 import org.koin.dsl.module
@@ -97,11 +98,6 @@ object Main {
             )
         }
         Scripts.load()
-        val fairyCodes = get<FairyRingCodes>()
-        val variableDefinitions = get<VariableDefinitions>()
-        val start = System.currentTimeMillis()
-        val publishers = PublishersImpl(fairyCodes, variableDefinitions)
-        println("Loaded publishers in ${System.currentTimeMillis() - start} ms")
         Runtime.getRuntime().addShutdownHook(
             thread(start = false) {
                 World.emit(Despawn)

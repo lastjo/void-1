@@ -31,6 +31,8 @@ class PublisherProcessor(
         mainClass.superclass(superclass)
         val allScripts = mutableMapOf<String, ClassName>()
         val allDependencies = TreeMap<TypeName, String>()
+        var total = 0
+        var count = 0
         for (annotation in annotations) {
             val symbols = resolver.getSymbolsWithAnnotation(annotation)
             val subscriptions = symbols.filterIsInstance<KSFunctionDeclaration>()
@@ -40,6 +42,8 @@ class PublisherProcessor(
                 continue
             }
             for ((schema, methods) in subscriptions) {
+                total += methods.size
+                count++
                 // Create a class per schema
                 val classBuilder = TypeSpec.classBuilder(schema.name)
                 val constructor = FunSpec.constructorBuilder()
@@ -121,6 +125,16 @@ class PublisherProcessor(
             constructor.addParameter(param, type)
         }
         mainClass.primaryConstructor(constructor.build())
+        mainClass.addProperty(
+            PropertySpec.builder("subscriptions", INT)
+                .initializer(total.toString())
+                .build()
+        )
+        mainClass.addProperty(
+            PropertySpec.builder("publishers", INT)
+                .initializer(count.toString())
+                .build()
+        )
 
         // Save main file
         val fileSpec = FileSpec.builder("world.gregs.voidps.engine.script", "PublishersImpl")
