@@ -4,8 +4,8 @@ import content.entity.sound.areaSound
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.entity.obj.replace
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.toTicks
+import world.gregs.voidps.type.Script
 import java.util.concurrent.TimeUnit
 
 @Script

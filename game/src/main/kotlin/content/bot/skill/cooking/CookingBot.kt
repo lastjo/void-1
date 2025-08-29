@@ -19,10 +19,10 @@ import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.worldSpawn
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.timerStop
 import world.gregs.voidps.network.client.instruction.InteractDialogue
 import world.gregs.voidps.network.client.instruction.InteractInterfaceObject
+import world.gregs.voidps.type.Script
 
 @Script
 class CookingBot {

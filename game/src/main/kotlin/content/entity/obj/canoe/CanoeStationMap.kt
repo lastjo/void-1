@@ -2,8 +2,8 @@ package content.entity.obj.canoe
 
 import world.gregs.voidps.engine.client.ui.event.interfaceClose
 import world.gregs.voidps.engine.client.ui.interfaceOption
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.suspend.StringSuspension
+import world.gregs.voidps.type.Script
 
 @Script
 class CanoeStationMap {

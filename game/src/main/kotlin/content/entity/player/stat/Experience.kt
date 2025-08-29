@@ -5,8 +5,8 @@ import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.exp.experience
 import world.gregs.voidps.engine.entity.character.player.skill.level.levelChange
 import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.network.login.protocol.encode.skillLevel
+import world.gregs.voidps.type.Script
 
 @Script
 class Experience {

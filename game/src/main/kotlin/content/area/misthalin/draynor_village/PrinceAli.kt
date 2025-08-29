@@ -17,8 +17,8 @@ import world.gregs.voidps.engine.inv.contains
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.queue.softQueue
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.toTicks
+import world.gregs.voidps.type.Script
 import java.util.concurrent.TimeUnit
 
 @Script

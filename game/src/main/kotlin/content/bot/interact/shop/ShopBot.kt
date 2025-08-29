@@ -16,9 +16,9 @@ import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.get
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.network.client.instruction.InteractInterface
 import world.gregs.voidps.network.client.instruction.InteractNPC
+import world.gregs.voidps.type.Script
 
 suspend fun Bot.openShop(id: String): NPC = openShop(get<AreaDefinitions>().getOrNull(id)!!)
 

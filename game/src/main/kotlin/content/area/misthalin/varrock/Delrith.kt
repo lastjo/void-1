@@ -47,11 +47,11 @@ import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.engine.queue.strongQueue
 import world.gregs.voidps.engine.queue.weakQueue
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.engine.timer.toTicks
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Region
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import java.util.concurrent.TimeUnit
 

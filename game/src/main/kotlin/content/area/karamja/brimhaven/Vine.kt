@@ -7,8 +7,8 @@ import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.entity.obj.replace
 import world.gregs.voidps.engine.queue.queue
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.toTicks
+import world.gregs.voidps.type.Script
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 

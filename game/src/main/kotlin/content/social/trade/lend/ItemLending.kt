@@ -10,8 +10,8 @@ import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.playerDespawn
 import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.inject
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.*
+import world.gregs.voidps.type.Script
 import java.util.concurrent.TimeUnit
 
 @Script

@@ -4,10 +4,10 @@ import content.entity.player.effect.antifire
 import content.entity.player.effect.superAntifire
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.timerStart
 import world.gregs.voidps.engine.timer.timerStop
 import world.gregs.voidps.engine.timer.timerTick
+import world.gregs.voidps.type.Script
 
 @Script
 class Antifire {

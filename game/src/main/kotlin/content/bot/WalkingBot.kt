@@ -4,8 +4,8 @@ import content.bot.interact.navigation.await
 import world.gregs.voidps.engine.data.Settings
 import world.gregs.voidps.engine.entity.worldSpawn
 import world.gregs.voidps.engine.inject
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.network.client.instruction.Walk
+import world.gregs.voidps.type.Script
 
 @Script
 class WalkingBot {

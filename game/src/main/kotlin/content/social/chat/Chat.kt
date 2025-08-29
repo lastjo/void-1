@@ -18,7 +18,6 @@ import world.gregs.voidps.engine.entity.character.player.name
 import world.gregs.voidps.engine.entity.character.player.rights
 import world.gregs.voidps.engine.event.onEvent
 import world.gregs.voidps.engine.inject
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.network.client.instruction.ChatPrivate
 import world.gregs.voidps.network.client.instruction.ChatPublic
 import world.gregs.voidps.network.client.instruction.ChatTypeChange
@@ -26,6 +25,7 @@ import world.gregs.voidps.network.login.protocol.encode.clanChat
 import world.gregs.voidps.network.login.protocol.encode.privateChatFrom
 import world.gregs.voidps.network.login.protocol.encode.privateChatTo
 import world.gregs.voidps.network.login.protocol.encode.publicChat
+import world.gregs.voidps.type.Script
 
 @Script
 class Chat {

@@ -19,8 +19,8 @@ import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.queue.softQueue
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.suspend.SuspendableContext
+import world.gregs.voidps.type.Script
 
 @Script
 class Kaqemeex {

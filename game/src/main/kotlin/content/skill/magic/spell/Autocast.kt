@@ -7,8 +7,8 @@ import world.gregs.voidps.engine.client.variable.variableSet
 import world.gregs.voidps.engine.data.definition.InterfaceDefinitions
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventoryChanged
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
+import world.gregs.voidps.type.Script
 
 @Script
 class Autocast {

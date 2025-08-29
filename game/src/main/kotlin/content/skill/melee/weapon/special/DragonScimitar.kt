@@ -6,10 +6,10 @@ import content.skill.prayer.isCurses
 import content.skill.prayer.prayerStart
 import net.pearx.kasechange.toTitleCase
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.timerStart
 import world.gregs.voidps.engine.timer.timerTick
 import world.gregs.voidps.engine.timer.toTicks
+import world.gregs.voidps.type.Script
 import java.util.concurrent.TimeUnit
 
 @Script

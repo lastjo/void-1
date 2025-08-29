@@ -19,13 +19,13 @@ import world.gregs.voidps.engine.entity.character.player.chat.global.PublicQuick
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.event.onEvent
 import world.gregs.voidps.engine.inject
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.network.client.instruction.QuickChatPrivate
 import world.gregs.voidps.network.client.instruction.QuickChatPublic
 import world.gregs.voidps.network.login.protocol.encode.clanQuickChat
 import world.gregs.voidps.network.login.protocol.encode.privateQuickChatFrom
 import world.gregs.voidps.network.login.protocol.encode.privateQuickChatTo
 import world.gregs.voidps.network.login.protocol.encode.publicQuickChat
+import world.gregs.voidps.type.Script
 
 @Script
 class QuickChat {

@@ -20,8 +20,8 @@ import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.equipment
 import world.gregs.voidps.engine.inv.inventoryChanged
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.network.login.protocol.visual.VisualMask.APPEARANCE_MASK
+import world.gregs.voidps.type.Script
 import java.math.RoundingMode
 import java.text.DecimalFormat
 

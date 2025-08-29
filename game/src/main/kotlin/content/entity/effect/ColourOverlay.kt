@@ -1,9 +1,9 @@
 package content.entity.effect
 
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.characterTimerStart
 import world.gregs.voidps.engine.timer.characterTimerStop
 import world.gregs.voidps.engine.timer.characterTimerTick
+import world.gregs.voidps.type.Script
 
 @Script
 class ColourOverlay {

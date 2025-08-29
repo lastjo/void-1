@@ -10,8 +10,8 @@ import content.quest.quest
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.inv.holdsItem
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.suspend.SuspendableContext
+import world.gregs.voidps.type.Script
 
 @Script
 class GillieGroats {

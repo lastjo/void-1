@@ -1,8 +1,8 @@
 package content.area.wilderness
 
 import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Direction
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.equals
 
 @Script

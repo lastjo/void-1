@@ -23,8 +23,8 @@ import world.gregs.voidps.engine.entity.item.floor.FloorItems
 import world.gregs.voidps.engine.entity.npcSpawn
 import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.inject
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.*
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import java.util.concurrent.TimeUnit
 

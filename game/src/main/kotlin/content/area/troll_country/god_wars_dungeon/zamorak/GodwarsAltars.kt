@@ -9,8 +9,8 @@ import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.equipment
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.toTicks
+import world.gregs.voidps.type.Script
 import java.util.concurrent.TimeUnit
 
 @Script

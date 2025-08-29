@@ -8,9 +8,9 @@ import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.timerStart
 import world.gregs.voidps.engine.timer.timerTick
+import world.gregs.voidps.type.Script
 import kotlin.math.sign
 
 val Character.teleBlocked: Boolean get() = teleBlockCounter > 0

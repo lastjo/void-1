@@ -2,8 +2,8 @@ package content.bot.skill
 
 import content.bot.isBot
 import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.network.client.instruction.InteractDialogue
+import world.gregs.voidps.type.Script
 
 @Script
 class SkillBot {

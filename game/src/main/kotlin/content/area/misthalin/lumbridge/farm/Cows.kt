@@ -4,9 +4,9 @@ import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.interact.itemOnNPCOperate
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
 import world.gregs.voidps.engine.entity.npcSpawn
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.npcTimerStart
 import world.gregs.voidps.engine.timer.npcTimerTick
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
 
 @Script

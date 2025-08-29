@@ -6,8 +6,8 @@ import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Direction
+import world.gregs.voidps.type.Script
 
 @Script
 class Ectopool {

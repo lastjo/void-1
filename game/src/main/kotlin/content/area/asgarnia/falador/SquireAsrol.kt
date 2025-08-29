@@ -18,8 +18,8 @@ import world.gregs.voidps.engine.inv.holdsItem
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.queue.softQueue
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.suspend.SuspendableContext
+import world.gregs.voidps.type.Script
 
 @Script
 class SquireAsrol {

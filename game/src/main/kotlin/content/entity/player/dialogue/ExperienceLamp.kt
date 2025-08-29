@@ -1,8 +1,8 @@
 package content.entity.player.dialogue
 
 import world.gregs.voidps.engine.client.ui.interfaceOption
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.suspend.StringSuspension
+import world.gregs.voidps.type.Script
 
 @Script
 class ExperienceLamp {

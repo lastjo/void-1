@@ -2,8 +2,8 @@ package content.skill.melee.weapon.special
 
 import content.entity.effect.freeze
 import content.entity.player.combat.special.specialAttackDamage
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.toTicks
+import world.gregs.voidps.type.Script
 import java.util.concurrent.TimeUnit
 
 @Script

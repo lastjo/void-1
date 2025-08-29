@@ -4,10 +4,10 @@ import content.entity.player.combat.special.MAX_SPECIAL_ATTACK
 import content.entity.player.combat.special.specialAttackEnergy
 import content.skill.constitution.canConsume
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.timerStart
 import world.gregs.voidps.engine.timer.timerStop
 import world.gregs.voidps.engine.timer.timerTick
+import world.gregs.voidps.type.Script
 
 @Script
 class RecoverSpecial {

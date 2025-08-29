@@ -16,12 +16,12 @@ import world.gregs.voidps.engine.map.zone.ClearRegion
 import world.gregs.voidps.engine.map.zone.DynamicZones
 import world.gregs.voidps.engine.map.zone.RegionLoad
 import world.gregs.voidps.engine.map.zone.ReloadZone
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.network.client.instruction.FinishRegionLoad
 import world.gregs.voidps.network.login.protocol.encode.dynamicMapRegion
 import world.gregs.voidps.network.login.protocol.encode.mapRegion
 import world.gregs.voidps.type.Distance
 import world.gregs.voidps.type.Region
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Zone
 
 @Script

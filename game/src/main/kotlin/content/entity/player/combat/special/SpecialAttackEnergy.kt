@@ -2,9 +2,9 @@ package content.entity.player.combat.special
 
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.timerStart
 import world.gregs.voidps.engine.timer.timerTick
+import world.gregs.voidps.type.Script
 import kotlin.math.min
 
 @Script

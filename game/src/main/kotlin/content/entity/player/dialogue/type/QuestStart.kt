@@ -13,9 +13,9 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.hasMax
 import world.gregs.voidps.engine.get
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.suspend.StringSuspension
 import world.gregs.voidps.engine.suspend.SuspendableContext
+import world.gregs.voidps.type.Script
 
 private const val QUEST_START_ID = "quest_intro"
 

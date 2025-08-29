@@ -34,8 +34,8 @@ import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.*
 import world.gregs.voidps.engine.map.Spiral
 import world.gregs.voidps.engine.queue.strongQueue
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Direction
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.random
 
