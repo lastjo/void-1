@@ -1,7 +1,16 @@
 package world.gregs.voidps.type.sub
 
 /**
- * Open interface subscriber
+ * Interface opened subscriber
+ * ```kotlin
+ * @Open("bank")
+ * fun bankOpen(player: Player) {
+ * }
+ *
+ *
+ * @Open("price_checker")
+ * fun openPriceChecker(player: Player, id: String) {
+ * }
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.SOURCE)

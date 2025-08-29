@@ -6,5 +6,7 @@ dependencies {
     implementation("com.squareup:kotlinpoet:${findProperty("kotlinPoetVersion")}")
     implementation("com.squareup:kotlinpoet-ksp:${findProperty("kotlinPoetVersion")}")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-params:${findProperty("junitVersion")}")
+    testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.5.0")
+    testImplementation("com.github.tschuchortdev:kotlin-compile-testing-ksp:1.5.0")
+    testImplementation("io.mockk:mockk:${findProperty("mockkVersion")}")
 }

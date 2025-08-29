@@ -1,7 +1,6 @@
 package world.gregs.voidps.event.sub
 
 import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.CodeBlock
 import world.gregs.voidps.event.Publisher
 import world.gregs.voidps.event.Subscriber
 
@@ -12,7 +11,7 @@ class SpawnPublisher(val field: String, target: ClassName): Publisher(
     ),
     notification = true
 ) {
-    override fun comparisons(builder: CodeBlock.Builder, method: Subscriber, methodName: String): List<List<Pair<String, Any>>> {
+    override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val ids = method.annotationArgs["ids"] as List<String>
         if (ids.isEmpty()) {
             return listOf()

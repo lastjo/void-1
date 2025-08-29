@@ -5,19 +5,35 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import world.gregs.voidps.type.sub.*
 import world.gregs.voidps.event.sub.*
-import world.gregs.voidps.type.sub.Added
+import world.gregs.voidps.type.sub.ItemAdded
 
-// TODO move this to a separate module
+/**
+ * Register for Kotlin Symbol Processing which provides a [PublisherProcessor]
+ *
+ * Lists [PublisherProcessor.schemas]:
+ *  Annotation -> Required parameters -> [Publisher] schema
+ */
 class PublisherProcessorProvider : SymbolProcessorProvider {
     override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor = PublisherProcessor(
         codeGenerator = environment.codeGenerator,
         logger = environment.logger,
         schemas = mapOf(
             Option::class.qualifiedName!! to listOf(
-                listOf("Player", "GameObject") to OptionPublisher(OBJECT),
-                listOf("Player", "Player") to OptionPublisher(PLAYER),
-                listOf("Player", "NPC") to OptionPublisher(NPC),
-                listOf("Player", "FloorItem") to OptionPublisher(FLOOR_ITEM),
+                listOf("Player", "GameObject") to OptionPublisher("player", PLAYER, OBJECT),
+                listOf("Player", "Player") to OptionPublisher("player", PLAYER, PLAYER),
+                listOf("Player", "NPC") to OptionPublisher("player", PLAYER, NPC),
+                listOf("Player", "FloorItem") to OptionPublisher("player", PLAYER, FLOOR_ITEM),
+                listOf("Player", "Character") to OptionPublisher("player", PLAYER, CHARACTER),
+                listOf("NPC", "GameObject") to OptionPublisher("npc", NPC, OBJECT),
+                listOf("NPC", "Player") to OptionPublisher("npc", NPC, PLAYER),
+                listOf("NPC", "NPC") to OptionPublisher("npc", NPC, NPC),
+                listOf("NPC", "FloorItem") to OptionPublisher("npc", NPC, FLOOR_ITEM),
+                listOf("NPC", "Character") to OptionPublisher("npc", NPC, CHARACTER),
+                listOf("Character", "GameObject") to OptionPublisher("character", CHARACTER, OBJECT),
+                listOf("Character", "Player") to OptionPublisher("character", CHARACTER, PLAYER),
+                listOf("Character", "NPC") to OptionPublisher("character", CHARACTER, NPC),
+                listOf("Character", "FloorItem") to OptionPublisher("character", CHARACTER, FLOOR_ITEM),
+                listOf("Character", "Character") to OptionPublisher("character", CHARACTER, CHARACTER),
             ),
             Interface::class.qualifiedName!! to listOf(
                 listOf("Player") to InterfacePublisher(),
@@ -25,6 +41,7 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
             UseOn::class.qualifiedName!! to listOf(
                 listOf("Player", "Player") to InterfaceOnPublisher(PLAYER),
                 listOf("Player", "NPC") to InterfaceOnPublisher(NPC),
+                listOf("Player", "Character") to InterfaceOnPublisher(CHARACTER),
                 listOf("Player", "Item") to InterfaceOnPublisher(ITEM),
                 listOf("Player", "GameObject") to InterfaceOnPublisher(OBJECT),
                 listOf("Player", "FloorItem") to InterfaceOnPublisher(FLOOR_ITEM),
@@ -49,19 +66,22 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
             TimerStart::class.qualifiedName!! to listOf(
                 listOf("Player") to TimerStartPublisher("player", PLAYER),
                 listOf("NPC") to TimerStartPublisher("npc", NPC),
+                listOf("Character") to TimerStartPublisher("character", CHARACTER),
             ),
             TimerTick::class.qualifiedName!! to listOf(
                 listOf("Player") to TimerTickPublisher("player", PLAYER),
                 listOf("NPC") to TimerTickPublisher("npc", NPC),
+                listOf("Character") to TimerTickPublisher("character", CHARACTER),
             ),
             TimerStop::class.qualifiedName!! to listOf(
                 listOf("Player") to TimerStopPublisher("player", PLAYER),
                 listOf("NPC") to TimerStopPublisher("npc", NPC),
+                listOf("Character") to TimerStopPublisher("character", CHARACTER),
             ),
-            Added::class.qualifiedName!! to listOf(
+            ItemAdded::class.qualifiedName!! to listOf(
                 listOf("Player") to ItemAddedPublisher(),
             ),
-            Removed::class.qualifiedName!! to listOf(
+            ItemRemoved::class.qualifiedName!! to listOf(
                 listOf("Player") to ItemRemovedPublisher(),
             ),
             Command::class.qualifiedName!! to listOf(

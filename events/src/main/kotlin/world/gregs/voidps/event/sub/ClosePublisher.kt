@@ -1,6 +1,5 @@
 package world.gregs.voidps.event.sub
 
-import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.STRING
 import world.gregs.voidps.event.PLAYER
 import world.gregs.voidps.event.Publisher
@@ -13,7 +12,7 @@ class ClosePublisher: Publisher(
         "id" to STRING,
     ),
 ) {
-    override fun comparisons(builder: CodeBlock.Builder, method: Subscriber, methodName: String): List<List<Pair<String, Any>>> {
+    override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val ids = method.annotationArgs["ids"] as List<String>
         if (ids.isEmpty()) {
             return emptyList()

@@ -1,6 +1,5 @@
 package world.gregs.voidps.event.sub
 
-import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.INT
 import com.squareup.kotlinpoet.STRING
 import world.gregs.voidps.event.ITEM
@@ -23,7 +22,7 @@ class InterfacePublisher : Publisher(
     ),
     suspendable = true
 ) {
-    override fun comparisons(builder: CodeBlock.Builder, method: Subscriber, methodName: String): List<List<Pair<String, Any>>> {
+    override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val option = method.annotationArgs["option"] as String
         val id = method.annotationArgs["id"] as String
         val component = method.annotationArgs["component"] as String

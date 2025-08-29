@@ -1,6 +1,5 @@
 package world.gregs.voidps.event.sub
 
-import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.INT
 import com.squareup.kotlinpoet.STRING
 import world.gregs.voidps.event.PLAYER
@@ -14,10 +13,10 @@ class CommandPublisher: Publisher(
         "player" to PLAYER,
         "prefix" to STRING,
         "rights" to INT,
-        "command" to STRING,
+        "content" to STRING,
     ),
 ) {
-    override fun comparisons(builder: CodeBlock.Builder, method: Subscriber, methodName: String): List<List<Pair<String, Any>>> {
+    override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val ids = method.annotationArgs["ids"] as List<String>
         val rights = method.annotationArgs["rights"] as Int
         val list = mutableListOf<Pair<String, Any>>()

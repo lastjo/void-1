@@ -2,23 +2,22 @@ package world.gregs.voidps.event.sub
 
 import com.squareup.kotlinpoet.BOOLEAN
 import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.STRING
 import world.gregs.voidps.event.PLAYER
 import world.gregs.voidps.event.Publisher
 import world.gregs.voidps.event.Subscriber
 
-class OptionPublisher(target: ClassName): Publisher(
-    name = "Player${target.simpleName}Publisher",
+class OptionPublisher(field: String, source: ClassName, target: ClassName): Publisher(
+    name = "${source.simpleName}${target.simpleName}Publisher",
     parameters = listOf(
-        "player" to PLAYER,
+        field to source,
         "target" to target,
         "option" to STRING,
         "approach" to BOOLEAN,
     ),
     suspendable = true
 ) {
-    override fun comparisons(builder: CodeBlock.Builder, method: Subscriber, methodName: String): List<List<Pair<String, Any>>> {
+    override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val option = method.annotationArgs["option"] as String
         val ids = method.annotationArgs["ids"] as List<String>
         val approach = method.annotationArgs["approach"] as Boolean

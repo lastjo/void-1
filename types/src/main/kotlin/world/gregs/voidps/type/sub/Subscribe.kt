@@ -1,7 +1,14 @@
 package world.gregs.voidps.type.sub
 
 /**
- * Generic subscriber
+ * Generic subscriber for events that aren't used frequently
+ * and don't have a dedicated annotation.
+ *
+ * ```kotlin
+ * @Subscribe("consume", "bandits_brew")
+ * fun banditsBrew(player: Player) {
+ * }
+ * ```
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.SOURCE)

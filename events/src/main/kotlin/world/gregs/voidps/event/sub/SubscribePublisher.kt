@@ -1,6 +1,5 @@
 package world.gregs.voidps.event.sub
 
-import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.STRING
 import world.gregs.voidps.event.PLAYER
 import world.gregs.voidps.event.Publisher
@@ -14,7 +13,7 @@ class SubscribePublisher: Publisher(
         "id" to STRING,
     ),
 ) {
-    override fun comparisons(builder: CodeBlock.Builder, method: Subscriber, methodName: String): List<List<Pair<String, Any>>> {
+    override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val event = method.annotationArgs["event"] as String
         val ids = method.annotationArgs["ids"] as List<String>
         val list = mutableListOf<Pair<String, Any>>()
