@@ -14,6 +14,7 @@ class SubscribePublisher :
             "id" to STRING,
         ),
         overrideMethod = "publish",
+        notification = true,
     ) {
     override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val event = method.annotationArgs["event"] as String

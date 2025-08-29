@@ -56,6 +56,14 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
                 listOf("FloorItem") to SpawnPublisher("floorItem", FLOOR_ITEM),
                 listOf("World") to SpawnPublisher("world", WORLD),
             ),
+            Despawn::class.qualifiedName!! to listOf(
+                listOf("Player") to DespawnPublisher("player", PLAYER),
+                listOf("NPC") to DespawnPublisher("npc", NPC),
+                listOf("Character") to DespawnPublisher("character", CHARACTER),
+                listOf("GameObject") to DespawnPublisher("obj", OBJECT),
+                listOf("FloorItem") to DespawnPublisher("floorItem", FLOOR_ITEM),
+                listOf("World") to DespawnPublisher("world", WORLD),
+            ),
             Open::class.qualifiedName!! to listOf(
                 listOf("Player") to OpenPublisher(),
             ),

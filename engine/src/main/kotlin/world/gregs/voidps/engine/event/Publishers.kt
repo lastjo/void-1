@@ -102,6 +102,12 @@ abstract class Publishers {
     open fun spawn(obj: GameObject): Boolean = false
     open fun spawn(world: World): Boolean = false
 
+    open fun despawn(player: Player): Boolean = false
+    open fun despawn(npc: NPC): Boolean = false
+    open fun despawn(floorItem: FloorItem): Boolean = false
+    open fun despawn(obj: GameObject): Boolean = false
+    open fun despawn(world: World): Boolean = false
+
     open fun publish(player: Player, event: String, id: String = ""): Boolean = false
 
     fun timerStart(source: Entity, timer: String, restart: Boolean = false): Int = when (source) {
