@@ -12,10 +12,10 @@ class PublisherTest {
                 notification = true,
                 parameters = emptyList(),
                 returnsDefault = "NotBoolean",
-                overrideMethod = ""
+                overrideMethod = "",
             ) {
                 override fun comparisons(
-                    method: Subscriber
+                    method: Subscriber,
                 ): List<List<Pair<String, Any>>> = emptyList()
             }
         }

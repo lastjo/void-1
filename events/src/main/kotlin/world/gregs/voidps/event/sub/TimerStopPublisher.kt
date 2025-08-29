@@ -6,15 +6,16 @@ import com.squareup.kotlinpoet.STRING
 import world.gregs.voidps.event.Publisher
 import world.gregs.voidps.event.Subscriber
 
-class TimerStopPublisher(field: String, type: ClassName): Publisher(
-    name = "StartTimerPublisher",
-    parameters = listOf(
-        field to type,
-        "timer" to STRING,
-        "logout" to BOOLEAN,
-    ),
-    overrideMethod = "timerStart${type.simpleName}",
-) {
+class TimerStopPublisher(field: String, type: ClassName) :
+    Publisher(
+        name = "StartTimerPublisher",
+        parameters = listOf(
+            field to type,
+            "timer" to STRING,
+            "logout" to BOOLEAN,
+        ),
+        overrideMethod = "timerStart${type.simpleName}",
+    ) {
     override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val ids = method.annotationArgs["ids"] as List<String>
         if (ids.isEmpty()) {

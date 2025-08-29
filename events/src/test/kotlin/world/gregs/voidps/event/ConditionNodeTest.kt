@@ -11,13 +11,11 @@ class ConditionNodeTest {
         parameters = listOf("id" to ClassName("kotlin", "String")),
         returnsDefault = true,
         notification = true,
-        overrideMethod = ""
+        overrideMethod = "",
     ) {
         override fun comparisons(
-            method: Subscriber
-        ): List<List<Pair<String, Any>>> {
-            return listOf(listOf("id" to "123"))
-        }
+            method: Subscriber,
+        ): List<List<Pair<String, Any>>> = listOf(listOf("id" to "123"))
     }
 
     @Test
@@ -28,7 +26,7 @@ class ConditionNodeTest {
             parameters = listOf("id" to "String"),
             schema = dummyPublisher,
             annotationArgs = emptyMap(),
-            classParams = emptyList()
+            classParams = emptyList(),
         )
 
         val root = ConditionNode.buildTree(dummyPublisher, listOf(subscriber))
@@ -46,7 +44,7 @@ class ConditionNodeTest {
             parameters = listOf("id" to "String"),
             schema = dummyPublisher,
             annotationArgs = emptyMap(),
-            classParams = emptyList()
+            classParams = emptyList(),
         )
 
         val args = ConditionNode.arguments(subscriber, dummyPublisher)

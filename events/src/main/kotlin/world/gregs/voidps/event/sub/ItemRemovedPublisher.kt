@@ -7,16 +7,17 @@ import world.gregs.voidps.event.PLAYER
 import world.gregs.voidps.event.Publisher
 import world.gregs.voidps.event.Subscriber
 
-class ItemRemovedPublisher : Publisher(
-    name = "ItemRemovedPublisher",
-    parameters = listOf(
-        "player" to PLAYER,
-        "item" to ITEM,
-        "index" to INT,
-        "inventory" to STRING,
-    ),
-    overrideMethod = "itemRemoved",
-) {
+class ItemRemovedPublisher :
+    Publisher(
+        name = "ItemRemovedPublisher",
+        parameters = listOf(
+            "player" to PLAYER,
+            "item" to ITEM,
+            "index" to INT,
+            "inventory" to STRING,
+        ),
+        overrideMethod = "itemRemoved",
+    ) {
     override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val ids = method.annotationArgs["ids"] as List<String>
         val slots = method.annotationArgs["slots"] as List<Int>
@@ -37,7 +38,7 @@ class ItemRemovedPublisher : Publisher(
             return ids.map { list + listOf("item.id" to it) }
         } else if (slots.isNotEmpty()) {
             return slots.map { list + listOf("index" to it) }
-        } else  {
+        } else {
             return listOf(list)
         }
     }

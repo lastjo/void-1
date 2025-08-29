@@ -7,22 +7,22 @@ import world.gregs.voidps.event.PLAYER
 import world.gregs.voidps.event.Publisher
 import world.gregs.voidps.event.Subscriber
 
-
-class InterfacePublisher : Publisher(
-    name = "PlayerInterfacePublisher",
-    parameters = listOf(
-        "player" to PLAYER,
-        "id" to STRING,
-        "component" to STRING,
-        "option" to STRING,
-        "optionIndex" to INT,
-        "item" to ITEM,
-        "itemSlot" to INT,
-        "inventory" to STRING,
-    ),
-    suspendable = true,
-    overrideMethod = "interfaceOption"
-) {
+class InterfacePublisher :
+    Publisher(
+        name = "PlayerInterfacePublisher",
+        parameters = listOf(
+            "player" to PLAYER,
+            "id" to STRING,
+            "component" to STRING,
+            "option" to STRING,
+            "optionIndex" to INT,
+            "item" to ITEM,
+            "itemSlot" to INT,
+            "inventory" to STRING,
+        ),
+        suspendable = true,
+        overrideMethod = "interfaceOption",
+    ) {
     override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val option = method.annotationArgs["option"] as String
         val id = method.annotationArgs["id"] as String

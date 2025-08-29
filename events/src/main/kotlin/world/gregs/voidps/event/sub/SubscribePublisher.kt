@@ -5,15 +5,16 @@ import world.gregs.voidps.event.PLAYER
 import world.gregs.voidps.event.Publisher
 import world.gregs.voidps.event.Subscriber
 
-class SubscribePublisher: Publisher(
-    name = "SubscribePublisher",
-    parameters = listOf(
-        "player" to PLAYER,
-        "event" to STRING,
-        "id" to STRING,
-    ),
-    overrideMethod = "publish"
-) {
+class SubscribePublisher :
+    Publisher(
+        name = "SubscribePublisher",
+        parameters = listOf(
+            "player" to PLAYER,
+            "event" to STRING,
+            "id" to STRING,
+        ),
+        overrideMethod = "publish",
+    ) {
     override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val event = method.annotationArgs["event"] as String
         val ids = method.annotationArgs["ids"] as List<String>

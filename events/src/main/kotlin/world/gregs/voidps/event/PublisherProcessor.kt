@@ -15,7 +15,7 @@ class PublisherProcessor(
     private val codeGenerator: CodeGenerator,
     private val logger: KSPLogger,
     private val schemas: Map<String, List<Pair<List<String>, Publisher>>>,
-    private val superclass: ClassName
+    private val superclass: ClassName,
 ) : SymbolProcessor {
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
@@ -62,7 +62,7 @@ class PublisherProcessor(
                             PropertySpec.builder(methodName, method.className)
                                 .addModifiers(KModifier.PRIVATE)
                                 .initializer("${method.className.simpleName}($classParams)")
-                                .build()
+                                .build(),
                         )
                     }
                 }
@@ -73,7 +73,7 @@ class PublisherProcessor(
                         PropertySpec.builder(methodName, className)
                             .addModifiers(KModifier.PRIVATE)
                             .initializer(methodName)
-                            .build()
+                            .build(),
                     )
                 }
                 classBuilder.primaryConstructor(constructor.build())
@@ -93,11 +93,11 @@ class PublisherProcessor(
                 mainClass.addProperty(
                     PropertySpec.builder(
                         fieldName,
-                        ClassName("world.gregs.voidps.engine.script", schema.name)
+                        ClassName("world.gregs.voidps.engine.script", schema.name),
                     )
                         .addModifiers(KModifier.PRIVATE)
                         .initializer("${schema.name}($deps)")
-                        .build()
+                        .build(),
                 )
                 if (schema.overrideMethod != "") {
                     mainClass.addFunction(overrideMethod(schema, fieldName, check = false))
@@ -121,12 +121,12 @@ class PublisherProcessor(
         mainClass.addProperty(
             PropertySpec.builder("subscriptions", INT)
                 .initializer(total.toString())
-                .build()
+                .build(),
         )
         mainClass.addProperty(
             PropertySpec.builder("publishers", INT)
                 .initializer(count.toString())
-                .build()
+                .build(),
         )
 
         // Save main file
@@ -206,5 +206,4 @@ class PublisherProcessor(
             classParams = classParams,
         )
     }
-
 }

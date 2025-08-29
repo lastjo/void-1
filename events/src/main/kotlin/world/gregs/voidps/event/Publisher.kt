@@ -18,6 +18,9 @@ abstract class Publisher(
         if (notification) {
             assert(returnsDefault is Boolean) { "Notification methods must return cancellation boolean." }
         }
+        if (interaction) {
+            assert(parameters.any { it.first == "approach" }) { "Interactions must contain an approach/operate toggle." }
+        }
     }
 
     abstract fun comparisons(method: Subscriber): List<List<Pair<String, Any>>>
@@ -83,7 +86,7 @@ abstract class Publisher(
                     .addStatement(if (player != null) "$player.warn(e) { \"Failed to publish ${name.removeSuffix("Publisher")}\" }" else "e.printStackTrace()")
                     .addStatement("return %L", returnsDefault)
                     .endControlFlow()
-                    .build()
+                    .build(),
             )
             funSpec.returns(returns::class)
         }
@@ -99,7 +102,7 @@ abstract class Publisher(
                 val args = ConditionNode.arguments(method, this)
                 builder.addStatement(
                     "else -> ${if (returnSomething) "" else "return "}$methodName.%L(${args.joinToString(", ")})",
-                    method.methodName
+                    method.methodName,
                 )
             }
             return true
@@ -129,7 +132,7 @@ abstract class Publisher(
                 val args = ConditionNode.arguments(method, this)
                 builder.addStatement(
                     " -> $methodName.%L(${args.joinToString(", ")})",
-                    method.methodName
+                    method.methodName,
                 )
             }
         }
@@ -144,4 +147,3 @@ internal val OBJECT = ClassName("world.gregs.voidps.engine.entity.obj", "GameObj
 internal val FLOOR_ITEM = ClassName("world.gregs.voidps.engine.entity.item.floor", "FloorItem")
 internal val ITEM = ClassName("world.gregs.voidps.engine.entity.item", "Item")
 internal val WORLD = ClassName("world.gregs.voidps.engine.entity", "World")
-

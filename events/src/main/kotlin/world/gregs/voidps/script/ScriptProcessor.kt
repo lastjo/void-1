@@ -55,5 +55,4 @@ class ScriptProcessor(
         logger.info("ScriptProcessor took ${System.currentTimeMillis() - start} ms")
         return emptyList()
     }
-
 }

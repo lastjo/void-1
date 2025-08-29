@@ -21,5 +21,5 @@ annotation class UseOn(
     val on: String = "*",
     val id: String = "*",
     val component: String = "*",
-    val approach: Boolean = false
+    val approach: Boolean = false,
 )

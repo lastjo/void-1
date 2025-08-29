@@ -6,7 +6,7 @@ import com.squareup.kotlinpoet.CodeBlock
 data class ConditionNode(
     val condition: Pair<String, Any>? = null,
     val children: MutableList<ConditionNode> = mutableListOf(),
-    val subscribers: MutableList<Subscriber> = mutableListOf()
+    val subscribers: MutableList<Subscriber> = mutableListOf(),
 ) {
 
     fun generate(builder: CodeBlock.Builder, schema: Publisher) {
@@ -60,7 +60,7 @@ data class ConditionNode(
             builder.addStatement(
                 " || %L.%L(${args.joinToString(", ")})",
                 methodName,
-                sub.methodName
+                sub.methodName,
             )
         }
     }

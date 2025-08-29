@@ -37,7 +37,7 @@ class PublisherProcessorIntegrationTest {
         kspWithCompilation = true
         symbolProcessorProviders = listOf(
             // provider for your processor
-            TestProcessorProvider(required, notification, suspend, default, interaction)
+            TestProcessorProvider(required, notification, suspend, default, interaction),
         )
         messageOutputStream = System.out
     }
@@ -74,17 +74,16 @@ class PublisherProcessorIntegrationTest {
         private val default: Any = false,
         private val interaction: Boolean = false,
     ) : SymbolProcessorProvider {
-        override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor =
-            PublisherProcessor(
-                codeGenerator = environment.codeGenerator,
-                logger = environment.logger,
-                superclass = Publishers::class.asClassName(),
-                schemas = mapOf(
-                    "test.OnEvent" to listOf(
-                        required to OnEventPublisher(notification, suspend, default, interaction),
-                    ),
+        override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor = PublisherProcessor(
+            codeGenerator = environment.codeGenerator,
+            logger = environment.logger,
+            superclass = Publishers::class.asClassName(),
+            schemas = mapOf(
+                "test.OnEvent" to listOf(
+                    required to OnEventPublisher(notification, suspend, default, interaction),
                 ),
-            )
+            ),
+        )
     }
 
     @Test
@@ -343,7 +342,7 @@ class PublisherProcessorIntegrationTest {
                 parameters = listOf("id" to STRING),
                 returnsDefault = "notBoolean",
                 notification = true,
-                overrideMethod = ""
+                overrideMethod = "",
             ) {
                 override fun comparisons(method: Subscriber) = emptyList<List<Pair<String, Any>>>()
             }
@@ -393,5 +392,4 @@ class PublisherProcessorIntegrationTest {
         assertTrue(content.contains("dep: Int"), "PublishersImpl constructor should inject dep")
         assertTrue(content.contains("NeedsDependency(dep)"), "Publisher should construct NeedsDependency with dep injected")
     }
-
 }

@@ -4,8 +4,8 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import com.squareup.kotlinpoet.ClassName
-import world.gregs.voidps.type.sub.*
 import world.gregs.voidps.event.sub.*
+import world.gregs.voidps.type.sub.*
 import world.gregs.voidps.type.sub.ItemAdded
 
 /**
@@ -87,6 +87,6 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
             Command::class.qualifiedName!! to listOf(
                 listOf("Player") to CommandPublisher(),
             ),
-        )
+        ),
     )
 }

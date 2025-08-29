@@ -20,5 +20,5 @@ import world.gregs.voidps.type.PlayerRights
 annotation class Command(
     vararg val ids: String,
     val description: String = "",
-    val rights: Int = PlayerRights.NONE
+    val rights: Int = PlayerRights.NONE,
 )
