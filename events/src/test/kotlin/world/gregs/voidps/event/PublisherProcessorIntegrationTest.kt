@@ -17,6 +17,8 @@ class PublisherProcessorIntegrationTest {
 
         open suspend fun onEventSuspend(id: String): Boolean = false
 
+        open fun hasOnEventSuspend(id: String, name: String): Boolean = false
+
         open fun onEvent(id: String, name: String): Boolean = false
 
         open fun onEvent(id: String): Boolean = false
@@ -28,13 +30,14 @@ class PublisherProcessorIntegrationTest {
         notification: Boolean = false,
         suspend: Boolean = false,
         default: Any = false,
+        interaction: Boolean = false,
     ) = KotlinCompilation().apply {
         sources = listOf(SourceFile.kotlin("MyHandler.kt", source))
         inheritClassPath = true
         kspWithCompilation = true
         symbolProcessorProviders = listOf(
             // provider for your processor
-            TestProcessorProvider(required, notification, suspend, default)
+            TestProcessorProvider(required, notification, suspend, default, interaction)
         )
         messageOutputStream = System.out
     }
@@ -43,6 +46,7 @@ class PublisherProcessorIntegrationTest {
         notification: Boolean = false,
         suspend: Boolean = false,
         default: Any = false,
+        interaction: Boolean = false,
     ) : Publisher(
         name = "OnEventPublisher",
         parameters = listOf(
@@ -52,7 +56,8 @@ class PublisherProcessorIntegrationTest {
         returnsDefault = default,
         notification = notification,
         suspendable = suspend,
-        overrideMethod = if (suspend) "onEventSuspend" else "onEvent"
+        overrideMethod = if (suspend) "onEventSuspend" else "onEvent",
+        interaction = interaction,
     ) {
         override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
             // Supports optional multiple annotation values
@@ -67,6 +72,7 @@ class PublisherProcessorIntegrationTest {
         private val notification: Boolean = false,
         private val suspend: Boolean = false,
         private val default: Any = false,
+        private val interaction: Boolean = false,
     ) : SymbolProcessorProvider {
         override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor =
             PublisherProcessor(
@@ -75,7 +81,7 @@ class PublisherProcessorIntegrationTest {
                 superclass = Publishers::class.asClassName(),
                 schemas = mapOf(
                     "test.OnEvent" to listOf(
-                        required to OnEventPublisher(notification, suspend, default),
+                        required to OnEventPublisher(notification, suspend, default, interaction),
                     ),
                 ),
             )
@@ -177,6 +183,30 @@ class PublisherProcessorIntegrationTest {
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
         val content = compilation.kspSourcesDir.resolve("kotlin/world/gregs/voidps/engine/script/OnEventPublisher.kt").readText()
         assertTrue(content.contains("suspend fun publish("), "Publish method should also be suspendable")
+    }
+
+    @Test
+    fun `Interaction produces has method`() {
+        @Language("kotlin")
+        val source = """
+            package test
+
+            annotation class OnEvent(val value: String)
+
+            class MyHandler {
+                @OnEvent("123")
+                suspend fun handler(id: String): Boolean {
+                    return true
+                }
+            }
+        """.trimIndent()
+
+        val compilation = compilation(source, suspend = true, interaction = true)
+        val result = compilation.compile()
+
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+        val content = compilation.kspSourcesDir.resolve("kotlin/world/gregs/voidps/engine/script/OnEventPublisher.kt").readText()
+        assertTrue(content.contains("public fun has("), "Publish should have 'has' method")
     }
 
     @Test

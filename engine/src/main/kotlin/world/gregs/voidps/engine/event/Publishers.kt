@@ -56,6 +56,19 @@ abstract class Publishers {
     open suspend fun characterNPCOption(character: Character, target: NPC, option: String, approach: Boolean = false): Boolean = false
     open suspend fun characterFloorItemOption(character: Character, target: FloorItem, option: String, approach: Boolean = false): Boolean = false
 
+    open fun hasPlayerGameObjectOption(player: Player, target: GameObject, option: String, approach: Boolean = false): Boolean = false
+    open fun hasPlayerPlayerOption(player: Player, target: Player, option: String, approach: Boolean = false): Boolean = false
+    open fun hasPlayerNPCOption(player: Player, target: NPC, option: String, approach: Boolean = false): Boolean = false
+    open fun hasPlayerFloorItemOption(player: Player, target: FloorItem, option: String, approach: Boolean = false): Boolean = false
+    open fun hasNpcGameObjectOption(npc: NPC, target: GameObject, option: String, approach: Boolean = false): Boolean = false
+    open fun hasNpcPlayerOption(npc: NPC, target: Player, option: String, approach: Boolean = false): Boolean = false
+    open fun hasNpcNPCOption(npc: NPC, target: NPC, option: String, approach: Boolean = false): Boolean = false
+    open fun hasNpcFloorItemOption(npc: NPC, target: FloorItem, option: String, approach: Boolean = false): Boolean = false
+    open fun hasCharacterGameObjectOption(character: Character, target: GameObject, option: String, approach: Boolean = false): Boolean = false
+    open fun hasCharacterPlayerOption(character: Character, target: Player, option: String, approach: Boolean = false): Boolean = false
+    open fun hasCharacterNPCOption(character: Character, target: NPC, option: String, approach: Boolean = false): Boolean = false
+    open fun hasCharacterFloorItemOption(character: Character, target: FloorItem, option: String, approach: Boolean = false): Boolean = false
+
     open fun interfaceClosed(player: Player, id: String): Boolean = false
 
     open fun command(player: Player, prefix: String, content: String = "", rights: Int = PlayerRights.NONE): Boolean = false
@@ -72,16 +85,18 @@ abstract class Publishers {
     }
 
     open suspend fun interfaceOnPlayer(player: Player, target: Player, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false
-
     open suspend fun interfaceOnNPC(player: Player, target: NPC, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false
-
     open suspend fun interfaceOnCharacter(player: Player, target: Character, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false
-
     open suspend fun interfaceOnItem(player: Player, target: Item, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false
-
     open suspend fun interfaceOnGameObject(player: Player, target: GameObject, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false
-
     open suspend fun interfaceOnFloorItem(player: Player, target: FloorItem, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false
+
+    open fun hasInterfaceOnPlayer(player: Player, target: Player, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false
+    open fun hasInterfaceOnNPC(player: Player, target: NPC, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false
+    open fun hasInterfaceOnCharacter(player: Player, target: Character, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false
+    open fun hasInterfaceOnItem(player: Player, target: Item, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false
+    open fun hasInterfaceOnGameObject(player: Player, target: GameObject, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false
+    open fun hasInterfaceOnFloorItem(player: Player, target: FloorItem, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false
 
     open suspend fun interfaceOption(player: Player, id: String = "", component: String = "", option: String = "", optionIndex: Int = -1, item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false
 

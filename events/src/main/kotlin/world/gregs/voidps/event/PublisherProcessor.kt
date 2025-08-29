@@ -77,7 +77,10 @@ class PublisherProcessor(
                     )
                 }
                 classBuilder.primaryConstructor(constructor.build())
-                classBuilder.addFunction(schema.generate(methods))
+                if (schema.interaction) {
+                    classBuilder.addFunction(schema.generate(methods, check = true))
+                }
+                classBuilder.addFunction(schema.generate(methods, check = false))
                 val fileSpec = FileSpec.builder("world.gregs.voidps.engine.script", schema.name)
                 fileSpec.addType(classBuilder.build())
 
@@ -97,20 +100,10 @@ class PublisherProcessor(
                         .build()
                 )
                 if (schema.overrideMethod != "") {
-                    val method = FunSpec.builder(schema.overrideMethod)
-                        .addModifiers(KModifier.OVERRIDE)
-                    if (schema.suspendable) {
-                        method.addModifiers(KModifier.SUSPEND)
+                    mainClass.addFunction(overrideMethod(schema, fieldName, check = false))
+                    if (schema.interaction) {
+                        mainClass.addFunction(overrideMethod(schema, fieldName, check = true))
                     }
-                    for ((name, type) in schema.parameters) {
-                        method.addParameter(name, type)
-                    }
-                    mainClass.addFunction(
-                        method
-                            .addStatement("return $fieldName.publish(${schema.parameters.joinToString(", ") { it.first }})")
-                            .returns(schema.returnsDefault::class)
-                            .build()
-                    )
                 }
                 try {
                     fileSpec.build().writeTo(codeGenerator, Dependencies(false))
@@ -144,6 +137,23 @@ class PublisherProcessor(
         } catch (e: FileAlreadyExistsException) {
             e.printStackTrace()
         }
+    }
+
+    private fun overrideMethod(schema: Publisher, fieldName: String, check: Boolean): FunSpec {
+        val method = FunSpec.builder(if (check) "has${schema.overrideMethod.replaceFirstChar { it.uppercase() }}" else schema.overrideMethod)
+            .addModifiers(KModifier.OVERRIDE)
+        if (schema.suspendable && !check) {
+            method.addModifiers(KModifier.SUSPEND)
+        }
+        for ((name, type) in schema.parameters) {
+            method.addParameter(name, type)
+        }
+        if (check) {
+            method.addStatement("return $fieldName.has(${schema.parameters.joinToString(", ") { it.first }})").returns(BOOLEAN)
+        } else {
+            method.addStatement("return $fieldName.publish(${schema.parameters.joinToString(", ") { it.first }})").returns(schema.returnsDefault::class)
+        }
+        return method.build()
     }
 
     /**

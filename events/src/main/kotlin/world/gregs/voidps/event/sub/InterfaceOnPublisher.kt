@@ -21,6 +21,7 @@ class InterfaceOnPublisher(target: ClassName): Publisher(
     ),
     suspendable = true,
     overrideMethod = "interfaceOn${target.simpleName}",
+    interaction = true
 ) {
     override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val item = method.annotationArgs["item"] as String
@@ -42,9 +43,7 @@ class InterfaceOnPublisher(target: ClassName): Publisher(
         if (component != "*") {
             list.add("component" to component)
         }
-        if (approach) {
-            list.add("approach" to true)
-        }
+        list.add("approach" to approach)
         return listOf(list)
     }
 }

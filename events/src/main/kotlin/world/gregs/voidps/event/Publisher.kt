@@ -1,9 +1,6 @@
 package world.gregs.voidps.event
 
-import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.FunSpec
-import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.*
 
 /**
  * Contains the mapping from a [Subscriber] method and [Annotation] into a generated Publisher class
@@ -14,6 +11,7 @@ abstract class Publisher(
     val parameters: List<Pair<String, ClassName>>,
     var returnsDefault: Any = false,
     var notification: Boolean = false,
+    var interaction: Boolean = false,
     val overrideMethod: String,
 ) {
     init {
@@ -27,9 +25,9 @@ abstract class Publisher(
     /**
      * Generate a publish function for a list of [Subscriber] [methods]
      */
-    fun generate(methods: List<Subscriber>): FunSpec {
-        val funSpec = FunSpec.builder("publish")
-        if (suspendable) {
+    fun generate(methods: List<Subscriber>, check: Boolean): FunSpec {
+        val funSpec = FunSpec.builder(if (check) "has" else "publish")
+        if (suspendable && !check) {
             funSpec.addModifiers(KModifier.SUSPEND)
         }
         var player: String? = null
@@ -45,51 +43,65 @@ abstract class Publisher(
         val builder: CodeBlock.Builder
         if (notification) {
             builder = CodeBlock.builder()
-            val root = ConditionNode.buildTree(this, methods)
-            builder.addStatement("var handled = false")
-            root.generate(builder, this)
-            builder.addStatement("return handled")
+            if (check) {
+                // Assume any sub means existing as you can never know for certain with a notification call
+                builder.addStatement("return true")
+            } else {
+                val root = ConditionNode.buildTree(this, methods)
+                builder.addStatement("var handled = false")
+                root.generate(builder, this)
+                builder.addStatement("return handled")
+            }
         } else {
             builder = CodeBlock.builder().beginControlFlow(if (returnSomething) "return when" else "when")
             var addedElse = false
             for (method in methods) {
                 val comparisons = comparisons(method)
-                addedElse = addedElse || generateStatement(builder, method, comparisons, returnSomething)
+                addedElse = addedElse || generateStatement(builder, method, comparisons, returnSomething, check)
             }
             if (!addedElse) {
-                builder.addStatement("else -> ${if (returnSomething) "" else "return "}%L", returns)
+                builder.addStatement("else -> ${if (returnSomething) "" else "return "}%L", if (check) false else returns)
             }
             builder.endControlFlow()
             if (!returnSomething && !addedElse) {
                 builder.addStatement("return true")
             }
         }
-        val errorHandling = CodeBlock.builder().beginControlFlow("try")
-        if (player != null) {
-            errorHandling.add("%L.debug { %P }\n", player, "${name.removeSuffix("Publisher")}[${parameters.joinToString(", ") { "\$${it.first}" }}]")
+        if (check) {
+            funSpec.addCode(builder.build())
+            funSpec.returns(BOOLEAN)
+        } else {
+            val errorHandling = CodeBlock.builder().beginControlFlow("try")
+            if (player != null) {
+                errorHandling.add("%L.debug { %P }\n", player, "${name.removeSuffix("Publisher")}[${parameters.joinToString(", ") { "\$${it.first}" }}]")
+            }
+            funSpec.addCode(
+                errorHandling
+                    .add(builder.build())
+                    .endControlFlow()
+                    .beginControlFlow("catch (e: %T)", Exception::class)
+                    .addStatement(if (player != null) "$player.warn(e) { \"Failed to publish ${name.removeSuffix("Publisher")}\" }" else "e.printStackTrace()")
+                    .addStatement("return %L", returnsDefault)
+                    .endControlFlow()
+                    .build()
+            )
+            funSpec.returns(returns::class)
         }
-        funSpec.addCode(
-            errorHandling
-                .add(builder.build())
-                .endControlFlow()
-                .beginControlFlow("catch (e: %T)", Exception::class)
-                .addStatement(if (player != null) "$player.warn(e) { \"Failed to publish ${name.removeSuffix("Publisher")}\" }" else "e.printStackTrace()")
-                .addStatement("return %L", returnsDefault)
-                .endControlFlow()
-                .build()
-        )
-        funSpec.returns(returns::class)
         return funSpec.build()
     }
 
-    private fun generateStatement(builder: CodeBlock.Builder, method: Subscriber, comparisons: List<List<Pair<String, Any>>>, returnSomething: Boolean): Boolean {
+    private fun generateStatement(builder: CodeBlock.Builder, method: Subscriber, comparisons: List<List<Pair<String, Any>>>, returnSomething: Boolean, check: Boolean): Boolean {
         val methodName = method.className.simpleName.replaceFirstChar { it.lowercase() }
         if (comparisons.isEmpty()) {
-            val args = ConditionNode.arguments(method, this)
-            builder.addStatement(
-                "else -> ${if (returnSomething) "" else "return "}$methodName.%L(${args.joinToString(", ")})",
-                method.methodName
-            )
+            if (check) {
+                builder.addStatement("else -> ${if (returnSomething) "" else "return "}false")
+            } else {
+                val args = ConditionNode.arguments(method, this)
+                builder.addStatement(
+                    "else -> ${if (returnSomething) "" else "return "}$methodName.%L(${args.joinToString(", ")})",
+                    method.methodName
+                )
+            }
             return true
         }
         for (comparison in comparisons) {
@@ -107,14 +119,19 @@ abstract class Publisher(
                         value.contains("*") -> builder.add("%T($key, %S)", ClassName("world.gregs.voidps.engine.event", "wildcardEquals"), value)
                         else -> builder.add("$key == %S", value)
                     }
+                    is Boolean -> builder.add("${if (value) "" else "!"}$key", value)
                     else -> builder.add("$key == %L", value)
                 }
             }
-            val args = ConditionNode.arguments(method, this)
-            builder.addStatement(
-                " -> $methodName.%L(${args.joinToString(", ")})",
-                method.methodName
-            )
+            if (check) {
+                builder.addStatement(" -> {}")
+            } else {
+                val args = ConditionNode.arguments(method, this)
+                builder.addStatement(
+                    " -> $methodName.%L(${args.joinToString(", ")})",
+                    method.methodName
+                )
+            }
         }
         return false
     }

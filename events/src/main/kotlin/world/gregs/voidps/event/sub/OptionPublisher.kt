@@ -6,7 +6,7 @@ import com.squareup.kotlinpoet.STRING
 import world.gregs.voidps.event.Publisher
 import world.gregs.voidps.event.Subscriber
 
-class OptionPublisher(field: String, source: ClassName, target: ClassName): Publisher(
+class OptionPublisher(field: String, source: ClassName, target: ClassName) : Publisher(
     name = "${source.simpleName}${target.simpleName}Publisher",
     parameters = listOf(
         field to source,
@@ -16,6 +16,7 @@ class OptionPublisher(field: String, source: ClassName, target: ClassName): Publ
     ),
     suspendable = true,
     overrideMethod = "${source.simpleName.replaceFirstChar { it.lowercase() }}${target.simpleName}Option",
+    interaction = true
 ) {
     override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val option = method.annotationArgs["option"] as String
@@ -25,9 +26,7 @@ class OptionPublisher(field: String, source: ClassName, target: ClassName): Publ
         if (option != "*") {
             list.add("option" to option)
         }
-        if (approach) {
-            list.add("approach" to true)
-        }
+        list.add("approach" to approach)
         if (ids.isEmpty()) {
             return listOf(list)
         }

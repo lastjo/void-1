@@ -39,6 +39,7 @@ data class ConditionNode(
                         value.contains("*") -> builder.beginControlFlow("if (%T($key, %S))", ClassName("world.gregs.voidps.engine.event", "wildcardEquals"), value)
                         else -> builder.beginControlFlow("if ($key == %S)", value)
                     }
+                    is Boolean -> builder.beginControlFlow("if (${if (value) "" else "!"}$key)", value)
                     else -> builder.beginControlFlow("if ($key == %L)", value)
                 }
                 child.generate(builder, schema)
