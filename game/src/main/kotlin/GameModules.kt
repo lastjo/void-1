@@ -50,7 +50,7 @@ fun gameModule(files: ConfigFiles) = module {
             get(),
             get(),
             InterfaceHandler(get(), get(), get(), get()),
-            get()
+            get(),
         )
     }
     single(createdAtStart = true) {

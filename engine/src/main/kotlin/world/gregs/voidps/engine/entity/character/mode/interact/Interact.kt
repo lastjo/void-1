@@ -1,5 +1,10 @@
 package world.gregs.voidps.engine.entity.character.mode.interact
 
+import com.github.michaelbull.logging.InlineLogger
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import world.gregs.voidps.engine.client.ui.closeDialogue
 import world.gregs.voidps.engine.client.ui.hasMenuOpen
 import world.gregs.voidps.engine.client.variable.hasClock
@@ -13,6 +18,7 @@ import world.gregs.voidps.engine.entity.character.player.chat.cantReach
 import world.gregs.voidps.engine.entity.character.player.chat.noInterest
 import world.gregs.voidps.engine.event.Events
 import world.gregs.voidps.engine.suspend.resumeSuspension
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * Moves a player within interact distance of [target]
@@ -27,15 +33,17 @@ import world.gregs.voidps.engine.suspend.resumeSuspension
 class Interact(
     character: Character,
     val target: Entity,
-    interaction: Interaction<*>,
+    interaction: Interaction<*>? = null,
     strategy: TargetStrategy = TargetStrategy(target),
     private var approachRange: Int? = null,
     private val faceTarget: Boolean = true,
     shape: Int? = null,
+    private var has: (Boolean) -> Boolean = { false },
+    private var interact: (suspend (Boolean) -> Unit)? = null,
 ) : Movement(character, strategy, shape) {
 
-    private var approach: Interaction<*> = interaction.copy(true)
-    private var operate: Interaction<*> = interaction.copy(false)
+    private var approach: Interaction<*>? = interaction?.copy(true)
+    private var operate: Interaction<*>? = interaction?.copy(false)
     private var clearInteracted = false
 
     fun updateInteraction(interaction: Interaction<*>) {
@@ -137,8 +145,10 @@ class Interact(
         val withinMelee = arrived()
         val withinRange = arrived(approachRange ?: 10)
         when {
-            withinMelee && Events.events.contains(character, operate) -> if (launch(operate) && afterMovement) updateRange = false
-            withinRange && Events.events.contains(character, approach) -> if (launch(approach) && afterMovement) updateRange = false
+            withinMelee && has.invoke(false) -> if (launch(false) && afterMovement) updateRange = false
+            withinMelee && has.invoke(true) -> if (launch(true) && afterMovement) updateRange = false
+            withinMelee && operate != null && Events.events.contains(character, operate!!) -> if (launch(operate!!) && afterMovement) updateRange = false
+            withinRange && approach != null && Events.events.contains(character, approach!!) -> if (launch(approach!!) && afterMovement) updateRange = false
             withinMelee -> {
                 character.noInterest()
                 clear()
@@ -146,6 +156,26 @@ class Interact(
             else -> return false
         }
         return true
+    }
+
+    private fun launch(interact: Boolean): Boolean {
+        if (character.resumeSuspension()) {
+            return true
+        }
+        val interaction = this.interact
+        if (interaction != null) {
+            this.interact = null
+            this.has = { false }
+            launch {
+                interaction.invoke(interact)
+            }
+            return true
+        }
+        return false
+    }
+
+    fun launch(block: suspend CoroutineScope.() -> Unit) {
+        scope.launch(errorHandler, block = block)
     }
 
     /**
@@ -176,5 +206,15 @@ class Interact(
     }
 
     override fun onCompletion() {
+    }
+
+    companion object {
+        private val logger = InlineLogger()
+        private val errorHandler = CoroutineExceptionHandler { _, throwable ->
+            if (throwable !is CancellationException) {
+                logger.warn(throwable) { "Error in event." }
+            }
+        }
+        private val scope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined)
     }
 }
