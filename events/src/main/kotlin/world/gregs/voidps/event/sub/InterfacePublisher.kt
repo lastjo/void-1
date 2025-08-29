@@ -14,13 +14,14 @@ class InterfacePublisher : Publisher(
         "player" to PLAYER,
         "id" to STRING,
         "component" to STRING,
-        "optionIndex" to INT,
         "option" to STRING,
+        "optionIndex" to INT,
         "item" to ITEM,
         "itemSlot" to INT,
         "inventory" to STRING,
     ),
-    suspendable = true
+    suspendable = true,
+    overrideMethod = "interfaceOption"
 ) {
     override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val option = method.annotationArgs["option"] as String

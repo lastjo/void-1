@@ -14,7 +14,8 @@ import java.util.*
 class PublisherProcessor(
     private val codeGenerator: CodeGenerator,
     private val logger: KSPLogger,
-    private val schemas: Map<String, List<Pair<List<String>, Publisher>>>
+    private val schemas: Map<String, List<Pair<List<String>, Publisher>>>,
+    private val superclass: ClassName
 ) : SymbolProcessor {
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
@@ -27,6 +28,7 @@ class PublisherProcessor(
     private fun resolve(resolver: Resolver) {
         val annotations = schemas.keys
         val mainClass = TypeSpec.classBuilder("PublishersImpl")
+        mainClass.superclass(superclass)
         val allScripts = mutableMapOf<String, ClassName>()
         val allDependencies = TreeMap<TypeName, String>()
         for (annotation in annotations) {
@@ -80,14 +82,32 @@ class PublisherProcessor(
                     .distinct()
                     .sorted()
                     .joinToString(", ")
+                val fieldName = schema.name.replaceFirstChar { it.lowercase() }
                 mainClass.addProperty(
                     PropertySpec.builder(
-                        schema.name.replaceFirstChar { it.lowercase() },
+                        fieldName,
                         ClassName("world.gregs.voidps.engine.script", schema.name)
                     )
+                        .addModifiers(KModifier.PRIVATE)
                         .initializer("${schema.name}($deps)")
                         .build()
                 )
+                if (schema.overrideMethod != "") {
+                    val method = FunSpec.builder(schema.overrideMethod)
+                        .addModifiers(KModifier.OVERRIDE)
+                    if (schema.suspendable) {
+                        method.addModifiers(KModifier.SUSPEND)
+                    }
+                    for ((name, type) in schema.parameters) {
+                        method.addParameter(name, type)
+                    }
+                    mainClass.addFunction(
+                        method
+                            .addStatement("return $fieldName.publish(${schema.parameters.joinToString(", ") { it.first }})")
+                            .returns(schema.returnsDefault::class)
+                            .build()
+                    )
+                }
                 try {
                     fileSpec.build().writeTo(codeGenerator, Dependencies(false))
                 } catch (e: FileAlreadyExistsException) {
@@ -99,12 +119,6 @@ class PublisherProcessor(
         val constructor = FunSpec.constructorBuilder()
         for ((type, param) in allDependencies) {
             constructor.addParameter(param, type)
-            mainClass.addProperty(
-                PropertySpec.builder(param, type)
-                    .addModifiers(KModifier.PRIVATE)
-                    .initializer(param)
-                    .build()
-            )
         }
         mainClass.primaryConstructor(constructor.build())
 

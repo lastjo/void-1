@@ -15,6 +15,7 @@ class ItemAddedPublisher : Publisher(
         "index" to INT,
         "inventory" to STRING,
     ),
+    overrideMethod = "itemAdded",
 ) {
     override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val ids = method.annotationArgs["ids"] as List<String>

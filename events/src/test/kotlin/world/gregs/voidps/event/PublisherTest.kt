@@ -11,7 +11,8 @@ class PublisherTest {
                 name = "Invalid",
                 notification = true,
                 parameters = emptyList(),
-                returnsDefault = "NotBoolean"
+                returnsDefault = "NotBoolean",
+                overrideMethod = ""
             ) {
                 override fun comparisons(
                     method: Subscriber

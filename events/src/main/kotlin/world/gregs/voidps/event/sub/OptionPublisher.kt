@@ -15,7 +15,8 @@ class OptionPublisher(field: String, source: ClassName, target: ClassName): Publ
         "option" to STRING,
         "approach" to BOOLEAN,
     ),
-    suspendable = true
+    suspendable = true,
+    overrideMethod = "${target.simpleName.replaceFirstChar { it.lowercase() }}Option",
 ) {
     override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val option = method.annotationArgs["option"] as String

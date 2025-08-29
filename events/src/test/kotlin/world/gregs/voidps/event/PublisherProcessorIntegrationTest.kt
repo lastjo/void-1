@@ -4,12 +4,23 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import com.squareup.kotlinpoet.STRING
+import com.squareup.kotlinpoet.asClassName
 import com.tschuchort.compiletesting.*
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class PublisherProcessorIntegrationTest {
+
+    abstract class Publishers {
+        open suspend fun onEventSuspend(id: String, name: String): Boolean = false
+
+        open suspend fun onEventSuspend(id: String): Boolean = false
+
+        open fun onEvent(id: String, name: String): Boolean = false
+
+        open fun onEvent(id: String): Boolean = false
+    }
 
     private fun compilation(
         source: String,
@@ -40,7 +51,8 @@ class PublisherProcessorIntegrationTest {
         ),
         returnsDefault = default,
         notification = notification,
-        suspendable = suspend
+        suspendable = suspend,
+        overrideMethod = if (suspend) "onEventSuspend" else "onEvent"
     ) {
         override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
             // Supports optional multiple annotation values
@@ -60,11 +72,12 @@ class PublisherProcessorIntegrationTest {
             PublisherProcessor(
                 codeGenerator = environment.codeGenerator,
                 logger = environment.logger,
+                superclass = Publishers::class.asClassName(),
                 schemas = mapOf(
                     "test.OnEvent" to listOf(
                         required to OnEventPublisher(notification, suspend, default),
                     ),
-                )
+                ),
             )
     }
 
@@ -91,7 +104,7 @@ class PublisherProcessorIntegrationTest {
 
         // Find generated file
         val generatedDir = compilation.kspSourcesDir
-        val publishersFile = generatedDir.resolve("kotlin/world/gregs/voidps/engine/script/Publishers.kt")
+        val publishersFile = generatedDir.resolve("kotlin/world/gregs/voidps/engine/script/PublishersImpl.kt")
 
         assertTrue(publishersFile.exists(), "PublishersImpl.kt should be generated")
 
@@ -299,7 +312,8 @@ class PublisherProcessorIntegrationTest {
                 name = "Invalid",
                 parameters = listOf("id" to STRING),
                 returnsDefault = "notBoolean",
-                notification = true
+                notification = true,
+                overrideMethod = ""
             ) {
                 override fun comparisons(method: Subscriber) = emptyList<List<Pair<String, Any>>>()
             }
@@ -344,9 +358,9 @@ class PublisherProcessorIntegrationTest {
         val result = compilation.compile()
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
-        val publishersFile = compilation.kspSourcesDir.resolve("kotlin/world/gregs/voidps/engine/script/Publishers.kt")
+        val publishersFile = compilation.kspSourcesDir.resolve("kotlin/world/gregs/voidps/engine/script/PublishersImpl.kt")
         val content = publishersFile.readText()
-        assertTrue(content.contains("private val dep: Int"), "PublishersImpl constructor should inject dep")
+        assertTrue(content.contains("dep: Int"), "PublishersImpl constructor should inject dep")
         assertTrue(content.contains("NeedsDependency(dep)"), "Publisher should construct NeedsDependency with dep injected")
     }
 

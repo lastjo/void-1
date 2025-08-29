@@ -12,9 +12,10 @@ class CommandPublisher: Publisher(
     parameters = listOf(
         "player" to PLAYER,
         "prefix" to STRING,
-        "rights" to INT,
         "content" to STRING,
+        "rights" to INT,
     ),
+    overrideMethod = "command"
 ) {
     override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val ids = method.annotationArgs["ids"] as List<String>

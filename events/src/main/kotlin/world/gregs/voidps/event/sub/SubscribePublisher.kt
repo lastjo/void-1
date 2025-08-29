@@ -12,6 +12,7 @@ class SubscribePublisher: Publisher(
         "event" to STRING,
         "id" to STRING,
     ),
+    overrideMethod = "publish"
 ) {
     override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val event = method.annotationArgs["event"] as String

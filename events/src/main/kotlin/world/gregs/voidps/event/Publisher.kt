@@ -13,7 +13,8 @@ abstract class Publisher(
     val suspendable: Boolean = false,
     val parameters: List<Pair<String, ClassName>>,
     var returnsDefault: Any = false,
-    var notification: Boolean = false
+    var notification: Boolean = false,
+    val overrideMethod: String,
 ) {
     init {
         if (notification) {

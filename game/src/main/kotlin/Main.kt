@@ -21,7 +21,7 @@ import world.gregs.voidps.engine.entity.Despawn
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.item.drop.DropTables
 import world.gregs.voidps.engine.map.collision.CollisionDecoder
-import world.gregs.voidps.engine.script.Publishers
+import world.gregs.voidps.engine.script.PublishersImpl
 import world.gregs.voidps.engine.script.Scripts
 import world.gregs.voidps.network.GameServer
 import world.gregs.voidps.network.LoginServer
@@ -100,7 +100,7 @@ object Main {
         val fairyCodes = get<FairyRingCodes>()
         val variableDefinitions = get<VariableDefinitions>()
         val start = System.currentTimeMillis()
-        Publishers(fairyCodes, variableDefinitions)
+        val publishers = PublishersImpl(fairyCodes, variableDefinitions)
         println("Loaded publishers in ${System.currentTimeMillis() - start} ms")
         Runtime.getRuntime().addShutdownHook(
             thread(start = false) {

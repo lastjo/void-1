@@ -19,7 +19,8 @@ class InterfaceOnPublisher(target: ClassName): Publisher(
         "itemSlot" to INT,
         "inventory" to STRING,
     ),
-    suspendable = true
+    suspendable = true,
+    overrideMethod = "interfaceOn${target.simpleName}",
 ) {
     override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val item = method.annotationArgs["item"] as String

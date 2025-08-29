@@ -4,12 +4,13 @@ import com.squareup.kotlinpoet.ClassName
 import world.gregs.voidps.event.Publisher
 import world.gregs.voidps.event.Subscriber
 
-class SpawnPublisher(val field: String, target: ClassName): Publisher(
+class SpawnPublisher(private val field: String, target: ClassName): Publisher(
     name = "Spawn${target.simpleName}Publisher",
     parameters = listOf(
         field to target
     ),
-    notification = true
+    notification = true,
+    overrideMethod = "spawn"
 ) {
     override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val ids = method.annotationArgs["ids"] as List<String>

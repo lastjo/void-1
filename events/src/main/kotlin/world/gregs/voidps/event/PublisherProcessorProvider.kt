@@ -3,6 +3,7 @@ package world.gregs.voidps.event
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
+import com.squareup.kotlinpoet.ClassName
 import world.gregs.voidps.type.sub.*
 import world.gregs.voidps.event.sub.*
 import world.gregs.voidps.type.sub.ItemAdded
@@ -17,6 +18,7 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
     override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor = PublisherProcessor(
         codeGenerator = environment.codeGenerator,
         logger = environment.logger,
+        superclass = ClassName("world.gregs.voidps.engine.event", "Publishers"),
         schemas = mapOf(
             Option::class.qualifiedName!! to listOf(
                 listOf("Player", "GameObject") to OptionPublisher("player", PLAYER, OBJECT),
@@ -67,6 +69,7 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
                 listOf("Player") to TimerStartPublisher("player", PLAYER),
                 listOf("NPC") to TimerStartPublisher("npc", NPC),
                 listOf("Character") to TimerStartPublisher("character", CHARACTER),
+                listOf("World") to TimerStartPublisher("world", WORLD),
             ),
             TimerTick::class.qualifiedName!! to listOf(
                 listOf("Player") to TimerTickPublisher("player", PLAYER),

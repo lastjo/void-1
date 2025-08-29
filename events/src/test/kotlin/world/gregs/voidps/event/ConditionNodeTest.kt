@@ -10,7 +10,8 @@ class ConditionNodeTest {
         suspendable = false,
         parameters = listOf("id" to ClassName("kotlin", "String")),
         returnsDefault = true,
-        notification = true
+        notification = true,
+        overrideMethod = ""
     ) {
         override fun comparisons(
             method: Subscriber
