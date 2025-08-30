@@ -118,7 +118,11 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
                 LevelChangePublisher(Publishers::levelChangeNPC),
                 LevelChangePublisher(Publishers::levelChangeCharacter),
             ),
-
+            Variable::class.qualifiedName!! to listOf(
+                VariableSetPublisher(Publishers::variableSetPlayer),
+                VariableSetPublisher(Publishers::variableSetNPC),
+                VariableSetPublisher(Publishers::variableSetCharacter),
+            ),
         ),
     )
 }

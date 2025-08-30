@@ -16,7 +16,7 @@ class ConditionNodeTest {
     ) {
         override fun comparisons(
             method: Subscriber,
-        ): List<List<Pair<String, Any>>> = listOf(listOf("id" to "123"))
+        ): List<List<Pair<String, Any?>>> = listOf(listOf("id" to "123"))
     }
 
     @Test

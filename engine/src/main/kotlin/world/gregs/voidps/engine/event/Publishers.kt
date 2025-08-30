@@ -218,4 +218,8 @@ abstract class Publishers {
     open fun levelChangeNPC(npc: NPC, skill: Skill = Skill.Attack, from: Int = -1, to: Int = -1, max: Boolean = false): Boolean = false
     open fun levelChangeCharacter(character: Character, skill: Skill = Skill.Attack, from: Int = -1, to: Int = -1, max: Boolean = false): Boolean = false
 
+    open fun variableSetPlayer(player: Player, id: String = "", from: Any? = null, to: Any? = null): Boolean = false
+    open fun variableSetNPC(npc: NPC, id: String = "", from: Any? = null, to: Any? = null): Boolean = false
+    open fun variableSetCharacter(character: Character, id: String = "", from: Any? = null, to: Any? = null): Boolean = false
+
 }

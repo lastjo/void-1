@@ -89,7 +89,7 @@ class PublisherProcessorIntegrationTest {
         checkMethodName = if (interaction) "hasOnEvent" else null,
         cancellable = cancellable
     ) {
-        override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
+        override fun comparisons(method: Subscriber): List<List<Pair<String, Any?>>> {
             // Supports optional multiple annotation values
             val values = (method.annotationArgs["value"] as? List<String>)
                 ?: listOfNotNull(method.annotationArgs["value"] as? String)
@@ -105,7 +105,7 @@ class PublisherProcessorIntegrationTest {
     private class OnMagicEventPublisher(
         function: KFunction<*>, hasFunction: KFunction<*>? = null, notification: Boolean = false, cancellable: Boolean = false, returnsDefault: Any? = null
     ) : Publisher(function, hasFunction, notification, cancellable, returnsDefault) {
-        override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
+        override fun comparisons(method: Subscriber): List<List<Pair<String, Any?>>> {
             // Supports optional multiple annotation values
             val values = (method.annotationArgs["value"] as? List<String>)
                 ?: listOfNotNull(method.annotationArgs["value"] as? String)

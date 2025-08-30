@@ -5,7 +5,7 @@ import world.gregs.voidps.event.Publisher
 import world.gregs.voidps.event.Subscriber
 
 class InterfacePublisher : Publisher(Publishers::interfaceOption) {
-    override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
+    override fun comparisons(method: Subscriber): List<List<Pair<String, Any?>>> {
         val option = method.annotationArgs["option"] as String
         val id = method.annotationArgs["id"] as String
         val component = method.annotationArgs["component"] as String

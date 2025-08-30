@@ -4,7 +4,7 @@ import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 
 data class ConditionNode(
-    val condition: Pair<String, Any>? = null,
+    val condition: Pair<String, Any?>? = null,
     val children: MutableList<ConditionNode> = mutableListOf(),
     val subscribers: MutableList<Subscriber> = mutableListOf(),
 ) {

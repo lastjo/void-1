@@ -5,7 +5,7 @@ import world.gregs.voidps.event.Subscriber
 import kotlin.reflect.KFunction
 
 class InterfaceOnPublisher(function: KFunction<*>, has: KFunction<*>) : Publisher(function, has) {
-    override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
+    override fun comparisons(method: Subscriber): List<List<Pair<String, Any?>>> {
         val item = method.annotationArgs["item"] as String
         val on = method.annotationArgs["on"] as String
         val id = method.annotationArgs["id"] as String

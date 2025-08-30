@@ -5,7 +5,7 @@ import world.gregs.voidps.event.Subscriber
 import kotlin.reflect.KFunction
 
 class LevelChangePublisher(function: KFunction<*>) : Publisher(function, notification = true) {
-    override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
+    override fun comparisons(method: Subscriber): List<List<Pair<String, Any?>>> {
         val skills = method.annotationArgs["skills"] as List<String>
         val from = method.annotationArgs["from"] as Int
         val to = method.annotationArgs["to"] as Int

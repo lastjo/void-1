@@ -5,7 +5,7 @@ import world.gregs.voidps.event.Subscriber
 import kotlin.reflect.KFunction
 
 class OptionPublisher(function: KFunction<*>, has: KFunction<*>) : Publisher(function, has) {
-    override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
+    override fun comparisons(method: Subscriber): List<List<Pair<String, Any?>>> {
         val option = method.annotationArgs["option"] as String
         val ids = method.annotationArgs["ids"] as List<String>
         val approach = method.annotationArgs["approach"] as Boolean

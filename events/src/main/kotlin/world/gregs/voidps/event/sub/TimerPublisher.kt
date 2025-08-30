@@ -5,7 +5,7 @@ import world.gregs.voidps.event.Subscriber
 import kotlin.reflect.KFunction
 
 class TimerPublisher(function: KFunction<*>) : Publisher(function) {
-    override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
+    override fun comparisons(method: Subscriber): List<List<Pair<String, Any?>>> {
         val ids = method.annotationArgs["ids"] as List<String>
         if (ids.isEmpty()) {
             return emptyList()

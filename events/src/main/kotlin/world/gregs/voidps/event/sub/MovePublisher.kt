@@ -6,7 +6,7 @@ import world.gregs.voidps.type.Tile
 import kotlin.reflect.KFunction
 
 class MovePublisher(function: KFunction<*>) : Publisher(function, notification = true) {
-    override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
+    override fun comparisons(method: Subscriber): List<List<Pair<String, Any?>>> {
         val from = method.annotationArgs["from"] as List<Int>
         val to = method.annotationArgs["to"] as List<Int>
         val ids = method.annotationArgs["ids"] as List<String>

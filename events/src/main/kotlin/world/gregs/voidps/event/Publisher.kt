@@ -53,7 +53,7 @@ abstract class Publisher(
         }
     }
 
-    abstract fun comparisons(method: Subscriber): List<List<Pair<String, Any>>>
+    abstract fun comparisons(method: Subscriber): List<List<Pair<String, Any?>>>
 
     /**
      * Generate a publish function for a list of [Subscriber] [methods]
@@ -123,7 +123,7 @@ abstract class Publisher(
         return funSpec.build()
     }
 
-    private fun generateStatement(builder: CodeBlock.Builder, method: Subscriber, comparisons: List<List<Pair<String, Any>>>, returnSomething: Boolean, check: Boolean): Boolean {
+    private fun generateStatement(builder: CodeBlock.Builder, method: Subscriber, comparisons: List<List<Pair<String, Any?>>>, returnSomething: Boolean, check: Boolean): Boolean {
         val methodName = method.className.simpleName.replaceFirstChar { it.lowercase() }
         if (comparisons.isEmpty()) {
             if (check) {
