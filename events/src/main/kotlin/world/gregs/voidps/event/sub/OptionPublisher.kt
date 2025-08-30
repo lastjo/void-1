@@ -17,6 +17,10 @@ class OptionPublisher(function: KFunction<*>, has: KFunction<*>) : Publisher(fun
         if (ids.isEmpty()) {
             return listOf(list)
         }
-        return ids.map { list + listOf("target.id" to it) }
+        return if (name.endsWith("GameObjectOptionPublisher") || name.endsWith("NPCOptionPublisher")) {
+            ids.map { list + listOf("def.stringId" to it) }
+        } else {
+            ids.map { list + listOf("target.id" to it) }
+        }
     }
 }

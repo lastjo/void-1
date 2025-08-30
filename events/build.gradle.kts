@@ -1,6 +1,7 @@
 dependencies {
     implementation(project(":types"))
     implementation(project(":engine"))
+    implementation(project(":cache"))
 
     implementation("com.michael-bull.kotlin-inline-logger:kotlin-inline-logger-jvm:${findProperty("inlineLoggingVersion")}")
     implementation("com.google.devtools.ksp:symbol-processing-api:${findProperty("kspVersion")}")

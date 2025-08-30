@@ -2,10 +2,12 @@ package world.gregs.voidps.engine.entity.obj
 
 import org.koin.mp.KoinPlatformTools
 import world.gregs.voidps.cache.definition.data.ObjectDefinition
+import world.gregs.voidps.engine.client.instruction.handle.ObjectOptionHandler
 import world.gregs.voidps.engine.client.update.batch.ZoneBatchUpdates
 import world.gregs.voidps.engine.data.definition.AnimationDefinitions
 import world.gregs.voidps.engine.data.definition.ObjectDefinitions
 import world.gregs.voidps.engine.entity.Entity
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.event.EventDispatcher
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.network.login.protocol.encode.zone.ObjectAnimation
@@ -60,6 +62,10 @@ value class GameObject(internal val packed: Long) :
         "GameObject(intId=$intId, tile=$tile, shape=$shape, rotation=$rotation)"
     } else {
         "GameObject(id=$id, intId=$intId, tile=$tile, shape=$shape, rotation=$rotation)"
+    }
+
+    fun def(player: Player, definitions: ObjectDefinitions = get()): ObjectDefinition {
+        return ObjectOptionHandler.getDefinition(player, definitions, def, def)
     }
 
     companion object {

@@ -10,6 +10,9 @@ class SpawnPublisher(function: KFunction<*>) : Publisher(function, notification 
         if (ids.isEmpty()) {
             return listOf()
         }
+        if (name.endsWith("GameObjectPublisher") || name.endsWith("NPCPublisher")) {
+            return ids.map { listOf("def.stringId" to it) }
+        }
         return ids.map { listOf("$${parameters.first().first}.id" to it) }
     }
 }

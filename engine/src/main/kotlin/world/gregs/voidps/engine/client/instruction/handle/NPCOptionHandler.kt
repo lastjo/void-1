@@ -54,8 +54,8 @@ class NPCOptionHandler(
         }
         player.closeInterfaces()
         player.talkWith(npc, definition)
-        val block: suspend (Boolean) -> Unit = { publishers.playerNPCOption(player, npc, selectedOption, it) }
-        val check: (Boolean) -> Boolean = { publishers.hasPlayerNPCOption(player, npc, selectedOption, it) }
+        val block: suspend (Boolean) -> Unit = { publishers.playerNPCOption(player, npc, definition, selectedOption, it) }
+        val check: (Boolean) -> Boolean = { publishers.hasPlayerNPCOption(player, npc, definition, selectedOption, it) }
         player.mode = Interact(player, npc, NPCOption(player, npc, definition, selectedOption), interact = block, has = check)
     }
 }

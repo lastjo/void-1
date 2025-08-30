@@ -17,7 +17,11 @@ class InterfaceOnPublisher(function: KFunction<*>, has: KFunction<*>) : Publishe
             list.add("item.id" to item)
         }
         if (on != "*") {
-            list.add("target.id" to on)
+            if (name == "InterfaceOnGameObjectPublisher" || name == "InterfaceOnNPCPublisher") {
+                list.add("def.stringId" to on)
+            } else {
+                list.add("target.id" to on)
+            }
         }
         if (id != "*") {
             list.add("id" to id)
