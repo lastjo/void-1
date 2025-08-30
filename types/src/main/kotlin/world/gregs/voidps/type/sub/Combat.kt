@@ -3,6 +3,7 @@ package world.gregs.voidps.type.sub
 /**
  * Combat subscriber
  *
+ * The main difference is Attack is called on attack, damage after the delay.
  * CombatAttack - target damage taken
  * CombatDamage - source damage dealt
  *

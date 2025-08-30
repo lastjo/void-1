@@ -223,15 +223,36 @@ abstract class Publishers {
     open fun variableSetCharacter(character: Character, id: String = "", from: Any? = null, to: Any? = null): Boolean = false
 
     open fun playerCombatAttackPlayer(player: Player, target: Player, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
-    open fun playerCombatAttackNPC(player: Player, target: NPC, def: NPCDefinition = target.def, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
+    open fun playerCombatAttackNPC(player: Player, target: NPC, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
     open fun playerCombatAttackCharacter(player: Player, target: Character, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
 
+    open fun combatAttack(source: Character, target: Character, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean {
+        when (source) {
+             is Player -> {
+                when (target) {
+                    is Player -> playerCombatAttackPlayer(source, target, type, damage, weapon, spell, special, delay)
+                    is NPC -> playerCombatAttackNPC(source, target, type, damage, weapon, spell, special, delay)
+                }
+                playerCombatAttackCharacter(source, target, type, damage, weapon, spell, special, delay)
+            }
+             is NPC -> {
+                when (target) {
+                    is Player -> npcCombatAttackPlayer(source, target, type, damage, weapon, spell, special, delay)
+                    is NPC -> npcCombatAttackNPC(source, target, type, damage, weapon, spell, special, delay)
+                }
+                npcCombatAttackCharacter(source, target, type, damage, weapon, spell, special, delay)
+            }
+        }
+        characterCombatAttackCharacter(source, target, type, damage, weapon, spell, special, delay)
+        return true
+    }
+
     open fun npcCombatAttackPlayer(npc: NPC, target: Player, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
-    open fun npcCombatAttackNPC(npc: NPC, target: NPC, def: NPCDefinition = target.def, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
+    open fun npcCombatAttackNPC(npc: NPC, target: NPC, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
     open fun npcCombatAttackCharacter(npc: NPC, target: Character, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
 
     open fun characterCombatAttackPlayer(character: Character, target: Player, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
-    open fun characterCombatAttackNPC(character: Character, target: NPC, def: NPCDefinition = target.def, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
+    open fun characterCombatAttackNPC(character: Character, target: NPC, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
     open fun characterCombatAttackCharacter(character: Character, target: Character, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
 
     open fun prayerStartPlayer(player: Player, id: String = "", restart: Boolean = false): Boolean = false
