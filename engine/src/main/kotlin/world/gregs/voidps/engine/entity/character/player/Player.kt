@@ -134,6 +134,10 @@ class Player(
         block(Dialogue(this, npc))
     }
 
+    suspend fun dialogue(block: suspend SuspendableContext<Player>.() -> Unit) {
+        block(Dialogue(this, NPC())) // FIXME
+    }
+
     companion object {
         val logger = InlineLogger()
     }
