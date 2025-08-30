@@ -123,6 +123,27 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
                 VariableSetPublisher(Publishers::variableSetNPC),
                 VariableSetPublisher(Publishers::variableSetCharacter),
             ),
+            Combat::class.qualifiedName!! to listOf(
+                CombatPublisher(Publishers::playerCombatAttackPlayer),
+                CombatPublisher(Publishers::playerCombatAttackNPC),
+                CombatPublisher(Publishers::playerCombatAttackCharacter),
+                CombatPublisher(Publishers::npcCombatAttackPlayer),
+                CombatPublisher(Publishers::npcCombatAttackNPC),
+                CombatPublisher(Publishers::npcCombatAttackCharacter),
+                CombatPublisher(Publishers::characterCombatAttackPlayer),
+                CombatPublisher(Publishers::characterCombatAttackNPC),
+                CombatPublisher(Publishers::characterCombatAttackCharacter),
+            ),
+            PrayerStart::class.qualifiedName!! to listOf(
+                PrayerPublisher(Publishers::prayerStartPlayer),
+                PrayerPublisher(Publishers::prayerStartNPC),
+                PrayerPublisher(Publishers::prayerStartCharacter),
+            ),
+            PrayerStop::class.qualifiedName!! to listOf(
+                PrayerPublisher(Publishers::prayerStopPlayer),
+                PrayerPublisher(Publishers::prayerStopNPC),
+                PrayerPublisher(Publishers::prayerStopCharacter),
+            ),
         ),
     )
 }

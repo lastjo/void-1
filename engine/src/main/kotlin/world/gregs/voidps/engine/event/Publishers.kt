@@ -222,4 +222,24 @@ abstract class Publishers {
     open fun variableSetNPC(npc: NPC, id: String = "", from: Any? = null, to: Any? = null): Boolean = false
     open fun variableSetCharacter(character: Character, id: String = "", from: Any? = null, to: Any? = null): Boolean = false
 
+    open fun playerCombatAttackPlayer(player: Player, target: Player, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
+    open fun playerCombatAttackNPC(player: Player, target: NPC, def: NPCDefinition = target.def, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
+    open fun playerCombatAttackCharacter(player: Player, target: Character, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
+
+    open fun npcCombatAttackPlayer(npc: NPC, target: Player, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
+    open fun npcCombatAttackNPC(npc: NPC, target: NPC, def: NPCDefinition = target.def, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
+    open fun npcCombatAttackCharacter(npc: NPC, target: Character, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
+
+    open fun characterCombatAttackPlayer(character: Character, target: Player, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
+    open fun characterCombatAttackNPC(character: Character, target: NPC, def: NPCDefinition = target.def, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
+    open fun characterCombatAttackCharacter(character: Character, target: Character, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
+
+    open fun prayerStartPlayer(player: Player, id: String = "", restart: Boolean = false): Boolean = false
+    open fun prayerStartNPC(npc: NPC, id: String = "", restart: Boolean = false): Boolean = false
+    open fun prayerStartCharacter(character: Character, id: String = "", restart: Boolean = false): Boolean = false
+
+    open fun prayerStopPlayer(player: Player, id: String = "", restart: Boolean = false): Boolean = false
+    open fun prayerStopNPC(npc: NPC, id: String = "", restart: Boolean = false): Boolean = false
+    open fun prayerStopCharacter(character: Character, id: String = "", restart: Boolean = false): Boolean = false
+
 }
