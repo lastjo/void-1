@@ -8,13 +8,13 @@ import world.gregs.voidps.event.Subscriber
 
 class TimerStopPublisher(field: String, type: ClassName) :
     Publisher(
-        name = "StartTimerPublisher",
+        name = "StopTimerPublisher",
         parameters = listOf(
             field to type,
             "timer" to STRING,
             "logout" to BOOLEAN,
         ),
-        overrideMethod = "timerStart${type.simpleName}",
+        overrideMethod = "timerStop${type.simpleName}",
     ) {
     override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val ids = method.annotationArgs["ids"] as List<String>

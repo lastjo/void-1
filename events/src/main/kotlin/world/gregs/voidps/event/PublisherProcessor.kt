@@ -163,6 +163,9 @@ class PublisherProcessor(
     fun findSchema(annotation: String, args: List<Pair<String, String>>): Publisher {
         val list = schemas[annotation] ?: error("No schema found for annotation: $annotation.")
         for ((required, publisher) in list) {
+            if (required.isEmpty()) {
+                return publisher
+            }
             var i = 0
             for ((_, type) in args) {
                 val suffix = required[i]
@@ -190,8 +193,8 @@ class PublisherProcessor(
             error("Method ${parentClass.simpleName.asString()}.${fn.simpleName.asString()} cannot be suspendable.")
         }
         val returnType = fn.returnType?.resolve()?.declaration?.qualifiedName?.asString()
-        if (schema.returnsDefault != false && returnType != "kotlin.Unit" && returnType != schema.returnsDefault::class.qualifiedName) {
-            error("Method ${parentClass.simpleName.asString()}.${fn.simpleName.asString()} must return ${schema.returnsDefault::class.simpleName}.")
+        if ((schema.returnsDefault != false || schema.notification) && returnType != schema.returnsDefault::class.qualifiedName) {
+            error("Method ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()} ${if (schema.notification) "is a notification so " else ""}must return a ${schema.returnsDefault::class.simpleName}.")
         }
         val classParams: List<Pair<String, TypeName>> = parentClass.primaryConstructor?.parameters?.map { param ->
             val name = param.name?.asString() ?: error("Unnamed class param in ${parentClass.qualifiedName?.asString()}")

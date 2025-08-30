@@ -46,7 +46,12 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
                 listOf("Player", "FloorItem") to InterfaceOnPublisher(FLOOR_ITEM),
             ),
             Subscribe::class.qualifiedName!! to listOf(
-                listOf("Player") to SubscribePublisher(),
+                listOf("Player") to SubscribePublisher("player", PLAYER),
+                listOf("NPC") to SubscribePublisher("npc", NPC),
+                listOf("GameObject") to SubscribePublisher("obj", OBJECT),
+                listOf("FloorItem") to SubscribePublisher("floorItem", FLOOR_ITEM),
+                listOf("World") to SubscribePublisher("world", WORLD),
+                emptyList<String>() to EmptySubscribePublisher(),
             ),
             Spawn::class.qualifiedName!! to listOf(
                 listOf("Player") to SpawnPublisher("player", PLAYER),

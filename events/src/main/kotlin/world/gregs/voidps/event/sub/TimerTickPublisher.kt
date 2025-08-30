@@ -13,7 +13,7 @@ class TimerTickPublisher(field: String, type: ClassName) :
             "timer" to STRING,
         ),
         returnsDefault = -1,
-        overrideMethod = "timerStart${type.simpleName}",
+        overrideMethod = "timerTick${type.simpleName}",
     ) {
     override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val ids = method.annotationArgs["ids"] as List<String>
