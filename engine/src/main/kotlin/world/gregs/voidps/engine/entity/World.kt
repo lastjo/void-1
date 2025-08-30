@@ -29,7 +29,7 @@ const val MAX_NPCS = 0x8000 // 32768
 object World : Entity, Variable, EventDispatcher, Runnable, KoinComponent {
     override var tile = Tile.EMPTY
 
-    override val variables = Variables(this)
+    override val variables = Variables(this, this, get())
     private val logger = InlineLogger()
 
     val members: Boolean

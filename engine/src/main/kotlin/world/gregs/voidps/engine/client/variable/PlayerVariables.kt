@@ -2,15 +2,18 @@ package world.gregs.voidps.engine.client.variable
 
 import world.gregs.voidps.engine.data.config.VariableDefinition.Companion.persist
 import world.gregs.voidps.engine.data.definition.VariableDefinitions
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.event.EventDispatcher
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.network.client.Client
 
 class PlayerVariables(
-    events: EventDispatcher,
+    events: Player,
     data: MutableMap<String, Any>,
+    publishers: Publishers,
     var definitions: VariableDefinitions = VariableDefinitions(),
     val temp: MutableMap<String, Any> = mutableMapOf(),
-) : Variables(events, data) {
+) : Variables(events, events, publishers, data) {
 
     var client: Client? = null
 

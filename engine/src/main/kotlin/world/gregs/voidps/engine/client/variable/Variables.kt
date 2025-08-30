@@ -1,10 +1,14 @@
 package world.gregs.voidps.engine.client.variable
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
+import world.gregs.voidps.engine.entity.Entity
 import world.gregs.voidps.engine.event.EventDispatcher
+import world.gregs.voidps.engine.event.Publishers
 
 open class Variables(
     private var events: EventDispatcher,
+    private var entity: Entity,
+    private var publishers: Publishers,
     val data: MutableMap<String, Any> = Object2ObjectOpenHashMap(2),
 ) {
 
@@ -24,6 +28,7 @@ open class Variables(
         value = block.invoke()
         // Don't check if default or not as values must be set.
         data(key)[key] = value
+        publishers.variableSet(entity, key, null, value)
         events.emit(VariableSet(key, null, value))
         return value
     }
@@ -42,6 +47,7 @@ open class Variables(
         if (refresh) {
             send(key)
         }
+        publishers.variableSet(entity, key, previous, value)
         events.emit(VariableSet(key, previous, value))
     }
 
@@ -50,7 +56,9 @@ open class Variables(
         if (refresh) {
             send(key)
         }
-        events.emit(VariableSet(key, removed ?: return null, null))
+        val from = removed ?: return null
+        publishers.variableSet(entity, key, from, null)
+        events.emit(VariableSet(key, from, null))
         return removed
     }
 

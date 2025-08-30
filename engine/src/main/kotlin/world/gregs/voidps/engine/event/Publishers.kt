@@ -218,6 +218,20 @@ abstract class Publishers {
     open fun levelChangeNPC(npc: NPC, skill: Skill = Skill.Attack, from: Int = -1, to: Int = -1, max: Boolean = false): Boolean = false
     open fun levelChangeCharacter(character: Character, skill: Skill = Skill.Attack, from: Int = -1, to: Int = -1, max: Boolean = false): Boolean = false
 
+    open fun variableSet(entity: Entity, id: String = "", from: Any? = null, to: Any? = null): Boolean {
+        when (entity) {
+            is Player -> {
+                variableSetPlayer(entity, id, from, to)
+                variableSetCharacter(entity, id, from, to)
+            }
+            is NPC -> {
+                variableSetNPC(entity, id, from, to)
+                variableSetCharacter(entity, id, from, to)
+            }
+        }
+        return false
+    }
+
     open fun variableSetPlayer(player: Player, id: String = "", from: Any? = null, to: Any? = null): Boolean = false
     open fun variableSetNPC(npc: NPC, id: String = "", from: Any? = null, to: Any? = null): Boolean = false
     open fun variableSetCharacter(character: Character, id: String = "", from: Any? = null, to: Any? = null): Boolean = false
@@ -228,14 +242,14 @@ abstract class Publishers {
 
     open fun combatAttack(source: Character, target: Character, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean {
         when (source) {
-             is Player -> {
+            is Player -> {
                 when (target) {
                     is Player -> playerCombatAttackPlayer(source, target, type, damage, weapon, spell, special, delay)
                     is NPC -> playerCombatAttackNPC(source, target, type, damage, weapon, spell, special, delay)
                 }
                 playerCombatAttackCharacter(source, target, type, damage, weapon, spell, special, delay)
             }
-             is NPC -> {
+            is NPC -> {
                 when (target) {
                     is Player -> npcCombatAttackPlayer(source, target, type, damage, weapon, spell, special, delay)
                     is NPC -> npcCombatAttackNPC(source, target, type, damage, weapon, spell, special, delay)
