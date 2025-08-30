@@ -4,13 +4,16 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import world.gregs.voidps.engine.GameLoop
+import world.gregs.voidps.engine.entity.World
+import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.event.Publishers
 
 internal class TimerQueueTest : TimersTest() {
 
     @BeforeEach
     override fun setup() {
         super.setup()
-        timers = TimerQueue(events)
+        timers = TimerQueue(events, World, object : Publishers() {})
     }
 
     @Test

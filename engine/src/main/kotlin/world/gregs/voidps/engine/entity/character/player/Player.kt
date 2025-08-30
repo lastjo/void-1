@@ -23,6 +23,7 @@ import world.gregs.voidps.engine.entity.character.player.chat.clan.ClanRank
 import world.gregs.voidps.engine.entity.character.player.equip.BodyParts
 import world.gregs.voidps.engine.entity.character.player.skill.exp.Experience
 import world.gregs.voidps.engine.entity.character.player.skill.level.Levels
+import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.inv.Inventories
 import world.gregs.voidps.engine.queue.ActionQueue
 import world.gregs.voidps.engine.suspend.DialogueSuspension
@@ -108,12 +109,12 @@ class Player(
     /**
      * Always ticks
      */
-    override var softTimers: Timers = TimerQueue(this)
+    override var softTimers: Timers = TimerQueue(this, this, get())
 
     /**
      * Ticks while not delayed or has interface open
      */
-    var timers = TimerQueue(this)
+    var timers = TimerQueue(this, this, get())
 
     override var variables: Variables = PlayerVariables(this, variables)
 

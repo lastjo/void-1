@@ -9,6 +9,8 @@ import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.ObjectOption
+import world.gregs.voidps.engine.event.Publishers
+import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.engine.timedLoad
 import world.gregs.voidps.type.Delta
@@ -31,6 +33,9 @@ class ObjectTeleports {
             return false
         }
         val teleport = ObjectTeleport(player, target, def, definition.option)
+        if (get<Publishers>().teleport(player, target, def, option)) {
+            return true
+        }
         player.emit(teleport)
         if (teleport.cancelled) {
             return false
@@ -56,6 +61,7 @@ class ObjectTeleports {
             }
             player.tele(tile)
         }
+        get<Publishers>().teleport(player, teleport.target, teleport.obj, teleport.option, land = true)
         teleport.land = true
         player.emit(teleport)
     }

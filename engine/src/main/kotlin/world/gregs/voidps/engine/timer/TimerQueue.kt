@@ -1,10 +1,14 @@
 package world.gregs.voidps.engine.timer
 
+import world.gregs.voidps.engine.entity.Entity
 import world.gregs.voidps.engine.event.EventDispatcher
+import world.gregs.voidps.engine.event.Publishers
 import java.util.*
 
 class TimerQueue(
     private val events: EventDispatcher,
+    private val entity: Entity,
+    private val publishers: Publishers,
 ) : Timers {
 
     val queue = PriorityQueue<Timer>()
@@ -15,6 +19,7 @@ class TimerQueue(
         if (names.contains(name)) {
             return false
         }
+        publishers.timerStart(entity, name, restart)
         val start = TimerStart(name, restart)
         events.emit(start)
         if (start.cancelled) {
@@ -38,6 +43,7 @@ class TimerQueue(
             }
             iterator.remove()
             timer.reset()
+            publishers.timerTick(entity, timer.name)
             val tick = TimerTick(timer.name)
             events.emit(tick)
             if (tick.cancelled) {
@@ -58,6 +64,7 @@ class TimerQueue(
 
     override fun stop(name: String) {
         if (clear(name)) {
+            publishers.timerStop(entity, name, logout = false)
             events.emit(TimerStop(name, logout = false))
         }
     }
@@ -73,6 +80,7 @@ class TimerQueue(
         val names = names.toList()
         clearAll()
         for (name in names) {
+            publishers.timerStop(entity, name, logout = true)
             events.emit(TimerStop(name, logout = true))
         }
     }

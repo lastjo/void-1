@@ -2,6 +2,7 @@ package world.gregs.voidps.engine.entity
 
 import com.github.michaelbull.logging.InlineLogger
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 import world.gregs.voidps.engine.GameLoop
 import world.gregs.voidps.engine.client.variable.Variable
 import world.gregs.voidps.engine.client.variable.Variables
@@ -42,7 +43,7 @@ object World : Entity, Variable, EventDispatcher, Runnable, KoinComponent {
         emit(Spawn)
     }
 
-    val timers: Timers = TimerQueue(this)
+    val timers: Timers = TimerQueue(this, this, get())
 
     private val actions = ConcurrentHashMap<String, Pair<Int, () -> Unit>>()
 
