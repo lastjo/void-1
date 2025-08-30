@@ -15,6 +15,7 @@ import playerOption
 import world.gregs.voidps.engine.entity.character.player.appearance
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Levels
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.equipment
 import world.gregs.voidps.engine.inv.inventory
@@ -154,6 +155,7 @@ internal class CombatTest : WorldTest() {
             object : Levels.Level {
                 override fun getMaxLevel(skill: Skill): Int = if (skill == Skill.Constitution) 10000 else 1
             },
+            object : Publishers() {}
         )
         npc.levels.clear()
 

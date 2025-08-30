@@ -6,18 +6,20 @@ import io.mockk.verifyOrder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.player.skill.exp.Experience
 import world.gregs.voidps.engine.entity.character.player.skill.level.CurrentLevelChanged
 import world.gregs.voidps.engine.entity.character.player.skill.level.Levels
 import world.gregs.voidps.engine.entity.character.player.skill.level.MaxLevelChanged
 import world.gregs.voidps.engine.entity.character.player.skill.level.PlayerLevels
 import world.gregs.voidps.engine.event.EventDispatcher
+import world.gregs.voidps.engine.event.Publishers
 
 internal class LevelsTest {
 
     private lateinit var exp: Experience
     private lateinit var levels: Levels
-    private lateinit var events: EventDispatcher
+    private lateinit var events: Character
 
     @BeforeEach
     fun setup() {
@@ -25,7 +27,7 @@ internal class LevelsTest {
         events = mockk(relaxed = true)
         levels = Levels()
         exp.events = events
-        levels.link(events, PlayerLevels(exp))
+        levels.link(events, PlayerLevels(exp), object : Publishers() {})
     }
 
     @Test
@@ -120,7 +122,7 @@ internal class LevelsTest {
     fun `Boosting with stack has arbitrary limit`() {
         exp = Experience()
         exp.events = events
-        levels.link(events, PlayerLevels(exp))
+        levels.link(events, PlayerLevels(exp), object : Publishers() {})
 
         exp.set(Skill.Strength, 14000000.0)
         levels.set(Skill.Strength, 99)

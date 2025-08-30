@@ -13,6 +13,8 @@ import world.gregs.voidps.engine.entity.character.player.skill.exp.Experience
 import world.gregs.voidps.engine.entity.character.player.skill.exp.experience
 import world.gregs.voidps.engine.entity.character.player.skill.level.MaxLevelChanged
 import world.gregs.voidps.engine.entity.character.player.skill.level.maxLevelChange
+import world.gregs.voidps.engine.event.Publishers
+import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.suspend.ContinueSuspension
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
@@ -37,12 +39,16 @@ fun levelUp(player: Player, skill: Skill, text: String) {
 @Script
 class LevelUp {
 
+    val publishers: Publishers by inject()
+
     init {
         experience { player ->
             val previousLevel = Experience.level(skill, from)
             val currentLevel = Experience.level(skill, to)
             if (currentLevel != previousLevel) {
                 player.levels.restore(skill, currentLevel - previousLevel)
+                publishers.levelChangePlayer(player, skill, previousLevel, currentLevel, max = true)
+                publishers.levelChangeCharacter(player, skill, previousLevel, currentLevel, max = true)
                 player.emit(MaxLevelChanged(skill, previousLevel, currentLevel))
             }
         }

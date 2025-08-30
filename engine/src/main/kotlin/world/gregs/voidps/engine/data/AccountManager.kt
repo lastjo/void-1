@@ -70,7 +70,7 @@ class AccountManager(
         player.inventories.start()
         player.steps.previous = player.tile.add(Direction.WEST.delta)
         player.experience.events = player
-        player.levels.link(player, PlayerLevels(player.experience))
+        player.levels.link(player, PlayerLevels(player.experience), publishers)
         player.body.link(player.equipment, overrides)
         player.body.updateAll()
         player.appearance.displayName = player.name

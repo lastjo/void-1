@@ -8,6 +8,7 @@ import world.gregs.voidps.engine.data.definition.NPCDefinitions
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCLevels
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
+import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.Script
@@ -33,7 +34,7 @@ class CombatDebug {
             player.message("Ranged: $rangeMax Melee: $meleeMax Magic: $magicMax")
             player.message("Hit Chance")
             val target = NPC(npcName, Tile.EMPTY, npcDefinitions.get(npcName)).apply {
-                levels.link(this, NPCLevels(def))
+                levels.link(this, NPCLevels(def), get())
                 levels.clear()
             }
             val rangeChance = Hit.chance(player, target, "range", weapon)
