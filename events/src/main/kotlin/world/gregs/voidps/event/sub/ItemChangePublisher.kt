@@ -1,23 +1,10 @@
 package world.gregs.voidps.event.sub
 
-import com.squareup.kotlinpoet.INT
-import com.squareup.kotlinpoet.STRING
-import world.gregs.voidps.event.ITEM
-import world.gregs.voidps.event.PLAYER
 import world.gregs.voidps.event.Publisher
 import world.gregs.voidps.event.Subscriber
+import kotlin.reflect.KFunction
 
-class ItemAddedPublisher :
-    Publisher(
-        name = "ItemAddedPublisher",
-        parameters = listOf(
-            "player" to PLAYER,
-            "item" to ITEM,
-            "index" to INT,
-            "inventory" to STRING,
-        ),
-        overrideMethod = "itemAdded",
-    ) {
+class ItemChangePublisher(function: KFunction<*>) : Publisher(function) {
     override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val ids = method.annotationArgs["ids"] as List<String>
         val slots = method.annotationArgs["slots"] as List<Int>

@@ -1,24 +1,10 @@
 package world.gregs.voidps.event.sub
 
-import com.squareup.kotlinpoet.BOOLEAN
-import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.STRING
 import world.gregs.voidps.event.Publisher
 import world.gregs.voidps.event.Subscriber
+import kotlin.reflect.KFunction
 
-class OptionPublisher(field: String, source: ClassName, target: ClassName) :
-    Publisher(
-        name = "${source.simpleName}${target.simpleName}Publisher",
-        parameters = listOf(
-            field to source,
-            "target" to target,
-            "option" to STRING,
-            "approach" to BOOLEAN,
-        ),
-        suspendable = true,
-        overrideMethod = "${source.simpleName.replaceFirstChar { it.lowercase() }}${target.simpleName}Option",
-        interaction = true,
-    ) {
+class OptionPublisher(function: KFunction<*>, has: KFunction<*>) : Publisher(function, has) {
     override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val option = method.annotationArgs["option"] as String
         val ids = method.annotationArgs["ids"] as List<String>

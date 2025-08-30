@@ -1,6 +1,8 @@
 package world.gregs.voidps.event
 
 import com.squareup.kotlinpoet.*
+import kotlin.reflect.KFunction
+import kotlin.reflect.KParameter
 
 /**
  * Contains the mapping from a [Subscriber] method and [Annotation] into a generated Publisher class
@@ -14,6 +16,21 @@ abstract class Publisher(
     var interaction: Boolean = false,
     val overrideMethod: String,
 ) {
+
+    constructor(function: KFunction<*>, hasFunction: KFunction<*>? = null, notification: Boolean = false, returnsDefault: Any? = null) : this(
+        name = "${function::class.simpleName?.replaceFirstChar { it.uppercase() }}Publisher",
+        parameters = function.parameters.filter { it.kind == KParameter.Kind.VALUE }.map { it.name!! to it.type.asTypeName() as ClassName },
+        returnsDefault = returnsDefault ?: when (function.returnType.asTypeName()) {
+            STRING -> ""
+            INT -> -1
+            else -> false
+        },
+        overrideMethod = function.name,
+        suspendable = function.isSuspend,
+        notification = notification,
+        interaction = hasFunction != null,
+    )
+
     init {
         if (notification) {
             assert(returnsDefault is Boolean) { "Notification methods must return cancellation boolean." }

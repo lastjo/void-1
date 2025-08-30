@@ -52,10 +52,10 @@ abstract class Publishers {
     open fun hasPlayerPlayerOption(player: Player, target: Player, option: String, approach: Boolean = false): Boolean = false
     open fun hasPlayerNPCOption(player: Player, target: NPC, option: String, approach: Boolean = false): Boolean = false
     open fun hasPlayerFloorItemOption(player: Player, target: FloorItem, option: String, approach: Boolean = false): Boolean = false
-    open fun hasNpcGameObjectOption(npc: NPC, target: GameObject, option: String, approach: Boolean = false): Boolean = false
-    open fun hasNpcPlayerOption(npc: NPC, target: Player, option: String, approach: Boolean = false): Boolean = false
-    open fun hasNpcNPCOption(npc: NPC, target: NPC, option: String, approach: Boolean = false): Boolean = false
-    open fun hasNpcFloorItemOption(npc: NPC, target: FloorItem, option: String, approach: Boolean = false): Boolean = false
+    open fun hasNPCGameObjectOption(npc: NPC, target: GameObject, option: String, approach: Boolean = false): Boolean = false
+    open fun hasNPCPlayerOption(npc: NPC, target: Player, option: String, approach: Boolean = false): Boolean = false
+    open fun hasNPCNPCOption(npc: NPC, target: NPC, option: String, approach: Boolean = false): Boolean = false
+    open fun hasNPCFloorItemOption(npc: NPC, target: FloorItem, option: String, approach: Boolean = false): Boolean = false
     open fun hasCharacterGameObjectOption(character: Character, target: GameObject, option: String, approach: Boolean = false): Boolean = false
     open fun hasCharacterPlayerOption(character: Character, target: Player, option: String, approach: Boolean = false): Boolean = false
     open fun hasCharacterNPCOption(character: Character, target: NPC, option: String, approach: Boolean = false): Boolean = false
@@ -96,19 +96,26 @@ abstract class Publishers {
 
     open fun interfaceOpen(player: Player, id: String = ""): Boolean = false
 
-    open fun spawn(player: Player): Boolean = false
-    open fun spawn(npc: NPC): Boolean = false
-    open fun spawn(floorItem: FloorItem): Boolean = false
-    open fun spawn(obj: GameObject): Boolean = false
-    open fun spawn(world: World): Boolean = false
+    open fun spawnPlayer(player: Player): Boolean = false
+    open fun spawnNPC(npc: NPC): Boolean = false
+    open fun spawnCharacter(character: Character): Boolean = false
+    open fun spawnFloorItem(floorItem: FloorItem): Boolean = false
+    open fun spawnGameObject(obj: GameObject): Boolean = false
+    open fun spawnWorld(world: World): Boolean = false
 
-    open fun despawn(player: Player): Boolean = false
-    open fun despawn(npc: NPC): Boolean = false
-    open fun despawn(floorItem: FloorItem): Boolean = false
-    open fun despawn(obj: GameObject): Boolean = false
-    open fun despawn(world: World): Boolean = false
+    open fun despawnPlayer(player: Player): Boolean = false
+    open fun despawnNPC(npc: NPC): Boolean = false
+    open fun despawnCharacter(character: Character): Boolean = false
+    open fun despawnFloorItem(floorItem: FloorItem): Boolean = false
+    open fun despawnGameObject(obj: GameObject): Boolean = false
+    open fun despawnWorld(world: World): Boolean = false
 
-    open fun publish(player: Player, event: String, id: String = ""): Boolean = false
+    open fun publish(event: String, id: String = ""): Boolean = false
+    open fun publishPlayer(player: Player, event: String, id: String = ""): Boolean = false
+    open fun publishNPC(npc: NPC, event: String, id: String = ""): Boolean = false
+    open fun publishFloorItem(floorItem: FloorItem, event: String, id: String = ""): Boolean = false
+    open fun publishGameObject(obj: GameObject, event: String, id: String = ""): Boolean = false
+    open fun publishWorld(world: World, event: String, id: String = ""): Boolean = false
 
     fun timerStart(source: Entity, timer: String, restart: Boolean = false): Int = when (source) {
         is Player -> {
@@ -135,29 +142,17 @@ abstract class Publishers {
     open fun timerStartCharacter(character: Character, timer: String, restart: Boolean = false): Int = -1
     open fun timerStartWorld(world: World, timer: String, restart: Boolean = false): Int = -1
 
-    fun timerStop(source: Entity, timer: String, logout: Boolean = false): Int = when (source) {
-        is Player -> {
-            var result = timerStopPlayer(source, timer, logout)
-            if (result == -1) {
-                result = timerStopCharacter(source, timer, logout)
-            }
-            result
-        }
-        is NPC -> {
-            var result = timerStopNPC(source, timer, logout)
-            if (result == -1) {
-                result = timerStopCharacter(source, timer, logout)
-            }
-            result
-        }
+    fun timerStop(source: Entity, timer: String, logout: Boolean = false): Boolean = when (source) {
+        is Player -> timerStopPlayer(source, timer, logout) || timerStopCharacter(source, timer, logout)
+        is NPC -> timerStopNPC(source, timer, logout) || timerStopCharacter(source, timer, logout)
         is World -> timerStopWorld(source, timer, logout)
-        else -> -1
+        else -> false
     }
 
-    open fun timerStopPlayer(player: Player, timer: String, logout: Boolean = false): Int = -1
-    open fun timerStopNPC(npc: NPC, timer: String, logout: Boolean = false): Int = -1
-    open fun timerStopCharacter(character: Character, timer: String, logout: Boolean = false): Int = -1
-    open fun timerStopWorld(world: World, timer: String, logout: Boolean = false): Int = -1
+    open fun timerStopPlayer(player: Player, timer: String, logout: Boolean = false): Boolean = false
+    open fun timerStopNPC(npc: NPC, timer: String, logout: Boolean = false): Boolean = false
+    open fun timerStopCharacter(character: Character, timer: String, logout: Boolean = false): Boolean = false
+    open fun timerStopWorld(world: World, timer: String, logout: Boolean = false): Boolean = false
 
     fun timerTick(source: Entity, timer: String): Int = when (source) {
         is Player -> {

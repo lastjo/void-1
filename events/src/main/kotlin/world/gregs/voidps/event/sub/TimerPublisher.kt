@@ -1,20 +1,10 @@
 package world.gregs.voidps.event.sub
 
-import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.STRING
 import world.gregs.voidps.event.Publisher
 import world.gregs.voidps.event.Subscriber
+import kotlin.reflect.KFunction
 
-class TimerTickPublisher(field: String, type: ClassName) :
-    Publisher(
-        name = "TickTimerPublisher",
-        parameters = listOf(
-            field to type,
-            "timer" to STRING,
-        ),
-        returnsDefault = -1,
-        overrideMethod = "timerTick${type.simpleName}",
-    ) {
+class TimerPublisher(function: KFunction<*>) : Publisher(function) {
     override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val ids = method.annotationArgs["ids"] as List<String>
         if (ids.isEmpty()) {

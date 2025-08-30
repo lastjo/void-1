@@ -1,31 +1,10 @@
 package world.gregs.voidps.event.sub
 
-import com.squareup.kotlinpoet.BOOLEAN
-import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.INT
-import com.squareup.kotlinpoet.STRING
-import world.gregs.voidps.event.ITEM
-import world.gregs.voidps.event.PLAYER
 import world.gregs.voidps.event.Publisher
 import world.gregs.voidps.event.Subscriber
+import kotlin.reflect.KFunction
 
-class InterfaceOnPublisher(target: ClassName) :
-    Publisher(
-        name = "InterfaceOn${target.simpleName}Publisher",
-        parameters = listOf(
-            "player" to PLAYER,
-            "target" to target,
-            "id" to STRING,
-            "component" to STRING,
-            "item" to ITEM,
-            "itemSlot" to INT,
-            "inventory" to STRING,
-            "approach" to BOOLEAN,
-        ),
-        suspendable = true,
-        overrideMethod = "interfaceOn${target.simpleName}",
-        interaction = true,
-    ) {
+class InterfaceOnPublisher(function: KFunction<*>, has: KFunction<*>) : Publisher(function, has) {
     override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val item = method.annotationArgs["item"] as String
         val on = method.annotationArgs["on"] as String
