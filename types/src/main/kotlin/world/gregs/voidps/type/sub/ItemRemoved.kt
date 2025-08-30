@@ -17,5 +17,5 @@ package world.gregs.voidps.type.sub
 annotation class ItemRemoved(
     vararg val ids: String,
     val slots: IntArray = [],
-    val inventory: String = "*",
+    val inventory: String = "inventory",
 )

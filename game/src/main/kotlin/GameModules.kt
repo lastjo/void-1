@@ -17,6 +17,8 @@ import world.gregs.voidps.engine.client.instruction.InstructionHandlers
 import world.gregs.voidps.engine.client.instruction.InterfaceHandler
 import world.gregs.voidps.engine.client.ui.chat.plural
 import world.gregs.voidps.engine.data.*
+import world.gregs.voidps.engine.data.definition.InventoryDefinitions
+import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.data.definition.VariableDefinitions
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Players
@@ -74,8 +76,10 @@ fun gameModule(files: ConfigFiles) = module {
         val players = get<Players>()
         val objects = get<GameObjects>()
         val floorItems = get<FloorItems>()
+        val itemDefinitions = get<ItemDefinitions>()
+        val inventoryDefinitions = get<InventoryDefinitions>()
         val start = System.currentTimeMillis()
-        val publishers = PublishersImpl(fairyCodes, variableDefinitions, npcs, players, objects)
+        val publishers = PublishersImpl(fairyCodes, inventoryDefinitions, itemDefinitions, variableDefinitions, npcs, players, objects)
         npcs.publishers = publishers
         objects.publishers = publishers
         floorItems.publishers = publishers

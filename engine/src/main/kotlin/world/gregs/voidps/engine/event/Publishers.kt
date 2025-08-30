@@ -11,7 +11,10 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.item.floor.FloorItem
 import world.gregs.voidps.engine.entity.obj.GameObject
+import world.gregs.voidps.type.Area
 import world.gregs.voidps.type.PlayerRights
+import world.gregs.voidps.type.Tile
+import world.gregs.voidps.type.area.Rectangle
 
 abstract class Publishers {
     suspend fun option(character: Character, target: Player, option: String, approach: Boolean = false): Boolean = when (character) {
@@ -109,7 +112,7 @@ abstract class Publishers {
 
     open suspend fun inventoryOption(player: Player, item: Item = Item.EMPTY, inventory: String = "", option: String = "", itemSlot: Int = -1): Boolean = false
 
-    open fun inventoryChanged(player: Player, previous: Item, index: Int, id: String): Boolean = false
+    open fun inventoryChanged(player: Player, inventory: String = "", index: Int = -1, item: Item = Item.EMPTY, from: String = "", fromIndex: Int = -1, fromItem: Item = Item.EMPTY): Boolean = false
 
     open fun itemAdded(player: Player, item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false
 
@@ -128,6 +131,10 @@ abstract class Publishers {
     open fun despawnFloorItem(floorItem: FloorItem): Boolean = false
     open fun despawnGameObject(obj: GameObject): Boolean = false
     open fun despawnWorld(world: World): Boolean = false
+
+    open fun playerDeath(player: Player): Boolean = false
+    open fun npcDeath(npc: NPC): Boolean = false
+    open fun characterDeath(character: Character): Boolean = false
 
     open fun publish(event: String = "", id: String = ""): Boolean = false
     open fun publishPlayer(player: Player, event: String = "", id: String = ""): Boolean = false
@@ -196,5 +203,14 @@ abstract class Publishers {
     open fun timerTickNPC(npc: NPC, timer: String = ""): Int = -1
     open fun timerTickCharacter(character: Character, timer: String = ""): Int = -1
     open fun timerTickWorld(world: World, timer: String = ""): Int = -1
+
+    open fun teleport(player: Player, target: GameObject, def: ObjectDefinition = target.def, option: String = "", land: Boolean = false): Boolean = false
+
+    open fun enterArea(player: Player, name: String = "", tag: String = "", area: Area = Rectangle(0, 0, 0, 0)): Boolean = false
+    open fun exitArea(player: Player, name: String = "", tag: String = "", area: Area = Rectangle(0, 0, 0, 0)): Boolean = false
+
+    open fun movePlayer(player: Player, from: Tile = Tile.EMPTY, to: Tile = Tile.EMPTY): Boolean = false
+    open fun moveNPC(npc: NPC, from: Tile = Tile.EMPTY, to: Tile = Tile.EMPTY): Boolean = false
+    open fun moveCharacter(character: Character, from: Tile = Tile.EMPTY, to: Tile = Tile.EMPTY): Boolean = false
 
 }

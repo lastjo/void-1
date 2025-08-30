@@ -4,6 +4,8 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.event.Event
 import world.gregs.voidps.engine.event.EventDispatcher
 import world.gregs.voidps.engine.event.Events
+import world.gregs.voidps.engine.event.Publishers
+import world.gregs.voidps.engine.get
 
 data class OpenShop(val id: String) : Event {
     override val size = 2
@@ -22,5 +24,6 @@ fun shopOpen(shop: String = "*", handler: suspend OpenShop.(Player) -> Unit) {
 }
 
 fun Player.openShop(id: String) {
+    get<Publishers>().publishPlayer(this, "shop_open", id)
     emit(OpenShop(id))
 }

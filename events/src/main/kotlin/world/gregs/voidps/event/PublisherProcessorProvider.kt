@@ -69,6 +69,11 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
                 SpawnPublisher(Publishers::despawnFloorItem),
                 SpawnPublisher(Publishers::despawnWorld),
             ),
+            Death::class.qualifiedName!! to listOf(
+                SpawnPublisher(Publishers::playerDeath),
+                SpawnPublisher(Publishers::npcDeath),
+                SpawnPublisher(Publishers::characterDeath),
+            ),
             Open::class.qualifiedName!! to listOf(
                 InterfaceChangePublisher(Publishers::interfaceOpened),
             ),
@@ -96,13 +101,18 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
                 TimerPublisher(Publishers::timerStopCharacter),
                 TimerPublisher(Publishers::timerStopWorld),
             ),
-            ItemAdded::class.qualifiedName!! to listOf(
-                ItemChangePublisher(Publishers::itemAdded),
-            ),
-            ItemRemoved::class.qualifiedName!! to listOf(
-                ItemChangePublisher(Publishers::itemRemoved),
-            ),
+            ItemAdded::class.qualifiedName!! to listOf(ItemChangePublisher(Publishers::itemAdded)),
+            ItemRemoved::class.qualifiedName!! to listOf(ItemChangePublisher(Publishers::itemRemoved)),
+            InventoryChanged::class.qualifiedName!! to listOf(InventoryChangePublisher(Publishers::inventoryChanged)),
             Command::class.qualifiedName!! to listOf(CommandPublisher()),
+            Teleport::class.qualifiedName!! to listOf(TeleportPublisher()),
+            Enter::class.qualifiedName!! to listOf(AreaPublisher(Publishers::enterArea)),
+            Exit::class.qualifiedName!! to listOf(AreaPublisher(Publishers::exitArea)),
+            Move::class.qualifiedName!! to listOf(
+                MovePublisher(Publishers::movePlayer),
+                MovePublisher(Publishers::moveNPC),
+                MovePublisher(Publishers::moveCharacter),
+            ),
         ),
     )
 }

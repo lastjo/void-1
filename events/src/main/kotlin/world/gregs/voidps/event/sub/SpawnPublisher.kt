@@ -10,6 +10,6 @@ class SpawnPublisher(function: KFunction<*>) : Publisher(function, notification 
         if (ids.isEmpty()) {
             return listOf()
         }
-        return ids.map { listOf("$${parameters.first().first}.id" to it) }
+        return ids.map { listOf("${parameters.first().first}.id" to it) }
     }
 }

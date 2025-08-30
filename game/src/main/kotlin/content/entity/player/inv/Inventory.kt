@@ -7,6 +7,9 @@ import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.interfaceSwap
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
 import world.gregs.voidps.engine.entity.character.mode.combat.CombatMovement
+import world.gregs.voidps.engine.event.Events
+import world.gregs.voidps.engine.event.Publishers
+import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.sendInventory
 import world.gregs.voidps.engine.inv.swap
@@ -15,6 +18,7 @@ import world.gregs.voidps.type.Script
 @Script
 class Inventory {
 
+    val publishers: Publishers by inject()
     val logger = InlineLogger()
 
     init {
@@ -53,6 +57,9 @@ class Inventory {
             player.closeInterfaces()
             if (player.mode is CombatMovement) {
                 player.mode = EmptyMode
+            }
+            Events.events.launch {
+                publishers.inventoryOption(player, item, id, equipOption, itemSlot)
             }
             player.emit(
                 InventoryOption(

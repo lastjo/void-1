@@ -67,7 +67,7 @@ class ChangeManager(
                     publishers.itemAdded(player, change.item, change.index, inventory.id)
                     changes.add(ItemAdded(inventory.id, change.index, change.item))
                 }
-                publishers.inventoryChanged(player, change.previous, change.index, inventory.id)
+                publishers.inventoryChanged(player, inventory.id, change.index, change.item, change.from, change.fromIndex, change.previous)
                 changes.add(InventorySlotChanged(inventory.id, change.index, change.item, change.from, change.fromIndex, change.previous))
             }
         }
