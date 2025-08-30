@@ -146,6 +146,8 @@ data class NPCs(
         val index = index() ?: return false
         indexArray[index] = npc
         npc.index = index
+        npc.softTimers.publishers = publishers
+        npc.variables.publishers = publishers
         npc.levels.link(npc, NPCLevels(npc.def), publishers)
         npc.levels.clear(Skill.Constitution)
         npc.levels.clear(Skill.Attack)

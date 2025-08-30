@@ -7,9 +7,9 @@ import world.gregs.voidps.engine.event.Publishers
 class TimerSlot(
     private val events: EventDispatcher,
     private val entity: Entity,
-    private val publishers: Publishers,
 ) : Timers {
 
+    override lateinit var publishers: Publishers
     private var timer: Timer? = null
 
     override fun start(name: String, restart: Boolean): Boolean {

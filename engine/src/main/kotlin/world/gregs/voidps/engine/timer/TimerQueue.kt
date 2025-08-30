@@ -8,12 +8,12 @@ import java.util.*
 class TimerQueue(
     private val events: EventDispatcher,
     private val entity: Entity,
-    private val publishers: Publishers,
 ) : Timers {
 
     val queue = PriorityQueue<Timer>()
     val names = mutableSetOf<String>()
     private val changes = mutableListOf<Timer>()
+    override lateinit var publishers: Publishers
 
     override fun start(name: String, restart: Boolean): Boolean {
         if (names.contains(name)) {

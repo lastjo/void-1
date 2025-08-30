@@ -8,10 +8,10 @@ import world.gregs.voidps.engine.event.Publishers
 open class Variables(
     private var events: EventDispatcher,
     private var entity: Entity,
-    private var publishers: Publishers,
     val data: MutableMap<String, Any> = Object2ObjectOpenHashMap(2),
 ) {
 
+    lateinit var publishers: Publishers
     @Suppress("LeakingThis")
     var bits = VariableBits(this, events)
 

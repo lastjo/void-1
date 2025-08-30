@@ -60,6 +60,7 @@ class AccountManager(
         player.interfaces = Interfaces(player, player.client, interfaceDefinitions, publishers = publishers)
         player.interfaceOptions = InterfaceOptions(player, interfaceDefinitions, inventoryDefinitions)
         (player.variables as PlayerVariables).definitions = variableDefinitions
+        player.variables.publishers = publishers
         player.area.areaDefinitions = areaDefinitions
         player.inventories.definitions = inventoryDefinitions
         player.inventories.itemDefinitions = itemDefinitions
@@ -67,6 +68,8 @@ class AccountManager(
         player.inventories.publishers = publishers
         player.inventories.normalStack = ItemDependentStack(itemDefinitions)
         player.inventories.player = player
+        player.timers.publishers = publishers
+        player.softTimers.publishers = publishers
         player.inventories.start()
         player.steps.previous = player.tile.add(Direction.WEST.delta)
         player.experience.events = player

@@ -1,6 +1,10 @@
 package world.gregs.voidps.engine.timer
 
+import world.gregs.voidps.engine.event.Publishers
+
 interface Timers : Runnable {
+    var publishers: Publishers
+
     fun start(name: String, restart: Boolean = false): Boolean
     fun restart(name: String) = start(name, restart = true)
     fun contains(name: String): Boolean

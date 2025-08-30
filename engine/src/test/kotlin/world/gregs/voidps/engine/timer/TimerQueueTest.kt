@@ -13,7 +13,9 @@ internal class TimerQueueTest : TimersTest() {
     @BeforeEach
     override fun setup() {
         super.setup()
-        timers = TimerQueue(events, World, object : Publishers() {})
+        val queue = TimerQueue(events, World)
+        timers = queue
+        queue.publishers = object : Publishers() {}
     }
 
     @Test

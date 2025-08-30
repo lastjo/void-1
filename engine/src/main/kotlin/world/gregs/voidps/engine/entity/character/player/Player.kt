@@ -106,21 +106,17 @@ class Player(
 
     override var queue = ActionQueue(this)
 
-    // TODO set publishers after creation
-    // Could even have a PublisherImpl.setup() which creates all lateinit var scripts and things, passing all the things to be injected
-    // That way Publishers could
-
     /**
      * Always ticks
      */
-    override var softTimers: Timers = TimerQueue(this, this, get())
+    override var softTimers: Timers = TimerQueue(this, this)
 
     /**
      * Ticks while not delayed or has interface open
      */
-    var timers = TimerQueue(this, this, get())
+    var timers = TimerQueue(this, this)
 
-    override var variables: Variables = PlayerVariables(this, variables, get())
+    override var variables: Variables = PlayerVariables(this, variables)
 
     override val steps = Steps(this)
 

@@ -29,7 +29,7 @@ const val MAX_NPCS = 0x8000 // 32768
 object World : Entity, Variable, EventDispatcher, Runnable, KoinComponent {
     override var tile = Tile.EMPTY
 
-    override val variables = Variables(this, this, get())
+    override val variables = Variables(this, this)
     private val logger = InlineLogger()
 
     val members: Boolean
@@ -39,11 +39,13 @@ object World : Entity, Variable, EventDispatcher, Runnable, KoinComponent {
         loadItemSpawns(get<FloorItems>(), get<ItemSpawns>(), files.list(Settings["spawns.items"]), get())
         loadObjectSpawns(get<GameObjects>(), files.list(Settings["spawns.objects"]), get())
         loadNpcSpawns(get<NPCs>(), files.list(Settings["spawns.npcs"]), get())
-        get<Publishers>().spawnWorld(this)
+        val publishers = get<Publishers>()
+        timers.publishers = publishers
+        publishers.spawnWorld(this)
         emit(Spawn)
     }
 
-    val timers: Timers = TimerQueue(this, this, get())
+    val timers: Timers = TimerQueue(this, this)
 
     private val actions = ConcurrentHashMap<String, Pair<Int, () -> Unit>>()
 

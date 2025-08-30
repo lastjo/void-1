@@ -36,7 +36,7 @@ internal class VariablesTest {
         every { variable.defaultValue } returns 0
         definitions = mockk(relaxed = true)
         events = mockk(relaxed = true)
-        variables = spyk(PlayerVariables(events, map, object : Publishers() {}))
+        variables = spyk(PlayerVariables(events, map))
         variables.bits = VariableBits(variables, events)
         player = mockk(relaxed = true)
         client = mockk(relaxed = true)
