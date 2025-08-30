@@ -21,7 +21,10 @@ data class ConditionNode(
             builder.beginControlFlow("when (%L)", firstKey)
             for (child in children) {
                 val (_, value) = child.condition!!
-                builder.beginControlFlow("%S ->", value.toString())
+                when (value) {
+                    is String -> builder.beginControlFlow("%S ->", value)
+                    else -> builder.beginControlFlow("%L ->", value)
+                }
                 child.generate(builder, schema)
                 builder.endControlFlow()
             }
@@ -53,15 +56,28 @@ data class ConditionNode(
     }
 
     private fun leaf(schema: Publisher, builder: CodeBlock.Builder) {
-        builder.add("handled = handled")
-        for (sub in subscribers) {
-            val args = arguments(sub, schema)
-            val methodName = sub.className.simpleName.replaceFirstChar { it.lowercase() }
-            builder.addStatement(
-                " || %L.%L(${args.joinToString(", ")})",
-                methodName,
-                sub.methodName,
-            )
+        val cancellable = subscribers.filter { it.returnType != "kotlin.Unit" }
+        if (cancellable.isNotEmpty()) {
+            builder.add("handled = handled")
+            for (sub in cancellable) {
+                val args = arguments(sub, schema)
+                val methodName = sub.className.simpleName.replaceFirstChar { it.lowercase() }
+                builder.addStatement(" || %L.%L(${args.joinToString(", ")})", methodName, sub.methodName)
+            }
+        }
+        val uncancellable = subscribers.filter { it.returnType == "kotlin.Unit" }
+        if (uncancellable.isNotEmpty()) {
+            if (cancellable.isNotEmpty()) {
+                builder.addStatement("if (!handled) {")
+            }
+            for (sub in uncancellable) {
+                val args = arguments(sub, schema)
+                val methodName = sub.className.simpleName.replaceFirstChar { it.lowercase() }
+                builder.addStatement("%L.%L(${args.joinToString(", ")})", methodName, sub.methodName)
+            }
+            if (cancellable.isNotEmpty()) {
+                builder.addStatement("}")
+            }
         }
     }
 
