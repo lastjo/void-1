@@ -12,6 +12,7 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.ObjectOption
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.network.client.instruction.InteractObject
 import world.gregs.voidps.type.Tile
@@ -19,6 +20,7 @@ import world.gregs.voidps.type.Tile
 class ObjectOptionHandler(
     private val objects: GameObjects,
     private val definitions: ObjectDefinitions,
+    private val publishers: Publishers,
 ) : InstructionHandler<InteractObject>() {
 
     private val logger = InlineLogger()
@@ -47,7 +49,9 @@ class ObjectOptionHandler(
             return
         }
         player.closeInterfaces()
-        player.mode = Interact(player, target, ObjectOption(player, target, definition, selectedOption))
+        val block: suspend (Boolean) -> Unit = { publishers.playerGameObjectOption(player, target, definition, selectedOption, it) }
+        val check: (Boolean) -> Boolean = { publishers.hasPlayerGameObjectOption(player, target, definition, selectedOption, it) }
+        player.mode = Interact(player, target, ObjectOption(player, target, definition, selectedOption), interact = block, has = check)
     }
 
     private fun getObject(tile: Tile, objectId: Int): GameObject? {

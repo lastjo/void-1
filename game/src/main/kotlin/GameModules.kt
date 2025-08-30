@@ -18,7 +18,11 @@ import world.gregs.voidps.engine.client.instruction.InterfaceHandler
 import world.gregs.voidps.engine.client.ui.chat.plural
 import world.gregs.voidps.engine.data.*
 import world.gregs.voidps.engine.data.definition.VariableDefinitions
+import world.gregs.voidps.engine.entity.character.npc.NPCs
+import world.gregs.voidps.engine.entity.character.player.Players
+import world.gregs.voidps.engine.entity.item.floor.FloorItems
 import world.gregs.voidps.engine.entity.item.floor.ItemSpawns
+import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.script.PublishersImpl
 
@@ -63,11 +67,18 @@ fun gameModule(files: ConfigFiles) = module {
         GrandExchange(get(), get(), get<Storage>().claims().toMutableMap(), get(), get(), get(), get())
     }
     single(createdAtStart = true) {
+        val logger = InlineLogger("Publishers")
         val fairyCodes = get<FairyRingCodes>()
         val variableDefinitions = get<VariableDefinitions>()
-        val logger = InlineLogger("Publishers")
+        val npcs = get<NPCs>()
+        val players = get<Players>()
+        val objects = get<GameObjects>()
+        val floorItems = get<FloorItems>()
         val start = System.currentTimeMillis()
-        val publishers = PublishersImpl(fairyCodes, variableDefinitions)
+        val publishers = PublishersImpl(fairyCodes, variableDefinitions, npcs, players, objects)
+        npcs.publishers = publishers
+        objects.publishers = publishers
+        floorItems.publishers = publishers
         logger.info { "Loaded ${publishers.subscriptions} publisher ${"subscriptions".plural(publishers.subscriptions)} in ${System.currentTimeMillis() - start} ms" }
         publishers as Publishers
     }

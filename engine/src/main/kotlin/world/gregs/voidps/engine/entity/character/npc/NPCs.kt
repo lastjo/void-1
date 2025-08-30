@@ -12,6 +12,7 @@ import world.gregs.voidps.engine.entity.character.CharacterSearch
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
 import world.gregs.voidps.engine.entity.character.mode.Wander
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.map.collision.CollisionStrategyProvider
 import world.gregs.voidps.engine.map.collision.Collisions
 import world.gregs.voidps.type.Direction
@@ -37,6 +38,7 @@ data class NPCs(
         private set
     private val map: CharacterMap = CharacterMap()
     private val logger = InlineLogger()
+    var publishers: Publishers = object : Publishers() {}
 
     override fun run() {
         var i = 0
@@ -163,6 +165,7 @@ data class NPCs(
             npc["respawn_delay"] = respawnDelay
             npc["respawn_direction"] = npc.direction
         }
+        publishers.spawnNPC(npc)
         npc.emit(Spawn)
         return true
     }
@@ -177,6 +180,7 @@ data class NPCs(
 
     fun clear() {
         for (npc in this) {
+            publishers.despawnNPC(npc)
             npc.emit(Despawn)
             npc.softTimers.stopAll()
         }

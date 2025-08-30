@@ -22,12 +22,6 @@ class PublisherProcessor(
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val start = System.currentTimeMillis()
-        resolve(resolver)
-        logger.info("PublisherProcessor took ${System.currentTimeMillis() - start} ms")
-        return emptyList()
-    }
-
-    private fun resolve(resolver: Resolver) {
         val annotations = schemas.keys
         val mainClass = TypeSpec.classBuilder("PublishersImpl")
         mainClass.superclass(superclass)
@@ -114,6 +108,10 @@ class PublisherProcessor(
                 }
             }
         }
+        if (count == 0) {
+            logger.info("Not symbols found; skipping.")
+            return emptyList()
+        }
         // Add all dependencies to main constructor
         val constructor = FunSpec.constructorBuilder()
         for ((type, param) in allDependencies) {
@@ -139,6 +137,8 @@ class PublisherProcessor(
         } catch (e: FileAlreadyExistsException) {
             e.printStackTrace()
         }
+        logger.info("PublisherProcessor took ${System.currentTimeMillis() - start} ms")
+        return emptyList()
     }
 
     private fun overrideMethod(schema: Publisher, fieldName: String, check: Boolean): FunSpec {
@@ -198,7 +198,7 @@ class PublisherProcessor(
         if (schema.notification) {
             if (!schema.cancellable && returnType != "kotlin.Unit") {
                 error("Method ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()} is not cancellable notification so cannot have a return type. (returns ${returnType})")
-            } else if(returnType != "kotlin.Unit" && returnType != "kotlin.Boolean") {
+            } else if (returnType != "kotlin.Unit" && returnType != "kotlin.Boolean") {
                 error("Method ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()} is a cancellable notification so must return a Boolean or nothing. (returns ${returnType})")
             }
         } else if (schema.returnsDefault != false && returnType != schema.returnsDefault::class.qualifiedName) {

@@ -5,13 +5,14 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import world.gregs.voidps.cache.definition.data.InterfaceDefinition
+import world.gregs.voidps.engine.event.Publishers
 
 internal class GameFrameTest : InterfaceTest() {
 
     @BeforeEach
     override fun setup() {
         super.setup()
-        interfaces = Interfaces(events, client, definitions, open)
+        interfaces = Interfaces(events, client, definitions, open, object : Publishers() {})
         every { definitions.getOrNull("") } returns InterfaceDefinition()
         every { definitions.getOrNull("toplevel_full") } returns InterfaceDefinition(id = -1, type = "root")
         every { definitions.getOrNull("toplevel") } returns InterfaceDefinition(type = "root")

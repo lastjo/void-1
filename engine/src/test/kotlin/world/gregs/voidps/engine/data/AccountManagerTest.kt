@@ -22,6 +22,7 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.character.player.chat.clan.Clan
 import world.gregs.voidps.engine.entity.character.player.equip.AppearanceOverrides
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.map.collision.CollisionStrategyProvider
 import world.gregs.voidps.engine.script.KoinMock
 import world.gregs.voidps.network.client.Client
@@ -88,6 +89,7 @@ class AccountManagerTest : KoinMock() {
             areaDefinitions = get(),
             players = Players(),
             overrides = AppearanceOverrides(),
+            publishers = object : Publishers() {}
         )
     }
 
@@ -114,7 +116,7 @@ class AccountManagerTest : KoinMock() {
     @Test
     fun `Spawn player`() {
         val player = Player(0)
-        player.interfaces = Interfaces(player, definitions = get())
+        player.interfaces = Interfaces(player, publishers = object : Publishers() {}, definitions = get())
         val client: Client = mockk(relaxed = true)
         manager.spawn(player, client)
         verify {

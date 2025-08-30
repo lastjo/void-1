@@ -15,6 +15,7 @@ import world.gregs.voidps.engine.entity.item.floor.loadItemSpawns
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.loadObjectSpawns
 import world.gregs.voidps.engine.event.EventDispatcher
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.timer.TimerQueue
 import world.gregs.voidps.engine.timer.Timers
@@ -37,6 +38,7 @@ object World : Entity, Variable, EventDispatcher, Runnable, KoinComponent {
         loadItemSpawns(get<FloorItems>(), get<ItemSpawns>(), files.list(Settings["spawns.items"]), get())
         loadObjectSpawns(get<GameObjects>(), files.list(Settings["spawns.objects"]), get())
         loadNpcSpawns(get<NPCs>(), files.list(Settings["spawns.npcs"]), get())
+        get<Publishers>().spawnWorld(this)
         emit(Spawn)
     }
 
@@ -81,6 +83,7 @@ object World : Entity, Variable, EventDispatcher, Runnable, KoinComponent {
     }
 
     fun shutdown() {
+        get<Publishers>().despawnWorld(this)
         emit(Despawn)
     }
 }

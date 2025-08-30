@@ -11,6 +11,7 @@ import world.gregs.voidps.engine.entity.Spawn
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.name
 import world.gregs.voidps.engine.entity.item.floor.FloorItems.Companion.MAX_TILE_ITEMS
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.network.login.protocol.encode.send
 import world.gregs.voidps.network.login.protocol.encode.zone.FloorItemAddition
 import world.gregs.voidps.network.login.protocol.encode.zone.FloorItemRemoval
@@ -39,14 +40,17 @@ class FloorItems(
 
     private val addQueue = mutableListOf<FloorItem>()
     private val removeQueue = mutableListOf<FloorItem>()
+    var publishers: Publishers = object : Publishers() {}
 
     override fun run() {
         for (floorItem in removeQueue) {
+            publishers.despawnFloorItem(floorItem)
             floorItem.emit(Despawn)
         }
         removeQueue.clear()
         for (floorItem in addQueue) {
             add(floorItem)
+            publishers.spawnFloorItem(floorItem)
             floorItem.emit(Spawn)
         }
         addQueue.clear()

@@ -18,6 +18,7 @@ import world.gregs.voidps.engine.entity.character.player.appearance
 import world.gregs.voidps.engine.entity.character.player.equip.AppearanceOverrides
 import world.gregs.voidps.engine.entity.character.player.name
 import world.gregs.voidps.engine.entity.character.player.skill.level.PlayerLevels
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.equipment
 import world.gregs.voidps.engine.inv.restrict.ValidItemRestriction
 import world.gregs.voidps.engine.inv.stack.ItemDependentStack
@@ -42,6 +43,7 @@ class AccountManager(
     private val players: Players,
     private val areaDefinitions: AreaDefinitions,
     private val overrides: AppearanceOverrides,
+    private val publishers: Publishers,
 ) {
     private val validItems = ValidItemRestriction(itemDefinitions)
     private val homeTile: Tile
@@ -55,7 +57,7 @@ class AccountManager(
     fun setup(player: Player, client: Client?, displayMode: Int): Boolean {
         player.index = players.index() ?: return false
         player.visuals.hits.self = player.index
-        player.interfaces = Interfaces(player, player.client, interfaceDefinitions)
+        player.interfaces = Interfaces(player, player.client, interfaceDefinitions, publishers = publishers)
         player.interfaceOptions = InterfaceOptions(player, interfaceDefinitions, inventoryDefinitions)
         (player.variables as PlayerVariables).definitions = variableDefinitions
         player.area.areaDefinitions = areaDefinitions
@@ -91,6 +93,7 @@ class AccountManager(
         }
         player.emit(RegionLoad)
         player.open(player.interfaces.gameFrame)
+        publishers.spawnPlayer(player)
         player.emit(Spawn)
         for (def in areaDefinitions.get(player.tile.zone)) {
             if (player.tile in def.area) {

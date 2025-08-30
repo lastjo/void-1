@@ -70,10 +70,13 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
                 SpawnPublisher(Publishers::despawnWorld),
             ),
             Open::class.qualifiedName!! to listOf(
-                InterfaceChangePublisher(Publishers::interfaceOpen),
+                InterfaceChangePublisher(Publishers::interfaceOpened),
             ),
             Close::class.qualifiedName!! to listOf(
                 InterfaceChangePublisher(Publishers::interfaceClosed),
+            ),
+            Refresh::class.qualifiedName!! to listOf(
+                InterfaceChangePublisher(Publishers::interfaceRefreshed),
             ),
             TimerStart::class.qualifiedName!! to listOf(
                 TimerPublisher(Publishers::timerStartPlayer),

@@ -16,7 +16,7 @@ import world.gregs.voidps.engine.data.definition.InterfaceDefinitions
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.event.EventDispatcher
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.network.client.Client
 import world.gregs.voidps.network.login.protocol.encode.*
@@ -25,10 +25,11 @@ import world.gregs.voidps.network.login.protocol.encode.*
  * API for the interacting and tracking of client interfaces
  */
 class Interfaces(
-    private val events: EventDispatcher,
+    private val player: Player,
     internal var client: Client? = null,
     internal val definitions: InterfaceDefinitions,
     private val interfaces: MutableMap<String, String> = Object2ObjectOpenHashMap(),
+    private val publishers: Publishers,
 ) {
     var displayMode = 0
 
@@ -50,7 +51,8 @@ class Interfaces(
 
     fun close(id: String?): Boolean {
         if (id != null && !getType(id).startsWith("dialogue_box")) {
-            events.emit(CloseInterface)
+            publishers.interfaceClosed(player, id)
+            player.emit(CloseInterface)
         }
         if (id != null && remove(id)) {
             closeChildrenOf(id)
@@ -70,8 +72,9 @@ class Interfaces(
     fun remove(id: String): Boolean {
         if (interfaces.remove(getType(id), id)) {
             sendClose(id)
-            events.emit(InterfaceClosed(id))
-            (events as? Player)?.queue?.clearWeak()
+            publishers.interfaceClosed(player, id)
+            player.emit(InterfaceClosed(id))
+            player.queue.clearWeak()
             return true
         }
         return false
@@ -98,7 +101,8 @@ class Interfaces(
         if (interfaces[type] != id) {
             interfaces[type] = id
             sendOpen(id)
-            events.emit(InterfaceOpened(id))
+            publishers.interfaceOpened(player, id)
+            player.emit(InterfaceOpened(id))
             notifyRefresh(id)
             return true
         }
@@ -114,8 +118,9 @@ class Interfaces(
             if (getParent(id) == parent) {
                 it.remove()
                 sendClose(id)
-                events.emit(InterfaceClosed(id))
-                (events as? Player)?.queue?.clearWeak()
+                publishers.interfaceClosed(player, id)
+                player.emit(InterfaceClosed(id))
+                player.queue.clearWeak()
                 children.add(id)
             }
         }
@@ -157,7 +162,8 @@ class Interfaces(
     }
 
     private fun notifyRefresh(id: String) {
-        events.emit(InterfaceRefreshed(id))
+        publishers.interfaceRefreshed(player, id)
+        player.emit(InterfaceRefreshed(id))
     }
 
     fun sendAnimation(id: String, component: String, animation: Int): Boolean {
