@@ -113,6 +113,12 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
                 MovePublisher(Publishers::moveNPC),
                 MovePublisher(Publishers::moveCharacter),
             ),
+            LevelChange::class.qualifiedName!! to listOf(
+                LevelChangePublisher(Publishers::levelChangePlayer),
+                LevelChangePublisher(Publishers::levelChangeNPC),
+                LevelChangePublisher(Publishers::levelChangeCharacter),
+            ),
+
         ),
     )
 }

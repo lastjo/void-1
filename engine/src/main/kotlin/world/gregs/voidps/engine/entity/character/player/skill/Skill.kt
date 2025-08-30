@@ -40,6 +40,32 @@ enum class Skill {
         val all = entries.toTypedArray()
         val count = all.size
 
+        const val ATTACK = "Attack"
+        const val DEFENCE = "Defence"
+        const val STRENGTH = "Strength"
+        const val CONSTITUTION = "Constitution"
+        const val RANGED = "Ranged"
+        const val PRAYER = "Prayer"
+        const val MAGIC = "Magic"
+        const val COOKING = "Cooking"
+        const val WOODCUTTING = "Woodcutting"
+        const val FLETCHING = "Fletching"
+        const val FISHING = "Fishing"
+        const val FIREMAKING = "Firemaking"
+        const val CRAFTING = "Crafting"
+        const val SMITHING = "Smithing"
+        const val MINING = "Mining"
+        const val HERBLORE = "Herblore"
+        const val AGILITY = "Agility"
+        const val THIEVING = "Thieving"
+        const val SLAYER = "Slayer"
+        const val FARMING = "Farming"
+        const val RUNECRAFTING = "Runecrafting"
+        const val HUNTER = "Hunter"
+        const val CONSTRUCTION = "Construction"
+        const val SUMMONING = "Summoning"
+        const val DUNGEONEERING = "Dungeoneering"
+
         private val skills = mapOf(
             "Attack" to Attack,
             "Defence" to Defence,

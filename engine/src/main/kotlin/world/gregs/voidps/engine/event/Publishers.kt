@@ -8,6 +8,7 @@ import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.item.floor.FloorItem
 import world.gregs.voidps.engine.entity.obj.GameObject
@@ -212,5 +213,9 @@ abstract class Publishers {
     open fun movePlayer(player: Player, from: Tile = Tile.EMPTY, to: Tile = Tile.EMPTY): Boolean = false
     open fun moveNPC(npc: NPC, from: Tile = Tile.EMPTY, to: Tile = Tile.EMPTY): Boolean = false
     open fun moveCharacter(character: Character, from: Tile = Tile.EMPTY, to: Tile = Tile.EMPTY): Boolean = false
+
+    open fun levelChangePlayer(player: Player, skill: Skill = Skill.Attack, from: Int = -1, to: Int = -1, max: Boolean = false): Boolean = false
+    open fun levelChangeNPC(npc: NPC, skill: Skill = Skill.Attack, from: Int = -1, to: Int = -1, max: Boolean = false): Boolean = false
+    open fun levelChangeCharacter(character: Character, skill: Skill = Skill.Attack, from: Int = -1, to: Int = -1, max: Boolean = false): Boolean = false
 
 }
