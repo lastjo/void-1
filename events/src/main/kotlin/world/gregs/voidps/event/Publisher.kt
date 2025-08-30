@@ -14,12 +14,13 @@ abstract class Publisher(
     val required: List<String>,
     var returnsDefault: Any = false,
     var notification: Boolean = false,
+    var cancellable: Boolean = false,
     var interaction: Boolean = false,
     val methodName: String,
     val checkMethodName: String? = null,
 ) {
 
-    constructor(function: KFunction<*>, hasFunction: KFunction<*>? = null, notification: Boolean = false, returnsDefault: Any? = null) : this(
+    constructor(function: KFunction<*>, hasFunction: KFunction<*>? = null, notification: Boolean = false, cancellable: Boolean = false, returnsDefault: Any? = null) : this(
         name = "${function.name.replaceFirstChar { it.uppercase() }}Publisher",
         parameters = function.parameters.filter { it.kind == KParameter.Kind.VALUE }.map { it.name!! to it.type.asTypeName() as ClassName },
         required = function.parameters.filter { it.kind == KParameter.Kind.VALUE }.filter { !it.isOptional }.map { (it.type.asTypeName() as ClassName).simpleName },
@@ -33,6 +34,7 @@ abstract class Publisher(
         suspendable = function.isSuspend,
         notification = notification,
         interaction = hasFunction != null,
+        cancellable = cancellable,
     ) {
         if (hasFunction != null) {
             assert(hasFunction.returnType.asTypeName() == BOOLEAN) { "Publisher check method '${hasFunction.name}' must return a Boolean." }
@@ -46,9 +48,6 @@ abstract class Publisher(
     }
 
     init {
-        if (notification) {
-            assert(returnsDefault is Boolean) { "Notification methods must return cancellation boolean." }
-        }
         if (interaction) {
             assert(parameters.any { it.first == "approach" }) { "Interactions must contain an approach/operate toggle." }
         }

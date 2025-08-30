@@ -28,6 +28,7 @@ class ConditionNodeTest {
             schema = dummyPublisher,
             annotationArgs = emptyMap(),
             classParams = emptyList(),
+            returnType = "kotlin.Unit",
         )
 
         val root = ConditionNode.buildTree(dummyPublisher, listOf(subscriber))
@@ -46,6 +47,7 @@ class ConditionNodeTest {
             schema = dummyPublisher,
             annotationArgs = emptyMap(),
             classParams = emptyList(),
+            returnType = "kotlin.Unit",
         )
 
         val args = ConditionNode.arguments(subscriber, dummyPublisher)

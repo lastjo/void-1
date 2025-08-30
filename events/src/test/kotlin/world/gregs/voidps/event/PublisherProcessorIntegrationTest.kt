@@ -34,6 +34,7 @@ class PublisherProcessorIntegrationTest {
         source: String,
         required: List<String> = listOf("String"),
         notification: Boolean = false,
+        cancellable: Boolean = false,
         suspend: Boolean = false,
         default: Any = false,
         interaction: Boolean = false,
@@ -43,7 +44,7 @@ class PublisherProcessorIntegrationTest {
         kspWithCompilation = true
         symbolProcessorProviders = listOf(
             // provider for your processor
-            TestProcessorProvider(required, notification, suspend, default, interaction),
+            TestProcessorProvider(required, notification, cancellable, suspend, default, interaction),
         )
         messageOutputStream = System.out
     }
@@ -53,6 +54,7 @@ class PublisherProcessorIntegrationTest {
         function: KFunction<*>,
         hasFunction: KFunction<*>? = null,
         notification: Boolean = false,
+        cancellable: Boolean = false,
         default: Any = false,
     ) = KotlinCompilation().apply {
         sources = listOf(SourceFile.kotlin("MyHandler.kt", source))
@@ -60,7 +62,7 @@ class PublisherProcessorIntegrationTest {
         kspWithCompilation = true
         symbolProcessorProviders = listOf(
             // provider for your processor
-            TestMagicProcessorProvider(function, hasFunction, notification, default),
+            TestMagicProcessorProvider(function, hasFunction, notification, cancellable, default),
         )
         messageOutputStream = System.out
     }
@@ -70,6 +72,7 @@ class PublisherProcessorIntegrationTest {
         suspend: Boolean = false,
         default: Any = false,
         interaction: Boolean = false,
+        cancellable: Boolean = false,
         required: List<String>,
     ) : Publisher(
         name = "OnEventPublisher",
@@ -83,7 +86,8 @@ class PublisherProcessorIntegrationTest {
         methodName = if (suspend) "onEventSuspend" else "onEvent",
         interaction = interaction,
         required = required,
-        checkMethodName = if (interaction) "hasOnEvent" else null
+        checkMethodName = if (interaction) "hasOnEvent" else null,
+        cancellable = cancellable
     ) {
         override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
             // Supports optional multiple annotation values
@@ -99,8 +103,8 @@ class PublisherProcessorIntegrationTest {
     }
 
     private class OnMagicEventPublisher(
-        function: KFunction<*>, hasFunction: KFunction<*>? = null, notification: Boolean = false, returnsDefault: Any? = null
-    ) : Publisher(function, hasFunction, notification, returnsDefault) {
+        function: KFunction<*>, hasFunction: KFunction<*>? = null, notification: Boolean = false, cancellable: Boolean = false, returnsDefault: Any? = null
+    ) : Publisher(function, hasFunction, notification, cancellable, returnsDefault) {
         override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
             // Supports optional multiple annotation values
             val values = (method.annotationArgs["value"] as? List<String>)
@@ -112,6 +116,7 @@ class PublisherProcessorIntegrationTest {
     private class TestProcessorProvider(
         private val required: List<String> = listOf("String"),
         private val notification: Boolean = false,
+        private val cancellable: Boolean = false,
         private val suspend: Boolean = false,
         private val default: Any = false,
         private val interaction: Boolean = false,
@@ -122,14 +127,14 @@ class PublisherProcessorIntegrationTest {
             superclass = Publishers::class.asClassName(),
             schemas = mapOf(
                 "test.OnEvent" to listOf(
-                    OnEventPublisher(notification, suspend, default, interaction, required),
+                    OnEventPublisher(notification, suspend, default, interaction, cancellable, required),
                 ),
             ),
         )
     }
 
     private class TestMagicProcessorProvider(
-        val function: KFunction<*>, val hasFunction: KFunction<*>? = null, val notification: Boolean = false, val returnsDefault: Any? = null
+        val function: KFunction<*>, val hasFunction: KFunction<*>? = null, val notification: Boolean = false, val cancellable: Boolean = false, val returnsDefault: Any? = null
     ) : SymbolProcessorProvider {
         override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor = PublisherProcessor(
             codeGenerator = environment.codeGenerator,
@@ -137,7 +142,7 @@ class PublisherProcessorIntegrationTest {
             superclass = Publishers::class.asClassName(),
             schemas = mapOf(
                 "test.OnEvent" to listOf(
-                    OnMagicEventPublisher(function, hasFunction, notification, returnsDefault),
+                    OnMagicEventPublisher(function, hasFunction, notification, cancellable, returnsDefault),
                 ),
             ),
         )
@@ -382,7 +387,7 @@ class PublisherProcessorIntegrationTest {
             }
         """.trimIndent()
 
-        val compilation = compilation(source, required = listOf("String", "String"), notification = true)
+        val compilation = compilation(source, required = listOf("String", "String"), notification = true, cancellable = true)
         val result = compilation.compile()
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
@@ -392,19 +397,54 @@ class PublisherProcessorIntegrationTest {
     }
 
     @Test
-    fun `Notification types must return booleans`() {
-        assertThrows(AssertionError::class.java) {
-            object : Publisher(
-                name = "Invalid",
-                parameters = listOf("id" to STRING),
-                returnsDefault = "notBoolean",
-                notification = true,
-                methodName = "",
-                required = emptyList()
-            ) {
-                override fun comparisons(method: Subscriber) = emptyList<List<Pair<String, Any>>>()
+    fun `Notifications don't require return types`() {
+        @Language("kotlin")
+        val source = """
+            package test
+            annotation class OnEvent(val value: String = "")
+
+            class HandlerOne {
+                @OnEvent("X")
+                fun one(id: String, name: String) {
+                
+                }
             }
-        }
+        """.trimIndent()
+
+        val compilation = compilation(source, required = listOf("String", "String"), notification = true)
+        val result = compilation.compile()
+
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+        val content = compilation.kspSourcesDir.resolve("kotlin/world/gregs/voidps/engine/script/OnEventPublisher.kt").readText()
+        assertTrue(content.contains("handlerOne.one"), "Multiple subscribers for same comparison allowed")
+    }
+
+    @Test
+    fun `Cancellable and non-cancellable notification can be mixed`() {
+        @Language("kotlin")
+        val source = """
+            package test
+            annotation class OnEvent(val value: String = "")
+
+            class HandlerOne {
+                @OnEvent("X")
+                fun one(id: String, name: String) = true
+            }
+            class HandlerTwo {
+                @OnEvent("X")
+                fun two(id: String, name: String) {
+                
+                }
+            }
+        """.trimIndent()
+
+        val compilation = compilation(source, required = listOf("String", "String"), notification = true, cancellable = true)
+        val result = compilation.compile()
+
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+        val content = compilation.kspSourcesDir.resolve("kotlin/world/gregs/voidps/engine/script/OnEventPublisher.kt").readText()
+        assertTrue(content.contains("handled = handled || handlerOne.one"), "Multiple subscribers for same comparison allowed")
+        assertTrue(content.contains("handlerTwo.two(id, name)"), "Second subscriber should be called independently")
     }
 
     @Test

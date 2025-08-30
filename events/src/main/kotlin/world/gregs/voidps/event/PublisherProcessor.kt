@@ -194,9 +194,15 @@ class PublisherProcessor(
         if (fn.modifiers.contains(Modifier.SUSPEND) && !schema.suspendable) {
             error("Method ${parentClass.simpleName.asString()}.${fn.simpleName.asString()} cannot be suspendable.")
         }
-        val returnType = fn.returnType?.resolve()?.declaration?.qualifiedName?.asString()
-        if ((schema.returnsDefault != false || schema.notification) && returnType != schema.returnsDefault::class.qualifiedName) {
-            error("Method ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()} ${if (schema.notification) "is a notification so " else ""}must return a ${schema.returnsDefault::class.simpleName}.")
+        val returnType = fn.returnType!!.resolve().declaration.qualifiedName!!.asString()
+        if (schema.notification) {
+            if (!schema.cancellable && returnType != "kotlin.Unit") {
+                error("Method ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()} is not cancellable notification so cannot have a return type. (returns ${returnType})")
+            } else if(returnType != "kotlin.Unit" && returnType != "kotlin.Boolean") {
+                error("Method ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()} is a cancellable notification so must return a Boolean or nothing. (returns ${returnType})")
+            }
+        } else if (schema.returnsDefault != false && returnType != schema.returnsDefault::class.qualifiedName) {
+            error("Method ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()} must return a ${schema.returnsDefault::class.simpleName}. (returns ${returnType})")
         }
         val classParams: List<Pair<String, TypeName>> = parentClass.primaryConstructor?.parameters?.map { param ->
             val name = param.name?.asString() ?: error("Unnamed class param in ${parentClass.qualifiedName?.asString()}")
@@ -209,6 +215,7 @@ class PublisherProcessor(
             schema = schema,
             annotationArgs = args,
             classParams = classParams,
+            returnType = returnType
         )
     }
 }
