@@ -11,7 +11,8 @@ class ConditionNodeTest {
         parameters = listOf("id" to ClassName("kotlin", "String")),
         returnsDefault = true,
         notification = true,
-        overrideMethod = "",
+        methodName = "",
+        required = listOf()
     ) {
         override fun comparisons(
             method: Subscriber,

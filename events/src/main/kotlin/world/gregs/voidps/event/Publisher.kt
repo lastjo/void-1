@@ -11,25 +11,39 @@ abstract class Publisher(
     val name: String,
     val suspendable: Boolean = false,
     val parameters: List<Pair<String, ClassName>>,
+    val required: List<String>,
     var returnsDefault: Any = false,
     var notification: Boolean = false,
     var interaction: Boolean = false,
-    val overrideMethod: String,
+    val methodName: String,
+    val checkMethodName: String? = null,
 ) {
 
     constructor(function: KFunction<*>, hasFunction: KFunction<*>? = null, notification: Boolean = false, returnsDefault: Any? = null) : this(
-        name = "${function::class.simpleName?.replaceFirstChar { it.uppercase() }}Publisher",
+        name = "${function.name.replaceFirstChar { it.uppercase() }}Publisher",
         parameters = function.parameters.filter { it.kind == KParameter.Kind.VALUE }.map { it.name!! to it.type.asTypeName() as ClassName },
+        required = function.parameters.filter { it.kind == KParameter.Kind.VALUE }.filter { !it.isOptional }.map { (it.type.asTypeName() as ClassName).simpleName },
         returnsDefault = returnsDefault ?: when (function.returnType.asTypeName()) {
             STRING -> ""
             INT -> -1
             else -> false
         },
-        overrideMethod = function.name,
+        methodName = function.name,
+        checkMethodName = hasFunction?.name,
         suspendable = function.isSuspend,
         notification = notification,
         interaction = hasFunction != null,
-    )
+    ) {
+        if (hasFunction != null) {
+            assert(hasFunction.returnType.asTypeName() == BOOLEAN) { "Publisher check method '${hasFunction.name}' must return a Boolean." }
+            assert(!hasFunction.isSuspend) { "Publisher check method '${hasFunction.name}' cannot be suspendable." }
+
+            val expected = function.parameters.filter { it.kind == KParameter.Kind.VALUE }.map { it.name }.toSet()
+            val actual = hasFunction.parameters.filter { it.kind == KParameter.Kind.VALUE }.map { it.name }.toSet()
+            assert(expected.size == actual.size) { "Publisher check method '${hasFunction.name}' must have all the same parameters as publish function '${function.name}'." }
+            assert(actual.containsAll(expected)) { "Publisher check method '${hasFunction.name}' must have all the same parameters as publish function '${function.name}'." }
+        }
+    }
 
     init {
         if (notification) {

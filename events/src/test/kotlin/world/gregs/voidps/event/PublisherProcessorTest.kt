@@ -20,7 +20,8 @@ class PublisherProcessorTest {
         parameters = listOf("id" to ClassName("kotlin", "String")),
         returnsDefault = true,
         notification = true,
-        overrideMethod = "",
+        methodName = "",
+        required = listOf("String")
     ) {
         override fun comparisons(
             method: Subscriber,
@@ -31,7 +32,7 @@ class PublisherProcessorTest {
     fun `Find schema matches expected parameters`() {
         val schemas = mapOf(
             "MyAnnotation" to listOf(
-                listOf("String") to dummyPublisher,
+                dummyPublisher,
             ),
         )
 

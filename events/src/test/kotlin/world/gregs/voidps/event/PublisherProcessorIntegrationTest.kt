@@ -9,15 +9,21 @@ import com.tschuchort.compiletesting.*
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import kotlin.reflect.KFunction
 
 class PublisherProcessorIntegrationTest {
 
     abstract class Publishers {
+        open suspend fun onEventSuspendInteract(id: String, name: String = "", approach: Boolean = false): Boolean = false
+        open fun hasOnEventSuspendInteract(id: String, name: String = "", approach: Boolean = false): Boolean = false
+
         open suspend fun onEventSuspend(id: String, name: String): Boolean = false
 
         open suspend fun onEventSuspend(id: String): Boolean = false
 
         open fun hasOnEventSuspend(id: String, name: String): Boolean = false
+
+        open fun hasOnEvent(id: String, name: String, approach: Boolean): Boolean = false
 
         open fun onEvent(id: String, name: String): Boolean = false
 
@@ -42,11 +48,29 @@ class PublisherProcessorIntegrationTest {
         messageOutputStream = System.out
     }
 
+    private fun compilation(
+        source: String,
+        function: KFunction<*>,
+        hasFunction: KFunction<*>? = null,
+        notification: Boolean = false,
+        default: Any = false,
+    ) = KotlinCompilation().apply {
+        sources = listOf(SourceFile.kotlin("MyHandler.kt", source))
+        inheritClassPath = true
+        kspWithCompilation = true
+        symbolProcessorProviders = listOf(
+            // provider for your processor
+            TestMagicProcessorProvider(function, hasFunction, notification, default),
+        )
+        messageOutputStream = System.out
+    }
+
     private class OnEventPublisher(
         notification: Boolean = false,
         suspend: Boolean = false,
         default: Any = false,
         interaction: Boolean = false,
+        required: List<String>,
     ) : Publisher(
         name = "OnEventPublisher",
         parameters = listOf(
@@ -56,9 +80,27 @@ class PublisherProcessorIntegrationTest {
         returnsDefault = default,
         notification = notification,
         suspendable = suspend,
-        overrideMethod = if (suspend) "onEventSuspend" else "onEvent",
+        methodName = if (suspend) "onEventSuspend" else "onEvent",
         interaction = interaction,
+        required = required,
+        checkMethodName = if (interaction) "hasOnEvent" else null
     ) {
+        override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
+            // Supports optional multiple annotation values
+            val values = (method.annotationArgs["value"] as? List<String>)
+                ?: listOfNotNull(method.annotationArgs["value"] as? String)
+            val list = mutableListOf<Pair<String, Any>>()
+            val approach = method.annotationArgs["appraoch"] as? Boolean
+            if (approach != null) {
+                list.add("approach" to approach)
+            }
+            return values.map { list + listOf("id" to it) }
+        }
+    }
+
+    private class OnMagicEventPublisher(
+        function: KFunction<*>, hasFunction: KFunction<*>? = null, notification: Boolean = false, returnsDefault: Any? = null
+    ) : Publisher(function, hasFunction, notification, returnsDefault) {
         override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
             // Supports optional multiple annotation values
             val values = (method.annotationArgs["value"] as? List<String>)
@@ -80,7 +122,22 @@ class PublisherProcessorIntegrationTest {
             superclass = Publishers::class.asClassName(),
             schemas = mapOf(
                 "test.OnEvent" to listOf(
-                    required to OnEventPublisher(notification, suspend, default, interaction),
+                    OnEventPublisher(notification, suspend, default, interaction, required),
+                ),
+            ),
+        )
+    }
+
+    private class TestMagicProcessorProvider(
+        val function: KFunction<*>, val hasFunction: KFunction<*>? = null, val notification: Boolean = false, val returnsDefault: Any? = null
+    ) : SymbolProcessorProvider {
+        override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor = PublisherProcessor(
+            codeGenerator = environment.codeGenerator,
+            logger = environment.logger,
+            superclass = Publishers::class.asClassName(),
+            schemas = mapOf(
+                "test.OnEvent" to listOf(
+                    OnMagicEventPublisher(function, hasFunction, notification, returnsDefault),
                 ),
             ),
         )
@@ -157,7 +214,7 @@ class PublisherProcessorIntegrationTest {
 
         val result = compilation(source, default = "default").compile()
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
-        assertTrue(result.messages.contains("must return String"), "Error should mention return type")
+        assertTrue(result.messages.contains("must return a String"), "Error should mention return type")
     }
 
     @Test
@@ -190,21 +247,21 @@ class PublisherProcessorIntegrationTest {
         val source = """
             package test
 
-            annotation class OnEvent(val value: String)
+            annotation class OnEvent(val value: String, val approach: Boolean = false)
 
             class MyHandler {
                 @OnEvent("123")
-                suspend fun handler(id: String): Boolean {
-                    return true
+                suspend fun handler(id: String): Int {
+                    return 0
                 }
             }
         """.trimIndent()
 
-        val compilation = compilation(source, suspend = true, interaction = true)
+        val compilation = compilation(source, Publishers::onEventSuspendInteract, Publishers::hasOnEventSuspendInteract)
         val result = compilation.compile()
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
-        val content = compilation.kspSourcesDir.resolve("kotlin/world/gregs/voidps/engine/script/OnEventPublisher.kt").readText()
+        val content = compilation.kspSourcesDir.resolve("kotlin/world/gregs/voidps/engine/script/OnEventSuspendInteractPublisher.kt").readText()
         assertTrue(content.contains("public fun has("), "Publish should have 'has' method")
     }
 
@@ -342,7 +399,8 @@ class PublisherProcessorIntegrationTest {
                 parameters = listOf("id" to STRING),
                 returnsDefault = "notBoolean",
                 notification = true,
-                overrideMethod = "",
+                methodName = "",
+                required = emptyList()
             ) {
                 override fun comparisons(method: Subscriber) = emptyList<List<Pair<String, Any>>>()
             }

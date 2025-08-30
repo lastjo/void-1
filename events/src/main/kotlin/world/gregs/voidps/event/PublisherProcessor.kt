@@ -9,12 +9,14 @@ import com.squareup.kotlinpoet.ksp.writeTo
 import java.util.*
 
 /**
- * Takes [Subscriber]s marked with annotations and generates [Publisher] classes filled with if statements in order to publish events
+ * Takes [Subscriber]s marked with annotations and generates:
+ * 1. [Publisher] classes filled with if statements in order to publish events
+ * 2. Publishers implementation with methods to call each individual Publisher class
  */
 class PublisherProcessor(
     private val codeGenerator: CodeGenerator,
     private val logger: KSPLogger,
-    private val schemas: Map<String, List<Pair<List<String>, Publisher>>>,
+    private val schemas: Map<String, List<Publisher>>,
     private val superclass: ClassName,
 ) : SymbolProcessor {
 
@@ -99,7 +101,7 @@ class PublisherProcessor(
                         .initializer("${schema.name}($deps)")
                         .build(),
                 )
-                if (schema.overrideMethod != "") {
+                if (schema.methodName != "") {
                     mainClass.addFunction(overrideMethod(schema, fieldName, check = false))
                     if (schema.interaction) {
                         mainClass.addFunction(overrideMethod(schema, fieldName, check = true))
@@ -140,7 +142,7 @@ class PublisherProcessor(
     }
 
     private fun overrideMethod(schema: Publisher, fieldName: String, check: Boolean): FunSpec {
-        val method = FunSpec.builder(if (check) "has${schema.overrideMethod.replaceFirstChar { it.uppercase() }}" else schema.overrideMethod)
+        val method = FunSpec.builder(if (check) schema.checkMethodName!! else schema.methodName)
             .addModifiers(KModifier.OVERRIDE)
         if (schema.suspendable && !check) {
             method.addModifiers(KModifier.SUSPEND)
@@ -158,18 +160,18 @@ class PublisherProcessor(
 
     /**
      * Looks up the [Publisher] schema by matching the subscribing methods [args] against the [annotation]
-     * list of required args
+     * list of [Publisher.required] args
      */
     fun findSchema(annotation: String, args: List<Pair<String, String>>): Publisher {
-        val list = schemas[annotation] ?: error("No schema found for annotation: $annotation.")
-        for ((required, publisher) in list) {
-            if (required.isEmpty()) {
+        val publishers = schemas[annotation] ?: error("No schema found for annotation: $annotation.")
+        for (publisher in publishers) {
+            if (publisher.required.isEmpty()) {
                 return publisher
             }
             var i = 0
             for ((_, type) in args) {
-                val suffix = required[i]
-                if (type == suffix && ++i == required.size) {
+                val suffix = publisher.required[i]
+                if (type == suffix && ++i == publisher.required.size) {
                     return publisher
                 }
             }
