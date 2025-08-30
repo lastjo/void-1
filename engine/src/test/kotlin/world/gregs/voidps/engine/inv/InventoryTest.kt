@@ -8,8 +8,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import world.gregs.voidps.cache.definition.data.ItemDefinition
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.event.EventDispatcher
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.remove.DefaultItemAmountBounds
 import world.gregs.voidps.engine.inv.remove.ItemAmountBounds
 import world.gregs.voidps.engine.inv.remove.ShopItemAmountBounds
@@ -22,7 +23,7 @@ internal class InventoryTest {
     private lateinit var inventory: Inventory
     private lateinit var items: Array<Item>
     private lateinit var minimumAmounts: IntArray
-    private lateinit var events: EventDispatcher
+    private lateinit var events: Player
 
     @BeforeEach
     fun setup() {
@@ -44,7 +45,7 @@ internal class InventoryTest {
             stackRule = stackRule,
             amountBounds = amountBounds,
         ).apply {
-            transaction.changes.bind(events)
+            transaction.changes.bind(events, object : Publishers() {})
         },
     )
 

@@ -109,6 +109,8 @@ abstract class Publishers {
 
     open suspend fun inventoryOption(player: Player, item: Item = Item.EMPTY, inventory: String = "", option: String = "", itemSlot: Int = -1): Boolean = false
 
+    open fun inventoryChanged(player: Player, previous: Item, index: Int, id: String): Boolean = false
+
     open fun itemAdded(player: Player, item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false
 
     open fun itemRemoved(player: Player, item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false

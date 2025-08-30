@@ -3,8 +3,10 @@ package world.gregs.voidps.engine.inv.transact
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Test
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.event.EventDispatcher
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.Inventory
 import world.gregs.voidps.engine.inv.InventorySlotChanged
 import world.gregs.voidps.engine.inv.transact.operation.TransactionOperationTest
@@ -17,9 +19,9 @@ class TransactionTest : TransactionOperationTest() {
     @Test
     fun `Set tracks changes`() {
         val inventory = Inventory.debug(1)
-        val events: EventDispatcher = mockk(relaxed = true)
+        val events: Player = mockk(relaxed = true)
         val transaction = inventory.transaction
-        transaction.changes.bind(events)
+        transaction.changes.bind(events, object : Publishers() {})
         transaction.set(0, Item("item", 1))
         transaction.changes.send()
         verify { events.emit(any<InventorySlotChanged>()) }

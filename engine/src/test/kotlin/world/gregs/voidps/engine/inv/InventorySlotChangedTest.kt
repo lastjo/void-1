@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.event.Events
+import world.gregs.voidps.engine.event.Publishers
 import kotlin.test.assertEquals
 
 class InventorySlotChangedTest {
@@ -15,7 +16,7 @@ class InventorySlotChangedTest {
     fun setup() {
         inventory = Inventory.debug(1, id = "inventory")
         val dispatcher = Player()
-        inventory.transaction.changes.bind(dispatcher)
+        inventory.transaction.changes.bind(dispatcher, object : Publishers() {})
         Events.events.clear()
     }
 

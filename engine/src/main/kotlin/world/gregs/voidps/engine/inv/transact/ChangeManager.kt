@@ -1,8 +1,9 @@
 package world.gregs.voidps.engine.inv.transact
 
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.event.Event
-import world.gregs.voidps.engine.event.EventDispatcher
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.*
 import java.util.*
 
@@ -13,7 +14,12 @@ class ChangeManager(
     private val inventory: Inventory,
 ) {
     private val changes: Stack<Event> = Stack()
-    private val events = mutableSetOf<EventDispatcher>()
+    private val events = mutableSetOf<Player>()
+    private lateinit var publishers: Publishers
+
+    val itemChanges: Stack<Change> = Stack()
+
+    data class Change(val from: String, val index: Int, val previous: Item, val fromIndex: Int, val item: Item)
 
     /**
      * Track a change of an item in the inventory.
@@ -24,26 +30,21 @@ class ChangeManager(
      * @param item the current state of the item
      */
     fun track(from: String, index: Int, previous: Item, fromIndex: Int, item: Item) {
-        if (previous.isNotEmpty()) {
-            changes.add(ItemRemoved(inventory.id, index, previous))
-        }
-        if (item.isNotEmpty()) {
-            changes.add(ItemAdded(inventory.id, index, item))
-        }
-        changes.add(InventorySlotChanged(inventory.id, index, item, from, fromIndex, previous))
+        itemChanges.add(Change(from, index, previous, fromIndex, item))
     }
 
     /**
-     * Adds [events] to the list of recipients of [InventorySlotChanged] updates in this inventory.
+     * Adds [player] to the list of recipients of [InventorySlotChanged] updates in this inventory.
      */
-    fun bind(events: EventDispatcher) {
-        this.events.add(events)
+    fun bind(player: Player, publishers: Publishers) {
+        this.publishers = publishers
+        this.events.add(player)
     }
 
     /**
      * Removes [events] to the list of recipients of [InventorySlotChanged] updates in this inventory.
      */
-    fun unbind(events: EventDispatcher) {
+    fun unbind(events: Player) {
         this.events.remove(events)
     }
 
@@ -51,6 +52,25 @@ class ChangeManager(
      * Send the tracked changes to the appropriate recipients.
      */
     fun send() {
+        if (itemChanges.isEmpty()) {
+            return
+        }
+        val changes: Stack<Event> = Stack()
+        for (player in events) {
+            publishers.publishPlayer(player, "inventory_update", inventory.id)
+            for (change in itemChanges) {
+                if (change.previous.isNotEmpty()) {
+                    publishers.itemRemoved(player, change.previous, change.index, inventory.id)
+                    changes.add(ItemRemoved(inventory.id, change.index, change.previous))
+                }
+                if (change.item.isNotEmpty()) {
+                    publishers.itemAdded(player, change.item, change.index, inventory.id)
+                    changes.add(ItemAdded(inventory.id, change.index, change.item))
+                }
+                publishers.inventoryChanged(player, change.previous, change.index, inventory.id)
+                changes.add(InventorySlotChanged(inventory.id, change.index, change.item, change.from, change.fromIndex, change.previous))
+            }
+        }
         if (changes.isEmpty()) {
             return
         }
@@ -67,6 +87,7 @@ class ChangeManager(
      * Clear the tracked changes.
      */
     fun clear() {
+        itemChanges.clear()
         changes.clear()
     }
 }

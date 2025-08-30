@@ -11,6 +11,7 @@ import world.gregs.voidps.engine.data.Settings
 import world.gregs.voidps.engine.data.definition.InventoryDefinitions
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.restrict.NoRestrictions
@@ -130,7 +131,8 @@ class DropTablesTest {
         val itemDefinitions = ItemDefinitions(emptyArray()).apply { ids = mapOf("test" to 0) }
         player.inventories.normalStack = ItemDependentStack(itemDefinitions)
         player.inventories.validItemRule = NoRestrictions
-        player.inventories.events = player
+        player.inventories.player = player
+        player.inventories.publishers = object : Publishers() {}
         val drop = ItemDrop(
             id = "item",
             amount = 10..10,
@@ -153,7 +155,8 @@ class DropTablesTest {
         val itemDefinitions = ItemDefinitions(emptyArray()).apply { ids = mapOf("test" to 0) }
         player.inventories.normalStack = ItemDependentStack(itemDefinitions)
         player.inventories.validItemRule = NoRestrictions
-        player.inventories.events = player
+        player.inventories.player = player
+        player.inventories.publishers = object : Publishers() {}
         val drop = ItemDrop(
             id = "item",
             amount = 10..10,
@@ -175,7 +178,8 @@ class DropTablesTest {
         val itemDefinitions = ItemDefinitions(emptyArray()).apply { ids = mapOf("test" to 0, "unknown" to 1) }
         player.inventories.normalStack = ItemDependentStack(itemDefinitions)
         player.inventories.validItemRule = NoRestrictions
-        player.inventories.events = player
+        player.inventories.player = player
+        player.inventories.publishers = object : Publishers() {}
         val drop = ItemDrop(
             id = "item",
             amount = 10..10,
