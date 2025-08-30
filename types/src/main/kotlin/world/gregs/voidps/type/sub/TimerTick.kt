@@ -6,7 +6,7 @@ package world.gregs.voidps.type.sub
  * ```kotlin
  * @TimerTick("teleport_block")
  * fun teleblock(player: Player): Int {
- *     return -1 // Next interval, -1 for same
+ *     return -1 // Next interval, -1 for same, 0 for cancel
  * }
  *
  * @TimerTick("disease")

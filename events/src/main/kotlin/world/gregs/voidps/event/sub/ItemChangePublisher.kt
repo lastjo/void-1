@@ -4,7 +4,7 @@ import world.gregs.voidps.event.Publisher
 import world.gregs.voidps.event.Subscriber
 import kotlin.reflect.KFunction
 
-class ItemChangePublisher(function: KFunction<*>) : Publisher(function) {
+class ItemChangePublisher(function: KFunction<*>) : Publisher(function, notification = true) {
     override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val ids = method.annotationArgs["ids"] as List<String>
         val slots = method.annotationArgs["slots"] as List<Int>
@@ -17,14 +17,14 @@ class ItemChangePublisher(function: KFunction<*>) : Publisher(function) {
             val lists = mutableListOf<List<Pair<String, Any>>>()
             for (id in ids) {
                 for (slot in slots) {
-                    lists.add(list + listOf("item.id" to id, "index" to slot))
+                    lists.add(list + listOf("item.id" to id, "itemSlot" to slot))
                 }
             }
             return lists
         } else if (ids.isNotEmpty()) {
             return ids.map { list + listOf("item.id" to it) }
         } else if (slots.isNotEmpty()) {
-            return slots.map { list + listOf("index" to it) }
+            return slots.map { list + listOf("itemSlot" to it) }
         } else {
             return listOf(list)
         }

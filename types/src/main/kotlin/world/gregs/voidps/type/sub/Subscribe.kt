@@ -6,7 +6,8 @@ package world.gregs.voidps.type.sub
  *
  * ```kotlin
  * @Subscribe("consume", "bandits_brew")
- * fun banditsBrew(player: Player) {
+ * fun banditsBrew(player: Player): Boolean {
+ *     return false // cancel (optional)
  * }
  * ```
  */

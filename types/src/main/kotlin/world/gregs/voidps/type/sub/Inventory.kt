@@ -4,13 +4,13 @@ package world.gregs.voidps.type.sub
  * Inventory click subscriber
  *
  * ```kotlin
- * @Interface("Toggle Accept Aid", "aid", "options)
- * fun toggleAid(player: Player) {
+ * @Inventory("Bury")
+ * fun buryBones(player: Player) {
  * }
  *
  *
- * @Interface("View" id = "filter_buttons")
- * fun viewFilter(player: Player, id: String, component: String, option: String, optionIndex: Int, item: Item, itemSlot: Int, inventory: String) {
+ * @Inventory("Wear", "ring_of_stone")
+ * fun stone(player: Player, item: Item, inventory: String, option: String, itemSlot: Int) {
  * }
  */
 @Repeatable

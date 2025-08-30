@@ -4,7 +4,7 @@ import world.gregs.voidps.event.Publisher
 import world.gregs.voidps.event.Subscriber
 import kotlin.reflect.KFunction
 
-class SubscribePublisher(function: KFunction<*>) : Publisher(function, notification = true) {
+class SubscribePublisher(function: KFunction<*>) : Publisher(function, notification = true, cancellable = true) {
     override fun comparisons(method: Subscriber): List<List<Pair<String, Any>>> {
         val event = method.annotationArgs["event"] as String
         val ids = method.annotationArgs["ids"] as List<String>
