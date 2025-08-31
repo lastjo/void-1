@@ -72,7 +72,7 @@ abstract class Publisher(
         }
 
         val returns = returnsDefault
-        val returnSomething = returns != false
+        val returnSomething = cancellable || returns != false
         val builder: CodeBlock.Builder
         if (notification) {
             builder = CodeBlock.builder()
@@ -88,9 +88,14 @@ abstract class Publisher(
         } else {
             builder = CodeBlock.builder().beginControlFlow(if (returnSomething) "return when" else "when")
             var addedElse = false
-            for (method in methods) {
-                val comparisons = comparisons(method)
-                addedElse = addedElse || generateStatement(builder, method, comparisons, returnSomething, check)
+            val methodComparisons = methods.map { it to comparisons(it) }
+            for ((method, comparisons) in methodComparisons.filter { it.second.isNotEmpty() }) {
+                generateStatement(builder, method, comparisons, check)
+            }
+            val remaining = methodComparisons.filter { it.second.isEmpty() }
+            for ((method, _) in remaining) {
+                addedElse = true
+                generateElse(check, builder, returnSomething, method)
             }
             if (!addedElse) {
                 builder.addStatement("else -> ${if (returnSomething) "" else "return "}%L", if (check) false else returns)
@@ -123,20 +128,21 @@ abstract class Publisher(
         return funSpec.build()
     }
 
-    private fun generateStatement(builder: CodeBlock.Builder, method: Subscriber, comparisons: List<List<Pair<String, Any?>>>, returnSomething: Boolean, check: Boolean): Boolean {
-        val methodName = method.className.simpleName.replaceFirstChar { it.lowercase() }
-        if (comparisons.isEmpty()) {
-            if (check) {
-                builder.addStatement("else -> ${if (returnSomething) "" else "return "}false")
-            } else {
-                val args = ConditionNode.arguments(method, this)
-                builder.addStatement(
-                    "else -> ${if (returnSomething) "" else "return "}$methodName.%L(${args.joinToString(", ")})",
-                    method.methodName,
-                )
-            }
-            return true
+    private fun generateElse(check: Boolean, builder: CodeBlock.Builder, returnSomething: Boolean, method: Subscriber) {
+        if (check) {
+            builder.addStatement("else -> ${if (returnSomething) "" else "return "}false")
+        } else {
+            val methodName = method.className.simpleName.replaceFirstChar { it.lowercase() }
+            val args = ConditionNode.arguments(method, this)
+            builder.addStatement(
+                "else -> ${if (returnSomething) "" else "return "}$methodName.%L(${args.joinToString(", ")})",
+                method.methodName,
+            )
         }
+    }
+
+    private fun generateStatement(builder: CodeBlock.Builder, method: Subscriber, comparisons: List<List<Pair<String, Any?>>>, check: Boolean) {
+        val methodName = method.className.simpleName.replaceFirstChar { it.lowercase() }
         for (comparison in comparisons) {
             // If statement
             for (i in comparison.indices) {
@@ -166,7 +172,6 @@ abstract class Publisher(
                 )
             }
         }
-        return false
     }
 }
 
