@@ -43,6 +43,7 @@ import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.ObjectShape
 import world.gregs.voidps.engine.entity.playerDespawn
 import world.gregs.voidps.engine.event.Context
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.engine.queue.strongQueue
@@ -158,6 +159,8 @@ class Delrith {
                 npc.queue.clear("death")
             }
             npc.strongQueue("death", TimeUnit.MINUTES.toTicks(5)) {
+                Publishers.all.npcDeath(character)
+                Publishers.all.characterDeath(character)
                 npc.emit(Death)
             }
             //    player.playSound("demon_slayer_portal_open")

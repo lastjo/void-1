@@ -2,8 +2,10 @@ package content.entity.combat
 
 import content.area.wilderness.inSingleCombat
 import content.entity.combat.hit.characterCombatDamage
+import content.entity.combat.hit.hit
 import content.entity.death.characterDeath
 import content.entity.player.combat.special.specialAttack
+import content.skill.magic.spell.spell
 import content.skill.melee.weapon.attackRange
 import content.skill.melee.weapon.attackSpeed
 import content.skill.melee.weapon.fightStyle
@@ -22,6 +24,7 @@ import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.characterDespawn
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.event.onEvent
 import world.gregs.voidps.type.Script
 
@@ -125,6 +128,8 @@ class Combat {
             character.emit(CombatStart(target))
         }
         target.start("in_combat", 8)
+
+        Publishers.all.combatAttack(character, target, character.fightStyle, -1, character.weapon, character.spell)
         val swing = CombatSwing(target)
         character.emit(swing)
         (character as? Player)?.specialAttack = false

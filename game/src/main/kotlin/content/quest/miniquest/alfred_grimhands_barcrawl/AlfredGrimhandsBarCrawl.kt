@@ -10,6 +10,7 @@ import content.quest.quest
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.chat.Colours
 import world.gregs.voidps.engine.client.ui.chat.toTag
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.entity.character.mode.interact.TargetInteraction
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
@@ -18,10 +19,11 @@ import world.gregs.voidps.engine.event.TargetContext
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Inventory
 
-suspend fun <T : TargetInteraction<Player, NPC>> T.barCrawlDrink(
-    start: (suspend T.() -> Unit)? = null,
-    effects: suspend T.() -> Unit = {},
+suspend fun Dialogue.barCrawlDrink(
+    start: (suspend Dialogue.() -> Unit)? = null,
+    effects: suspend Dialogue.() -> Unit = {},
 ) {
     player<Talk>("I'm doing Alfred Grimhand's Barcrawl.")
     val info: Map<String, Any> = target.def.getOrNull("bar_crawl") ?: return
@@ -32,11 +34,11 @@ suspend fun <T : TargetInteraction<Player, NPC>> T.barCrawlDrink(
         return
     }
     player.message(info["give"] as String)
-    delay(4)
+    player.delay(4)
     player.message(info["drink"] as String)
-    delay(4)
+    player.delay(4)
     player.message(info["effect"] as String)
-    delay(4)
+    player.delay(4)
     (info["sign"] as? String)?.let { player.message(it) }
     player.addVarbit("barcrawl_signatures", id)
     effects()
@@ -48,37 +50,35 @@ val barCrawlFilter: TargetContext<Player, NPC>.() -> Boolean = filter@{
     player.quest("alfred_grimhands_barcrawl") == "signatures" && !player.containsVarbit("barcrawl_signatures", id)
 }
 
-@Script
 class AlfredGrimhandsBarCrawl {
 
-    init {
-        inventoryItem("Read", "barcrawl_card") {
-            val signatures: List<String> = player["barcrawl_signatures", emptyList()]
-            if (signatures.size == 10) {
-                player.message("You are too drunk to be able to read the barcrawl card.")
-                return@inventoryItem
-            }
-            player.messageScroll(
-                listOf(
-                    "${Colours.BLUE.toTag()}The Official Alfred Grimhand Barcrawl!",
-                    "",
-                    line("Blue Moon Inn", "uncle_humphreys_gutrot"),
-                    line("Blurberry's Bar", "fire_toad_blast"),
-                    line("Dead Man's Chest", "supergrog"),
-                    line("Dragon Inn", "fire_brandy"),
-                    line("Flying Horse Inn", "heart_stopper"),
-                    line("Forester's Arms", "liverbane_ale"),
-                    line("Jolly Boar Inn", "olde_suspiciouse"),
-                    line("Karamja Spirits Bar", "ape_bite_liqueur"),
-                    line("Rising Sun Inn", "hand_of_death_cocktail"),
-                    line("Rusty Anchor Inn", "black_skull_ale"),
-                ),
-            )
+    @Inventory("Read", "barcrawl_card")
+    fun readCard(player: Player) {
+        val signatures: List<String> = player["barcrawl_signatures", emptyList()]
+        if (signatures.size == 10) {
+            player.message("You are too drunk to be able to read the barcrawl card.")
+            return
         }
+        player.messageScroll(
+            listOf(
+                "${Colours.BLUE.toTag()}The Official Alfred Grimhand Barcrawl!",
+                "",
+                player.line("Blue Moon Inn", "uncle_humphreys_gutrot"),
+                player.line("Blurberry's Bar", "fire_toad_blast"),
+                player.line("Dead Man's Chest", "supergrog"),
+                player.line("Dragon Inn", "fire_brandy"),
+                player.line("Flying Horse Inn", "heart_stopper"),
+                player.line("Forester's Arms", "liverbane_ale"),
+                player.line("Jolly Boar Inn", "olde_suspiciouse"),
+                player.line("Karamja Spirits Bar", "ape_bite_liqueur"),
+                player.line("Rising Sun Inn", "hand_of_death_cocktail"),
+                player.line("Rusty Anchor Inn", "black_skull_ale"),
+            ),
+        )
     }
 
-    fun Context<Player>.line(name: String, id: String): String {
-        val complete = player.containsVarbit("barcrawl_signatures", id)
+    fun Player.line(name: String, id: String): String {
+        val complete = containsVarbit("barcrawl_signatures", id)
         return "<${Colours.bool(complete)}>$name - ${if (complete) "Completed!" else "Not Completed"}"
     }
 }

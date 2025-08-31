@@ -16,6 +16,8 @@ import world.gregs.voidps.engine.event.Events
  * @param weapon weapon used
  * @param spell magic spell used
  * @param special whether weapon special attack was used
+ *
+ * @Combat(afterDelay = true)
  */
 data class CombatDamage(
     val source: Character,

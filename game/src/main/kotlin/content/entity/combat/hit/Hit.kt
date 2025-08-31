@@ -156,7 +156,7 @@ fun Character.hit(
 ): Int {
     val actualDamage = Damage.modify(this, target, offensiveType, damage, weapon, spell, special)
         .coerceAtMost(target.levels.get(Skill.Constitution))
-    get<Publishers>().combatAttack(this, target, offensiveType, actualDamage, weapon, spell, special, delay)
+    Publishers.all.combatAttack(this, target, offensiveType, actualDamage, weapon, spell, special, delay)
     emit(CombatAttack(target, offensiveType, actualDamage, weapon, spell, special, delay))
     target.strongQueue("hit", if (delay == 0) 0 else CLIENT_TICKS.toTicks(delay) + 1) {
         target.directHit(this@hit, actualDamage, offensiveType, weapon, spell, special)
@@ -176,7 +176,7 @@ fun Character.directHit(source: Character, damage: Int, type: String = "damage",
     if (source.dead) {
         return
     }
-    get<Publishers>().combatAttack(source, this, type, damage, weapon, spell, special, -1)
+    Publishers.all.combatAttack(source, this, type, damage, weapon, spell, special, delay = -1)
     emit(CombatDamage(source, type, damage, weapon, spell, special))
     if (source["debug", false] || this["debug", false]) {
         val player = if (this["debug", false] && this is Player) this else source as Player

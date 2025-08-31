@@ -4,11 +4,13 @@ import content.entity.effect.transform
 import content.entity.player.dialogue.*
 import content.entity.player.dialogue.type.*
 import world.gregs.voidps.engine.client.ui.closeMenu
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.client.ui.dialogue.talkWith
 import world.gregs.voidps.engine.client.ui.event.interfaceClose
 import world.gregs.voidps.engine.client.ui.event.interfaceOpen
 import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.data.definition.EnumDefinitions
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
@@ -31,6 +33,9 @@ import world.gregs.voidps.network.login.protocol.visual.update.player.BodyColour
 import world.gregs.voidps.network.login.protocol.visual.update.player.BodyPart
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.Close
+import world.gregs.voidps.type.sub.Open
+import world.gregs.voidps.type.sub.Option
 import java.util.concurrent.TimeUnit
 
 @Script
@@ -39,33 +44,37 @@ class MakeoverMage {
     val enums: EnumDefinitions by inject()
     val npcs: NPCs by inject()
 
+    @Option("Talk-to", "makeover_mage*")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        npc<Pleased>("Hello there! I am known as the Makeover Mage! I have spent many years researching magicks that can change your physical appearance.")
+        npc<Pleased>("I call it a 'makeover'. Would you like me to perform my magicks on you?")
+        choice {
+            more()
+            start()
+            exit()
+            amulet()
+            colour()
+        }
+    }
+
+    @Option("Makeover", "makeover_mage*")
+    suspend fun click(player: Player, npc: NPC) = player.talkWith(npc) {
+        openDressingRoom("skin_colour")
+    }
+
+    @Close("skin_colour")
+    fun close(player: Player) {
+        player.softTimers.stop("dressing_room")
+    }
+
+    @Open("skin_colour")
+    fun open(player: Player, id: String) {
+        player["makeover_female"] = !player.male
+        player["makeover_colour_skin"] = player.body.getColour(BodyColour.Skin)
+        player.interfaces.sendText(id, "confirm", "CONFIRM")
+    }
+
     init {
-        npcOperate("Talk-to", "makeover_mage*") {
-            npc<Pleased>("Hello there! I am known as the Makeover Mage! I have spent many years researching magicks that can change your physical appearance.")
-            npc<Pleased>("I call it a 'makeover'. Would you like me to perform my magicks on you?")
-            choice {
-                more()
-                start()
-                exit()
-                amulet()
-                colour()
-            }
-        }
-
-        npcOperate("Makeover", "makeover_mage*") {
-            openDressingRoom("skin_colour")
-        }
-
-        interfaceClose("skin_colour") { player ->
-            player.softTimers.stop("dressing_room")
-        }
-
-        interfaceOpen("skin_colour") { player ->
-            player["makeover_female"] = !player.male
-            player["makeover_colour_skin"] = player.body.getColour(BodyColour.Skin)
-            player.interfaces.sendText(id, "confirm", "CONFIRM")
-        }
-
         interfaceOption("Select Female", "female", "skin_colour") {
             player["makeover_female"] = true
             player.sendVariable("makeover_colour_skin")
@@ -138,7 +147,7 @@ class MakeoverMage {
         }
     }
 
-    suspend fun ChoiceBuilder<NPCOption<Player>>.more(): Unit = option<Quiz>("Tell me more about this 'makeover'.") {
+    suspend fun ChoiceBuilder<Dialogue>.more(): Unit = option<Quiz>("Tell me more about this 'makeover'.") {
         npc<Happy>("Why, of course! Basically, and I will explain this so that you understand it correctly,")
         npc<Happy>("I use my secret magical technique to melt your body down into a puddle of its elements.")
         npc<Happy>("When I have broken down all components of your body, I then rebuild it into the form I am thinking of.")
@@ -148,7 +157,7 @@ class MakeoverMage {
         whatDoYouSay()
     }
 
-    suspend fun NPCOption<Player>.whatDoYouSay() {
+    suspend fun Dialogue.whatDoYouSay() {
         npc<Uncertain>("So, what do you say? Feel like a change?")
         choice {
             start()
@@ -156,17 +165,17 @@ class MakeoverMage {
         }
     }
 
-    suspend fun ChoiceBuilder<NPCOption<Player>>.start(): Unit = option<Talk>("Sure, do it.") {
+    suspend fun ChoiceBuilder<Dialogue>.start(): Unit = option<Talk>("Sure, do it.") {
         npc<Happy>("You, of course, agree that if by some accident you are turned into a frog you have no rights for compensation or refund.")
         openDressingRoom("skin_colour")
     }
 
-    suspend fun ChoiceBuilder<NPCOption<Player>>.exit(): Unit = option("No, thanks.") {
+    suspend fun ChoiceBuilder<Dialogue>.exit(): Unit = option("No, thanks.") {
         player<Frustrated>("No, thanks. I'm happy as I am.")
         npc<Sad>("Ehhh..suit yourself.")
     }
 
-    suspend fun ChoiceBuilder<NPCOption<Player>>.amulet(): Unit = option<Pleased>("Cool amulet! Can I have one?") {
+    suspend fun ChoiceBuilder<Dialogue>.amulet(): Unit = option<Pleased>("Cool amulet! Can I have one?") {
         val cost = 100
         npc<Talk>("No problem, but please remember that the amulet I will sell you is only a copy of my own. It contains no magical powers and, as such, will only cost you $cost coins.")
         if (!player.holdsItem("coins", cost)) {
@@ -196,7 +205,7 @@ class MakeoverMage {
         }
     }
 
-    suspend fun NPCOption<Player>.explain() {
+    suspend fun Dialogue.explain() {
         npc<Pleased>("I can alter your physical form if you wish. Would you like me to perform my magicks on you?")
         choice {
             more()
@@ -205,7 +214,7 @@ class MakeoverMage {
         }
     }
 
-    suspend fun ChoiceBuilder<NPCOption<Player>>.colour(): Unit = option<Pleased>("Can you make me a different colour?") {
+    suspend fun ChoiceBuilder<Dialogue>.colour(): Unit = option<Pleased>("Can you make me a different colour?") {
         npc<Happy>("Why, of course! I have a wide array of colours for you to choose from.")
         whatDoYouSay()
     }

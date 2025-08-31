@@ -33,7 +33,7 @@ class ObjectTeleports {
             return false
         }
         val teleport = ObjectTeleport(player, target, def, definition.option)
-        if (get<Publishers>().teleport(player, target, def, option)) {
+        if (Publishers.all.teleport(player, target, def, option)) {
             return true
         }
         player.emit(teleport)
@@ -61,7 +61,7 @@ class ObjectTeleports {
             }
             player.tele(tile)
         }
-        get<Publishers>().teleport(player, teleport.target, teleport.obj, teleport.option, land = true)
+        Publishers.all.teleport(player, teleport.target, teleport.obj, teleport.option, land = true)
         teleport.land = true
         player.emit(teleport)
     }

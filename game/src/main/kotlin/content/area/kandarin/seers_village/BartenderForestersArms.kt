@@ -8,6 +8,7 @@ import content.entity.player.dialogue.type.npc
 import content.quest.miniquest.alfred_grimhands_barcrawl.barCrawlDrink
 import content.quest.miniquest.alfred_grimhands_barcrawl.barCrawlFilter
 import world.gregs.voidps.engine.client.message
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.client.ui.interact.itemOnNPCOperate
 import world.gregs.voidps.engine.entity.character.mode.interact.TargetInteraction
 import world.gregs.voidps.engine.entity.character.npc.NPC
@@ -16,61 +17,65 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.noInterest
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
+import world.gregs.voidps.type.sub.UseOn
 
 @Script
 class BartenderForestersArms {
 
-    init {
-        npcOperate("Talk-to", "bartender_foresters_arms") {
-            npc<Quiz>("Good morning, what would you like?")
-            choice {
-                option<Quiz>("What do you have?") {
-                    npc<Talk>("Well we have beer, or if you want some food, we have our home made stew and meat pies.")
-                    choice {
-                        option<Talk>("Beer please.") {
-                            npc<Talk>("One beer coming up. Ok, that'll be two coins.")
-                            if (buy("beer", 2)) {
-                                player.message("You buy a pint of beer.")
-                            }
+    @Option("Talk-to", "bartender_foresters_arms")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        npc<Quiz>("Good morning, what would you like?")
+        choice {
+            option<Quiz>("What do you have?") {
+                npc<Talk>("Well we have beer, or if you want some food, we have our home made stew and meat pies.")
+                choice {
+                    option<Talk>("Beer please.") {
+                        npc<Talk>("One beer coming up. Ok, that'll be two coins.")
+                        if (buy("beer", 2)) {
+                            player.message("You buy a pint of beer.")
                         }
-                        option<Talk>("I'll try the meat pie.") {
-                            npc<Talk>("Ok, that'll be 16 coins.")
-                            if (buy("meat_pie", 16)) {
-                                player.message("You buy a nice hot meat pie.")
-                            }
-                        }
-                        option<Quiz>("Could I have some stew please?") {
-                            npc<Talk>("A bowl of stew, that'll be 20 coins please.")
-                            if (buy("stew", 20)) {
-                                player.message("You buy a bowl of home made stew.")
-                            }
-                        }
-                        option<Talk>("I don't really want anything thanks.")
                     }
-                }
-                option<Talk>("I'll have a beer then.") {
-                    npc<Talk>("Ok, that'll be two coins.")
-                    if (buy("beer", 20)) {
-                        player.message("You buy a pint of beer.")
+                    option<Talk>("I'll try the meat pie.") {
+                        npc<Talk>("Ok, that'll be 16 coins.")
+                        if (buy("meat_pie", 16)) {
+                            player.message("You buy a nice hot meat pie.")
+                        }
                     }
+                    option<Quiz>("Could I have some stew please?") {
+                        npc<Talk>("A bowl of stew, that'll be 20 coins please.")
+                        if (buy("stew", 20)) {
+                            player.message("You buy a bowl of home made stew.")
+                        }
+                    }
+                    option<Talk>("I don't really want anything thanks.")
                 }
-                option("I'm doing Alfred Grimhand's barcrawl.", filter = barCrawlFilter) {
-                    barCrawl()
-                }
-                option<Talk>("I don't really want anything thanks.")
             }
+            option<Talk>("I'll have a beer then.") {
+                npc<Talk>("Ok, that'll be two coins.")
+                if (buy("beer", 20)) {
+                    player.message("You buy a pint of beer.")
+                }
+            }
+            option("I'm doing Alfred Grimhand's barcrawl.", filter = barCrawlFilter) {
+                barCrawl()
+            }
+            option<Talk>("I don't really want anything thanks.")
         }
+    }
 
-        itemOnNPCOperate("barcrawl_card", "bartender_foresters_arms") {
-            if (player.containsVarbit("barcrawl_signatures", "liverbane_ale")) {
-                player.noInterest() // TODO proper message
-                return@itemOnNPCOperate
-            }
+    @UseOn("barcrawl_card", "bartender_foresters_arms")
+    suspend fun use(player: Player, npc: NPC) {
+        if (player.containsVarbit("barcrawl_signatures", "liverbane_ale")) {
+            player.noInterest() // TODO proper message
+            return
+        }
+        player.talkWith(npc) {
             barCrawl()
         }
     }
 
-    suspend fun TargetInteraction<Player, NPC>.barCrawl() = barCrawlDrink(
+    suspend fun Dialogue.barCrawl() = barCrawlDrink(
         effects = {
             player.levels.drain(Skill.Attack, 6)
             player.levels.drain(Skill.Defence, 6)

@@ -5,7 +5,6 @@ import content.entity.combat.attackers
 import content.entity.combat.hit.npcCombatDamage
 import content.entity.gfx.areaGfx
 import content.entity.player.dialogue.type.warning
-import content.entity.player.inv.inventoryItem
 import content.entity.sound.areaSound
 import content.skill.firemaking.Light
 import content.skill.firemaking.Light.hasLightSource
@@ -24,7 +23,7 @@ import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.entity.obj.objectOperate
+import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventoryUpdate
@@ -33,6 +32,7 @@ import world.gregs.voidps.engine.queue.queue
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
+import world.gregs.voidps.type.sub.*
 import kotlin.random.Random
 
 @Script
@@ -53,66 +53,75 @@ class GiantMole {
     val gianMoleSpawns = areas["giant_mole_spawn_area"]
     val initialCaveTile: Tile = Tile(1752, 5237, 0)
 
-    init {
-        inventoryItem("Dig", "spade") {
-            val playerTile: Tile = player.tile
-            player.anim("dig_with_spade")
-            if (!acceptedTiles.contains(playerTile)) {
-                return@inventoryItem
-            }
+    @Inventory("Dig", "spade")
+    suspend fun dig(player: Player) {
+        val playerTile: Tile = player.tile
+        player.anim("dig_with_spade")
+        if (!acceptedTiles.contains(playerTile)) {
+            return
+        }
+        player.dialogue {
             if (warning("mole_lair")) {
                 player.tele(initialCaveTile)
             }
         }
+    }
 
-        objectOperate("Climb", "giant_mole_lair_escape_rope") {
-            player.anim("climb_up")
-            player.tele(acceptedTiles.random())
+    @Option("Climb", "giant_mole_lair_escape_rope")
+    fun click(player: Player, target: GameObject) {
+        player.anim("climb_up")
+        player.tele(acceptedTiles.random())
+    }
+
+    @Combat(id = "giant_mole")
+    fun combat(mole: NPC, target: Player, damage: Int) {
+        val currentHealth = mole.levels.get(Skill.Constitution)
+        var shouldBurrow = false
+        if (mole.fightStyle == "magic" && damage != 0) {
+            shouldBurrow = shouldBurrowAway(currentHealth)
+        } else if (mole.fightStyle != "magic") {
+            shouldBurrow = shouldBurrowAway(currentHealth)
         }
-
-        npcCombatDamage("giant_mole") {
-            val currentHealth = it.levels.get(Skill.Constitution)
-            var shouldBurrow = false
-            if (it.fightStyle == "magic" && damage != 0) {
-                shouldBurrow = shouldBurrowAway(currentHealth)
-            } else if (it.fightStyle != "magic") {
-                shouldBurrow = shouldBurrowAway(currentHealth)
-            }
-            if (shouldBurrow && !it.hasClock("awaiting_mole_burrow_complete")) {
-                it.start("awaiting_mole_burrow_complete", 4)
-                giantMoleBurrow(it)
-            }
+        if (shouldBurrow && !mole.hasClock("awaiting_mole_burrow_complete")) {
+            mole.start("awaiting_mole_burrow_complete", 4)
+            giantMoleBurrow(mole)
         }
+    }
 
-        enterArea("giant_mole_lair") {
-            if (!hasLightSource(player)) {
-                player.open("level_three_darkness")
-            }
+    @Enter("giant_mole_lair")
+    fun enter(player: Player) {
+        if (!hasLightSource(player)) {
+            player.open("level_three_darkness")
         }
+    }
 
-        exitArea("giant_mole_lair") {
-            if (player.interfaces.contains("level_three_darkness")) {
-                player.close("level_three_darkness")
-            }
+    @Exit("giant_mole_lair")
+    fun exit(player: Player) {
+        if (player.interfaces.contains("level_three_darkness")) {
+            player.close("level_three_darkness")
         }
+    }
 
-        playerSpawn { player ->
-            if (giantMoleLair.contains(player.tile)) {
-                if (!hasLightSource(player)) {
-                    player.open("level_three_darkness")
-                }
-            }
+    @Spawn
+    fun spawn(player: Player) {
+        if (!giantMoleLair.contains(player.tile)) {
+            return
         }
+        if (!hasLightSource(player)) {
+            player.open("level_three_darkness")
+        }
+    }
 
-        inventoryUpdate("inventory") { player: Player ->
-            if (giantMoleLair.contains(player.tile)) {
-                val hasLightSource = hasLightSource(player)
-                if (!hasLightSource && !player.interfaces.contains("level_three_darkness")) {
-                    player.open("level_three_darkness")
-                } else if (hasLightSource && player.interfaces.contains("level_three_darkness")) {
-                    player.close("level_three_darkness")
-                }
-            }
+    @InventoryChanged
+    fun update(player: Player) {
+        if (!giantMoleLair.contains(player.tile)) {
+            return
+        }
+        val hasLightSource = hasLightSource(player)
+        if (!hasLightSource && !player.interfaces.contains("level_three_darkness")) {
+            player.open("level_three_darkness")
+        } else if (hasLightSource && player.interfaces.contains("level_three_darkness")) {
+            player.close("level_three_darkness")
         }
     }
 

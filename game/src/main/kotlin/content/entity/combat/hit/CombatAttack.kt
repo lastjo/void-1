@@ -14,6 +14,8 @@ import world.gregs.voidps.engine.event.Events
  * @param type the combat type, typically: melee, range or magic
  * @param damage the damage inflicted upon the [target]
  * @param delay until hit in client ticks
+ *
+ * @Combat(afterDelay = false)
  */
 data class CombatAttack(
     val target: Character,

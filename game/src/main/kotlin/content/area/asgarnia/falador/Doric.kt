@@ -6,25 +6,23 @@ import content.entity.sound.jingle
 import content.quest.quest
 import content.quest.questComplete
 import content.quest.refreshQuestJournal
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
 import world.gregs.voidps.engine.event.Context
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.contains
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.engine.suspend.SuspendableContext
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
-class Doric {
-
-    val floorItems: FloorItems by inject()
+class Doric(
+    val floorItems: FloorItems
+) {
 
     val ores = listOf(
         Item("clay", 6),
@@ -32,26 +30,25 @@ class Doric {
         Item("iron_ore", 2),
     )
 
-    init {
-        npcOperate("Talk-to", "doric") {
-            when (player.quest("dorics_quest")) {
-                "started" -> {
-                    npc<Quiz>("Have you got my materials yet, traveller?")
-                    if (!player.inventory.contains(ores)) {
-                        noOre()
-                        return@npcOperate
-                    }
-                    player<Happy>("I have everything you need!")
-                    npc<Happy>("Many thanks! Pass them here, please. I can spare you some coins for your trouble, and please use my anvils any time you want.")
-                    takeOre()
+    @Option("Talk-to", "doric")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        when (player.quest("dorics_quest")) {
+            "started" -> {
+                npc<Quiz>("Have you got my materials yet, traveller?")
+                if (!player.inventory.contains(ores)) {
+                    noOre()
+                    return@talkWith
                 }
-                "completed" -> {
-                    npc<Neutral>("Hello traveller, how is your metalworking coming along?")
-                    player<Neutral>("Not too bad, Doric.")
-                    npc<Happy>("Good, the love of metal is a thing close to my heart.")
-                }
-                else -> unstarted()
+                player<Happy>("I have everything you need!")
+                npc<Happy>("Many thanks! Pass them here, please. I can spare you some coins for your trouble, and please use my anvils any time you want.")
+                takeOre()
             }
+            "completed" -> {
+                npc<Neutral>("Hello traveller, how is your metalworking coming along?")
+                player<Neutral>("Not too bad, Doric.")
+                npc<Happy>("Good, the love of metal is a thing close to my heart.")
+            }
+            else -> unstarted()
         }
     }
 

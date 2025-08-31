@@ -34,11 +34,11 @@ import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.map.collision.CollisionFlags
 import world.gregs.voidps.engine.map.collision.Collisions
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.engine.timer.TimerQueue
 import world.gregs.voidps.engine.timer.timerTick
 import world.gregs.voidps.network.login.protocol.encode.*
 import world.gregs.voidps.type.PlayerRights
+import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.Zone
 import kotlin.system.measureNanoTime

@@ -10,6 +10,7 @@ import content.entity.player.dialogue.type.player
 import content.entity.player.dialogue.type.statement
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.interact.itemOnNPCOperate
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.inv.Inventory
@@ -19,15 +20,14 @@ import world.gregs.voidps.engine.inv.replace
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItemLimit.removeToLimit
 import world.gregs.voidps.engine.inv.transact.operation.ReplaceItem.replace
-import world.gregs.voidps.engine.script.Script
 import world.gregs.voidps.engine.suspend.SuspendableContext
+import world.gregs.voidps.type.sub.UseOn
 
-@Script
 class GuardianMummy {
 
-    val ivory = listOf("ivory_comb", "pottery_scarab", "pottery_statuette")
-    val stone = listOf("stone_seal", "stone_scarab", "stone_statuette")
-    val gold = listOf("gold_seal", "gold_scarab", "gold_statuette")
+    private val ivory = listOf("ivory_comb", "pottery_scarab", "pottery_statuette")
+    private val stone = listOf("stone_seal", "stone_scarab", "stone_statuette")
+    private val gold = listOf("gold_seal", "gold_scarab", "gold_statuette")
 
     init {
         npcOperate("Talk-to", "guardian_mummy") {
@@ -54,6 +54,17 @@ class GuardianMummy {
         itemOnNPCOperate("*", "guardian_mummy") {
             player.message("The Mummy is not interested in this")
         }
+    }
+
+    @UseOn(item = "pharaohs_sceptre", on = "guardian_mummy")
+    fun useSceptre(player: Player, npc: NPC) {
+//        player.delay(2)
+        player.message("Discharge")
+    }
+
+    @UseOn(on = "guardian_mummy")
+    fun useAll(player: Player, npc: NPC) {
+        player.message("The Mummy is not interested in this")
     }
 
     suspend fun SuspendableContext<Player>.notAnother() {

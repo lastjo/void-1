@@ -11,6 +11,8 @@ import world.gregs.voidps.engine.event.Events
 
 /**
  * A turn in a combat scenario resulting one or many hits
+ *
+ * @Combat(swing = true)
  */
 class CombatSwing(
     val target: Character,

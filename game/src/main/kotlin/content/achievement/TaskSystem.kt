@@ -18,121 +18,131 @@ import world.gregs.voidps.engine.entity.character.mode.move.exitArea
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.*
 
-@Script
-class TaskSystem {
+class TaskSystem(
+    private val variables: VariableDefinitions,
+    private val enumDefinitions: EnumDefinitions,
+    private val structDefinitions: StructDefinitions,
+) {
 
-    val variables: VariableDefinitions by inject()
-    val enumDefinitions: EnumDefinitions by inject()
-    val structDefinitions: StructDefinitions by inject()
-
-    init {
-        interfaceOpen("task_system") { player ->
-            player.sendVariable("task_pin_slot")
-            player.sendVariable("task_pinned")
-            player.sendVariable("introducing_explorer_jack_task")
-            refreshSlots(player)
-            if (player.contains("task_dont_show_again")) {
-                player.sendVariable("task_dont_show_again")
-            }
-            if (!player.questCompleted("unstable_foundations")) {
-                player["task_pinned"] = 3520 // Talk to explorer jack
-                player["task_pin_slot"] = 1
-                player["task_slot_selected"] = 1
-                player["unstable_foundations"] = "incomplete"
-            }
+    @Open("task_system")
+    fun openTasks(player: Player) {
+        player.sendVariable("task_pin_slot")
+        player.sendVariable("task_pinned")
+        player.sendVariable("introducing_explorer_jack_task")
+        refreshSlots(player)
+        if (player.contains("task_dont_show_again")) {
+            player.sendVariable("task_dont_show_again")
         }
-
-        enterArea("lumbridge") {
-            player["task_area"] = "lumbridge_draynor"
+        if (!player.questCompleted("unstable_foundations")) {
+            player["task_pinned"] = 3520 // Talk to explorer jack
+            player["task_pin_slot"] = 1
+            player["task_slot_selected"] = 1
+            player["unstable_foundations"] = "incomplete"
         }
+    }
 
-        exitArea("lumbridge") {
-            player["task_area"] = "dnd_activities"
+    @Enter("lumbridge")
+    fun enterLumbridge(player: Player) {
+        player["task_area"] = "lumbridge_draynor"
+    }
+
+    @Enter("draynor")
+    fun enterDraynor(player: Player) {
+        player["task_area"] = "lumbridge_draynor"
+    }
+
+    @Exit("draynor")
+    @Exit("lumbridge")
+    fun exitAreas(player: Player) {
+        player["task_area"] = "dnd_activities"
+    }
+
+    @Interface("Close", "close_hint", "task_system")
+    fun closeHints(player: Player, id: String) {
+        player.interfaces.sendVisibility(id, "message_overlay", false)
+    }
+
+    @Interface("Select Task", "task_*", "task_system")
+    fun selectTask(player: Player, component: String) {
+        val slot = component.removePrefix("task_").toInt()
+        player["task_slot_selected"] = slot
+    }
+
+    @Interface("Select Task", "dont_show", "task_system")
+    fun toggleTask(player: Player) {
+        player["task_dont_show_again"] = !player["task_dont_show_again", false]
+    }
+
+    @Interface("Open", "task_list", "task_system")
+    fun openList(player: Player) {
+        player.open("task_list")
+    }
+
+    @Interface("OK", "ok", "task_system")
+    fun closeSummary(player: Player) {
+        player.interfaces.sendVisibility("task_system", "summary_overlay", false)
+        val slot = player["task_slot_selected", 0]
+        val selected = indexOfSlot(player, slot) ?: return
+        if (selected == player["task_pinned", -1]) {
+            player.clear("task_pinned")
+            player.clear("task_pin_slot")
         }
+        player.interfaces.sendVisibility("task_system", "ok", false)
+        refreshSlots(player)
+    }
 
-        enterArea("draynor") {
-            player["task_area"] = "lumbridge_draynor"
-        }
+    @Interface("Pin/Unpin Task", "task_*", "task_system")
+    fun pinSummary(player: Player, component: String) {
+        val index = component.removePrefix("task_").toInt()
+        pin(player, index)
+    }
 
-        exitArea("draynor") {
-            player["task_area"] = "dnd_activities"
-        }
+    @Interface("Set", "pin", "task_system")
+    fun pin(player: Player, component: String) {
+        val slot = player.get<Int>("task_slot_selected") ?: return
+        pin(player, slot)
+        player.interfaces.sendVisibility("task_system", "summary_overlay", false)
+    }
 
-        interfaceOption("Close", "close_hint", "task_system") {
-            player.interfaces.sendVisibility(id, "message_overlay", false)
-        }
+    @Variable("task_pin_slot", "task_area")
+    fun pinChanged(player: Player) {
+        refreshSlots(player)
+    }
 
-        interfaceOption("Select Task", "task_*", "task_system") {
-            val slot = component.removePrefix("task_").toInt()
-            player["task_slot_selected"] = slot
-        }
-
-        interfaceOption("Toggle", "dont_show", "task_system") {
-            player["task_dont_show_again"] = !player["task_dont_show_again", false]
-        }
-
-        interfaceOption("Open", "task_list", "task_system") {
-            player.open("task_list")
-        }
-
-        interfaceOption("OK", "ok", "task_system") {
-            player.interfaces.sendVisibility("task_system", "summary_overlay", false)
-            val slot = player["task_slot_selected", 0]
-            val selected = indexOfSlot(player, slot) ?: return@interfaceOption
-            if (selected == player["task_pinned", -1]) {
-                player.clear("task_pinned")
-                player.clear("task_pin_slot")
-            }
-            player.interfaces.sendVisibility("task_system", "ok", false)
-            refreshSlots(player)
-        }
-
-        interfaceOption("Pin/Unpin Task", "task_*", "task_system") {
-            val index = component.removePrefix("task_").toInt()
-            pin(player, index)
-        }
-
-        interfaceOption("Set", "pin", "task_system") {
-            val slot = player.get<Int>("task_slot_selected") ?: return@interfaceOption
-            pin(player, slot)
-            player.interfaces.sendVisibility("task_system", "summary_overlay", false)
-        }
-
-        variableSet("task_pin_slot", "task_area") { player ->
-            refreshSlots(player)
-        }
-
-        interfaceOption("Details", "details", "task_popup") {
-            if (player.questCompleted("unstable_foundations")) {
-                player["task_popup_summary"] = true
-                player.interfaces.sendVisibility("task_system", "ok", true)
-                val index = player["task_popup", -1]
-                for (slot in 0 until 6) {
-                    if (player["task_slot_$slot", -1] == index) {
-                        player["task_slot_selected"] = slot
-                        break
-                    }
+    @Interface("Details", "details", "task_popup")
+    fun details(player: Player) {
+        if (player.questCompleted("unstable_foundations")) {
+            player["task_popup_summary"] = true
+            player.interfaces.sendVisibility("task_system", "ok", true)
+            val index = player["task_popup", -1]
+            for (slot in 0 until 6) {
+                if (player["task_slot_$slot", -1] == index) {
+                    player["task_slot_selected"] = slot
+                    break
                 }
             }
-            player.tab(Tab.TaskSystem)
         }
+        player.tab(Tab.TaskSystem)
+    }
 
-        variableSet("*_task") { player ->
-            if (to == true || to == "completed") {
-                completeTask(player, key)
-            }
+    @Variable("*_task")
+    fun taskSet(player: Player, key: String, to: Any?) {
+        if (to == true || to == "completed") {
+            completeTask(player, key)
         }
+    }
 
-        interfaceOption("Hint", "hint_*", "task_system") {
-            val selected = player["task_slot_selected", 0]
-            val index = indexOfSlot(player, selected) ?: return@interfaceOption
-            val tile: Int = enumDefinitions.getStructOrNull("task_structs", index, component.replace("hint_", "task_hint_tile_")) ?: return@interfaceOption
-            // TODO I expect the functionality is actually minimap highlights not world map
-            player["world_map_marker_1"] = tile
-            player["world_map_marker_text_1"] = ""
-            player.open("world_map")
-        }
+    @Interface("Hint", "hint_*", "task_system")
+    fun hint(player: Player, component: String) {
+        val selected = player["task_slot_selected", 0]
+        val index = indexOfSlot(player, selected) ?: return
+        val tile: Int = enumDefinitions.getStructOrNull("task_structs", index, component.replace("hint_", "task_hint_tile_")) ?: return
+        // TODO I expect the functionality is actually minimap highlights not world map
+        player["world_map_marker_1"] = tile
+        player["world_map_marker_text_1"] = ""
+        player.open("world_map")
     }
 
     fun pin(player: Player, slot: Int) {

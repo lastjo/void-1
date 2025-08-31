@@ -6,9 +6,9 @@ import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.inv.itemAdded
 import world.gregs.voidps.engine.inv.itemRemoved
-import world.gregs.voidps.type.Script
-import world.gregs.voidps.type.sub.Added
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
+import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.ItemAdded
 
 @Script
 class VoidSet {
@@ -20,7 +20,7 @@ class VoidSet {
         EquipSlot.Hands.index,
     )
 
-    @Added("void_*", inventory = "worn_equipment", slots = [EquipSlot.HAT, EquipSlot.CHEST, EquipSlot.LEGS, EquipSlot.HANDS])
+    @ItemAdded("void_*", inventory = "worn_equipment", slots = [EquipSlot.HAT, EquipSlot.CHEST, EquipSlot.LEGS, EquipSlot.HANDS])
     fun equipVoid(player: Player) {
         if (player.hasFullSet("")) {
             player["void_set_effect"] = true

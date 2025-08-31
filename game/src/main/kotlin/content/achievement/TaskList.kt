@@ -12,86 +12,86 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.Open
+import world.gregs.voidps.type.sub.Spawn
+import world.gregs.voidps.type.sub.Variable
 
-@Script
-class TaskList {
+class TaskList(
+    private val variables: VariableDefinitions,
+    private val enumDefinitions: EnumDefinitions,
+) {
 
-    val variables: VariableDefinitions by inject()
+    @Spawn
+    fun setup(player: Player) {
+        player.sendVariable("task_disable_popups")
+        player["task_popup"] = 0
+        player["task_previous_popup"] = 0
+        var total = 0
+        for (area in 0 until 8) {
+            Tasks.forEach(area) {
+                if (Tasks.isCompleted(player, definition.stringId)) {
+                    player.sendVariable(definition.stringId)
+                    total++
+                }
+                null
+            }
+        }
+        player["task_progress_overall"] = total
+        player.sendVariable("task_hide_completed")
+        player.sendVariable("task_filter_sets")
+    }
 
-    val enumDefinitions: EnumDefinitions by inject()
+    @Open("task_list")
+    fun openTasks(player: Player) {
+        player.interfaceOptions.unlockAll("task_list", "tasks", 0..492)
+        refresh(player)
+    }
 
-    init {
-        playerSpawn { player ->
-            player.sendVariable("task_disable_popups")
+    @Interface("Select", "area_*", "task_list")
+    fun select(player: Player, component: String) {
+        player["task_list_area"] = component.removePrefix("area_")
+        refresh(player)
+    }
+
+    @Interface("Summary", "tasks", "task_list")
+    fun summary(player: Player, itemSlot: Int) {
+        player["task_slot_selected"] = itemSlot / 4
+    }
+
+    @Interface("Pin", "tasks", "task_list")
+    fun pinSlot(player: Player, itemSlot: Int) {
+        pin(player, itemSlot / 4)
+    }
+
+    @Interface("Filter-sets", "filter_sets", "task_list")
+    fun filterSets(player: Player) {
+        player["task_filter_sets"] = !player["task_filter_sets", false]
+    }
+
+    @Interface("Filter-done", "filter_done", "task_list")
+    fun filterDone(player: Player) {
+        player["task_hide_completed"] = !player["task_hide_completed", false]
+    }
+
+    @Interface("Turn-off", "toggle_popups", "task_list")
+    fun togglePopups(player: Player) {
+        val disable = !player["task_disable_popups", false]
+        player["task_disable_popups"] = disable
+        if (disable) {
             player["task_popup"] = 0
             player["task_previous_popup"] = 0
-            var total = 0
-            for (area in 0 until 8) {
-                Tasks.forEach(area) {
-                    if (Tasks.isCompleted(player, definition.stringId)) {
-                        player.sendVariable(definition.stringId)
-                        total++
-                    }
-                    null
-                }
-            }
-            player["task_progress_overall"] = total
-            player.sendVariable("task_hide_completed")
-            player.sendVariable("task_filter_sets")
         }
+    }
 
-        interfaceOpen("task_list") { player ->
-            player.interfaceOptions.unlockAll("task_list", "tasks", 0..492)
-            refresh(player)
-        }
+    @Variable("task_pin_slot")
+    fun pinChanged(player: Player) {
+        player.close("task_list")
+    }
 
-        interfaceOption("Select", "area_*", "task_list") {
-            player["task_list_area"] = component.removePrefix("area_")
-            refresh(player)
-        }
-
-        interfaceOption("Summary", "tasks", "task_list") {
-            player["task_slot_selected"] = itemSlot / 4
-        }
-
-        interfaceOption("Pin", "tasks", "task_list") {
-            pin(player, itemSlot / 4)
-        }
-
-        interfaceOption("Pin", "pin", "task_list") {
-            pin(player, player["task_slot_selected", 0])
-        }
-
-        interfaceOption("Filter-sets", "filter_sets", "task_list") {
-            player["task_filter_sets"] = !player["task_filter_sets", false]
-        }
-
-        interfaceOption("Filter-done", "filter_done", "task_list") {
-            player["task_hide_completed"] = !player["task_hide_completed", false]
-        }
-
-        interfaceOption("Turn-off", "toggle_popups", "task_list") {
-            val disable = !player["task_disable_popups", false]
-            player["task_disable_popups"] = disable
-            if (disable) {
-                player["task_popup"] = 0
-                player["task_previous_popup"] = 0
-            }
-        }
-
-        variableSet("task_pin_slot") { player ->
-            player.close("task_list")
-        }
-
-        interfaceOption("Hint", "hint_*", "task_list") {
-            val selected = player["task_slot_selected", 0]
-            val index = indexOfSlot(player, selected) ?: return@interfaceOption
-            val tile: Int = enumDefinitions.getStructOrNull("task_structs", index, component.replace("hint_", "task_hint_tile_")) ?: return@interfaceOption
-            // TODO I expect the functionality is actually minimap highlights not world map
-            player["world_map_marker_1"] = tile
-            player["world_map_marker_text_1"] = ""
-            player.open("world_map")
-        }
+    @Interface("Pin", "pin", "task_list")
+    fun pinSelected(player: Player) {
+        pin(player, player["task_slot_selected", 0])
     }
 
     fun indexOfSlot(player: Player, slot: Int): Int? {
@@ -157,4 +157,15 @@ class TaskList {
     /*
         Hints
      */
+
+    @Interface("Hint", "hint_*", "task_list")
+    fun hint(player: Player, component: String) {
+        val selected = player["task_slot_selected", 0]
+        val index = indexOfSlot(player, selected) ?: return
+        val tile: Int = enumDefinitions.getStructOrNull("task_structs", index, component.replace("hint_", "task_hint_tile_")) ?: return
+        // TODO I expect the functionality is actually minimap highlights not world map
+        player["world_map_marker_1"] = tile
+        player["world_map_marker_text_1"] = ""
+        player.open("world_map")
+    }
 }
