@@ -229,17 +229,13 @@ open class Movement(
                 val areaDefinitions: AreaDefinitions = get()
                 for (def in areaDefinitions.get(from.zone)) {
                     if (from in def.area && to !in def.area) {
-                        for (tag in def.tags) {
-                            character.publishers.exitArea(character, def.name, tag, def.area)
-                        }
+                        character.publishers.exitArea(character, def.name, def.tags, def.area)
                         character.emit(AreaExited(character, def.name, def.tags, def.area))
                     }
                 }
                 for (def in areaDefinitions.get(to.zone)) {
                     if (to in def.area && from !in def.area) {
-                        for (tag in def.tags) {
-                            character.publishers.enterArea(character, def.name, tag, def.area)
-                        }
+                        character.publishers.enterArea(character, def.name, def.tags, def.area)
                         character.emit(AreaEntered(character, def.name, def.tags, def.area))
                     }
                 }

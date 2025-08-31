@@ -1,35 +1,37 @@
 package world.gregs.voidps.event.sub
 
+import world.gregs.voidps.event.Comparator
+import world.gregs.voidps.event.Equals
 import world.gregs.voidps.event.Publisher
 import world.gregs.voidps.event.Subscriber
 import kotlin.reflect.KFunction
 
 class InterfaceOnPublisher(function: KFunction<*>, has: KFunction<*>) : Publisher(function, has) {
-    override fun comparisons(method: Subscriber): List<List<Pair<String, Any?>>> {
+    override fun comparisons(method: Subscriber): List<List<Comparator>> {
         val item = method.annotationArgs["item"] as String
         val on = method.annotationArgs["on"] as String
         val id = method.annotationArgs["id"] as String
         val component = method.annotationArgs["component"] as String
         val approach = method.annotationArgs["approach"] as Boolean
 
-        val list = mutableListOf<Pair<String, Any>>()
+        val list = mutableListOf<Comparator>()
         if (item != "*") {
-            list.add("item.id" to item)
+            list.add(Equals("item.id", item))
         }
         if (on != "*") {
             if (name == "InterfaceOnGameObjectPublisher" || name == "InterfaceOnNPCPublisher") {
-                list.add("def.stringId" to on)
+                list.add(Equals("def.stringId", on))
             } else {
-                list.add("target.id" to on)
+                list.add(Equals("target.id", on))
             }
         }
         if (id != "*") {
-            list.add("id" to id)
+            list.add(Equals("id", id))
         }
         if (component != "*") {
-            list.add("component" to component)
+            list.add(Equals("component", component))
         }
-        list.add("approach" to approach)
+        list.add(Equals("approach", approach))
         return listOf(list)
     }
 }

@@ -1,10 +1,9 @@
 package world.gregs.voidps.event
 
-import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 
 data class ConditionNode(
-    val condition: Pair<String, Any?>? = null,
+    val comparator: Comparator? = null,
     val children: MutableList<ConditionNode> = mutableListOf(),
     val subscribers: MutableList<Subscriber> = mutableListOf(),
 ) {
@@ -16,12 +15,11 @@ data class ConditionNode(
         }
 
         // Generate when statement when all children use the same key
-        val firstKey = children.first().condition?.first
-        if (children.all { it.condition?.first == firstKey }) {
+        val firstKey = children.first().comparator?.key
+        if (children.all { it.comparator is Equals && it.comparator.key == firstKey }) {
             builder.beginControlFlow("when (%L)", firstKey)
             for (child in children) {
-                val (_, value) = child.condition!!
-                when (value) {
+                when (val value = child.comparator!!.value) {
                     is String -> builder.beginControlFlow("%S ->", value)
                     else -> builder.beginControlFlow("%L ->", value)
                 }
@@ -33,18 +31,8 @@ data class ConditionNode(
         } else {
             // Fall back to if else chains when there is a mix of different keys
             for (child in children) {
-                val (key, value) = child.condition!!
-                when (value) {
-                    is String -> when {
-                        value == "*" -> continue
-                        value.startsWith("*") -> builder.beginControlFlow("if ($key.endsWith(%S))", value.removePrefix("*"))
-                        value.endsWith("*") -> builder.beginControlFlow("if ($key.startsWith(%S))", value.removeSuffix("*"))
-                        value.contains("*") -> builder.beginControlFlow("if (%T($key, %S))", ClassName("world.gregs.voidps.engine.event", "wildcardEquals"), value)
-                        else -> builder.beginControlFlow("if ($key == %S)", value)
-                    }
-                    is Boolean -> builder.beginControlFlow("if (${if (value) "" else "!"}$key)", value)
-                    else -> builder.beginControlFlow("if ($key == %L)", value)
-                }
+                val statement = child.comparator!!.statement() ?: continue
+                builder.beginControlFlow("if (${statement.code})", *statement.args)
                 child.generate(builder, schema)
                 builder.endControlFlow()
             }
@@ -101,9 +89,9 @@ data class ConditionNode(
                 }
                 for (chain in comparisons) {
                     var node = root
-                    for (pair in chain) {
-                        val child = node.children.find { it.condition == pair }
-                            ?: ConditionNode(pair).also { node.children.add(it) }
+                    for (comparator in chain) {
+                        val child = node.children.find { it.comparator == comparator }
+                            ?: ConditionNode(comparator).also { node.children.add(it) }
                         node = child
                     }
                     node.subscribers.add(method)
@@ -118,10 +106,10 @@ data class ConditionNode(
          */
         fun arguments(method: Subscriber, schema: Publisher) = method.parameters.map { (name, type) ->
             val param = schema.parameters.firstOrNull { it.first == name }
-            if (param != null && param.second.simpleName == type) {
+            if (param != null && param.second == type) {
                 name
             } else {
-                schema.parameters.firstOrNull { it.second.simpleName == type }?.first ?: error("No matching parameter $name: $type found for schema ${schema.name}")
+                schema.parameters.firstOrNull { it.second == type }?.first ?: error("No matching parameter $name: $type found for schema ${schema.name}")
             }
         }
     }

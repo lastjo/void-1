@@ -165,7 +165,7 @@ class PublisherProcessor(
      * Looks up the [Publisher] schema by matching the subscribing methods [args] against the [annotation]
      * list of [Publisher.required] args
      */
-    fun findSchema(annotation: String, args: List<Pair<String, String>>): Publisher {
+    fun findSchema(annotation: String, args: List<Pair<String, TypeName>>): Publisher {
         val publishers = schemas[annotation] ?: error("No schema found for annotation: $annotation.")
         for (publisher in publishers) {
             if (publisher.required.isEmpty()) {
@@ -195,7 +195,7 @@ class PublisherProcessor(
             }
             val annoType = annotation.annotationType.resolve().declaration.qualifiedName?.asString() ?: continue
             val args = annotation.arguments.associate { it.name?.asString().orEmpty() to it.value!! }
-            val params = fn.parameters.map { it.name!!.getShortName() to it.type.resolve().declaration.simpleName.asString() }
+            val params = fn.parameters.map { it.name!!.getShortName() to it.type.resolve().toTypeName() }
             val schema = findSchema(annoType, params)
             if (fn.modifiers.contains(Modifier.SUSPEND) && !schema.suspendable) {
                 error("Method ${parentClass.simpleName.asString()}.${fn.simpleName.asString()} cannot be suspendable.")

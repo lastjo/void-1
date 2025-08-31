@@ -3,6 +3,7 @@ package world.gregs.voidps.event
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.STRING
 import com.squareup.kotlinpoet.asClassName
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.*
@@ -17,15 +18,15 @@ class PublisherProcessorTest {
     private val dummyPublisher = object : Publisher(
         name = "TestPublisher",
         suspendable = false,
-        parameters = listOf("id" to ClassName("kotlin", "String")),
+        parameters = listOf("id" to STRING),
         returnsDefault = true,
         notification = true,
         methodName = "",
-        required = listOf("String")
+        required = listOf(STRING)
     ) {
         override fun comparisons(
             method: Subscriber,
-        ): List<List<Pair<String, Any?>>> = listOf(listOf("id" to "123"))
+        ): List<List<Comparator>> = listOf(listOf(Equals("id", "123")))
     }
 
     @Test
@@ -37,7 +38,7 @@ class PublisherProcessorTest {
         )
 
         val processor = PublisherProcessor(codeGenerator, logger, schemas, Publishers::class.asClassName())
-        val found = processor.findSchema("MyAnnotation", listOf("id" to "String"))
+        val found = processor.findSchema("MyAnnotation", listOf(Pair("id", STRING)))
 
         assertEquals(dummyPublisher, found)
     }
@@ -46,7 +47,7 @@ class PublisherProcessorTest {
     fun `Find schema throws when schema not found`() {
         val processor = PublisherProcessor(codeGenerator, logger, emptyMap(), Publishers::class.asClassName())
         assertThrows(IllegalStateException::class.java) {
-            processor.findSchema("Missing", listOf("id" to "String"))
+            processor.findSchema("Missing", listOf(Pair("id", STRING)))
         }
     }
 }

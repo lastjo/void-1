@@ -10,7 +10,7 @@ import com.squareup.kotlinpoet.TypeName
 data class Subscriber(
     val className: ClassName,
     val methodName: String,
-    val parameters: List<Pair<String, String>>,
+    val parameters: List<Pair<String, TypeName>>,
     val schema: Publisher,
     val annotationArgs: Map<String, Any>,
     val classParams: List<Pair<String, TypeName>>,

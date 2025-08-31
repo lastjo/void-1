@@ -4,6 +4,7 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import com.squareup.kotlinpoet.STRING
+import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.asClassName
 import com.tschuchort.compiletesting.*
 import org.intellij.lang.annotations.Language
@@ -32,7 +33,7 @@ class PublisherProcessorIntegrationTest {
 
     private fun compilation(
         source: String,
-        required: List<String> = listOf("String"),
+        required: List<TypeName> = listOf(STRING),
         notification: Boolean = false,
         cancellable: Boolean = false,
         suspend: Boolean = false,
@@ -73,7 +74,7 @@ class PublisherProcessorIntegrationTest {
         default: Any = false,
         interaction: Boolean = false,
         cancellable: Boolean = false,
-        required: List<String>,
+        required: List<TypeName>,
     ) : Publisher(
         name = "OnEventPublisher",
         parameters = listOf(
@@ -89,32 +90,32 @@ class PublisherProcessorIntegrationTest {
         checkMethodName = if (interaction) "hasOnEvent" else null,
         cancellable = cancellable
     ) {
-        override fun comparisons(method: Subscriber): List<List<Pair<String, Any?>>> {
+        override fun comparisons(method: Subscriber): List<List<Comparator>> {
             // Supports optional multiple annotation values
             val values = (method.annotationArgs["value"] as? List<String>)
                 ?: listOfNotNull(method.annotationArgs["value"] as? String)
-            val list = mutableListOf<Pair<String, Any>>()
+            val list = mutableListOf<Comparator>()
             val approach = method.annotationArgs["appraoch"] as? Boolean
             if (approach != null) {
-                list.add("approach" to approach)
+                list.add(Equals("approach", approach))
             }
-            return values.map { list + listOf("id" to it) }
+            return values.map { list + listOf(Equals("id", it)) }
         }
     }
 
     private class OnMagicEventPublisher(
         function: KFunction<*>, hasFunction: KFunction<*>? = null, notification: Boolean = false, cancellable: Boolean = false, returnsDefault: Any? = null
     ) : Publisher(function, hasFunction, notification, cancellable, returnsDefault) {
-        override fun comparisons(method: Subscriber): List<List<Pair<String, Any?>>> {
+        override fun comparisons(method: Subscriber): List<List<Comparator>> {
             // Supports optional multiple annotation values
             val values = (method.annotationArgs["value"] as? List<String>)
                 ?: listOfNotNull(method.annotationArgs["value"] as? String)
-            return values.map { listOf("id" to it) }
+            return values.map { listOf(Equals("id", it)) }
         }
     }
 
     private class TestProcessorProvider(
-        private val required: List<String> = listOf("String"),
+        private val required: List<TypeName> = listOf(STRING),
         private val notification: Boolean = false,
         private val cancellable: Boolean = false,
         private val suspend: Boolean = false,
@@ -387,7 +388,7 @@ class PublisherProcessorIntegrationTest {
             }
         """.trimIndent()
 
-        val compilation = compilation(source, required = listOf("String", "String"), notification = true, cancellable = true)
+        val compilation = compilation(source, required = listOf(STRING, STRING), notification = true, cancellable = true)
         val result = compilation.compile()
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
@@ -411,7 +412,7 @@ class PublisherProcessorIntegrationTest {
             }
         """.trimIndent()
 
-        val compilation = compilation(source, required = listOf("String", "String"), notification = true)
+        val compilation = compilation(source, required = listOf(STRING, STRING), notification = true)
         val result = compilation.compile()
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
@@ -438,7 +439,7 @@ class PublisherProcessorIntegrationTest {
             }
         """.trimIndent()
 
-        val compilation = compilation(source, required = listOf("String", "String"), notification = true, cancellable = true)
+        val compilation = compilation(source, required = listOf(STRING, STRING), notification = true, cancellable = true)
         val result = compilation.compile()
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
@@ -460,7 +461,7 @@ class PublisherProcessorIntegrationTest {
             }
         """.trimIndent()
 
-        val compilation = compilation(source, required = listOf("String"))
+        val compilation = compilation(source, required = listOf(STRING))
         val result = compilation.compile()
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)

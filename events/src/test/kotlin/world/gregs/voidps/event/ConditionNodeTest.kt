@@ -1,6 +1,7 @@
 package world.gregs.voidps.event
 
 import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.STRING
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -16,7 +17,7 @@ class ConditionNodeTest {
     ) {
         override fun comparisons(
             method: Subscriber,
-        ): List<List<Pair<String, Any?>>> = listOf(listOf("id" to "123"))
+        ): List<List<Comparator>> = listOf(listOf(Equals("id", "123")))
     }
 
     @Test
@@ -24,7 +25,7 @@ class ConditionNodeTest {
         val subscriber = Subscriber(
             className = ClassName("test", "MyHandler"),
             methodName = "onEvent",
-            parameters = listOf("id" to "String"),
+            parameters = listOf("id" to STRING),
             schema = dummyPublisher,
             annotationArgs = emptyMap(),
             classParams = emptyList(),
@@ -34,7 +35,7 @@ class ConditionNodeTest {
         val root = ConditionNode.buildTree(dummyPublisher, listOf(subscriber))
 
         assertEquals(1, root.children.size)
-        assertEquals("id" to "123", root.children.first().condition)
+        assertEquals(Equals("id", "123"), root.children.first().comparator)
         assertEquals(subscriber, root.children.first().subscribers.first())
     }
 
@@ -43,7 +44,7 @@ class ConditionNodeTest {
         val subscriber = Subscriber(
             className = ClassName("test", "MyHandler"),
             methodName = "onEvent",
-            parameters = listOf("id" to "String"),
+            parameters = listOf("id" to STRING),
             schema = dummyPublisher,
             annotationArgs = emptyMap(),
             classParams = emptyList(),

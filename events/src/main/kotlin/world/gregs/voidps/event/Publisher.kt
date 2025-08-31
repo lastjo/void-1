@@ -10,8 +10,8 @@ import kotlin.reflect.KParameter
 abstract class Publisher(
     val name: String,
     val suspendable: Boolean = false,
-    val parameters: List<Pair<String, ClassName>>,
-    val required: List<String>,
+    val parameters: List<Pair<String, TypeName>>,
+    val required: List<TypeName>,
     var returnsDefault: Any = false,
     var notification: Boolean = false,
     var cancellable: Boolean = false,
@@ -22,8 +22,11 @@ abstract class Publisher(
 
     constructor(function: KFunction<*>, hasFunction: KFunction<*>? = null, notification: Boolean = false, cancellable: Boolean = false, returnsDefault: Any? = null) : this(
         name = "${function.name.replaceFirstChar { it.uppercase() }}Publisher",
-        parameters = function.parameters.filter { it.kind == KParameter.Kind.VALUE }.map { it.name!! to it.type.asTypeName() as ClassName },
-        required = function.parameters.filter { it.kind == KParameter.Kind.VALUE }.filter { !it.isOptional }.map { (it.type.asTypeName() as ClassName).simpleName },
+        parameters = function.parameters.filter { it.kind == KParameter.Kind.VALUE }.map {
+            val typeName = it.type.asTypeName()
+            it.name!! to typeName
+        },
+        required = function.parameters.filter { it.kind == KParameter.Kind.VALUE }.filter { !it.isOptional }.map { it.type.asTypeName() },
         returnsDefault = returnsDefault ?: when (function.returnType.asTypeName()) {
             STRING -> ""
             INT -> -1
@@ -56,7 +59,7 @@ abstract class Publisher(
         }
     }
 
-    abstract fun comparisons(method: Subscriber): List<List<Pair<String, Any?>>>
+    abstract fun comparisons(method: Subscriber): List<List<Comparator>>
 
     /**
      * Generate a publish function for a list of [Subscriber] [methods]
@@ -144,7 +147,7 @@ abstract class Publisher(
         }
     }
 
-    private fun generateStatement(builder: CodeBlock.Builder, method: Subscriber, comparisons: List<List<Pair<String, Any?>>>, check: Boolean) {
+    private fun generateStatement(builder: CodeBlock.Builder, method: Subscriber, comparisons: List<List<Comparator>>, check: Boolean) {
         val methodName = method.className.simpleName.replaceFirstChar { it.lowercase() }
         for (comparison in comparisons) {
             // If statement
@@ -152,18 +155,8 @@ abstract class Publisher(
                 if (i > 0) {
                     builder.add(" && ")
                 }
-                val (key, value) = comparison[i]
-                when (value) {
-                    is String -> when {
-                        value == "*" -> continue
-                        value.startsWith("*") -> builder.add("$key.endsWith(%S)", value.removePrefix("*"))
-                        value.endsWith("*") -> builder.add("$key.startsWith(%S)", value.removeSuffix("*"))
-                        value.contains("*") -> builder.add("%T($key, %S)", ClassName("world.gregs.voidps.engine.event", "wildcardEquals"), value)
-                        else -> builder.add("$key == %S", value)
-                    }
-                    is Boolean -> builder.add("${if (value) "" else "!"}$key", value)
-                    else -> builder.add("$key == %L", value)
-                }
+                val statement = comparison[i].statement() ?: continue
+                builder.add(statement.code, *statement.args)
             }
             if (check) {
                 builder.addStatement(" -> {}")

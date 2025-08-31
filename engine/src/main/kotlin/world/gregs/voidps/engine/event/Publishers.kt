@@ -207,8 +207,8 @@ abstract class Publishers {
 
     open fun teleport(player: Player, target: GameObject, def: ObjectDefinition = target.def, option: String = "", land: Boolean = false): Boolean = false
 
-    open fun enterArea(player: Player, name: String = "", tag: String = "", area: Area = Rectangle(0, 0, 0, 0)): Boolean = false
-    open fun exitArea(player: Player, name: String = "", tag: String = "", area: Area = Rectangle(0, 0, 0, 0)): Boolean = false
+    open fun enterArea(player: Player, name: String = "", tags: Set<String> = emptySet(), area: Area = Rectangle(0, 0, 0, 0)): Boolean = false
+    open fun exitArea(player: Player, name: String = "", tags: Set<String> = emptySet(), area: Area = Rectangle(0, 0, 0, 0)): Boolean = false
 
     open fun movePlayer(player: Player, from: Tile = Tile.EMPTY, to: Tile = Tile.EMPTY): Boolean = false
     open fun moveNPC(npc: NPC, from: Tile = Tile.EMPTY, to: Tile = Tile.EMPTY): Boolean = false

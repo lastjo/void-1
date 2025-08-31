@@ -1,24 +1,26 @@
 package world.gregs.voidps.event.sub
 
 import world.gregs.voidps.engine.event.Publishers
+import world.gregs.voidps.event.Comparator
+import world.gregs.voidps.event.Equals
 import world.gregs.voidps.event.Publisher
 import world.gregs.voidps.event.Subscriber
 
 class InterfacePublisher : Publisher(Publishers::interfaceOption) {
-    override fun comparisons(method: Subscriber): List<List<Pair<String, Any?>>> {
+    override fun comparisons(method: Subscriber): List<List<Comparator>> {
         val option = method.annotationArgs["option"] as String
         val id = method.annotationArgs["id"] as String
         val component = method.annotationArgs["component"] as String
 
-        val list = mutableListOf<Pair<String, String>>()
+        val list = mutableListOf<Comparator>()
         if (option != "*") {
-            list.add("option" to option)
+            list.add(Equals("option", option))
         }
         if (id != "*") {
-            list.add("id" to id)
+            list.add(Equals("id", id))
         }
         if (component != "*") {
-            list.add("component" to component)
+            list.add(Equals("component", component))
         }
         return listOf(list)
     }
