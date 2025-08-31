@@ -277,4 +277,6 @@ abstract class Publishers {
     open fun prayerStopNPC(npc: NPC, id: String = "", restart: Boolean = false): Boolean = false
     open fun prayerStopCharacter(character: Character, id: String = "", restart: Boolean = false): Boolean = false
 
+    open fun consume(player: Player, item: Item = Item.EMPTY, slot: Int = -1): Boolean = true
+
 }

@@ -144,6 +144,7 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
                 PrayerPublisher(Publishers::prayerStopNPC),
                 PrayerPublisher(Publishers::prayerStopCharacter),
             ),
+            Consume::class.qualifiedName!! to listOf(ConsumePublisher(Publishers::consume))
         ),
     )
 }
