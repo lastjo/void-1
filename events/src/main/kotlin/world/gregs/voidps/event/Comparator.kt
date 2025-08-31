@@ -33,3 +33,9 @@ data class Contains(override val key: String, override val value: Any?) : Compar
         }
     }
 }
+
+data class GreaterEquals(override val key: String, override val value: Number) : Comparator {
+    override fun statement(): Statement {
+        return Statement("$key >= %L", arrayOf(value))
+    }
+}

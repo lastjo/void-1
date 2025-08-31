@@ -17,4 +17,5 @@ annotation class Combat(
     val type: String = "*",
     val spell: String = "*",
     val id: String = "*",
+    val afterDelay: Boolean = false,
 )

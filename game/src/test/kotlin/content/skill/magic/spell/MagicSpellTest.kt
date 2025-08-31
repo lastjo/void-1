@@ -104,6 +104,8 @@ abstract class MagicSpellTest : KoinTest {
             inventories = Inventories(mapOf("inventory" to Array(28) { Item.EMPTY.copy() }, "worn_equipment" to Array(12) { Item.EMPTY.copy() })),
         )
         val publishers = object : Publishers() {}
+        player.publishers = publishers
+        player.timers.publishers = publishers
         player.interfaces = Interfaces(player, definitions = interfaceDefinitions, publishers = publishers)
         player.inventories.definitions = inventoryDefinitions
         player.inventories.itemDefinitions = itemDefinitions

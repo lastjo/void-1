@@ -16,7 +16,7 @@ data class ConditionNode(
 
         // Generate when statement when all children use the same key
         val firstKey = children.first().comparator?.key
-        if (children.all { it.comparator is Equals && it.comparator.key == firstKey }) {
+        if (children.all { it.comparator is Equals && it.comparator.key == firstKey && (it.comparator.value !is String || !(it.comparator.value as String).contains("*")) }) {
             builder.beginControlFlow("when (%L)", firstKey)
             for (child in children) {
                 when (val value = child.comparator!!.value) {

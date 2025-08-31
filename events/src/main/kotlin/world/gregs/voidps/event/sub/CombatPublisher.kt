@@ -1,9 +1,6 @@
 package world.gregs.voidps.event.sub
 
-import world.gregs.voidps.event.Comparator
-import world.gregs.voidps.event.Equals
-import world.gregs.voidps.event.Publisher
-import world.gregs.voidps.event.Subscriber
+import world.gregs.voidps.event.*
 import kotlin.reflect.KFunction
 
 class CombatPublisher(function: KFunction<*>) : Publisher(function, notification = true) {
@@ -12,7 +9,13 @@ class CombatPublisher(function: KFunction<*>) : Publisher(function, notification
         val type = method.annotationArgs["type"] as String
         val spell = method.annotationArgs["spell"] as String
         val id = method.annotationArgs["id"] as String
+        val afterDelay = method.annotationArgs["afterDelay"] as Boolean
         val list = mutableListOf<Comparator>()
+        if (afterDelay) {
+            list.add(Equals("delay", -1))
+        } else {
+            list.add(GreaterEquals("delay", 0))
+        }
         if (weapon != "*") {
             list.add(Equals("weapon.id", weapon))
         }

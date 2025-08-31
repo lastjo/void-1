@@ -213,6 +213,9 @@ abstract class WorldTest : KoinTest {
                 sequential = true,
             )
             engine = GameLoop(tickStages)
+            val publishers = get<Publishers>()
+            World.timers.publishers = publishers
+            publishers.spawnWorld(World)
             World.emit(Spawn)
         }
         players = get()
