@@ -12,7 +12,6 @@ import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.event.Event
-import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.network.client.Instruction
 import world.gregs.voidps.network.client.instruction.*
@@ -27,16 +26,15 @@ class InstructionHandlers(
     itemDefinitions: ItemDefinitions,
     interfaceDefinitions: InterfaceDefinitions,
     handler: InterfaceHandler,
-    publishers: Publishers,
 ) {
     private val interactFloorItem = FloorItemOptionHandler(items)
     private val interactDialogue = DialogueContinueHandler(interfaceDefinitions)
     private val interactDialogueItem = DialogueItemContinueHandler(itemDefinitions)
     private val closeInterface = InterfaceClosedHandler()
-    val interactInterface = InterfaceOptionHandler(handler, interfaceDefinitions, publishers)
+    val interactInterface = InterfaceOptionHandler(handler, interfaceDefinitions)
     private val moveInventoryItem = InterfaceSwitchHandler(handler)
-    private val interactNPC = NPCOptionHandler(npcs, npcDefinitions, publishers)
-    private val interactObject = ObjectOptionHandler(objects, objectDefinitions, publishers)
+    private val interactNPC = NPCOptionHandler(npcs, npcDefinitions)
+    private val interactObject = ObjectOptionHandler(objects, objectDefinitions)
     private val interactPlayer = PlayerOptionHandler(players)
     private val interactInterfaceNPC = InterfaceOnNPCOptionHandler(npcs, handler)
     private val interactInterfaceObject = InterfaceOnObjectOptionHandler(objects, handler)

@@ -13,13 +13,12 @@ class TimerQueue(
     val queue = PriorityQueue<Timer>()
     val names = mutableSetOf<String>()
     private val changes = mutableListOf<Timer>()
-    override lateinit var publishers: Publishers
 
     override fun start(name: String, restart: Boolean): Boolean {
         if (names.contains(name)) {
             return false
         }
-        publishers.timerStart(entity, name, restart)
+        Publishers.all.timerStart(entity, name, restart)
         val start = TimerStart(name, restart)
         events.emit(start)
         if (start.cancelled) {
@@ -43,7 +42,7 @@ class TimerQueue(
             }
             iterator.remove()
             timer.reset()
-            publishers.timerTick(entity, timer.name)
+            Publishers.all.timerTick(entity, timer.name)
             val tick = TimerTick(timer.name)
             events.emit(tick)
             if (tick.cancelled) {
@@ -64,7 +63,7 @@ class TimerQueue(
 
     override fun stop(name: String) {
         if (clear(name)) {
-            publishers.timerStop(entity, name, logout = false)
+            Publishers.all.timerStop(entity, name, logout = false)
             events.emit(TimerStop(name, logout = false))
         }
     }
@@ -80,7 +79,7 @@ class TimerQueue(
         val names = names.toList()
         clearAll()
         for (name in names) {
-            publishers.timerStop(entity, name, logout = true)
+            Publishers.all.timerStop(entity, name, logout = true)
             events.emit(TimerStop(name, logout = true))
         }
     }

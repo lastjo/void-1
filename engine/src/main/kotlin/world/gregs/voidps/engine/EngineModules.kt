@@ -36,7 +36,7 @@ fun engineModule(files: ConfigFiles) = module {
     single {
         SaveQueue(get(), SafeStorage(File(Settings["storage.players.errors"])))
     }
-    single { AccountManager(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), AppearanceOverrides(get(), get()), get()) }
+    single { AccountManager(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), AppearanceOverrides(get(), get())) }
     // IO
     single {
         if (Settings["storage.type", "files"] == "database") {

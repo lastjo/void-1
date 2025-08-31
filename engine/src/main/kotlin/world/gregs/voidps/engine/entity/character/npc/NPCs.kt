@@ -38,7 +38,6 @@ data class NPCs(
         private set
     private val map: CharacterMap = CharacterMap()
     private val logger = InlineLogger()
-    var publishers: Publishers = object : Publishers() {}
 
     override fun run() {
         var i = 0
@@ -146,10 +145,7 @@ data class NPCs(
         val index = index() ?: return false
         indexArray[index] = npc
         npc.index = index
-        npc.publishers = publishers
-        npc.softTimers.publishers = publishers
-        npc.variables.publishers = publishers
-        npc.levels.link(npc, NPCLevels(npc.def), publishers)
+        npc.levels.link(npc, NPCLevels(npc.def))
         npc.levels.clear(Skill.Constitution)
         npc.levels.clear(Skill.Attack)
         npc.levels.clear(Skill.Strength)
@@ -168,7 +164,7 @@ data class NPCs(
             npc["respawn_delay"] = respawnDelay
             npc["respawn_direction"] = npc.direction
         }
-        publishers.spawnNPC(npc)
+        Publishers.all.spawnNPC(npc)
         npc.emit(Spawn)
         return true
     }
@@ -183,7 +179,7 @@ data class NPCs(
 
     fun clear() {
         for (npc in this) {
-            publishers.despawnNPC(npc)
+            Publishers.all.despawnNPC(npc)
             npc.emit(Despawn)
             npc.softTimers.stopAll()
         }

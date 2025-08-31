@@ -1,5 +1,10 @@
 package world.gregs.voidps.engine.event
 
+import com.github.michaelbull.logging.InlineLogger
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import world.gregs.voidps.cache.definition.data.ItemDefinition
 import world.gregs.voidps.cache.definition.data.NPCDefinition
 import world.gregs.voidps.cache.definition.data.ObjectDefinition
@@ -16,6 +21,7 @@ import world.gregs.voidps.type.Area
 import world.gregs.voidps.type.PlayerRights
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.area.Rectangle
+import kotlin.coroutines.cancellation.CancellationException
 
 abstract class Publishers {
     suspend fun option(character: Character, target: Player, option: String, approach: Boolean = false): Boolean = when (character) {
@@ -279,4 +285,28 @@ abstract class Publishers {
 
     open fun consume(player: Player, item: Item = Item.EMPTY, slot: Int = -1): Boolean = true
 
+    companion object {
+        private val logger = InlineLogger()
+        private val scope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined)
+        private val errorHandler = CoroutineExceptionHandler { _, throwable ->
+            if (throwable !is CancellationException) {
+                logger.warn(throwable) { "Error in publisher." }
+            }
+        }
+
+        fun launch(block: suspend CoroutineScope.() -> Unit) {
+            scope.launch(errorHandler, block = block)
+        }
+
+        var all: Publishers = object : Publishers() {}
+            private set
+
+        fun set(publishers: Publishers) {
+            this.all = publishers
+        }
+
+        fun clear() {
+            set(object : Publishers() {})
+        }
+    }
 }

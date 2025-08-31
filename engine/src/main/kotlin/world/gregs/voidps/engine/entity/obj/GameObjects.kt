@@ -38,7 +38,6 @@ class GameObjects(
     val timers = GameObjectTimers()
     var size = 0
         private set
-    var publishers: Publishers = object : Publishers() {}
 
     /**
      * Adds a temporary object with [id] [tile] [shape] and [rotation]
@@ -76,7 +75,7 @@ class GameObjects(
                 val current = replacements[obj.index]
                 if (current != null) {
                     val currentObj = remove(current, obj, collision)
-                    publishers.despawnGameObject(currentObj)
+                    Publishers.all.despawnGameObject(currentObj)
                     currentObj.emit(Despawn)
                 }
             } else if (original > 0) {
@@ -91,7 +90,7 @@ class GameObjects(
                 collisionAdd.modify(obj)
             }
             size++
-            publishers.spawnGameObject(obj)
+            Publishers.all.spawnGameObject(obj)
             obj.emit(Spawn)
         }
     }
@@ -152,7 +151,7 @@ class GameObjects(
                 collisionRemove.modify(obj)
             }
             size--
-            publishers.despawnGameObject(obj)
+            Publishers.all.despawnGameObject(obj)
             obj.emit(Despawn)
             // Re-add original (if exists)
             map.remove(obj, REPLACED)

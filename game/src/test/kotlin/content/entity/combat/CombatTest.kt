@@ -155,7 +155,6 @@ internal class CombatTest : WorldTest() {
             object : Levels.Level {
                 override fun getMaxLevel(skill: Skill): Int = if (skill == Skill.Constitution) 10000 else 1
             },
-            object : Publishers() {}
         )
         npc.levels.clear()
 

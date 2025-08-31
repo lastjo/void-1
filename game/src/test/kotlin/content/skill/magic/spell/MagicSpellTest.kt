@@ -103,17 +103,14 @@ abstract class MagicSpellTest : KoinTest {
         val player = Player(
             inventories = Inventories(mapOf("inventory" to Array(28) { Item.EMPTY.copy() }, "worn_equipment" to Array(12) { Item.EMPTY.copy() })),
         )
-        val publishers = object : Publishers() {}
-        player.publishers = publishers
-        player.timers.publishers = publishers
-        player.interfaces = Interfaces(player, definitions = interfaceDefinitions, publishers = publishers)
+        player.interfaces = Interfaces(player, definitions = interfaceDefinitions)
         player.inventories.definitions = inventoryDefinitions
         player.inventories.itemDefinitions = itemDefinitions
         player.inventories.validItemRule = NoRestrictions
         player.inventories.player = player
         player.inventories.normalStack = normalStackRule
         player.inventories.start()
-        player.levels.link(player, PlayerLevels(player.experience), publishers)
+        player.levels.link(player, PlayerLevels(player.experience))
         return player
     }
 }

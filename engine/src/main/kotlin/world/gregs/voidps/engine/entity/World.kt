@@ -39,9 +39,7 @@ object World : Entity, Variable, EventDispatcher, Runnable, KoinComponent {
         loadItemSpawns(get<FloorItems>(), get<ItemSpawns>(), files.list(Settings["spawns.items"]), get())
         loadObjectSpawns(get<GameObjects>(), files.list(Settings["spawns.objects"]), get())
         loadNpcSpawns(get<NPCs>(), files.list(Settings["spawns.npcs"]), get())
-        val publishers = get<Publishers>()
-        timers.publishers = publishers
-        publishers.spawnWorld(this)
+        Publishers.all.spawnWorld(this)
         emit(Spawn)
     }
 

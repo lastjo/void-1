@@ -132,7 +132,6 @@ class DropTablesTest {
         player.inventories.normalStack = ItemDependentStack(itemDefinitions)
         player.inventories.validItemRule = NoRestrictions
         player.inventories.player = player
-        player.inventories.publishers = object : Publishers() {}
         val drop = ItemDrop(
             id = "item",
             amount = 10..10,
@@ -156,7 +155,6 @@ class DropTablesTest {
         player.inventories.normalStack = ItemDependentStack(itemDefinitions)
         player.inventories.validItemRule = NoRestrictions
         player.inventories.player = player
-        player.inventories.publishers = object : Publishers() {}
         val drop = ItemDrop(
             id = "item",
             amount = 10..10,
@@ -179,7 +177,6 @@ class DropTablesTest {
         player.inventories.normalStack = ItemDependentStack(itemDefinitions)
         player.inventories.validItemRule = NoRestrictions
         player.inventories.player = player
-        player.inventories.publishers = object : Publishers() {}
         val drop = ItemDrop(
             id = "item",
             amount = 10..10,

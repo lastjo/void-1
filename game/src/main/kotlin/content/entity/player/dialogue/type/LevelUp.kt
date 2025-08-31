@@ -39,16 +39,14 @@ fun levelUp(player: Player, skill: Skill, text: String) {
 @Script
 class LevelUp {
 
-    val publishers: Publishers by inject()
-
     init {
         experience { player ->
             val previousLevel = Experience.level(skill, from)
             val currentLevel = Experience.level(skill, to)
             if (currentLevel != previousLevel) {
                 player.levels.restore(skill, currentLevel - previousLevel)
-                publishers.levelChangePlayer(player, skill, previousLevel, currentLevel, max = true)
-                publishers.levelChangeCharacter(player, skill, previousLevel, currentLevel, max = true)
+                Publishers.all.levelChangePlayer(player, skill, previousLevel, currentLevel, max = true)
+                Publishers.all.levelChangeCharacter(player, skill, previousLevel, currentLevel, max = true)
                 player.emit(MaxLevelChanged(skill, previousLevel, currentLevel))
             }
         }

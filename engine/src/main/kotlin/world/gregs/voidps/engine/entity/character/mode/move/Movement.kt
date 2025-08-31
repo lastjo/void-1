@@ -17,6 +17,7 @@ import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.movementType
 import world.gregs.voidps.engine.entity.character.player.temporaryMoveType
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.map.Overlap
 import world.gregs.voidps.engine.map.collision.Collisions
@@ -55,7 +56,7 @@ open class Movement(
     override fun tick() {
         if (character is Player && character.viewport?.loaded == false) {
             if (character.viewport != null && character.inc("fail_load_count") > 10) {
-                character.publishers.publishPlayer(character, "region_retry")
+                Publishers.all.publishPlayer(character, "region_retry")
                 character.emit(RegionRetry)
                 character.clear("fail_load_count")
             }
@@ -216,26 +217,26 @@ open class Movement(
             val to = character.tile
             character.visuals.moved = true
             if (character is Player && character.networked) {
-                character.publishers.publishPlayer(character, "region_reload")
+                Publishers.all.publishPlayer(character, "region_reload")
                 character.emit(ReloadRegion)
             }
             if (Settings["world.players.collision", false] && !character.contains("dead")) {
                 move(character, from, to)
             }
             if (character is Player) {
-                character.publishers.movePlayer(character, from, to)
-                character.publishers.moveCharacter(character, from, to)
+                Publishers.all.movePlayer(character, from, to)
+                Publishers.all.moveCharacter(character, from, to)
                 character.emit(Moved(character, from, to))
                 val areaDefinitions: AreaDefinitions = get()
                 for (def in areaDefinitions.get(from.zone)) {
                     if (from in def.area && to !in def.area) {
-                        character.publishers.exitArea(character, def.name, def.tags, def.area)
+                        Publishers.all.exitArea(character, def.name, def.tags, def.area)
                         character.emit(AreaExited(character, def.name, def.tags, def.area))
                     }
                 }
                 for (def in areaDefinitions.get(to.zone)) {
                     if (to in def.area && from !in def.area) {
-                        character.publishers.enterArea(character, def.name, def.tags, def.area)
+                        Publishers.all.enterArea(character, def.name, def.tags, def.area)
                         character.emit(AreaEntered(character, def.name, def.tags, def.area))
                     }
                 }

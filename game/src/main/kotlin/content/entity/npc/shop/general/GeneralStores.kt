@@ -40,7 +40,7 @@ object GeneralStores {
     }
 
     fun bind(player: Player, key: String): Inventory = get(key).apply {
-        this.transaction.changes.bind(player, get())
+        this.transaction.changes.bind(player)
         player.sendInventory(this, false)
     }
 

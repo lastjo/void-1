@@ -43,7 +43,6 @@ class AccountManager(
     private val players: Players,
     private val areaDefinitions: AreaDefinitions,
     private val overrides: AppearanceOverrides,
-    private val publishers: Publishers,
 ) {
     private val validItems = ValidItemRestriction(itemDefinitions)
     private val homeTile: Tile
@@ -57,24 +56,19 @@ class AccountManager(
     fun setup(player: Player, client: Client?, displayMode: Int): Boolean {
         player.index = players.index() ?: return false
         player.visuals.hits.self = player.index
-        player.publishers = publishers
-        player.interfaces = Interfaces(player, player.client, interfaceDefinitions, publishers = publishers)
+        player.interfaces = Interfaces(player, player.client, interfaceDefinitions)
         player.interfaceOptions = InterfaceOptions(player, interfaceDefinitions, inventoryDefinitions)
         (player.variables as PlayerVariables).definitions = variableDefinitions
-        player.variables.publishers = publishers
         player.area.areaDefinitions = areaDefinitions
         player.inventories.definitions = inventoryDefinitions
         player.inventories.itemDefinitions = itemDefinitions
         player.inventories.validItemRule = validItems
-        player.inventories.publishers = publishers
         player.inventories.normalStack = ItemDependentStack(itemDefinitions)
         player.inventories.player = player
-        player.timers.publishers = publishers
-        player.softTimers.publishers = publishers
         player.inventories.start()
         player.steps.previous = player.tile.add(Direction.WEST.delta)
         player.experience.events = player
-        player.levels.link(player, PlayerLevels(player.experience), publishers)
+        player.levels.link(player, PlayerLevels(player.experience))
         player.body.link(player.equipment, overrides)
         player.body.updateAll()
         player.appearance.displayName = player.name
@@ -98,7 +92,7 @@ class AccountManager(
         }
         player.emit(RegionLoad)
         player.open(player.interfaces.gameFrame)
-        publishers.spawnPlayer(player)
+        Publishers.all.spawnPlayer(player)
         player.emit(Spawn)
         for (def in areaDefinitions.get(player.tile.zone)) {
             if (player.tile in def.area) {

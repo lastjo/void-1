@@ -20,7 +20,6 @@ import world.gregs.voidps.type.Tile
 class ObjectOptionHandler(
     private val objects: GameObjects,
     private val definitions: ObjectDefinitions,
-    private val publishers: Publishers,
 ) : InstructionHandler<InteractObject>() {
 
     private val logger = InlineLogger()
@@ -49,8 +48,8 @@ class ObjectOptionHandler(
             return
         }
         player.closeInterfaces()
-        val block: suspend (Boolean) -> Unit = { publishers.playerGameObjectOption(player, target, definition, selectedOption, it) }
-        val check: (Boolean) -> Boolean = { publishers.hasPlayerGameObjectOption(player, target, definition, selectedOption, it) }
+        val block: suspend (Boolean) -> Unit = { Publishers.all.playerGameObjectOption(player, target, definition, selectedOption, it) }
+        val check: (Boolean) -> Boolean = { Publishers.all.hasPlayerGameObjectOption(player, target, definition, selectedOption, it) }
         player.mode = Interact(player, target, ObjectOption(player, target, definition, selectedOption), interact = block, has = check)
     }
 

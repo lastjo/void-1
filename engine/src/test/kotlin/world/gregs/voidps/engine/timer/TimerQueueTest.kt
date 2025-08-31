@@ -15,7 +15,6 @@ internal class TimerQueueTest : TimersTest() {
         super.setup()
         val queue = TimerQueue(events, World)
         timers = queue
-        queue.publishers = object : Publishers() {}
     }
 
     @Test

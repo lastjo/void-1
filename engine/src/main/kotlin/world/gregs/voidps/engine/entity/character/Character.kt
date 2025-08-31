@@ -24,7 +24,6 @@ import world.gregs.voidps.engine.entity.character.player.temporaryMoveType
 import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.ObjectShape
 import world.gregs.voidps.engine.event.EventDispatcher
-import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.queue.ActionQueue
 import world.gregs.voidps.engine.suspend.Suspension
@@ -59,7 +58,6 @@ interface Character :
     val size: Int
     val blockMove: Int
     val collisionFlag: Int
-    val publishers: Publishers
 
     override fun compareTo(other: Character): Int = index.compareTo(other.index)
 

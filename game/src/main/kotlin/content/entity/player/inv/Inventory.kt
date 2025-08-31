@@ -18,7 +18,6 @@ import world.gregs.voidps.type.Script
 @Script
 class Inventory {
 
-    val publishers: Publishers by inject()
     val logger = InlineLogger()
 
     init {
@@ -58,8 +57,8 @@ class Inventory {
             if (player.mode is CombatMovement) {
                 player.mode = EmptyMode
             }
-            Events.events.launch {
-                publishers.inventoryOption(player, item, id, equipOption, itemSlot)
+            Publishers.launch {
+                Publishers.all.inventoryOption(player, item, id, equipOption, itemSlot)
             }
             player.emit(
                 InventoryOption(

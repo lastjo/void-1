@@ -29,7 +29,6 @@ class Interfaces(
     internal var client: Client? = null,
     internal val definitions: InterfaceDefinitions,
     private val interfaces: MutableMap<String, String> = Object2ObjectOpenHashMap(),
-    private val publishers: Publishers,
 ) {
     var displayMode = 0
 
@@ -51,7 +50,7 @@ class Interfaces(
 
     fun close(id: String?): Boolean {
         if (id != null && !getType(id).startsWith("dialogue_box")) {
-            publishers.interfaceClosed(player, id)
+            Publishers.all.interfaceClosed(player, id)
             player.emit(CloseInterface)
         }
         if (id != null && remove(id)) {
@@ -72,7 +71,7 @@ class Interfaces(
     fun remove(id: String): Boolean {
         if (interfaces.remove(getType(id), id)) {
             sendClose(id)
-            publishers.interfaceClosed(player, id)
+            Publishers.all.interfaceClosed(player, id)
             player.emit(InterfaceClosed(id))
             player.queue.clearWeak()
             return true
@@ -101,7 +100,7 @@ class Interfaces(
         if (interfaces[type] != id) {
             interfaces[type] = id
             sendOpen(id)
-            publishers.interfaceOpened(player, id)
+            Publishers.all.interfaceOpened(player, id)
             player.emit(InterfaceOpened(id))
             notifyRefresh(id)
             return true
@@ -118,7 +117,7 @@ class Interfaces(
             if (getParent(id) == parent) {
                 it.remove()
                 sendClose(id)
-                publishers.interfaceClosed(player, id)
+                Publishers.all.interfaceClosed(player, id)
                 player.emit(InterfaceClosed(id))
                 player.queue.clearWeak()
                 children.add(id)
@@ -162,7 +161,7 @@ class Interfaces(
     }
 
     private fun notifyRefresh(id: String) {
-        publishers.interfaceRefreshed(player, id)
+        Publishers.all.interfaceRefreshed(player, id)
         player.emit(InterfaceRefreshed(id))
     }
 

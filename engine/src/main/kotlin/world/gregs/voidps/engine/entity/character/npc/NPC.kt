@@ -64,7 +64,6 @@ data class NPC(
     override val steps: Steps = Steps(this)
 
     override lateinit var collision: CollisionStrategy
-    override lateinit var publishers: Publishers
 
     var regenCounter = 0
 

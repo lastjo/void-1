@@ -83,7 +83,6 @@ class Player(
     lateinit var interfaces: Interfaces
     lateinit var interfaceOptions: InterfaceOptions
     override lateinit var collision: CollisionStrategy
-    override lateinit var publishers: Publishers
     val area: AreaQueue = AreaQueue(this)
 
     inline fun debug(message: () -> Any?) {

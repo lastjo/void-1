@@ -89,7 +89,6 @@ class AccountManagerTest : KoinMock() {
             areaDefinitions = get(),
             players = Players(),
             overrides = AppearanceOverrides(),
-            publishers = object : Publishers() {}
         )
     }
 
@@ -116,7 +115,7 @@ class AccountManagerTest : KoinMock() {
     @Test
     fun `Spawn player`() {
         val player = Player(0)
-        player.interfaces = Interfaces(player, publishers = object : Publishers() {}, definitions = get())
+        player.interfaces = Interfaces(player, definitions = get())
         val client: Client = mockk(relaxed = true)
         manager.spawn(player, client)
         verify {

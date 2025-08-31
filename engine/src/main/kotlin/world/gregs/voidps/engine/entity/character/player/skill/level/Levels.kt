@@ -19,12 +19,10 @@ class Levels(
 
     private lateinit var level: Level
     private lateinit var character: Character
-    private lateinit var publishers: Publishers
 
-    fun link(events: Character, level: Level, publishers: Publishers) {
+    fun link(events: Character, level: Level) {
         this.character = events
         this.level = level
-        this.publishers = publishers
     }
 
     /**
@@ -117,10 +115,10 @@ class Levels(
     private fun notify(skill: Skill, previous: Int) {
         val level = get(skill)
         when (val character = character) {
-            is Player -> publishers.levelChangePlayer(character, skill, previous, level)
-            is NPC -> publishers.levelChangeNPC(character, skill, previous, level)
+            is Player -> Publishers.all.levelChangePlayer(character, skill, previous, level)
+            is NPC -> Publishers.all.levelChangeNPC(character, skill, previous, level)
         }
-        publishers.levelChangeCharacter(character, skill, previous, level)
+        Publishers.all.levelChangeCharacter(character, skill, previous, level)
         character.emit(CurrentLevelChanged(skill, previous, level))
     }
 

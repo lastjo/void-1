@@ -16,7 +16,7 @@ class InventorySlotChangedTest {
     fun setup() {
         inventory = Inventory.debug(1, id = "inventory")
         val dispatcher = Player()
-        inventory.transaction.changes.bind(dispatcher, object : Publishers() {})
+        inventory.transaction.changes.bind(dispatcher)
         Events.events.clear()
     }
 

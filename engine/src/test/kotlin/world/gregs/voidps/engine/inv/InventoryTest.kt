@@ -45,7 +45,7 @@ internal class InventoryTest {
             stackRule = stackRule,
             amountBounds = amountBounds,
         ).apply {
-            transaction.changes.bind(events, object : Publishers() {})
+            transaction.changes.bind(events)
         },
     )
 

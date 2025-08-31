@@ -18,21 +18,19 @@ import world.gregs.voidps.type.Script
 @Script
 class PrayerToggle {
 
-    val publishers: Publishers by inject()
-
     init {
         variableSet("activated_*") { player ->
             player.closeInterfaces()
             val from = (from as? List<String>)?.toSet() ?: emptySet()
             val to = (to as? List<String>)?.toSet() ?: emptySet()
             for (prayer in from.subtract(to)) {
-                publishers.prayerStopPlayer(player, prayer)
-                publishers.prayerStopCharacter(player, prayer)
+                Publishers.all.prayerStopPlayer(player, prayer)
+                Publishers.all.prayerStopCharacter(player, prayer)
                 player.emit(PrayerStop(prayer))
             }
             for (prayer in to.subtract(from)) {
-                publishers.prayerStartPlayer(player, prayer)
-                publishers.prayerStartCharacter(player, prayer)
+                Publishers.all.prayerStartPlayer(player, prayer)
+                Publishers.all.prayerStartCharacter(player, prayer)
                 player.emit(PrayerStart(prayer))
             }
         }
@@ -40,16 +38,16 @@ class PrayerToggle {
         variableBitAdd(ACTIVE_PRAYERS, ACTIVE_CURSES) { player ->
             player.closeInterfaces()
             val id = (value as String).toSnakeCase()
-            publishers.prayerStartPlayer(player, id)
-            publishers.prayerStartCharacter(player, id)
+            Publishers.all.prayerStartPlayer(player, id)
+            Publishers.all.prayerStartCharacter(player, id)
             player.emit(PrayerStart(id))
         }
 
         variableBitRemove(ACTIVE_PRAYERS, ACTIVE_CURSES) { player ->
             player.closeInterfaces()
             val id = (value as String).toSnakeCase()
-            publishers.prayerStopPlayer(player, id)
-            publishers.prayerStopCharacter(player, id)
+            Publishers.all.prayerStopPlayer(player, id)
+            Publishers.all.prayerStopCharacter(player, id)
             player.emit(PrayerStop(id))
         }
     }

@@ -13,7 +13,6 @@ import world.gregs.voidps.network.client.instruction.InteractInterface
 class InterfaceOptionHandler(
     private val handler: InterfaceHandler,
     private val interfaceDefinitions: InterfaceDefinitions,
-    private val publishers: Publishers,
 ) : InstructionHandler<InteractInterface>() {
 
     private val logger = InlineLogger()
@@ -33,8 +32,8 @@ class InterfaceOptionHandler(
         }
 
         val selectedOption = options.getOrNull(option) ?: ""
-        Events.events.launch {
-            publishers.interfaceOption(
+        Publishers.launch {
+            Publishers.all.interfaceOption(
                 player = player,
                 id = id,
                 component = component,

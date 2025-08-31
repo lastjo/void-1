@@ -15,7 +15,6 @@ class ChangeManager(
 ) {
     private val changes: Stack<Event> = Stack()
     private val events = mutableSetOf<Player>()
-    private lateinit var publishers: Publishers
 
     val itemChanges: Stack<Change> = Stack()
 
@@ -36,8 +35,7 @@ class ChangeManager(
     /**
      * Adds [player] to the list of recipients of [InventorySlotChanged] updates in this inventory.
      */
-    fun bind(player: Player, publishers: Publishers) {
-        this.publishers = publishers
+    fun bind(player: Player) {
         this.events.add(player)
     }
 
@@ -57,17 +55,17 @@ class ChangeManager(
         }
         val changes: Stack<Event> = Stack()
         for (player in events) {
-            publishers.publishPlayer(player, "inventory_update", inventory.id)
+            Publishers.all.publishPlayer(player, "inventory_update", inventory.id)
             for (change in itemChanges) {
                 if (change.previous.isNotEmpty()) {
-                    publishers.itemRemoved(player, change.previous, change.index, inventory.id)
+                    Publishers.all.itemRemoved(player, change.previous, change.index, inventory.id)
                     changes.add(ItemRemoved(inventory.id, change.index, change.previous))
                 }
                 if (change.item.isNotEmpty()) {
-                    publishers.itemAdded(player, change.item, change.index, inventory.id)
+                    Publishers.all.itemAdded(player, change.item, change.index, inventory.id)
                     changes.add(ItemAdded(inventory.id, change.index, change.item))
                 }
-                publishers.inventoryChanged(player, inventory.id, change.index, change.item, change.from, change.fromIndex, change.previous)
+                Publishers.all.inventoryChanged(player, inventory.id, change.index, change.item, change.from, change.fromIndex, change.previous)
                 changes.add(InventorySlotChanged(inventory.id, change.index, change.item, change.from, change.fromIndex, change.previous))
             }
         }

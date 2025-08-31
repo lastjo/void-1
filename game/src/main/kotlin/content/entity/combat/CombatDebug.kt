@@ -34,7 +34,7 @@ class CombatDebug {
             player.message("Ranged: $rangeMax Melee: $meleeMax Magic: $magicMax")
             player.message("Hit Chance")
             val target = NPC(npcName, Tile.EMPTY, npcDefinitions.get(npcName)).apply {
-                levels.link(this, NPCLevels(def), get())
+                levels.link(this, NPCLevels(def))
                 levels.clear()
             }
             val rangeChance = Hit.chance(player, target, "range", weapon)

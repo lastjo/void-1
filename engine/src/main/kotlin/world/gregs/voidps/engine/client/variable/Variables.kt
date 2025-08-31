@@ -11,7 +11,6 @@ open class Variables(
     val data: MutableMap<String, Any> = Object2ObjectOpenHashMap(2),
 ) {
 
-    lateinit var publishers: Publishers
     @Suppress("LeakingThis")
     var bits = VariableBits(this, events)
 
@@ -28,7 +27,7 @@ open class Variables(
         value = block.invoke()
         // Don't check if default or not as values must be set.
         data(key)[key] = value
-        publishers.variableSet(entity, key, null, value)
+        Publishers.all.variableSet(entity, key, null, value)
         events.emit(VariableSet(key, null, value))
         return value
     }
@@ -47,7 +46,7 @@ open class Variables(
         if (refresh) {
             send(key)
         }
-        publishers.variableSet(entity, key, previous, value)
+        Publishers.all.variableSet(entity, key, previous, value)
         events.emit(VariableSet(key, previous, value))
     }
 
@@ -57,7 +56,7 @@ open class Variables(
             send(key)
         }
         val from = removed ?: return null
-        publishers.variableSet(entity, key, from, null)
+        Publishers.all.variableSet(entity, key, from, null)
         events.emit(VariableSet(key, from, null))
         return removed
     }

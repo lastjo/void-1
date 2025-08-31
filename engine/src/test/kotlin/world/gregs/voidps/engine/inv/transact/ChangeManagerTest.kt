@@ -2,6 +2,7 @@ package world.gregs.voidps.engine.inv.transact
 
 import io.mockk.mockk
 import io.mockk.verify
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import world.gregs.voidps.engine.entity.character.player.Player
@@ -23,10 +24,15 @@ internal class ChangeManagerTest {
         change = ChangeManager(inventory)
     }
 
+    @AfterEach
+    fun cleanup() {
+        Publishers.clear()
+    }
+
     @Test
     fun `Track and send changes`() {
         val events = mockk<Player>(relaxed = true)
-        change.bind(events, object : Publishers() {})
+        change.bind(events)
         change.track(from = "inventory", index = 1, previous = Item.EMPTY, fromIndex = 1, item = Item("item", 1))
         change.send()
         verify {
@@ -38,7 +44,7 @@ internal class ChangeManagerTest {
     @Test
     fun `Clear tracked changes`() {
         val events = mockk<Player>(relaxed = true)
-        change.bind(events, object : Publishers() {
+        Publishers.set(object : Publishers() {
             override fun itemAdded(player: Player, item: Item, itemSlot: Int, inventory: String): Boolean {
                 throw IllegalStateException()
             }
@@ -51,10 +57,11 @@ internal class ChangeManagerTest {
                 throw IllegalStateException()
             }
 
-            override fun inventoryChanged(player: Player, previous: Item, index: Int, id: String): Boolean {
+            override fun inventoryChanged(player: Player, inventory: String, index: Int, item: Item, from: String, fromIndex: Int, fromItem: Item): Boolean {
                 throw IllegalStateException()
             }
         })
+        change.bind(events)
         change.track("inventory", 1, Item.EMPTY, 1, Item("item", 1))
         change.clear()
         change.send()

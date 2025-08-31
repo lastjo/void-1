@@ -40,17 +40,16 @@ class FloorItems(
 
     private val addQueue = mutableListOf<FloorItem>()
     private val removeQueue = mutableListOf<FloorItem>()
-    var publishers: Publishers = object : Publishers() {}
 
     override fun run() {
         for (floorItem in removeQueue) {
-            publishers.despawnFloorItem(floorItem)
+            Publishers.all.despawnFloorItem(floorItem)
             floorItem.emit(Despawn)
         }
         removeQueue.clear()
         for (floorItem in addQueue) {
             add(floorItem)
-            publishers.spawnFloorItem(floorItem)
+            Publishers.all.spawnFloorItem(floorItem)
             floorItem.emit(Spawn)
         }
         addQueue.clear()
