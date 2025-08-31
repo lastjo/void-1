@@ -9,6 +9,7 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
+import world.gregs.voidps.engine.event.Publishers
 import java.util.*
 
 /**
@@ -30,6 +31,7 @@ class PublisherProcessor(
         mainClass.superclass(superclass)
         val allScripts = mutableMapOf<String, ClassName>()
         val allDependencies = TreeMap<TypeName, String>()
+        allDependencies[Publishers::class.asTypeName()] = "this"
         var total = 0
         var count = 0
         for (annotation in annotations) {
@@ -56,7 +58,9 @@ class PublisherProcessor(
                             allDependencies.putIfAbsent(type, param)
                         }
                         // Initialize scripts classes as variables with injected params
-                        val classParams = method.classParams.joinToString(", ") { allDependencies.getValue(it.second) }
+                        val classParams = method.classParams.joinToString(", ") {
+                            allDependencies.getValue(it.second)
+                        }
                         mainClass.addProperty(
                             PropertySpec.builder(methodName, method.className)
                                 .addModifiers(KModifier.PRIVATE)
@@ -118,6 +122,9 @@ class PublisherProcessor(
         // Add all dependencies to main constructor
         val constructor = FunSpec.constructorBuilder()
         for ((type, param) in allDependencies) {
+            if (param == "this") {
+                continue
+            }
             constructor.addParameter(param, type)
         }
         mainClass.primaryConstructor(constructor.build())
