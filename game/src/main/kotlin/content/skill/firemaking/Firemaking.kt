@@ -23,6 +23,7 @@ import world.gregs.voidps.engine.entity.item.floor.floorItemOperate
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.ObjectLayer
 import world.gregs.voidps.engine.entity.obj.ObjectShape
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
@@ -50,6 +51,9 @@ class Firemaking {
             player.queue.clearWeak()
             if (player.inventory.remove(logSlot, log.id)) {
                 val floorItem = floorItems.add(player.tile, log.id, disappearTicks = 300, owner = player)
+                Publishers.launch {
+                    Publishers.all.playerFloorItemOption(player, floorItem, "Light")
+                }
                 player.mode = Interact(player, floorItem, FloorItemOption(player, floorItem, "Light"))
             }
         }

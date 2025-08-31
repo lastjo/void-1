@@ -32,9 +32,12 @@ class ItemTake {
             player.inventoryFull()
             return
         }
-        val item = Publishers.all.playerTakeItem(player, target.id)
-        if (item.isBlank()) {
+        var item = Publishers.all.playerTakeItem(player, target.id)
+        if (item == "null" || item == "cancel") {
             return
+        }
+        if (item.isBlank()) {
+            item = target.id
         }
         if (!floorItems.remove(target)) {
             player.message("Too late - it's gone!")

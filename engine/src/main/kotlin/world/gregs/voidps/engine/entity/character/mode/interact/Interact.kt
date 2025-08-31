@@ -146,7 +146,7 @@ class Interact(
         val withinRange = arrived(approachRange ?: 10)
         when {
             withinMelee && has.invoke(false) -> if (launch(false) && afterMovement) updateRange = false
-            withinMelee && has.invoke(true) -> if (launch(true) && afterMovement) updateRange = false
+            withinRange && has.invoke(true) -> if (launch(true) && afterMovement) updateRange = false
             withinMelee && operate != null && Events.events.contains(character, operate!!) -> if (launch(operate!!) && afterMovement) updateRange = false
             withinRange && approach != null && Events.events.contains(character, approach!!) -> if (launch(approach!!) && afterMovement) updateRange = false
             withinMelee -> {

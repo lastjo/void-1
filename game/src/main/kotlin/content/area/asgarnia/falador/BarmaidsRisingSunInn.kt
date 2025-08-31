@@ -51,7 +51,7 @@ class BarmaidsRisingSunInn(
     @UseOn("beer_glass", "barmaid_emily")
     @UseOn("beer_glass", "barmaid_kaylee")
     @UseOn("beer_glass", "barmaid_tina")
-    @Option("Talk-to", "barmaid_emily", "barmaid_tina")
+    @Option("Talk-to", "barmaid_kaylee", "barmaid_tina")
     suspend fun barmaid(player: Player, npc: NPC) = player.talkWith(npc) {
         menu()
     }

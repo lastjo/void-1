@@ -96,6 +96,7 @@ class AccountManager(
         player.emit(Spawn)
         for (def in areaDefinitions.get(player.tile.zone)) {
             if (player.tile in def.area) {
+                Publishers.all.enterArea(player, def.name, def.tags, def.area)
                 player.emit(AreaEntered(player, def.name, def.tags, def.area))
             }
         }
