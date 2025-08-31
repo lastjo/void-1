@@ -1,7 +1,10 @@
 package world.gregs.voidps.event
 
 import com.google.devtools.ksp.processing.*
-import com.google.devtools.ksp.symbol.*
+import com.google.devtools.ksp.symbol.KSAnnotated
+import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSFunctionDeclaration
+import com.google.devtools.ksp.symbol.Modifier
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.toTypeName
@@ -32,7 +35,7 @@ class PublisherProcessor(
         for (annotation in annotations) {
             val symbols = resolver.getSymbolsWithAnnotation(annotation)
             val subscriptions = symbols.filterIsInstance<KSFunctionDeclaration>()
-                .mapNotNull { fn -> extractSubscription(annotation, fn) }
+                .flatMap { fn -> extractSubscription(annotation, fn) }
                 .groupBy { it.schema }
             if (subscriptions.isEmpty()) {
                 continue
@@ -183,39 +186,46 @@ class PublisherProcessor(
      * Collect suspension, return type and parameters information about a given function [fn],
      * and check they don't conflict with the expected schema.
      */
-    private fun extractSubscription(annotationName: String, fn: KSFunctionDeclaration): Subscriber? {
-        val parentClass = fn.parentDeclaration as? KSClassDeclaration ?: return null
-        val annotation = fn.annotations.firstOrNull { it.annotationType.resolve().declaration.qualifiedName?.asString() == annotationName } ?: return null
-        val annoType = annotation.annotationType.resolve().declaration.qualifiedName?.asString() ?: return null
-
-        val args = annotation.arguments.associate { it.name?.asString().orEmpty() to it.value!! }
-        val params = fn.parameters.map { it.name!!.getShortName() to it.type.resolve().declaration.simpleName.asString() }
-        val schema = findSchema(annoType, params)
-        if (fn.modifiers.contains(Modifier.SUSPEND) && !schema.suspendable) {
-            error("Method ${parentClass.simpleName.asString()}.${fn.simpleName.asString()} cannot be suspendable.")
-        }
-        val returnType = fn.returnType!!.resolve().declaration.qualifiedName!!.asString()
-        if (schema.notification) {
-            if (!schema.cancellable && returnType != "kotlin.Unit") {
-                error("Method ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()} is not cancellable notification so cannot have a return type. (returns ${returnType})")
-            } else if (returnType != "kotlin.Unit" && returnType != "kotlin.Boolean") {
-                error("Method ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()} is a cancellable notification so must return a Boolean or nothing. (returns ${returnType})")
+    private fun extractSubscription(annotationName: String, fn: KSFunctionDeclaration): List<Subscriber> {
+        val parentClass = fn.parentDeclaration as? KSClassDeclaration ?: return emptyList()
+        val list = mutableListOf<Subscriber>()
+        for (annotation in fn.annotations) {
+            if (annotation.annotationType.resolve().declaration.qualifiedName?.asString() != annotationName) {
+                continue
             }
-        } else if (schema.returnsDefault != false && returnType != schema.returnsDefault::class.qualifiedName) {
-            error("Method ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()} must return a ${schema.returnsDefault::class.simpleName}. (returns ${returnType})")
+            val annoType = annotation.annotationType.resolve().declaration.qualifiedName?.asString() ?: continue
+            val args = annotation.arguments.associate { it.name?.asString().orEmpty() to it.value!! }
+            val params = fn.parameters.map { it.name!!.getShortName() to it.type.resolve().declaration.simpleName.asString() }
+            val schema = findSchema(annoType, params)
+            if (fn.modifiers.contains(Modifier.SUSPEND) && !schema.suspendable) {
+                error("Method ${parentClass.simpleName.asString()}.${fn.simpleName.asString()} cannot be suspendable.")
+            }
+            val returnType = fn.returnType!!.resolve().declaration.qualifiedName!!.asString()
+            if (schema.notification) {
+                if (!schema.cancellable && returnType != "kotlin.Unit") {
+                    error("Method ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()} is not cancellable notification so cannot have a return type. (returns ${returnType})")
+                } else if (returnType != "kotlin.Unit" && returnType != "kotlin.Boolean") {
+                    error("Method ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()} is a cancellable notification so must return a Boolean or nothing. (returns ${returnType})")
+                }
+            } else if (schema.returnsDefault != false && returnType != schema.returnsDefault::class.qualifiedName) {
+                error("Method ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()} must return a ${schema.returnsDefault::class.simpleName}. (returns ${returnType})")
+            }
+            val classParams: List<Pair<String, TypeName>> = parentClass.primaryConstructor?.parameters?.map { param ->
+                val name = param.name?.asString() ?: error("Unnamed class param in ${parentClass.qualifiedName?.asString()}")
+                name to param.type.resolve().toTypeName()
+            } ?: emptyList()
+            list.add(
+                Subscriber(
+                    className = parentClass.toClassName(),
+                    methodName = fn.simpleName.asString(),
+                    parameters = params,
+                    schema = schema,
+                    annotationArgs = args,
+                    classParams = classParams,
+                    returnType = returnType
+                )
+            )
         }
-        val classParams: List<Pair<String, TypeName>> = parentClass.primaryConstructor?.parameters?.map { param ->
-            val name = param.name?.asString() ?: error("Unnamed class param in ${parentClass.qualifiedName?.asString()}")
-            name to param.type.resolve().toTypeName()
-        } ?: emptyList()
-        return Subscriber(
-            className = parentClass.toClassName(),
-            methodName = fn.simpleName.asString(),
-            parameters = params,
-            schema = schema,
-            annotationArgs = args,
-            classParams = classParams,
-            returnType = returnType
-        )
+        return list
     }
 }

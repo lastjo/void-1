@@ -48,6 +48,9 @@ abstract class Publisher(
     }
 
     init {
+        if (cancellable && notification) {
+            assert(returnsDefault != true) { "You can't return true by default with a cancellable notification." }
+        }
         if (interaction) {
             assert(parameters.any { it.first == "approach" }) { "Interactions must contain an approach/operate toggle." }
         }
