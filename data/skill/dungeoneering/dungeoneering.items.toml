@@ -9738,7 +9738,7 @@ excess = "vial_dungeoneering"
 [ranged_potion_dungeoneering_noted]
 id = 17585
 
-[melee_potion]
+[melee_potion_dungeoneering]
 id = 17586
 weight = 0.467
 heals = 0
@@ -9747,7 +9747,7 @@ empty = "vial_dungeoneering"
 examine = "A potion that increases a person's melee abilities."
 kept = "Always"
 
-[melee_potion_noted]
+[melee_potion_dungeoneering_noted]
 id = 17587
 
 [defence_potion_dungeoneering]

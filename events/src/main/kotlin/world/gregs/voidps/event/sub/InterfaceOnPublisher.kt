@@ -16,13 +16,13 @@ class InterfaceOnPublisher(function: KFunction<*>, has: KFunction<*>) : Publishe
 
         val list = mutableListOf<Comparator>()
         if (item != "*") {
-            list.add(Equals("item.id", item))
+            list.add(Equals(if (name == "InterfaceOnItemPublisher") "fromItem.id" else "item.id", item))
         }
         if (on != "*") {
-            if (name == "InterfaceOnGameObjectPublisher" || name == "InterfaceOnNPCPublisher") {
-                list.add(Equals("def.stringId", on))
-            } else {
-                list.add(Equals("target.id", on))
+            when (name) {
+                "InterfaceOnGameObjectPublisher", "InterfaceOnNPCPublisher" -> list.add(Equals("def.stringId", on))
+                "InterfaceOnItemPublisher" -> list.add(Equals("toItem.id", on))
+                else -> list.add(Equals("target.id", on))
             }
         }
         if (id != "*") {

@@ -56,12 +56,7 @@ class Eating {
             return
         }
         player.start(delay, ticks)
-        if (!Publishers.all.consume(player, item, slot)) {
-            return
-        }
-        val consumable = Consumable(item)
-        player.emit(consumable)
-        if (consumable.cancelled) {
+        if (Publishers.all.consume(player, item, slot)) {
             return
         }
         val replacement = item.def["excess", ""]
@@ -79,7 +74,6 @@ class Eating {
             player.message("You ${if (drink) "drink" else "eat"} the ${item.def.name.lowercase()}.", ChatType.Filter)
         }
         player.sound(if (drink) "drink" else "eat")
-        player.emit(Consume(item, slot))
         if (smash) {
             player.message("You quickly smash the empty vial using the trick a Barbarian taught you.", ChatType.Filter)
         }

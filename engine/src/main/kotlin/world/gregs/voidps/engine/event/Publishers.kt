@@ -49,8 +49,8 @@ abstract class Publishers {
     }
 
     suspend fun option(character: Character, target: FloorItem, option: String, approach: Boolean = false): Boolean = when (character) {
-        is Player -> playerFloorItemOption(character, target, target.def, option, approach) || characterFloorItemOption(character, target, target.def, option, approach)
-        is NPC -> npcFloorItemOption(character, target, target.def, option, approach) || characterFloorItemOption(character, target, target.def, option, approach)
+        is Player -> playerFloorItemOption(character, target, option, approach) || characterFloorItemOption(character, target, option, approach)
+        is NPC -> npcFloorItemOption(character, target, option, approach) || characterFloorItemOption(character, target, option, approach)
         else -> false
     }
 
@@ -78,13 +78,13 @@ abstract class Publishers {
     open fun hasNPCNPCOption(npc: NPC, target: NPC, def: NPCDefinition = target.def, option: String = "", approach: Boolean = false): Boolean = false
     open fun hasCharacterNPCOption(character: Character, target: NPC, def: NPCDefinition = target.def, option: String = "", approach: Boolean = false): Boolean = false
 
-    open suspend fun playerFloorItemOption(player: Player, target: FloorItem, def: ItemDefinition = ItemDefinition.EMPTY, option: String = "", approach: Boolean = false): Boolean = false
-    open suspend fun npcFloorItemOption(npc: NPC, target: FloorItem, def: ItemDefinition = ItemDefinition.EMPTY, option: String = "", approach: Boolean = false): Boolean = false
-    open suspend fun characterFloorItemOption(character: Character, target: FloorItem, def: ItemDefinition = ItemDefinition.EMPTY, option: String = "", approach: Boolean = false): Boolean = false
+    open suspend fun playerFloorItemOption(player: Player, target: FloorItem, option: String = "", approach: Boolean = false): Boolean = false
+    open suspend fun npcFloorItemOption(npc: NPC, target: FloorItem, option: String = "", approach: Boolean = false): Boolean = false
+    open suspend fun characterFloorItemOption(character: Character, target: FloorItem, option: String = "", approach: Boolean = false): Boolean = false
 
-    open fun hasPlayerFloorItemOption(player: Player, target: FloorItem, def: ItemDefinition = ItemDefinition.EMPTY, option: String = "", approach: Boolean = false): Boolean = false
-    open fun hasNPCFloorItemOption(npc: NPC, target: FloorItem, def: ItemDefinition = ItemDefinition.EMPTY, option: String = "", approach: Boolean = false): Boolean = false
-    open fun hasCharacterFloorItemOption(character: Character, target: FloorItem, def: ItemDefinition = ItemDefinition.EMPTY, option: String = "", approach: Boolean = false): Boolean = false
+    open fun hasPlayerFloorItemOption(player: Player, target: FloorItem, option: String = "", approach: Boolean = false): Boolean = false
+    open fun hasNPCFloorItemOption(npc: NPC, target: FloorItem, option: String = "", approach: Boolean = false): Boolean = false
+    open fun hasCharacterFloorItemOption(character: Character, target: FloorItem, option: String = "", approach: Boolean = false): Boolean = false
 
     open fun interfaceOpened(player: Player, id: String = ""): Boolean = false
     open fun interfaceClosed(player: Player, id: String = ""): Boolean = false
@@ -95,7 +95,6 @@ abstract class Publishers {
     suspend fun interfaceOn(player: Player, target: Any, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = when (target) {
         is Player -> interfaceOnPlayer(player, target, id, component, item, itemSlot, inventory) || interfaceOnCharacter(player, target, id, component, item, itemSlot, inventory)
         is NPC -> interfaceOnNPC(player, target, target.def(player), id, component, item, itemSlot, inventory) || interfaceOnCharacter(player, target, id, component, item, itemSlot, inventory)
-        is Item -> interfaceOnItem(player, target, id, component, item, itemSlot, inventory)
         is FloorItem -> interfaceOnFloorItem(player, target, id, component, item, itemSlot, inventory)
         is GameObject -> interfaceOnGameObject(player, target, target.def(player), id, component, item, itemSlot, inventory)
         else -> false
@@ -104,16 +103,16 @@ abstract class Publishers {
     open suspend fun interfaceOnPlayer(player: Player, target: Player, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = "", approach: Boolean = false): Boolean = false
     open suspend fun interfaceOnNPC(player: Player, target: NPC, def: NPCDefinition = target.def, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = "", approach: Boolean = false): Boolean = false
     open suspend fun interfaceOnCharacter(player: Player, target: Character, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = "", approach: Boolean = false): Boolean = false
-    open suspend fun interfaceOnItem(player: Player, target: Item, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = "", approach: Boolean = false): Boolean = false
     open suspend fun interfaceOnGameObject(player: Player, target: GameObject, def: ObjectDefinition = target.def, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = "", approach: Boolean = false): Boolean = false
     open suspend fun interfaceOnFloorItem(player: Player, target: FloorItem, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = "", approach: Boolean = false): Boolean = false
+    open fun interfaceOnItem(player: Player, toItem: Item, toSlot: Int = -1, fromItem: Item = Item.EMPTY, fromSlot: Int = -1, fromInventory: String = "", toInventory: String = "", approach: Boolean = false): Boolean = false
 
     open fun hasInterfaceOnPlayer(player: Player, target: Player, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = "", approach: Boolean = false): Boolean = false
     open fun hasInterfaceOnNPC(player: Player, target: NPC, def: NPCDefinition = target.def, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = "", approach: Boolean = false): Boolean = false
     open fun hasInterfaceOnCharacter(player: Player, target: Character, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = "", approach: Boolean = false): Boolean = false
-    open fun hasInterfaceOnItem(player: Player, target: Item, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = "", approach: Boolean = false): Boolean = false
     open fun hasInterfaceOnGameObject(player: Player, target: GameObject, def: ObjectDefinition = target.def, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = "", approach: Boolean = false): Boolean = false
     open fun hasInterfaceOnFloorItem(player: Player, target: FloorItem, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = "", approach: Boolean = false): Boolean = false
+    open fun hasInterfaceOnItem(player: Player, toItem: Item, toSlot: Int = -1, fromItem: Item = Item.EMPTY, fromSlot: Int = -1, fromInventory: String = "", toInventory: String = "", approach: Boolean = false): Boolean = false
 
     open suspend fun interfaceOption(player: Player, id: String = "", component: String = "", option: String = "", optionIndex: Int = -1, item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false
 

@@ -39,7 +39,7 @@ class InstructionHandlers(
     private val interactInterfaceNPC = InterfaceOnNPCOptionHandler(npcs, handler)
     private val interactInterfaceObject = InterfaceOnObjectOptionHandler(objects, handler)
     private val interactInterfacePlayer = InterfaceOnPlayerOptionHandler(players, handler)
-    private val interactInterfaceItem = InterfaceOnInterfaceOptionHandler(handler)
+    val interactInterfaceItem = InterfaceOnInterfaceOptionHandler(handler)
     private val interactInterfaceFloorItem = InterfaceOnFloorItemOptionHandler(items, handler)
     private val executeCommand = ExecuteCommandHandler()
     private val songEndHandler = SongEndHandler()

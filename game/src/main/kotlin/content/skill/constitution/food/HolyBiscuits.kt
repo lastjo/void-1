@@ -1,15 +1,15 @@
 package content.skill.constitution.food
 
-import content.skill.constitution.consume
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Consume
 
-@Script
 class HolyBiscuits {
 
-    init {
-        consume("holy_biscuits") { player ->
-            player.levels.restore(Skill.Prayer, 10)
-        }
+    @Consume("holy_biscuits")
+    fun eat(player: Player): Boolean {
+        player.levels.restore(Skill.Prayer, 10)
+        return false
     }
+
 }

@@ -1,4 +1,5 @@
 import content.entity.effect.transform
+import content.entity.player.inv.InventoryOption
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import world.gregs.voidps.cache.definition.data.InterfaceDefinition
@@ -20,6 +21,7 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.item.floor.FloorItem
 import world.gregs.voidps.engine.entity.obj.GameObject
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.inv.Inventory
 import world.gregs.voidps.engine.inv.inventory
@@ -176,14 +178,16 @@ fun Player.walk(toTile: Tile) = runTest {
     instructions.send(Walk(toTile.x, toTile.y))
 }
 
-fun Player.itemOnObject(obj: GameObject, itemSlot: Int, inventory: String = "inventory") {
+fun Player.itemOnObject(obj: GameObject, itemSlot: Int, inventory: String = "inventory") = runTest {
     val item = inventories.inventory(inventory)[itemSlot]
-    emit(ItemOnObject(this, obj, item, itemSlot, inventory))
+    Publishers.all.interfaceOnGameObject(this@itemOnObject, obj, obj.def, "", "", item, itemSlot, inventory)
+    emit(ItemOnObject(this@itemOnObject, obj, item, itemSlot, inventory))
 }
 
-fun Player.itemOnNpc(npc: NPC, itemSlot: Int, inventory: String = "inventory") {
+fun Player.itemOnNpc(npc: NPC, itemSlot: Int, inventory: String = "inventory") = runTest {
     val item = inventories.inventory(inventory)[itemSlot]
-    emit(ItemOnNPC(this, npc, item, itemSlot, inventory))
+    Publishers.all.interfaceOnNPC(this@itemOnNpc, npc, npc.def, "", "", item, itemSlot, inventory)
+    emit(ItemOnNPC(this@itemOnNpc, npc, item, itemSlot, inventory))
 }
 
 fun Player.itemOnItem(
@@ -194,16 +198,16 @@ fun Player.itemOnItem(
 ) {
     val one = inventories.inventory(firstInventory)
     val two = inventories.inventory(secondInventory)
-    emit(
-        ItemOnItem(
-            one[firstSlot],
-            two[secondSlot],
-            firstSlot,
-            secondSlot,
-            firstInventory,
-            secondInventory,
-        ),
-    )
+    get<InstructionHandlers>().interactInterfaceItem.validate(this, InteractInterfaceItem(
+        fromItem = one[firstSlot].def.id,
+        toItem = two[secondSlot].def.id,
+        fromSlot = firstSlot,
+        toSlot = secondSlot,
+        fromInterfaceId = 149,
+        fromComponentId = 0,
+        toInterfaceId = 149,
+        toComponentId = 0
+    ))
 }
 
 fun Player.npcOption(npc: NPC, option: String) {
@@ -218,6 +222,11 @@ fun Player.npcOption(npc: NPC, option: String) {
 
 fun Player.npcOption(npc: NPC, option: Int) = runTest {
     instructions.send(InteractNPC(npc.index, option + 1))
+}
+
+fun Player.inventoryOption(player: Player, inventory: String, item: Item, slot: Int, option: String,) = runTest {
+    Publishers.all.inventoryOption(player, item, inventory, option, slot)
+    player.emit(InventoryOption(player, inventory, item, slot, option))
 }
 
 fun Player.objectOption(gameObject: GameObject, option: String = "", optionIndex: Int? = null) = runTest {

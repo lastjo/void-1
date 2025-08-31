@@ -9,6 +9,7 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.item.floor.FloorItemOption
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.network.client.instruction.InteractFloorItem
 
 class FloorItemOptionHandler(
@@ -39,6 +40,8 @@ class FloorItemOptionHandler(
             return
         }
         player.closeInterfaces()
-        player.mode = Interact(player, floorItem, FloorItemOption(player, floorItem, selectedOption), shape = -1)
+        val block: suspend (Boolean) -> Unit = { Publishers.all.playerFloorItemOption(player, floorItem, selectedOption, it) }
+        val check: (Boolean) -> Boolean = { Publishers.all.hasPlayerFloorItemOption(player, floorItem, selectedOption, it) }
+        player.mode = Interact(player, floorItem, FloorItemOption(player, floorItem, selectedOption), shape = -1, interact = block, has = check)
     }
 }

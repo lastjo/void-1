@@ -6,6 +6,7 @@ import world.gregs.voidps.engine.client.ui.closeInterfaces
 import world.gregs.voidps.engine.client.ui.interact.InterfaceOnItem
 import world.gregs.voidps.engine.client.ui.interact.ItemOnItem
 import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.network.client.instruction.InteractInterfaceItem
 
 class InterfaceOnInterfaceOptionHandler(
@@ -21,6 +22,8 @@ class InterfaceOnInterfaceOptionHandler(
         player.closeInterfaces()
         player.queue.clearWeak()
         player.suspension = null
+
+        Publishers.all.interfaceOnItem(player, toItem, toSlot, fromItem, fromSlot, fromInventory, toInventory)
         val event = if (fromItem.isEmpty()) {
             InterfaceOnItem(
                 fromId,

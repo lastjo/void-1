@@ -9,38 +9,37 @@ import content.entity.player.combat.special.specialAttackEnergy
 import content.entity.player.effect.antifire
 import content.entity.player.effect.energy.runEnergy
 import content.entity.player.effect.superAntifire
-import content.skill.constitution.consume
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.chat.plural
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
+import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.inv.holdsItem
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.timer.toTicks
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Consume
 import java.util.concurrent.TimeUnit
 
-@Script
 class Potions {
 
-    init {
-        consume("*_4", "*_3", "*_2", "*_1") { player ->
-            val doses = item.id.last().digitToInt()
-            if (doses != 1) {
-                player.message("You have ${doses - 1} ${"dose".plural(doses - 1)} of the potion left.")
-                effects(player, item.id)
-                return@consume
-            }
-            player.message("You have finished your potion.")
-            if (player.contains("smash_vials")) {
-                player.inventory.remove(slot, item.id)
-                player.message("You quickly smash the empty vial using the tick a Barbarian taught you.")
-            }
+    @Consume("*_4", "*_3", "*_2", "*_1")
+    fun potion(player: Player, item: Item, itemSlot: Int): Boolean {
+        val doses = item.id.last().digitToInt()
+        if (doses != 1) {
+            player.message("You have ${doses - 1} ${"dose".plural(doses - 1)} of the potion left.")
             effects(player, item.id)
+            return false
         }
+        player.message("You have finished your potion.")
+        if (player.contains("smash_vials")) {
+            player.inventory.remove(itemSlot, item.id)
+            player.message("You quickly smash the empty vial using the tick a Barbarian taught you.")
+        }
+        effects(player, item.id)
+        return false
     }
 
     fun hasHolyItem(player: Player) = player.equipped(EquipSlot.Cape).id.startsWith("prayer_cape") || player.holdsItem("holy_wrench")

@@ -1,18 +1,18 @@
 package content.skill.constitution.food
 
-import content.skill.constitution.consume
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.engine.entity.item.Item
+import world.gregs.voidps.type.sub.Consume
 
-@Script
 class Rocktail {
 
-    init {
-        consume("rocktail") { player ->
-            val range: IntRange = item.def.getOrNull("heals") ?: return@consume
-            val amount = range.random()
-            player.levels.boost(Skill.Constitution, amount, maximum = 100)
-            cancel()
-        }
+    @Consume("rocktail")
+    fun eat(player: Player, item: Item): Boolean {
+        val range: IntRange = item.def.getOrNull("heals") ?: return false
+        val amount = range.random()
+        player.levels.boost(Skill.Constitution, amount, maximum = 100)
+        return true
     }
+
 }

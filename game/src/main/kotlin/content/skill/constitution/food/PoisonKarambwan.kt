@@ -1,15 +1,15 @@
 package content.skill.constitution.food
 
 import content.entity.combat.hit.directHit
-import content.skill.constitution.consume
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.type.sub.Consume
 
-@Script
 class PoisonKarambwan {
 
-    init {
-        consume("poison_karambwan") { player ->
-            player.directHit(50, "poison")
-        }
+    @Consume("poison_karambwan")
+    fun eat(player: Player): Boolean {
+        player.directHit(50, "poison")
+        return false
     }
+
 }

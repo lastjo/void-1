@@ -9,6 +9,7 @@ import world.gregs.voidps.engine.client.ui.interact.ItemOnNPC
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.network.client.instruction.InteractInterfaceNPC
 
 class InterfaceOnNPCOptionHandler(
@@ -41,6 +42,9 @@ class InterfaceOnNPCOptionHandler(
                 inventory,
             )
         }
-        player.mode = Interact(player, npc, interaction)
+        val def = npc.def(player)
+        val block: suspend (Boolean) -> Unit = { Publishers.all.interfaceOnNPC(player, npc, def, id, component, item, itemSlot, inventory, it) }
+        val check: (Boolean) -> Boolean = { Publishers.all.hasInterfaceOnNPC(player, npc, def, id, component, item, itemSlot, inventory, it) }
+        player.mode = Interact(player, npc, interaction, interact = block, has = check)
     }
 }

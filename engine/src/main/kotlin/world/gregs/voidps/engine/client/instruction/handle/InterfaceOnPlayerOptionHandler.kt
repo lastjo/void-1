@@ -8,6 +8,7 @@ import world.gregs.voidps.engine.client.ui.interact.ItemOnPlayer
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.network.client.instruction.InteractInterfacePlayer
 
 class InterfaceOnPlayerOptionHandler(
@@ -39,6 +40,8 @@ class InterfaceOnPlayerOptionHandler(
             )
         }
         player.closeInterfaces()
-        player.mode = Interact(player, target, interaction)
+        val block: suspend (Boolean) -> Unit = { Publishers.all.interfaceOnPlayer(player, target, id, component, item, itemSlot, inventory, it) }
+        val check: (Boolean) -> Boolean = { Publishers.all.hasInterfaceOnPlayer(player, target, id, component, item, itemSlot, inventory, it) }
+        player.mode = Interact(player, target, interaction, interact = block, has = check)
     }
 }

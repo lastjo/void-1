@@ -3,9 +3,12 @@ package content.skill.magic
 import content.entity.player.inv.InventoryOption
 import content.skill.melee.CombatFormulaTest
 import content.skill.prayer.PrayerConfigs
+import inventoryOption
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.item.Item
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.equipment
 import world.gregs.voidps.engine.inv.inventory
@@ -74,8 +77,7 @@ internal class MagicCombatFormulaTest : CombatFormulaTest() {
         val weapon = Item("mystic_steam_staff")
         player.equipment.set(EquipSlot.Weapon.index, weapon.id)
         val potion = Item("super_magic_potion_4")
-        player.inventory.add(potion.id)
-        player.emit(InventoryOption(player, "inventory", potion, 0, "Drink"))
+        player.inventoryOption(player, "inventory", potion, 0, "Drink")
         val npc = createNPC("giant_rat")
 
         val (offensiveRating, defensiveRating, maxHit, chance) = calculate(player, npc, "magic", weapon, "water_blast")
@@ -108,7 +110,8 @@ internal class MagicCombatFormulaTest : CombatFormulaTest() {
         player.equipment.set(EquipSlot.Weapon.index, weapon.id)
         val potion = Item("super_magic_potion_4")
         player.inventory.add(potion.id)
-        player.emit(InventoryOption(player, "inventory", potion, 0, "Drink"))
+
+        player.inventoryOption(player, "inventory", potion, 0, "Drink")
         val npc = createNPC("giant_rat")
 
         val (offensiveRating, defensiveRating, maxHit, chance) = calculate(player, npc, "magic", weapon, "fire_wave")

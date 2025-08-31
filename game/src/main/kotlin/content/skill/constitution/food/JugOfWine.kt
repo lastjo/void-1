@@ -1,15 +1,15 @@
 package content.skill.constitution.food
 
-import content.skill.constitution.consume
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Consume
 
-@Script
 class JugOfWine {
 
-    init {
-        consume("jug_of_wine") { player ->
-            player.levels.drain(Skill.Attack, 2)
-        }
+    @Consume("jug_of_wine")
+    fun drink(player: Player): Boolean {
+        player.levels.drain(Skill.Attack, 2)
+        return false
     }
+
 }

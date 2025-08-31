@@ -2,9 +2,12 @@ package content.skill.melee
 
 import content.entity.player.inv.InventoryOption
 import content.skill.prayer.PrayerConfigs
+import inventoryOption
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.item.Item
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.equipment
 import world.gregs.voidps.engine.inv.inventory
@@ -78,9 +81,10 @@ internal class MeleeCombatFormulaTest : CombatFormulaTest() {
         val strengthPotion = Item("super_strength_4")
         player.inventory.add(attackPotion.id)
         player.inventory.add(strengthPotion.id)
-        player.emit(InventoryOption(player, "inventory", attackPotion, 0, "Drink"))
+
+        player.inventoryOption(player, "inventory", attackPotion, 0, "Drink")
         tick(2)
-        player.emit(InventoryOption(player, "inventory", strengthPotion, 1, "Drink"))
+        player.inventoryOption(player, "inventory", strengthPotion, 1, "Drink")
         val npc = createNPC("giant_rat")
 
         val (offensiveRating, defensiveRating, maxHit, chance) = calculate(player, npc, "melee", weapon)

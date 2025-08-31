@@ -9,6 +9,7 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.PlayerOption
 import world.gregs.voidps.engine.entity.character.player.PlayerOptions
 import world.gregs.voidps.engine.entity.character.player.Players
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.network.client.instruction.InteractPlayer
 
 class PlayerOptionHandler(
@@ -32,7 +33,9 @@ class PlayerOptionHandler(
         if (option == "Follow") {
             player.mode = Follow(player, target)
         } else {
-            player.mode = Interact(player, target, PlayerOption(player, target, option))
+            val block: suspend (Boolean) -> Unit = { Publishers.all.playerPlayerOption(player, target, option, it) }
+            val check: (Boolean) -> Boolean = { Publishers.all.hasPlayerPlayerOption(player, target, option, it) }
+            player.mode = Interact(player, target, PlayerOption(player, target, option), interact = block, has = check)
         }
     }
 }
