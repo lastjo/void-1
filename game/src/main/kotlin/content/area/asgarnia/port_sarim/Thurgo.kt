@@ -3,8 +3,10 @@ package content.area.asgarnia.port_sarim
 import content.entity.player.dialogue.*
 import content.entity.player.dialogue.type.*
 import content.quest.quest
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.client.ui.interact.itemOnNPCOperate
 import world.gregs.voidps.engine.entity.character.mode.interact.Interaction
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
@@ -16,8 +18,9 @@ import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.remove
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
+import world.gregs.voidps.type.sub.UseOn
 
-@Script
 class Thurgo {
 
     val items = listOf(
@@ -25,27 +28,27 @@ class Thurgo {
         Item("iron_bar", 2),
     )
 
-    init {
-        npcOperate("Talk-to", "thurgo") {
-            when (player.quest("the_knights_sword")) {
-                "started", "find_thurgo" -> menu()
-                "happy_thurgo" -> menuSword()
-                "picture", "cupboard" -> menuAboutSword()
-                "blurite_sword" -> menuReplacementSword()
-                else -> thatCape()
-            }
-        }
-
-        itemOnNPCOperate("redberry_pie", "thurgo") {
-            when (player.quest("the_knights_sword")) {
-                "find_thurgo" -> menu()
-                "happy_thurgo" -> menuSword()
-                else -> player<Uncertain>("Why would I give him my pie?")
-            }
+    @Option("Talk-to", "thurgo")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        when (player.quest("the_knights_sword")) {
+            "started", "find_thurgo" -> menu()
+            "happy_thurgo" -> menuSword()
+            "picture", "cupboard" -> menuAboutSword()
+            "blurite_sword" -> menuReplacementSword()
+            else -> thatCape()
         }
     }
 
-    suspend fun Interaction<Player>.menuReplacementSword() {
+    @UseOn("redberry_pie", "thurgo")
+    suspend fun use(player: Player, npc: NPC) = player.talkWith(npc) {
+        when (player.quest("the_knights_sword")) {
+            "find_thurgo" -> menu()
+            "happy_thurgo" -> menuSword()
+            else -> player<Uncertain>("Why would I give him my pie?")
+        }
+    }
+
+    suspend fun Dialogue.menuReplacementSword() {
         choice {
             madeSword()
             replacementSword()
@@ -91,7 +94,7 @@ class Thurgo {
         npc<Happy>("Well, I need a blurite ore and two iron bars. The only place I know to get blurite is under this cliff here, but it is guarded by a very powerful ice giant.")
     }
 
-    suspend fun Interaction<Player>.menuAboutSword() {
+    suspend fun Dialogue.menuAboutSword() {
         choice {
             aboutSword()
             redberryPie()
@@ -99,7 +102,7 @@ class Thurgo {
         }
     }
 
-    suspend fun Interaction<Player>.menuSword() {
+    suspend fun Dialogue.menuSword() {
         choice {
             specialSword()
             redberryPie()
@@ -107,7 +110,7 @@ class Thurgo {
         }
     }
 
-    suspend fun Interaction<Player>.menu() {
+    suspend fun Dialogue.menu() {
         choice {
             imcandoDwarf()
             redberryPie()

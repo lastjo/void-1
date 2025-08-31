@@ -6,6 +6,7 @@ import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import content.entity.player.dialogue.type.statement
 import content.quest.quest
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
@@ -14,8 +15,8 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class Sanfew {
 
     val enchantedMeat = listOf(
@@ -25,26 +26,25 @@ class Sanfew {
         Item("enchanted_chicken"),
     )
 
-    init {
-        npcOperate("Talk-to", "sanfew") {
-            when (player.quest("druidic_ritual")) {
-                "unstarted" -> {
-                    npc<Quiz>("What can I do for you young 'un?")
-                    choice {
-                        option("I've heard you druids might be able to teach me herblore.") {
-                            player<Quiz>("So... I've heard you druids might be able to teach me herblore...")
-                            npc<Neutral>("Herblore eh? You're probably best off talking to Kaqemeex about that; he's the best herblore teacher we currently have. I believe at the moment he's at out stone circle just North of here.")
-                            player<Happy>("Thanks.")
-                        }
-                        option<Uncertain>("Actually, I don't need to speak to you.") {
-                            npc<Neutral>("Well, we all make mistakes sometimes.")
-                        }
+    @Option("Talk-to", "sanfew")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        when (player.quest("druidic_ritual")) {
+            "unstarted" -> {
+                npc<Quiz>("What can I do for you young 'un?")
+                choice {
+                    option("I've heard you druids might be able to teach me herblore.") {
+                        player<Quiz>("So... I've heard you druids might be able to teach me herblore...")
+                        npc<Neutral>("Herblore eh? You're probably best off talking to Kaqemeex about that; he's the best herblore teacher we currently have. I believe at the moment he's at out stone circle just North of here.")
+                        player<Happy>("Thanks.")
+                    }
+                    option<Uncertain>("Actually, I don't need to speak to you.") {
+                        npc<Neutral>("Well, we all make mistakes sometimes.")
                     }
                 }
-                "started" -> started()
-                "cauldron" -> cauldron()
-                else -> eadgarsRuse()
             }
+            "started" -> started()
+            "cauldron" -> cauldron()
+            else -> eadgarsRuse()
         }
     }
 

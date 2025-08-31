@@ -8,6 +8,7 @@ import content.entity.sound.jingle
 import content.quest.quest
 import content.quest.questComplete
 import content.quest.refreshQuestJournal
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.name
@@ -21,60 +22,59 @@ import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class Kaqemeex {
 
-    init {
-        npcOperate("Talk-to", "kaqemeex") {
-            when (player.quest("druidic_ritual")) {
-                "unstarted" -> {
-                    player<Neutral>("Hello there.")
-                    npc<Quiz>("What brings you to our holy monument?")
-                    choice {
-                        option("Who are you?") {
-                            npc<Neutral>("We are the druids of Guthix. We worship our god at our famous stone circles. You will find them located throughout these lands.")
-                            choice {
-                                option<Quiz>("What about the stone circle full of dark wizards?") {
-                                    startedQuest()
-                                }
-                                option<Quiz>("So what's so good about Guthix?") {
-                                    npc<Neutral>("Guthix is the oldest and most powerful god in Gielinor. His existence is vital to this world. He is the god of balance, and nature; he is also a very part of this world.")
-                                    npc<Neutral>("He exists in the trees, and the flowers, the water and the rocks. He is everywhere. His purpose is to ensure balance in everything in this world, and as such we worship him.")
-                                    player<Uncertain>("He sounds kind of boring...")
-                                    npc<Neutral>("Some day when your mind achieves enlightenment you will see the true beauty of his power.")
-                                }
-                                option<Neutral>("Well, I'll be on my way now.") {
-                                    npc<Neutral>("Goodbye adventurer. I feel we shall meet again.")
-                                }
+    @Option("Talk-to", "kaqemeex")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        when (player.quest("druidic_ritual")) {
+            "unstarted" -> {
+                player<Neutral>("Hello there.")
+                npc<Quiz>("What brings you to our holy monument?")
+                choice {
+                    option("Who are you?") {
+                        npc<Neutral>("We are the druids of Guthix. We worship our god at our famous stone circles. You will find them located throughout these lands.")
+                        choice {
+                            option<Quiz>("What about the stone circle full of dark wizards?") {
+                                startedQuest()
+                            }
+                            option<Quiz>("So what's so good about Guthix?") {
+                                npc<Neutral>("Guthix is the oldest and most powerful god in Gielinor. His existence is vital to this world. He is the god of balance, and nature; he is also a very part of this world.")
+                                npc<Neutral>("He exists in the trees, and the flowers, the water and the rocks. He is everywhere. His purpose is to ensure balance in everything in this world, and as such we worship him.")
+                                player<Uncertain>("He sounds kind of boring...")
+                                npc<Neutral>("Some day when your mind achieves enlightenment you will see the true beauty of his power.")
+                            }
+                            option<Neutral>("Well, I'll be on my way now.") {
+                                npc<Neutral>("Goodbye adventurer. I feel we shall meet again.")
                             }
                         }
-                        option<Neutral>("I'm in search of a quest.") {
-                            npc<Neutral>("Hmm. I think I may have a worthwhile quest for you actually. I don't know if you are familiar with the stone circle south of Varrock or not, but...")
-                            startedQuest()
-                        }
-                        option<Quiz>("Did you build this?") {
-                            npc<Neutral>("What, personally? No, of course I didn't. However, our forefathers did. The first Druids of Guthix built many stone circles across these lands over eight hundred years ago.")
-                            npc<Sad>("Unfortunately we only know of two remaining, and of those only one is usable by us anymore.")
-                            choice {
-                                option<Quiz>("What about the stone circle full of dark wizards?") {
-                                    startedQuest()
-                                }
-                                option<Neutral>("I'm in search of a quest.") {
-                                    npc<Neutral>("Hmm. I think I may have a worthwhile quest for you actually. I don't know if you are familiar with the stone circle south of Varrock or not, but...")
-                                    startedQuest()
-                                }
-                                option<Neutral>("Well, I'll be on my way now.") {
-                                    npc<Neutral>("Goodbye adventurer. I feel we shall meet again.")
-                                }
+                    }
+                    option<Neutral>("I'm in search of a quest.") {
+                        npc<Neutral>("Hmm. I think I may have a worthwhile quest for you actually. I don't know if you are familiar with the stone circle south of Varrock or not, but...")
+                        startedQuest()
+                    }
+                    option<Quiz>("Did you build this?") {
+                        npc<Neutral>("What, personally? No, of course I didn't. However, our forefathers did. The first Druids of Guthix built many stone circles across these lands over eight hundred years ago.")
+                        npc<Sad>("Unfortunately we only know of two remaining, and of those only one is usable by us anymore.")
+                        choice {
+                            option<Quiz>("What about the stone circle full of dark wizards?") {
+                                startedQuest()
+                            }
+                            option<Neutral>("I'm in search of a quest.") {
+                                npc<Neutral>("Hmm. I think I may have a worthwhile quest for you actually. I don't know if you are familiar with the stone circle south of Varrock or not, but...")
+                                startedQuest()
+                            }
+                            option<Neutral>("Well, I'll be on my way now.") {
+                                npc<Neutral>("Goodbye adventurer. I feel we shall meet again.")
                             }
                         }
                     }
                 }
-                "started", "cauldron" -> started()
-                "kaqemeex" -> kaqemeex()
-                else -> completed()
             }
+            "started", "cauldron" -> started()
+            "kaqemeex" -> kaqemeex()
+            else -> completed()
         }
     }
 

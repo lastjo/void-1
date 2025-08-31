@@ -9,10 +9,8 @@ import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.noInterest
-import world.gregs.voidps.engine.entity.obj.GameObjects
-import world.gregs.voidps.engine.entity.obj.ObjectLayer
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.entity.obj.remove
+import world.gregs.voidps.engine.entity.item.Item
+import world.gregs.voidps.engine.entity.obj.*
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.replace
@@ -20,6 +18,8 @@ import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.engine.timer.toTicks
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
+import world.gregs.voidps.type.sub.Option
+import world.gregs.voidps.type.sub.UseOn
 import java.util.concurrent.TimeUnit
 
 @Script
@@ -31,27 +31,25 @@ class TaverleyDungeon {
     val leftSpawn = Tile(2887, 9832)
     val rightSpawn = Tile(2887, 9829)
 
-    init {
-        objectOperate("Open", "door_taverley_1_closed", "door_taverley_2_closed") {
-            if (player.tile.x >= 2889 || !spawn(player, leftSpawn) && !spawn(player, rightSpawn)) {
-                enterDoor(target)
+    @Option("Open", "door_taverley_1_closed", "door_taverley_2_closed")
+    suspend fun enter(player: Player, target: GameObject) {
+        if (player.tile.x >= 2889 || !spawn(player, leftSpawn) && !spawn(player, rightSpawn)) {
+            player.enterDoor(target)
+        }
+    }
+
+    @UseOn("raw_beef", "cauldron_of_thunder")
+    @UseOn("raw_rat_meat", "cauldron_of_thunder")
+    @UseOn("raw_bear_meat", "cauldron_of_thunder")
+    @UseOn("raw_chicken", "cauldron_of_thunder")
+    fun dip(player: Player, item: Item) {
+        val required = item.id
+        if (player.quest("druidic_ritual") == "cauldron") {
+            if (player.inventory.replace(required, required.replace("raw_", "enchanted_"))) {
+                player.message("You dip the ${required.toLowerSpaceCase()} in the cauldron.")
             }
-        }
-
-        itemOnObjectOperate("raw_beef", "cauldron_of_thunder") {
-            dip(player, item.id)
-        }
-
-        itemOnObjectOperate("raw_rat_meat", "cauldron_of_thunder") {
-            dip(player, item.id)
-        }
-
-        itemOnObjectOperate("raw_bear_meat", "cauldron_of_thunder") {
-            dip(player, item.id)
-        }
-
-        itemOnObjectOperate("raw_chicken", "cauldron_of_thunder") {
-            dip(player, item.id)
+        } else {
+            player.noInterest()
         }
     }
 
@@ -69,13 +67,4 @@ class TaverleyDungeon {
         return true
     }
 
-    fun dip(player: Player, required: String) {
-        if (player.quest("druidic_ritual") == "cauldron") {
-            if (player.inventory.replace(required, required.replace("raw_", "enchanted_"))) {
-                player.message("You dip the ${required.toLowerSpaceCase()} in the cauldron.")
-            }
-        } else {
-            player.noInterest()
-        }
-    }
 }

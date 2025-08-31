@@ -13,6 +13,7 @@ import content.social.trade.exchange.GrandExchange
 import content.social.trade.exchange.history.ExchangeHistory
 import kotlinx.io.pool.DefaultPool
 import org.koin.dsl.module
+import org.rsmod.game.pathfinder.LineValidator
 import world.gregs.voidps.engine.client.instruction.InstructionHandlers
 import world.gregs.voidps.engine.client.instruction.InterfaceHandler
 import world.gregs.voidps.engine.client.ui.chat.plural
@@ -79,8 +80,25 @@ fun gameModule(files: ConfigFiles) = module {
         val styleDefinitions = get<WeaponStyleDefinitions>()
         val enumDefinitions = get<EnumDefinitions>()
         val structDefinitions = get<StructDefinitions>()
+        val lineValidator = get<LineValidator>()
+        val patrols = get<PatrolDefinitions>()
         val start = System.currentTimeMillis()
-        val publishers = PublishersImpl(fairyCodes, areas, enumDefinitions, inventoryDefinitions, itemDefinitions, structDefinitions, variableDefinitions, styleDefinitions, npcs, players, floorItems, objects)
+        val publishers = PublishersImpl(
+            fairyCodes = fairyCodes,
+            lineValidator = lineValidator,
+            areas = areas,
+            enums = enumDefinitions,
+            inventoryDefinitions = inventoryDefinitions,
+            itemDefinitions = itemDefinitions,
+            patrols = patrols,
+            structDefinitions = structDefinitions,
+            variableDefinitions = variableDefinitions,
+            styleDefinitions = styleDefinitions,
+            npcs = npcs,
+            players = players,
+            floorItems = floorItems,
+            objects = objects
+        )
         Publishers.set(publishers)
         logger.info { "Loaded ${publishers.subscriptions} publisher ${"subscriptions".plural(publishers.subscriptions)} in ${System.currentTimeMillis() - start} ms" }
         publishers as Publishers

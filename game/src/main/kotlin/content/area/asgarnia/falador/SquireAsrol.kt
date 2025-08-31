@@ -8,6 +8,7 @@ import content.quest.quest
 import content.quest.questComplete
 import content.quest.refreshQuestJournal
 import world.gregs.voidps.engine.client.message
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.combatLevel
@@ -20,26 +21,25 @@ import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class SquireAsrol {
 
-    init {
-        npcOperate("Talk-to", "squire_asrol") {
-            when (player.quest("the_knights_sword")) {
-                "unstarted" -> {
-                    npc<Neutral>("Hello. I am the squire to Sir Vyvin.")
-                    choice {
-                        lifeAsASquire()
-                        squireForMe()
-                    }
+    @Option("Talk-to", "squire_asrol")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        when (player.quest("the_knights_sword")) {
+            "unstarted" -> {
+                npc<Neutral>("Hello. I am the squire to Sir Vyvin.")
+                choice {
+                    lifeAsASquire()
+                    squireForMe()
                 }
-                "started" -> started()
-                "picture" -> askAboutPicture()
-                "cupboard" -> checkPicture()
-                "blurite_sword" -> bluriteSword()
-                else -> completed()
             }
+            "started" -> started()
+            "picture" -> askAboutPicture()
+            "cupboard" -> checkPicture()
+            "blurite_sword" -> bluriteSword()
+            else -> completed()
         }
     }
 

@@ -11,11 +11,15 @@ import content.entity.player.dialogue.type.statement
 import content.entity.sound.sound
 import content.quest.quest
 import org.rsmod.game.pathfinder.LineValidator
+import world.gregs.voidps.engine.client.ui.dialogue
 import world.gregs.voidps.engine.client.ui.dialogue.talkWith
 import world.gregs.voidps.engine.entity.character.mode.move.hasLineOfSight
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
+import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.entity.obj.replace
 import world.gregs.voidps.engine.inject
@@ -24,71 +28,74 @@ import world.gregs.voidps.engine.inv.holdsItem
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.timer.toTicks
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 import java.util.concurrent.TimeUnit
 
-@Script
-class SirVyvin {
+class SirVyvin(
+    private val floorItems: FloorItems,
+    private val npcs: NPCs,
+    private val lineValidator: LineValidator,
+) {
 
-    val floorItems: FloorItems by inject()
-    val npcs: NPCs by inject()
-    val lineValidator: LineValidator by inject()
+    @Option("Open", "cupboard_the_knights_sword_closed")
+    fun open(player: Player, target: GameObject) {
+        player.sound("cupboard_open")
+        target.replace("cupboard_the_knights_sword_opened", ticks = TimeUnit.MINUTES.toTicks(3))
+    }
 
-    init {
-        objectOperate("Open", "cupboard_the_knights_sword_closed") {
-            player.sound("cupboard_open")
-            target.replace("cupboard_the_knights_sword_opened", ticks = TimeUnit.MINUTES.toTicks(3))
-        }
+    @Option("Open", "cupboard_the_knights_sword_opened")
+    fun shut(player: Player, target: GameObject) {
+        player.sound("cupboard_close")
+        target.replace("cupboard_the_knights_sword_closed")
+    }
 
-        objectOperate("Shut", "cupboard_the_knights_sword_opened") {
-            player.sound("cupboard_close")
-            target.replace("cupboard_the_knights_sword_closed")
-        }
-
-        objectOperate("Search", "cupboard_the_knights_sword_opened") {
-            when (player.quest("the_knights_sword")) {
-                "cupboard", "blurite_sword" -> {
-                    val sirVyvin = npcs[player.tile.regionLevel].firstOrNull { it.id == "sir_vyvin" }
-                    if (sirVyvin != null && lineValidator.hasLineOfSight(sirVyvin, player)) {
-                        player.talkWith(sirVyvin)
-                        npc<Frustrated>("HEY! Just WHAT do you THINK you are DOING??? STAY OUT of MY cupboard!")
-                        return@objectOperate
-                    }
-                    if (player.holdsItem("portrait")) {
-                        statement("There is just a load of junk in here.")
-                    } else {
-                        statement("You find a small portrait in here which you take.")
-                        if (player.inventory.isFull()) {
-                            floorItems.add(player.tile, "portrait", disappearTicks = 300, owner = player)
-                            return@objectOperate
-                        }
-                        player.inventory.add("portrait")
-                    }
+    @Option("Search", "cupboard_the_knights_sword_opened")
+    suspend fun search(player: Player, target: GameObject) = player.dialogue {
+        when (player.quest("the_knights_sword")) {
+            "cupboard", "blurite_sword" -> {
+                val sirVyvin = npcs[player.tile.regionLevel].firstOrNull { it.id == "sir_vyvin" }
+                if (sirVyvin != null && lineValidator.hasLineOfSight(sirVyvin, player)) {
+                    player.talkWith(sirVyvin)
+                    npc<Frustrated>("HEY! Just WHAT do you THINK you are DOING??? STAY OUT of MY cupboard!")
+                    return@dialogue
                 }
-                else -> statement("There is just a load of junk in here.")
+                if (player.holdsItem("portrait")) {
+                    statement("There is just a load of junk in here.")
+                } else {
+                    statement("You find a small portrait in here which you take.")
+                    if (player.inventory.isFull()) {
+                        floorItems.add(player.tile, "portrait", disappearTicks = 300, owner = player)
+                        return@dialogue
+                    }
+                    player.inventory.add("portrait")
+                }
             }
+            else -> statement("There is just a load of junk in here.")
         }
+    }
 
-        npcOperate("Talk-to", "sir_vyvin") {
-            player<Neutral>("Hello.")
-            npc<Neutral>("Greetings traveller.")
-            choice {
-                option<Quiz>("Do you have anything to trade?") {
-                    npc<Neutral>("No, I'm sorry.")
-                }
-                option<Quiz>("Why are there so many knights in this city?") {
-                    npc<Neutral>("We are the White Knights of Falador. We are the most powerful order of knights in the land. We are helping the king Vallance rule the kingdom as he is getting old and tired.")
-                }
-                option("Can I just distract you for a minute?") {
-                    player<Neutral>("Can I just talk to you very slowly for a few minutes, while I distract you, so that my friend over there can do something while you're busy being distracted by me?")
-                    npc<Uncertain>("... ...what?")
-                    npc<Uncertain>("I'm... not sure what you're asking me... you want to join the White Knights?")
-                    player<Neutral>("Nope. I'm just trying to distract you.")
-                    npc<Uncertain>("... ...you are very odd.")
-                    player<Neutral>("So can I distract you some more?")
-                    npc<Uncertain>("... ...I don't think I want to talk to you anymore.")
-                    player<Neutral>("Ok. My work here is done. 'Bye!")
-                }
+    @Option("Talk-to", "sir_vyvin")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        player<Neutral>("Hello.")
+        npc<Neutral>("Greetings traveller.")
+        choice {
+            option<Quiz>("Do you have anything to trade?") {
+                npc<Neutral>("No, I'm sorry.")
+            }
+            option<Quiz>("Why are there so many knights in this city?") {
+                npc<Neutral>("We are the White Knights of Falador. We are the most powerful order of knights in the land. We are helping the king Vallance rule the kingdom as he is getting old and tired.")
+            }
+            option("Can I just distract you for a minute?") {
+                player<Neutral>("Can I just talk to you very slowly for a few minutes, while I distract you, so that my friend over there can do something while you're busy being distracted by me?")
+                npc<Uncertain>("... ...what?")
+                npc<Uncertain>("I'm... not sure what you're asking me... you want to join the White Knights?")
+                player<Neutral>("Nope. I'm just trying to distract you.")
+                npc<Uncertain>("... ...you are very odd.")
+                player<Neutral>("So can I distract you some more?")
+                npc<Uncertain>("... ...I don't think I want to talk to you anymore.")
+                player<Neutral>("Ok. My work here is done. 'Bye!")
             }
         }
     }
+
 }
