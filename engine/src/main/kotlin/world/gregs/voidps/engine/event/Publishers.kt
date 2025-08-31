@@ -309,4 +309,7 @@ abstract class Publishers {
             set(object : Publishers() {})
         }
     }
+
+    open fun playerTakeItem(player: Player, id: String = ""): String = id
+    open fun npcTakeItem(npc: NPC, id: String = ""): String = id
 }

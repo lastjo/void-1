@@ -74,6 +74,10 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
                 SpawnPublisher(Publishers::npcDeath),
                 SpawnPublisher(Publishers::characterDeath),
             ),
+            Take::class.qualifiedName!! to listOf(
+                ItemTakePublisher(Publishers::playerTakeItem),
+                ItemTakePublisher(Publishers::npcTakeItem),
+            ),
             Open::class.qualifiedName!! to listOf(
                 InterfaceChangePublisher(Publishers::interfaceOpened),
             ),

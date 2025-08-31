@@ -104,11 +104,19 @@ abstract class Publisher(
                 generateElse(check, builder, returnSomething, method)
             }
             if (!addedElse) {
-                builder.addStatement("else -> ${if (returnSomething) "" else "return "}%L", if (check) false else returns)
+                if (returns is String) {
+                    builder.addStatement("else -> ${if (returnSomething) "" else "return "}%S", if (check) false else returns)
+                } else {
+                    builder.addStatement("else -> ${if (returnSomething) "" else "return "}%L", if (check) false else returns)
+                }
             }
             builder.endControlFlow()
             if (!returnSomething && !addedElse) {
-                builder.addStatement("return true")
+                if (returns is String) {
+                    builder.addStatement("return \"\"")
+                } else {
+                    builder.addStatement("return true")
+                }
             }
         }
         if (check) {
@@ -119,13 +127,18 @@ abstract class Publisher(
             if (player != null) {
                 errorHandling.add("%L.debug { %P }\n", player, "${name.removeSuffix("Publisher")}[${parameters.joinToString(", ") { "\$${it.first}" }}]")
             }
+            errorHandling
+                .add(builder.build())
+                .endControlFlow()
+                .beginControlFlow("catch (e: %T)", Exception::class)
+                .addStatement(if (player != null) "$player.warn(e) { \"Failed to publish ${name.removeSuffix("Publisher")}\" }" else "e.printStackTrace()")
+            if (returnsDefault is String) {
+                errorHandling.addStatement("return %S", returnsDefault)
+            } else {
+                errorHandling.addStatement("return %L", returnsDefault)
+            }
             funSpec.addCode(
-                errorHandling
-                    .add(builder.build())
-                    .endControlFlow()
-                    .beginControlFlow("catch (e: %T)", Exception::class)
-                    .addStatement(if (player != null) "$player.warn(e) { \"Failed to publish ${name.removeSuffix("Publisher")}\" }" else "e.printStackTrace()")
-                    .addStatement("return %L", returnsDefault)
+                    errorHandling
                     .endControlFlow()
                     .build(),
             )
