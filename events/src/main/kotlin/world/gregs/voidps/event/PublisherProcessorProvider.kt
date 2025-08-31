@@ -41,8 +41,8 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
                 InterfaceOnPublisher(Publishers::interfaceOnPlayer, Publishers::hasInterfaceOnPlayer),
                 InterfaceOnPublisher(Publishers::interfaceOnNPC, Publishers::hasInterfaceOnNPC),
                 InterfaceOnPublisher(Publishers::interfaceOnCharacter, Publishers::hasInterfaceOnCharacter),
-                InterfaceOnPublisher(Publishers::interfaceOnItem, Publishers::hasInterfaceOnItem),
                 InterfaceOnPublisher(Publishers::interfaceOnGameObject, Publishers::hasInterfaceOnGameObject),
+                InterfaceOnPublisher(Publishers::interfaceOnItem, Publishers::hasInterfaceOnItem),
                 InterfaceOnPublisher(Publishers::interfaceOnFloorItem, Publishers::hasInterfaceOnFloorItem),
             ),
             Subscribe::class.qualifiedName!! to listOf(

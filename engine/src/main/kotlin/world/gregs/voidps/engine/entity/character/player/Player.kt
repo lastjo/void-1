@@ -131,13 +131,13 @@ class Player(
 
     override fun toString(): String = "Player($accountName, index=$index, tile=$tile)"
 
-    suspend fun talkWith(npc: NPC, block: suspend SuspendableContext<Player>.() -> Unit) {
+    suspend fun talkWith(npc: NPC, block: suspend Dialogue.() -> Unit) {
         set("dialogue_target", npc)
         set("dialogue_def", npc.def(this))
         block(Dialogue(this, npc))
     }
 
-    suspend fun dialogue(block: suspend SuspendableContext<Player>.() -> Unit) {
+    suspend fun dialogue(block: suspend Dialogue.() -> Unit) {
         block(Dialogue(this, NPC())) // FIXME
     }
 

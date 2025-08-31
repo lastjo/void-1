@@ -109,7 +109,7 @@ data class ConditionNode(
             if (param != null && param.second == type) {
                 name
             } else {
-                schema.parameters.firstOrNull { it.second == type }?.first ?: error("No matching parameter $name: $type found for schema ${schema.name}")
+                schema.parameters.firstOrNull { it.second == type }?.first ?: error("No matching parameter $name: $type of ${method.methodName} in ${method.className} for schema ${schema.name}.")
             }
         }
     }

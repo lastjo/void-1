@@ -6,6 +6,7 @@ package world.gregs.voidps.type.sub
  * ```kotlin
  * ```
  */
+@Repeatable
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.SOURCE)
 annotation class Exit(

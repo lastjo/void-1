@@ -72,13 +72,15 @@ fun gameModule(files: ConfigFiles) = module {
         val npcs = get<NPCs>()
         val players = get<Players>()
         val objects = get<GameObjects>()
+        val floorItems = get<FloorItems>()
         val itemDefinitions = get<ItemDefinitions>()
         val inventoryDefinitions = get<InventoryDefinitions>()
         val areas = get<AreaDefinitions>()
         val styleDefinitions = get<WeaponStyleDefinitions>()
         val enumDefinitions = get<EnumDefinitions>()
+        val structDefinitions = get<StructDefinitions>()
         val start = System.currentTimeMillis()
-        val publishers = PublishersImpl(fairyCodes, areas, enumDefinitions, inventoryDefinitions, itemDefinitions, variableDefinitions, styleDefinitions, npcs, players, objects)
+        val publishers = PublishersImpl(fairyCodes, areas, enumDefinitions, inventoryDefinitions, itemDefinitions, structDefinitions, variableDefinitions, styleDefinitions, npcs, players, floorItems, objects)
         Publishers.set(publishers)
         logger.info { "Loaded ${publishers.subscriptions} publisher ${"subscriptions".plural(publishers.subscriptions)} in ${System.currentTimeMillis() - start} ms" }
         publishers as Publishers

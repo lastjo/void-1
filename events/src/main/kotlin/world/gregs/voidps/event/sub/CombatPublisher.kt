@@ -10,11 +10,17 @@ class CombatPublisher(function: KFunction<*>) : Publisher(function, notification
         val spell = method.annotationArgs["spell"] as String
         val id = method.annotationArgs["id"] as String
         val afterDelay = method.annotationArgs["afterDelay"] as Boolean
+        val swing = method.annotationArgs["swing"] as Boolean
         val list = mutableListOf<Comparator>()
-        if (afterDelay) {
+        if (swing) {
             list.add(Equals("delay", -1))
+            list.add(Equals("damage", -1))
         } else {
-            list.add(GreaterEquals("delay", 0))
+            if (afterDelay) {
+                list.add(Equals("delay", -1))
+            } else {
+                list.add(GreaterEquals("delay", 0))
+            }
         }
         if (weapon != "*") {
             list.add(Equals("weapon.id", weapon))
@@ -26,7 +32,7 @@ class CombatPublisher(function: KFunction<*>) : Publisher(function, notification
             list.add(Equals("spell", spell))
         }
         if (id != "*") {
-            list.add(Equals("def.id", id))
+            list.add(Equals("source.id", id))
         }
         return listOf(list)
     }
