@@ -23,7 +23,7 @@ import world.gregs.voidps.engine.entity.character.player.chat.clan.ClanRank
 import world.gregs.voidps.engine.entity.character.player.equip.BodyParts
 import world.gregs.voidps.engine.entity.character.player.skill.exp.Experience
 import world.gregs.voidps.engine.entity.character.player.skill.level.Levels
-import world.gregs.voidps.engine.get
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.Inventories
 import world.gregs.voidps.engine.queue.ActionQueue
 import world.gregs.voidps.engine.suspend.DialogueSuspension
@@ -83,11 +83,12 @@ class Player(
     lateinit var interfaces: Interfaces
     lateinit var interfaceOptions: InterfaceOptions
     override lateinit var collision: CollisionStrategy
+    override lateinit var publishers: Publishers
     val area: AreaQueue = AreaQueue(this)
 
     inline fun debug(message: () -> Any?) {
         if (this["debug", false]) {
-            logger.info(message)
+            logger.debug(message)
         }
     }
 

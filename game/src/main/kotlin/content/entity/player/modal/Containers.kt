@@ -11,12 +11,12 @@ class Containers(
     private val inventoryDefinitions: InventoryDefinitions
 ) {
     @Subscribe("inventory_update")
-    fun sendUpdates(player: Player, inventory: String) {
-        val secondary = inventory.startsWith("_")
-        val id = if (secondary) inventory.removePrefix("_") else inventory
-        val updates = player.inventories.inventory(inventory).transaction.changes.itemChanges
+    fun sendUpdates(player: Player, id: String) {
+        val secondary = id.startsWith("_")
+        val actualId = if (secondary) id.removePrefix("_") else id
+        val updates = player.inventories.instances[actualId]?.transaction?.changes?.itemChanges ?: return
         player.sendInterfaceItemUpdate(
-            key = inventoryDefinitions.get(id).id,
+            key = inventoryDefinitions.get(actualId).id,
             updates = updates.map { Triple(it.index, itemDefinitions.getOrNull(it.item.id)?.id ?: -1, it.item.amount) },
             secondary = secondary,
         )

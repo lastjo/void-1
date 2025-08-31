@@ -57,6 +57,7 @@ class AccountManager(
     fun setup(player: Player, client: Client?, displayMode: Int): Boolean {
         player.index = players.index() ?: return false
         player.visuals.hits.self = player.index
+        player.publishers = publishers
         player.interfaces = Interfaces(player, player.client, interfaceDefinitions, publishers = publishers)
         player.interfaceOptions = InterfaceOptions(player, interfaceDefinitions, inventoryDefinitions)
         (player.variables as PlayerVariables).definitions = variableDefinitions
