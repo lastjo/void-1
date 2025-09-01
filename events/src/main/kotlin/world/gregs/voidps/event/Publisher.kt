@@ -151,12 +151,23 @@ abstract class Publisher(
         if (check) {
             builder.addStatement("else -> ${if (returnSomething) "" else "return "}false")
         } else {
-            val methodName = method.className.simpleName.replaceFirstChar { it.lowercase() }
             val args = ConditionNode.arguments(method, this)
-            builder.addStatement(
-                "else -> ${if (returnSomething) "" else "return "}$methodName.%L(${args.joinToString(", ")})",
-                method.methodName,
-            )
+            val methodName = method.className.simpleName.replaceFirstChar { it.lowercase() }
+            if (!returnSomething && method.returnType == "kotlin.Unit") {
+                builder.addStatement("else -> {")
+                builder.addStatement("  $methodName.%L(${args.joinToString(", ")})", method.methodName)
+                if (method.schema.returnsDefault is String) {
+                    builder.addStatement("  return %S", method.schema.returnsDefault)
+                } else {
+                    builder.addStatement("  return %L", method.schema.returnsDefault)
+                }
+                builder.addStatement("}")
+            } else {
+                builder.addStatement(
+                    "else -> ${if (returnSomething) "" else "return "}$methodName.%L(${args.joinToString(", ")})",
+                    method.methodName,
+                )
+            }
         }
     }
 
