@@ -116,9 +116,12 @@ abstract class Publishers {
 
     open suspend fun interfaceOption(player: Player, id: String = "", component: String = "", option: String = "", optionIndex: Int = -1, item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false
 
+    open fun continueDialogue(player: Player, id: String = "", component: String = "", option: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false
+
     open suspend fun inventoryOption(player: Player, item: Item = Item.EMPTY, inventory: String = "", option: String = "", itemSlot: Int = -1): Boolean = false
 
     open fun inventoryChanged(player: Player, inventory: String = "", index: Int = -1, item: Item = Item.EMPTY, from: String = "", fromIndex: Int = -1, fromItem: Item = Item.EMPTY): Boolean = false
+    open fun inventoryUpdated(player: Player, inventory: String = ""): Boolean = false
 
     open fun inventorySwap(player: Player, id: String = "", component: String = "", fromItem: Item = Item.EMPTY, fromSlot: Int = -1, fromInventory: String = "", toId: String = "", toComponent: String = "", toItem: Item = Item.EMPTY, toSlot: Int = -1, toInventory: String = ""): Boolean = false
 
@@ -144,8 +147,8 @@ abstract class Publishers {
     open fun npcDeath(npc: NPC): Boolean = false
     open fun characterDeath(character: Character): Boolean = false
 
-    open fun publish(event: String = "", id: String = ""): Boolean = false
-    open fun publishPlayer(player: Player, event: String = "", id: String = ""): Boolean = false
+    open fun publish(event: String = "", id: Any = ""): Boolean = false
+    open fun publishPlayer(player: Player, event: String = "", id: Any = ""): Boolean = false
     open fun publishNPC(npc: NPC, def: NPCDefinition = npc.def, event: String = "", id: String = ""): Boolean = false
     open fun publishFloorItem(floorItem: FloorItem, event: String = "", id: String = ""): Boolean = false
     open fun publishGameObject(obj: GameObject, def: ObjectDefinition = obj.def, event: String = "", id: String = ""): Boolean = false
@@ -212,8 +215,11 @@ abstract class Publishers {
     open fun timerTickCharacter(character: Character, timer: String = ""): Int = -1
     open fun timerTickWorld(world: World, timer: String = ""): Int = -1
 
-    open fun teleport(player: Player, target: GameObject, def: ObjectDefinition = target.def, option: String = ""): Int = 0
-    open fun teleportLand(player: Player, target: GameObject, def: ObjectDefinition = target.def, option: String = ""): Boolean = false
+    open fun teleport(player: Player, type: String = ""): Int = 0
+    open fun teleportLand(player: Player, type: String = ""): Boolean = false
+
+    open fun teleportGameObject(player: Player, target: GameObject, def: ObjectDefinition = target.def, option: String = ""): Int = 0
+    open fun teleportLandGameObject(player: Player, target: GameObject, def: ObjectDefinition = target.def, option: String = ""): Boolean = false
 
     open suspend fun enterArea(player: Player, name: String = "", tags: Set<String> = emptySet(), area: Area = Rectangle(0, 0, 0, 0)): Boolean = false
     open suspend fun exitArea(player: Player, name: String = "", tags: Set<String> = emptySet(), area: Area = Rectangle(0, 0, 0, 0), logout: Boolean = false): Boolean = false
@@ -222,6 +228,7 @@ abstract class Publishers {
     open suspend fun moveNPC(npc: NPC, from: Tile = Tile.EMPTY, to: Tile = Tile.EMPTY): Boolean = false
     open suspend fun moveCharacter(character: Character, from: Tile = Tile.EMPTY, to: Tile = Tile.EMPTY): Boolean = false
 
+    open fun experience(player: Player, skill: Skill = Skill.Attack, from: Double, to: Double): Boolean = false
     open fun levelChangePlayer(player: Player, skill: Skill = Skill.Attack, from: Int = -1, to: Int = -1, max: Boolean = false): Boolean = false
     open fun levelChangeNPC(npc: NPC, skill: Skill = Skill.Attack, from: Int = -1, to: Int = -1, max: Boolean = false): Boolean = false
     open fun levelChangeCharacter(character: Character, skill: Skill = Skill.Attack, from: Int = -1, to: Int = -1, max: Boolean = false): Boolean = false

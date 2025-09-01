@@ -13,7 +13,7 @@ class TimerSlot(
 
     override fun start(name: String, restart: Boolean): Boolean {
         val start = TimerStart(name, restart)
-        Publishers.all.timerStart(entity, name, restart)
+        val interval = Publishers.all.timerStart(entity, name, restart)
         events.emit(start)
         if (start.cancelled) {
             return false
@@ -22,7 +22,7 @@ class TimerSlot(
             Publishers.all.timerStop(entity, timer!!.name, logout = false)
             events.emit(TimerStop(timer!!.name, logout = false))
         }
-        this.timer = Timer(name, start.interval)
+        this.timer = Timer(name, if (interval != -1) interval else start.interval)
         return true
     }
 
@@ -35,14 +35,14 @@ class TimerSlot(
         }
         timer.reset()
         val tick = TimerTick(timer.name)
-        Publishers.all.timerTick(entity, timer.name)
+        val next = Publishers.all.timerTick(entity, timer.name)
         events.emit(tick)
         if (tick.cancelled) {
             Publishers.all.timerStop(entity, timer.name, logout = false)
             events.emit(TimerStop(timer.name, logout = false))
             this.timer = null
         } else if (tick.nextInterval != -1) {
-            timer.next(tick.nextInterval)
+            timer.next(if (next != -1) next else tick.nextInterval)
         }
     }
 

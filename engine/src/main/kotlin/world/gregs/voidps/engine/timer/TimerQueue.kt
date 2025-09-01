@@ -18,13 +18,13 @@ class TimerQueue(
         if (names.contains(name)) {
             return false
         }
-        Publishers.all.timerStart(entity, name, restart)
+        val interval = Publishers.all.timerStart(entity, name, restart)
         val start = TimerStart(name, restart)
         events.emit(start)
         if (start.cancelled) {
             return false
         }
-        val timer = Timer(name, start.interval)
+        val timer = Timer(name, if (interval != -1) interval else start.interval)
         queue.add(timer)
         names.add(name)
         return true
@@ -42,10 +42,10 @@ class TimerQueue(
             }
             iterator.remove()
             timer.reset()
-            Publishers.all.timerTick(entity, timer.name)
+            val next = Publishers.all.timerTick(entity, timer.name)
             val tick = TimerTick(timer.name)
             events.emit(tick)
-            if (tick.cancelled) {
+            if (tick.cancelled || next == 0) {
                 names.remove(timer.name)
                 events.emit(TimerStop(timer.name, logout = false))
             } else {

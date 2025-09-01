@@ -15,6 +15,7 @@ import world.gregs.voidps.engine.entity.character.mode.move.AreaExited
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.character.player.appearance
+import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.equip.AppearanceOverrides
 import world.gregs.voidps.engine.entity.character.player.name
 import world.gregs.voidps.engine.entity.character.player.skill.level.PlayerLevels
@@ -23,7 +24,6 @@ import world.gregs.voidps.engine.inv.equipment
 import world.gregs.voidps.engine.inv.restrict.ValidItemRestriction
 import world.gregs.voidps.engine.inv.stack.ItemDependentStack
 import world.gregs.voidps.engine.map.collision.CollisionStrategyProvider
-import world.gregs.voidps.engine.map.zone.RegionLoad
 import world.gregs.voidps.engine.queue.strongQueue
 import world.gregs.voidps.network.client.Client
 import world.gregs.voidps.network.client.ConnectionQueue
@@ -90,13 +90,16 @@ class AccountManager(
         client?.onDisconnecting {
             logout(player, false)
         }
-        player.emit(RegionLoad)
+        Publishers.all.publishPlayer(player, "region_load")
         player.open(player.interfaces.gameFrame)
         Publishers.all.spawnPlayer(player)
+        player.message("Welcome to ${Settings["server.name"]}.", ChatType.Welcome)
         player.emit(Spawn)
         for (def in areaDefinitions.get(player.tile.zone)) {
             if (player.tile in def.area) {
-                Publishers.all.enterArea(player, def.name, def.tags, def.area)
+                Publishers.launch {
+                    Publishers.all.enterArea(player, def.name, def.tags, def.area)
+                }
                 player.emit(AreaEntered(player, def.name, def.tags, def.area))
             }
         }
@@ -122,9 +125,12 @@ class AccountManager(
             World.queue("logout", 1) {
                 players.remove(player)
             }
-            for (def in areaDefinitions.get(player.tile.zone)) {
-                if (player.tile in def.area) {
-                    player.emit(AreaExited(player, def.name, def.tags, def.area, logout = true))
+            Publishers.launch {
+                for (def in areaDefinitions.get(player.tile.zone)) {
+                    if (player.tile in def.area) {
+                        Publishers.all.exitArea(player, def.name, def.tags, def.area, logout = true)
+                        player.emit(AreaExited(player, def.name, def.tags, def.area, logout = true))
+                    }
                 }
             }
             player.emit(Despawn)

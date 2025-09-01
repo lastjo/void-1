@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet
 import world.gregs.voidps.engine.data.definition.MapDefinitions
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.obj.GameObjects
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.map.collision.Collisions
 import world.gregs.voidps.engine.map.collision.clear
 import world.gregs.voidps.type.Region
@@ -63,7 +64,7 @@ class DynamicZones(
             zones.remove(zone.id)
         }
         regions.remove(region.id)
-        World.emit(ClearRegion(region))
+        Publishers.all.publish("clear_region", region)
     }
 
     private fun update(from: Zone, to: Zone, rotation: Int, set: Boolean) {
@@ -77,7 +78,7 @@ class DynamicZones(
                 regions.remove(region.id)
             }
         }
-        World.emit(ReloadZone(to))
+        Publishers.all.publish("reload_zone", to)
     }
 
     companion object {
