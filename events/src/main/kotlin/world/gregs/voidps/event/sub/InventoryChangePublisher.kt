@@ -15,7 +15,7 @@ class InventoryChangePublisher(function: KFunction<*>) : Publisher(function, not
             list.add(Equals("inventory", inventory))
         }
         if (slot != -1) {
-            list.add(Equals("slot", slot))
+            list.add(Equals("index", slot))
         }
         return listOf(list)
     }

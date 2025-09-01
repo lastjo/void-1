@@ -88,9 +88,9 @@ abstract class Publishers {
 
     open fun interfaceOpened(player: Player, id: String = ""): Boolean = false
     open fun interfaceClosed(player: Player, id: String = ""): Boolean = false
-    open fun interfaceRefreshed(player: Player, id: String): Boolean = false
+    open fun interfaceRefreshed(player: Player, id: String = ""): Boolean = false
 
-    open fun command(player: Player, content: String = "", prefix: String = "", rights: Int = PlayerRights.NONE): Boolean = false
+    open suspend fun command(player: Player, content: String = "", prefix: String = "", rights: Int = PlayerRights.NONE): Boolean = false
 
     suspend fun interfaceOn(player: Player, target: Any, id: String = "", component: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = when (target) {
         is Player -> interfaceOnPlayer(player, target, id, component, item, itemSlot, inventory) || interfaceOnCharacter(player, target, id, component, item, itemSlot, inventory)
@@ -119,6 +119,8 @@ abstract class Publishers {
     open suspend fun inventoryOption(player: Player, item: Item = Item.EMPTY, inventory: String = "", option: String = "", itemSlot: Int = -1): Boolean = false
 
     open fun inventoryChanged(player: Player, inventory: String = "", index: Int = -1, item: Item = Item.EMPTY, from: String = "", fromIndex: Int = -1, fromItem: Item = Item.EMPTY): Boolean = false
+
+    open fun inventorySwap(player: Player, id: String = "", component: String = "", fromItem: Item = Item.EMPTY, fromSlot: Int = -1, fromInventory: String = "", toId: String = "", toComponent: String = "", toItem: Item = Item.EMPTY, toSlot: Int = -1, toInventory: String = ""): Boolean = false
 
     open fun itemAdded(player: Player, item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false
 
@@ -210,14 +212,15 @@ abstract class Publishers {
     open fun timerTickCharacter(character: Character, timer: String = ""): Int = -1
     open fun timerTickWorld(world: World, timer: String = ""): Int = -1
 
-    open fun teleport(player: Player, target: GameObject, def: ObjectDefinition = target.def, option: String = "", land: Boolean = false): Boolean = false
+    open fun teleport(player: Player, target: GameObject, def: ObjectDefinition = target.def, option: String = ""): Int = 0
+    open fun teleportLand(player: Player, target: GameObject, def: ObjectDefinition = target.def, option: String = ""): Boolean = false
 
-    open fun enterArea(player: Player, name: String = "", tags: Set<String> = emptySet(), area: Area = Rectangle(0, 0, 0, 0)): Boolean = false
-    open fun exitArea(player: Player, name: String = "", tags: Set<String> = emptySet(), area: Area = Rectangle(0, 0, 0, 0)): Boolean = false
+    open suspend fun enterArea(player: Player, name: String = "", tags: Set<String> = emptySet(), area: Area = Rectangle(0, 0, 0, 0)): Boolean = false
+    open suspend fun exitArea(player: Player, name: String = "", tags: Set<String> = emptySet(), area: Area = Rectangle(0, 0, 0, 0), logout: Boolean = false): Boolean = false
 
-    open fun movePlayer(player: Player, from: Tile = Tile.EMPTY, to: Tile = Tile.EMPTY): Boolean = false
-    open fun moveNPC(npc: NPC, from: Tile = Tile.EMPTY, to: Tile = Tile.EMPTY): Boolean = false
-    open fun moveCharacter(character: Character, from: Tile = Tile.EMPTY, to: Tile = Tile.EMPTY): Boolean = false
+    open suspend fun movePlayer(player: Player, from: Tile = Tile.EMPTY, to: Tile = Tile.EMPTY): Boolean = false
+    open suspend fun moveNPC(npc: NPC, from: Tile = Tile.EMPTY, to: Tile = Tile.EMPTY): Boolean = false
+    open suspend fun moveCharacter(character: Character, from: Tile = Tile.EMPTY, to: Tile = Tile.EMPTY): Boolean = false
 
     open fun levelChangePlayer(player: Player, skill: Skill = Skill.Attack, from: Int = -1, to: Int = -1, max: Boolean = false): Boolean = false
     open fun levelChangeNPC(npc: NPC, skill: Skill = Skill.Attack, from: Int = -1, to: Int = -1, max: Boolean = false): Boolean = false
@@ -241,38 +244,38 @@ abstract class Publishers {
     open fun variableSetNPC(npc: NPC, id: String = "", from: Any? = null, to: Any? = null): Boolean = false
     open fun variableSetCharacter(character: Character, id: String = "", from: Any? = null, to: Any? = null): Boolean = false
 
-    open fun playerCombatAttackPlayer(player: Player, target: Player, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
-    open fun playerCombatAttackNPC(player: Player, target: NPC, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
-    open fun playerCombatAttackCharacter(player: Player, target: Character, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
+    open fun playerCombatAttackPlayer(player: Player, target: Player, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1, stage: Int = -1): Boolean = false
+    open fun playerCombatAttackNPC(player: Player, target: NPC, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1, stage: Int = -1): Boolean = false
+    open fun playerCombatAttackCharacter(player: Player, target: Character, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1, stage: Int = -1): Boolean = false
 
-    open fun combatAttack(source: Character, target: Character, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean {
+    open fun combatAttack(source: Character, target: Character, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1, stage: Int = -1): Boolean {
         when (source) {
             is Player -> {
                 when (target) {
-                    is Player -> playerCombatAttackPlayer(source, target, type, damage, weapon, spell, special, delay)
-                    is NPC -> playerCombatAttackNPC(source, target, type, damage, weapon, spell, special, delay)
+                    is Player -> playerCombatAttackPlayer(source, target, type, damage, weapon, spell, special, delay, stage)
+                    is NPC -> playerCombatAttackNPC(source, target, type, damage, weapon, spell, special, delay, stage)
                 }
-                playerCombatAttackCharacter(source, target, type, damage, weapon, spell, special, delay)
+                playerCombatAttackCharacter(source, target, type, damage, weapon, spell, special, delay, stage)
             }
             is NPC -> {
                 when (target) {
-                    is Player -> npcCombatAttackPlayer(source, target, type, damage, weapon, spell, special, delay)
-                    is NPC -> npcCombatAttackNPC(source, target, type, damage, weapon, spell, special, delay)
+                    is Player -> npcCombatAttackPlayer(source, target, type, damage, weapon, spell, special, delay, stage)
+                    is NPC -> npcCombatAttackNPC(source, target, type, damage, weapon, spell, special, delay, stage)
                 }
-                npcCombatAttackCharacter(source, target, type, damage, weapon, spell, special, delay)
+                npcCombatAttackCharacter(source, target, type, damage, weapon, spell, special, delay, stage)
             }
         }
-        characterCombatAttackCharacter(source, target, type, damage, weapon, spell, special, delay)
+        characterCombatAttackCharacter(source, target, type, damage, weapon, spell, special, delay, stage)
         return true
     }
 
-    open fun npcCombatAttackPlayer(source: NPC, target: Player, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
-    open fun npcCombatAttackNPC(source: NPC, target: NPC, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
-    open fun npcCombatAttackCharacter(source: NPC, target: Character, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
+    open fun npcCombatAttackPlayer(source: NPC, target: Player, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1, stage: Int = -1): Boolean = false
+    open fun npcCombatAttackNPC(source: NPC, target: NPC, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1, stage: Int = -1): Boolean = false
+    open fun npcCombatAttackCharacter(source: NPC, target: Character, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1, stage: Int = -1): Boolean = false
 
-    open fun characterCombatAttackPlayer(source: Character, target: Player, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
-    open fun characterCombatAttackNPC(source: Character, target: NPC, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
-    open fun characterCombatAttackCharacter(source: Character, target: Character, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1): Boolean = false
+    open fun characterCombatAttackPlayer(source: Character, target: Player, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1, stage: Int = -1): Boolean = false
+    open fun characterCombatAttackNPC(source: Character, target: NPC, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1, stage: Int = -1): Boolean = false
+    open fun characterCombatAttackCharacter(source: Character, target: Character, type: String = "", damage: Int = -1, weapon: Item = Item.EMPTY, spell: String = "", special: Boolean = false, delay: Int = -1, stage: Int = -1): Boolean = false
 
     open fun prayerStartPlayer(player: Player, id: String = "", restart: Boolean = false): Boolean = false
     open fun prayerStartNPC(npc: NPC, id: String = "", restart: Boolean = false): Boolean = false
@@ -283,6 +286,16 @@ abstract class Publishers {
     open fun prayerStopCharacter(character: Character, id: String = "", restart: Boolean = false): Boolean = false
 
     open fun consume(player: Player, item: Item = Item.EMPTY, slot: Int = -1): Boolean = true
+
+    open fun playerTakeItem(player: Player, id: String = ""): String = id
+    open fun npcTakeItem(npc: NPC, id: String = ""): String = id
+
+    open fun huntPlayer(npc: NPC, target: Player, mode: String = ""): Boolean = false
+    open fun huntNpc(npc: NPC, target: NPC, mode: String = ""): Boolean = false
+    open fun huntFloorItem(npc: NPC, target: FloorItem, mode: String = ""): Boolean = false
+    open fun huntGameObject(npc: NPC, target: GameObject, mode: String = ""): Boolean = false
+
+    open fun specialAttack(player: Player, target: Character, id: String = "", prepare: Boolean = false): Boolean = false
 
     companion object {
         private val logger = InlineLogger()
@@ -308,7 +321,4 @@ abstract class Publishers {
             set(object : Publishers() {})
         }
     }
-
-    open fun playerTakeItem(player: Player, id: String = ""): String = id
-    open fun npcTakeItem(npc: NPC, id: String = ""): String = id
 }

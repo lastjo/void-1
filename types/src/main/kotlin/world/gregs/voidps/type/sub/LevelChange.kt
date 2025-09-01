@@ -3,7 +3,9 @@ package world.gregs.voidps.type.sub
 /**
  * Level change subscriber
  * ```kotlin
+ * ```
  */
+@Repeatable
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.SOURCE)
 annotation class LevelChange(
@@ -11,4 +13,5 @@ annotation class LevelChange(
     val from: Int = -1,
     val to: Int = -1,
     val max: Boolean = false,
+    val id: String = "*"
 )

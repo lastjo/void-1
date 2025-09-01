@@ -15,6 +15,8 @@ class VariableSetPublisher(function: KFunction<*>) : Publisher(function, notific
         val toInt = method.annotationArgs["toInt"] as Int
         val fromNull = method.annotationArgs["fromNull"] as Boolean
         val toNull = method.annotationArgs["toNull"] as Boolean
+        val fromBool = method.annotationArgs["fromBool"] as String
+        val toBool = method.annotationArgs["toBool"] as String
         val list = mutableListOf<Comparator>()
         if (fromInt != -1) {
             list.add(Equals("from", fromInt))
@@ -33,6 +35,12 @@ class VariableSetPublisher(function: KFunction<*>) : Publisher(function, notific
         }
         if (toNull) {
             list.add(Equals("to", null))
+        }
+        if (fromBool != "*") {
+            list.add(Equals("from", from.toBoolean(), simplify = false))
+        }
+        if (toBool != "*") {
+            list.add(Equals("to", to.toBoolean(), simplify = false))
         }
         if (ids.isEmpty()) {
             return listOf(list)

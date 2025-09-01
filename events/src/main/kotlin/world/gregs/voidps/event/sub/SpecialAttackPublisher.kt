@@ -6,13 +6,15 @@ import world.gregs.voidps.event.Publisher
 import world.gregs.voidps.event.Subscriber
 import kotlin.reflect.KFunction
 
-class TeleportPublisher(function: KFunction<*>, notification: Boolean) : Publisher(function, returnsDefault = if (notification) false else 0) {
+class SpecialAttackPublisher(function: KFunction<*>) : Publisher(function, notification = true, cancellable = true) {
     override fun comparisons(method: Subscriber): List<List<Comparator>> {
-        val ids = method.annotationArgs["ids"] as List<String>
+        val id = method.annotationArgs["id"] as String
+        val prepare = method.annotationArgs["prepare"] as Boolean
         val list = mutableListOf<Comparator>()
-        if (ids.isEmpty()) {
-            return listOf()
+        list.add(Equals("prepare", prepare))
+        if (id != "*") {
+            list.add(Equals("id", id))
         }
-        return ids.map { list + listOf(Equals("def.stringId", it)) }
+        return listOf(list)
     }
 }

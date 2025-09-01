@@ -18,6 +18,7 @@ package world.gregs.voidps.type.sub
  * }
  * ```
  */
+@Repeatable
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.SOURCE)
 annotation class Option(

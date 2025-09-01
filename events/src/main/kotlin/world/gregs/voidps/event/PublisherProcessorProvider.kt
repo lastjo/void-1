@@ -108,8 +108,10 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
             ItemAdded::class.qualifiedName!! to listOf(ItemChangePublisher(Publishers::itemAdded)),
             ItemRemoved::class.qualifiedName!! to listOf(ItemChangePublisher(Publishers::itemRemoved)),
             InventoryChanged::class.qualifiedName!! to listOf(InventoryChangePublisher(Publishers::inventoryChanged)),
+            Swap::class.qualifiedName!! to listOf(InventorySwapPublisher(Publishers::inventorySwap)),
             Command::class.qualifiedName!! to listOf(CommandPublisher()),
-            Teleport::class.qualifiedName!! to listOf(TeleportPublisher()),
+            Teleport::class.qualifiedName!! to listOf(TeleportPublisher(Publishers::teleport, notification = false)),
+            TeleportLand::class.qualifiedName!! to listOf(TeleportPublisher(Publishers::teleportLand, notification = true)),
             Enter::class.qualifiedName!! to listOf(AreaPublisher(Publishers::enterArea)),
             Exit::class.qualifiedName!! to listOf(AreaPublisher(Publishers::exitArea)),
             Move::class.qualifiedName!! to listOf(
@@ -138,6 +140,7 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
                 CombatPublisher(Publishers::characterCombatAttackNPC),
                 CombatPublisher(Publishers::characterCombatAttackCharacter),
             ),
+            SpecialAttack::class.qualifiedName!! to listOf(SpecialAttackPublisher(Publishers::specialAttack)),
             PrayerStart::class.qualifiedName!! to listOf(
                 PrayerPublisher(Publishers::prayerStartPlayer),
                 PrayerPublisher(Publishers::prayerStartNPC),
@@ -148,7 +151,13 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
                 PrayerPublisher(Publishers::prayerStopNPC),
                 PrayerPublisher(Publishers::prayerStopCharacter),
             ),
-            Consume::class.qualifiedName!! to listOf(ConsumePublisher(Publishers::consume))
+            Consume::class.qualifiedName!! to listOf(ConsumePublisher(Publishers::consume)),
+            Hunt::class.qualifiedName!! to listOf(
+                HuntPublisher(Publishers::huntPlayer),
+                HuntPublisher(Publishers::huntNpc),
+                HuntPublisher(Publishers::huntFloorItem),
+                HuntPublisher(Publishers::huntGameObject),
+            ),
         ),
     )
 }

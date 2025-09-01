@@ -14,4 +14,6 @@ annotation class Variable(
     val toInt: Int = -1,
     val fromNull: Boolean = false,
     val toNull: Boolean = false,
+    val fromBool: String = "*",
+    val toBool: String = "*",
 )

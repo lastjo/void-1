@@ -12,8 +12,12 @@ class LevelChangePublisher(function: KFunction<*>) : Publisher(function, notific
         val from = method.annotationArgs["from"] as Int
         val to = method.annotationArgs["to"] as Int
         val max = method.annotationArgs["max"] as Boolean
+        val id = method.annotationArgs["id"] as String
         val list = mutableListOf<Comparator>()
         list.add(Equals("max", max))
+        if (id != "*") {
+            list.add(Equals("npc.id", id))
+        }
         if (from != -1) {
             list.add(Equals("from", from))
         }
