@@ -23,37 +23,33 @@ import world.gregs.voidps.engine.client.clearCamera
 import world.gregs.voidps.engine.client.moveCamera
 import world.gregs.voidps.engine.client.shakeCamera
 import world.gregs.voidps.engine.client.turnCamera
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.client.variable.hasClock
 import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
 import world.gregs.voidps.engine.entity.character.mode.PauseMode
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
-import world.gregs.voidps.engine.entity.character.mode.move.enterArea
-import world.gregs.voidps.engine.entity.character.mode.move.move
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.NPCs
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.entity.character.player.skill.level.npcLevelChange
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.ObjectShape
-import world.gregs.voidps.engine.entity.playerDespawn
 import world.gregs.voidps.engine.event.Context
 import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.engine.queue.strongQueue
 import world.gregs.voidps.engine.queue.weakQueue
-import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.engine.timer.toTicks
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Region
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
+import world.gregs.voidps.type.sub.*
 import java.util.concurrent.TimeUnit
 
 @Script
@@ -74,23 +70,96 @@ class Delrith {
 
     val words = listOf("Carlem", "Aber", "Camerinthum", "Purchai", "Gabindo")
 
-    init {
-        enterArea("demon_slayer_stone_circle") {
-            if (!player.questCompleted("demon_slayer") && player["demon_slayer_silverlight", false] && !player.hasClock("demon_slayer_instance_exit")) {
+    @Enter("demon_slayer_stone_circle")
+    suspend fun enter(player: Player) {
+        if (!player.questCompleted("demon_slayer") && player["demon_slayer_silverlight", false] && !player.hasClock("demon_slayer_instance_exit")) {
+            player.dialogue {
                 cutscene()
             }
         }
+    }
 
-        move({ exitArea(it, to) }) { player ->
-            val cutscene: Cutscene = player.remove("demon_slayer_cutscene") ?: return@move
-            cutscene.end(this)
+    @Move
+    suspend fun move(player: Player, to: Tile) {
+        if (exitArea(player, to)) {
+            val cutscene: Cutscene = player.remove("demon_slayer_cutscene") ?: return
+            player.dialogue {
+                cutscene.end(this)
+            }
         }
+    }
 
-        playerDespawn { player ->
-            val cutscene: Cutscene = player.remove("demon_slayer_cutscene") ?: return@playerDespawn
-            cutscene.destroy()
+    @Despawn
+    fun despawn(player: Player) {
+        val cutscene: Cutscene = player.remove("demon_slayer_cutscene") ?: return
+        cutscene.destroy()
+    }
+
+    @Option("Banish", "delrith")
+    fun operate(player: Player, target: NPC) {
+        if (target.transform != "delrith_weakened") {
+            return
         }
+        player.weakQueue("banish_delrith") {
+            player<Angry>("Now what was that incantation again?")
+            var correct = true
+            repeat(5) { index ->
+                val choice = choice(listOf("Carlem", "Aber", "Camerinthum", "Purchai", "Gabindo"))
+                val selected = words[choice - 1]
+                val suffix = if (index == 4) "!" else "..."
+                val text = "$selected$suffix"
+                player.say(text)
+                player<Talk>(text, largeHead = true, clickToContinue = false)
+                val expected = DemonSlayerSpell.getWord(player, index + 1)
+                if (selected != expected) {
+                    correct = false
+                    target.anim("delrith_continue")
+                    delay(2)
+                    npcs.remove(target)
+                    delay(1)
+                } else {
+                    delay(3)
+                }
+            }
+            if (correct) {
+                target.anim("delrith_death")
+                player.sound("demon_slayer_delrith_banished")
+                statement("Delrith is sucked into the vortex...", clickToContinue = false)
+                delay(14)
+                npcs.remove(target)
+                statement("...back into the dark dimension from which he came.")
+                val cutscene: Cutscene? = player.remove("demon_slayer_cutscene")
+                if (cutscene != null) {
+                    cutscene.end(this)
+                } else {
+                    player.tele(defaultTile)
+                }
+                questComplete()
+            } else {
+                statement("The vortex collapses. That was the wrong incantation.")
+            }
+        }
+    }
 
+    @LevelChange(Skill.CONSTITUTION, id = "delrith")
+    fun change(npc: NPC, to: Int) {
+        if (to > 0) {
+            return
+        }
+        if (npc.queue.contains("death")) {
+            npc.queue.clear("death")
+        }
+        npc.strongQueue("death", TimeUnit.MINUTES.toTicks(5)) {
+            Publishers.all.npcDeath(character)
+            Publishers.all.characterDeath(character)
+            npc.emit(Death)
+        }
+        //    player.playSound("demon_slayer_portal_open")
+        npc.transform("delrith_weakened")
+        npc.mode = PauseMode
+    }
+
+    init {
         combatPrepare("melee") { player ->
             if (target is NPC && target.id == "delrith" && target.transform == "delrith_weakened") {
                 cancel()
@@ -100,72 +169,10 @@ class Delrith {
             }
         }
 
-        npcOperate("Banish", "delrith") {
-            if (target.transform != "delrith_weakened") {
-                return@npcOperate
-            }
-            player.weakQueue("banish_delrith") {
-                player<Angry>("Now what was that incantation again?")
-                var correct = true
-                repeat(5) { index ->
-                    val choice = choice(listOf("Carlem", "Aber", "Camerinthum", "Purchai", "Gabindo"))
-                    val selected = words[choice - 1]
-                    val suffix = if (index == 4) "!" else "..."
-                    val text = "$selected$suffix"
-                    player.say(text)
-                    player<Talk>(text, largeHead = true, clickToContinue = false)
-                    val expected = DemonSlayerSpell.getWord(player, index + 1)
-                    if (selected != expected) {
-                        correct = false
-                        target.anim("delrith_continue")
-                        delay(2)
-                        npcs.remove(target)
-                        delay(1)
-                    } else {
-                        delay(3)
-                    }
-                }
-                if (correct) {
-                    target.anim("delrith_death")
-                    player.sound("demon_slayer_delrith_banished")
-                    statement("Delrith is sucked into the vortex...", clickToContinue = false)
-                    delay(14)
-                    npcs.remove(target)
-                    statement("...back into the dark dimension from which he came.")
-                    val cutscene: Cutscene? = player.remove("demon_slayer_cutscene")
-                    if (cutscene != null) {
-                        cutscene.end(this)
-                    } else {
-                        player.tele(defaultTile)
-                    }
-                    questComplete()
-                } else {
-                    statement("The vortex collapses. That was the wrong incantation.")
-                }
-            }
-        }
-
         npcCombatPrepare("delrith") {
             if (it.levels.get(Skill.Constitution) <= 0) {
                 cancel()
             }
-        }
-
-        npcLevelChange("delrith", Skill.Constitution) { npc ->
-            if (to > 0) {
-                return@npcLevelChange
-            }
-            if (npc.queue.contains("death")) {
-                npc.queue.clear("death")
-            }
-            npc.strongQueue("death", TimeUnit.MINUTES.toTicks(5)) {
-                Publishers.all.npcDeath(character)
-                Publishers.all.characterDeath(character)
-                npc.emit(Death)
-            }
-            //    player.playSound("demon_slayer_portal_open")
-            npc.transform("delrith_weakened")
-            npc.mode = PauseMode
         }
     }
 
@@ -175,7 +182,7 @@ class Delrith {
         return !area.contains(actual) && !player.hasClock("demon_slayer_instance_exit")
     }
 
-    suspend fun SuspendableContext<Player>.cutscene() {
+    suspend fun Dialogue.cutscene() {
         val region = Region(12852)
         val cutscene = startCutscene("demon_slayer_delrith", region)
         player["demon_slayer_cutscene"] = cutscene

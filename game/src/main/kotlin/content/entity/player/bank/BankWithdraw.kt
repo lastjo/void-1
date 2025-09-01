@@ -13,32 +13,32 @@ import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.MoveItemLimit.moveToLimit
 import world.gregs.voidps.engine.inv.transact.operation.ShiftItem.shiftToFreeIndex
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Interface
 
-@Script
 class BankWithdraw {
 
     val logger = InlineLogger()
 
-    init {
-        interfaceOption("Withdraw-*", "inventory", "bank") {
-            val amount = when (option) {
-                "Withdraw-1" -> 1
-                "Withdraw-5" -> 5
-                "Withdraw-10" -> 10
-                "Withdraw-*" -> player["last_bank_amount", 0]
-                "Withdraw-All" -> player.bank.count(item.id)
-                "Withdraw-All but one" -> item.amount - 1
-                "Withdraw-X" -> intEntry("Enter amount:").also {
-                    player["last_bank_amount"] = it
-                }
-                else -> return@interfaceOption
+    @Interface("Withdraw-*", "inventory", "bank")
+    suspend fun withdraw(player: Player, item: Item, itemSlot: Int, option: String) = player.dialogue {
+        val amount = when (option) {
+            "Withdraw-1" -> 1
+            "Withdraw-5" -> 5
+            "Withdraw-10" -> 10
+            "Withdraw-*" -> player["last_bank_amount", 0]
+            "Withdraw-All" -> player.bank.count(item.id)
+            "Withdraw-All but one" -> item.amount - 1
+            "Withdraw-X" -> intEntry("Enter amount:").also {
+                player["last_bank_amount"] = it
             }
-            withdraw(player, item, itemSlot, amount)
+            else -> return@dialogue
         }
+        withdraw(player, item, itemSlot, amount)
+    }
 
-        interfaceOption("Toggle item/note withdrawl", "note_mode", "bank") {
-            player.toggle("bank_notes")
-        }
+    @Interface("Toggle item/note withdrawl", "note_mode", "bank")
+    fun toggleNotes(player: Player) {
+        player.toggle("bank_notes")
     }
 
     fun withdraw(player: Player, item: Item, index: Int, amount: Int) {

@@ -2,92 +2,110 @@ package content.entity.world.music
 
 import content.bot.isBot
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interfaceOption
-import world.gregs.voidps.engine.client.ui.interfaceSwap
 import world.gregs.voidps.engine.client.ui.playTrack
-import world.gregs.voidps.engine.client.ui.songEnd
 import world.gregs.voidps.engine.data.definition.DefinitionsDecoder.Companion.toIdentifier
 import world.gregs.voidps.engine.data.definition.EnumDefinitions
-import world.gregs.voidps.engine.entity.character.mode.move.move
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.Tile
+import world.gregs.voidps.type.sub.*
 
-@Script
-class Music {
+class Music(
+    private val tracks: MusicTracks,
+    private val enums: EnumDefinitions,
+) {
 
-    val tracks: MusicTracks by inject()
-    val enums: EnumDefinitions by inject()
-
-    init {
-        playerSpawn { player ->
-            if (!player.isBot) {
-                unlockDefaultTracks(player)
-                playAreaTrack(player)
-                sendUnlocks(player)
-                sendPlaylist(player)
-            }
-        }
-
-        move({ !it.isBot }) { player ->
-            val tracks = tracks[player.tile.region]
-            for (track in tracks) {
-                if (!track.area.contains(from) && track.area.contains(to)) {
-                    autoPlay(player, track)
-                }
-            }
-        }
-
-        interfaceOption("Play", "tracks", "music_player") {
-            val index = itemSlot / 2
-            if (player.hasUnlocked(index)) {
-                player.playTrack(index)
-            }
-        }
-
-        interfaceOption("Play", "playlist", "music_player") {
-            val index = player["playlist_slot_${itemSlot + 1}", 32767]
-            if (player.hasUnlocked(index)) {
-                player.playTrack(index)
-            }
-        }
-
-        interfaceOption("Add to playlist", "tracks", "music_player") {
-            player.addToPlaylist(itemSlot)
-        }
-
-        interfaceOption("Remove from playlist", id = "music_player") {
-            player.removeSongFromPlaylist(itemSlot, component == "tracks")
-        }
-
-        interfaceOption("Playlist on/off", "playlist_toggle", "music_player") {
-            player.togglePlaylist()
-        }
-
-        interfaceOption("Clear Playlist", "clear_playlist", "music_player") {
-            player.clearPlaylist()
-        }
-
-        interfaceOption("Shuffle on/off", "shuffle_playlist", "music_player") {
-            player.togglePlaylistShuffle()
-        }
-
-        interfaceSwap(fromId = "music_player", fromComponent = "playlist") { player ->
-            val fromSong = player["playlist_slot_${fromSlot + 1}", 32767]
-            val toSong = player["playlist_slot_${toSlot + 1}", 32767]
-
-            player["playlist_slot_${fromSlot + 1}"] = toSong
-            player["playlist_slot_${toSlot + 1}"] = fromSong
-        }
-
-        songEnd { player ->
-            player["playing_song"] = false
-            if (player["playlist_enabled", false] && playNextPlaylistTrack(player, songIndex)) {
-                return@songEnd
-            }
+    @Spawn
+    fun spawn(player: Player) {
+        if (!player.isBot) {
+            unlockDefaultTracks(player)
             playAreaTrack(player)
+            sendUnlocks(player)
+            sendPlaylist(player)
         }
+    }
+
+    @Move
+    fun move(player: Player, from: Tile, to: Tile) {
+        if (player.isBot) {
+            return
+        }
+        val tracks = tracks[player.tile.region]
+        for (track in tracks) {
+            if (!track.area.contains(from) && track.area.contains(to)) {
+                autoPlay(player, track)
+            }
+        }
+    }
+
+    @Interface("Play", "tracks", "music_player")
+    fun playTrack(player: Player, itemSlot: Int) {
+        val index = itemSlot / 2
+        if (player.hasUnlocked(index)) {
+            player.playTrack(index)
+        }
+    }
+
+    @Interface("Play", "playlist", "music_player")
+    fun play(player: Player, itemSlot: Int) {
+        val index = player["playlist_slot_${itemSlot + 1}", 32767]
+        if (player.hasUnlocked(index)) {
+            player.playTrack(index)
+        }
+    }
+
+    @Interface("Add to playlist", "tracks", "music_player")
+    fun add(player: Player, itemSlot: Int) {
+        player.addToPlaylist(itemSlot)
+    }
+
+
+    @Interface("Remove from playlist", id = "music_player")
+    fun remove(player: Player, itemSlot: Int, component: String) {
+        player.removeSongFromPlaylist(itemSlot, component == "tracks")
+    }
+
+    /**
+     * Flips the [Player]s playlist varbit to 0 or 1
+     */
+    @Interface("Playlist on/off", "playlist_toggle", "music_player")
+    fun togglePlaylist(player: Player) {
+        player.toggle("playlist_enabled")
+    }
+
+    /**
+     * Sets all the [Player]s playlist varbits to 32767 (empty)
+     */
+    @Interface("Clear Playlist", "clear_playlist", "music_player")
+    fun clear(player: Player) {
+        (1..12).forEach {
+            player["playlist_slot_$it"] = 32767
+        }
+    }
+
+    /**
+     * Flips the [Player]s playlist shuffle varbit to 0 or 1
+     */
+    @Interface("Shuffle on/off", "shuffle_playlist", "music_player")
+    fun togglePlaylistShuffle(player: Player) {
+        player.toggle("playlist_shuffle_enabled")
+    }
+
+    @Swap(fromId = "music_player", fromComponent = "playlist")
+    fun swap(player: Player, fromSlot: Int, toSlot: Int) {
+        val fromSong = player["playlist_slot_${fromSlot + 1}", 32767]
+        val toSong = player["playlist_slot_${toSlot + 1}", 32767]
+
+        player["playlist_slot_${fromSlot + 1}"] = toSong
+        player["playlist_slot_${toSlot + 1}"] = fromSong
+    }
+
+    @Subscribe("song_end")
+    fun songEnd(player: Player, id: String) {
+        player["playing_song"] = false
+        if (player["playlist_enabled", false] && playNextPlaylistTrack(player, id.toInt())) {
+            return
+        }
+        playAreaTrack(player)
     }
 
     fun unlockDefaultTracks(player: Player) {
@@ -194,29 +212,6 @@ class Music {
             }
             this["playlist_slot_$it"] = this["playlist_slot_${it + 1}", 32767]
         }
-    }
-
-    /**
-     * Sets all the [Player]s playlist varbits to 32767 (empty)
-     */
-    fun Player.clearPlaylist() {
-        (1..12).forEach {
-            this["playlist_slot_$it"] = 32767
-        }
-    }
-
-    /**
-     * Flips the [Player]s playlist varbit to 0 or 1
-     */
-    fun Player.togglePlaylist() {
-        toggle("playlist_enabled")
-    }
-
-    /**
-     * Flips the [Player]s playlist shuffle varbit to 0 or 1
-     */
-    fun Player.togglePlaylistShuffle() {
-        toggle("playlist_shuffle_enabled")
     }
 
     fun Player.hasUnlocked(musicIndex: Int): Boolean {

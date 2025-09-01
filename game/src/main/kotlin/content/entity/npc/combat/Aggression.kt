@@ -11,55 +11,53 @@ import world.gregs.voidps.engine.entity.character.npc.hunt.HuntNPC
 import world.gregs.voidps.engine.entity.character.npc.hunt.HuntPlayer
 import world.gregs.voidps.engine.entity.character.npc.hunt.huntNPC
 import world.gregs.voidps.engine.entity.character.npc.hunt.huntPlayer
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.PlayerOption
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Hunt
 
-@Script
-class Aggression {
+class Aggression(
+    private val areas: AreaDefinitions
+) {
 
-    val areas: AreaDefinitions by inject()
-
-    val playerHandler: suspend HuntPlayer.(npc: NPC) -> Unit = huntPlayer@{ npc ->
+    @Hunt("aggressive")
+    @Hunt("aggressive_intolerant")
+    fun hunt(npc: NPC, target: Player) {
         if (!Settings["world.npcs.aggression", true] || attacking(npc, target)) {
-            return@huntPlayer
+            return
         }
         if (Settings["world.npcs.safeZone", false] && npc.tile in areas["lumbridge"]) {
-            return@huntPlayer
+            return
         }
         npc.mode = Interact(npc, target, PlayerOption(npc, target, "Attack"))
     }
-    val npcHandler: suspend HuntNPC.(npc: NPC) -> Unit = { npc ->
+
+    @Hunt("cowardly")
+    fun coward(npc: NPC, target: Player) {
+        if (!Settings["world.npcs.aggression", true] || attacking(npc, target)) {
+            return
+        }
+        if (Settings["world.npcs.safeZone", false] && npc.tile in areas["lumbridge"]) {
+            return
+        }
+        npc.mode = Interact(npc, target, PlayerOption(npc, target, "Attack"))
+    }
+
+    @Hunt("aggressive")
+    @Hunt("aggressive_intolerant")
+    fun hunt(npc: NPC, target: NPC) {
         if (!attacking(npc, target)) {
             npc.mode = Interact(npc, target, NPCOption(npc, target, target.def, "Attack"))
         }
     }
 
-    init {
-        huntPlayer(mode = "aggressive", handler = playerHandler)
-
-        huntPlayer(mode = "aggressive_intolerant", handler = playerHandler)
-
-        huntPlayer(mode = "cowardly") { npc ->
-            if (!Settings["world.npcs.aggression", true] || attacking(npc, target)) {
-                return@huntPlayer
-            }
-            if (Settings["world.npcs.safeZone", false] && npc.tile in areas["lumbridge"]) {
-                return@huntPlayer
-            }
-            npc.mode = Interact(npc, target, PlayerOption(npc, target, "Attack"))
+    @Hunt("cowardly")
+    fun coward(npc: NPC, target: NPC) {
+        if (attacking(npc, target)) {
+            return
         }
-
-        huntNPC(mode = "aggressive", handler = npcHandler)
-
-        huntNPC(mode = "aggressive_intolerant", handler = npcHandler)
-
-        huntNPC(mode = "cowardly") { npc ->
-            if (attacking(npc, target)) {
-                return@huntNPC
-            }
-            npc.mode = Interact(npc, target, NPCOption(npc, target, target.def, "Attack"))
-        }
+        npc.mode = Interact(npc, target, NPCOption(npc, target, target.def, "Attack"))
     }
 
     fun attacking(npc: NPC, target: Character): Boolean {

@@ -8,25 +8,23 @@ import world.gregs.voidps.engine.client.ui.close
 import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.queue.queue
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.Inventory
 import kotlin.random.Random
 
-@Script
 class Morphing {
 
-    init {
-        inventoryOptions("Wear", item = "easter_ring") {
-            morph(player, "easter_egg_${Random.nextInt(0, 6)}")
-        }
+    @Inventory("Wear", "easter_ring")
+    fun easterRing(player: Player) {
+        morph(player, "easter_egg_${Random.nextInt(0, 6)}")
+    }
 
-        inventoryOptions("Wear", item = "ring_of_stone") {
-            morph(player, item.id)
-        }
-
-        interfaceOption("Ok", "unmorph", "morph") {
-            unmorph(player)
-        }
+    @Inventory("Wear", "ring_of_stone")
+    fun ringOfStone(player: Player, item: Item) {
+        morph(player, item.id)
     }
 
     fun morph(player: Player, npc: String) {
@@ -38,6 +36,7 @@ class Morphing {
         }
     }
 
+    @Interface("Ok", "unmorph", "morph")
     fun unmorph(player: Player) {
         player.queue.clear()
         player.clearTransform()

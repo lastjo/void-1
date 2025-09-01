@@ -8,46 +8,52 @@ import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.interact.ItemOnObject
 import world.gregs.voidps.engine.client.ui.interact.itemOnObjectOperate
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.item.Item
+import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.replace
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
+import world.gregs.voidps.type.sub.Inventory
+import world.gregs.voidps.type.sub.Teleport
+import world.gregs.voidps.type.sub.TeleportLand
+import world.gregs.voidps.type.sub.UseOn
 
-@Script
-class Ectophial {
+class Ectophial(private val objects: GameObjects) {
 
-    val objects: GameObjects by inject()
+    @Inventory("Empty", "ectophial", "inventory")
+    suspend fun empty(player: Player) {
+        player.gfx("empty_ectophial")
+        player.animDelay("empty_ectophial")
+        player.delay(2)
+        teleport(player, "ectophial_teleport", "ectophial")
+    }
 
-    init {
-        inventoryItem("Empty", "ectophial", "inventory") {
-            player.gfx("empty_ectophial")
-            player.animDelay("empty_ectophial")
-            delay(2)
-            teleport(player, "ectophial_teleport", "ectophial")
+    @UseOn("ectophial_empty", "ectofuntus")
+    fun use(player: Player, target: GameObject, item: Item, itemSlot: Int) {
+        if (player.inventory.replace(itemSlot, item.id, "ectophial")) {
+            player.anim("take")
+            player.message("You refill the ectophial from the Ectofuntus.")
         }
+    }
 
-        itemOnObjectOperate("ectophial_empty", "ectofuntus") {
-            if (player.inventory.replace(itemSlot, item.id, "ectophial")) {
-                player.anim("take")
-                player.message("You refill the ectophial from the Ectofuntus.")
-            }
-        }
+    @Teleport("ectophial")
+    fun tele(player: Player): Int {
+        player.anim("empty_ectophial")
+        player.gfx("empty_ectophial")
+        player.message("You empty the ectoplasm onto the ground around your feet...", ChatType.Filter)
+        return 1
+    }
 
-        teleportTakeOff("ectophial") {
-            player.anim("empty_ectophial")
-            player.gfx("empty_ectophial")
-            player.message("You empty the ectoplasm onto the ground around your feet...", ChatType.Filter)
-        }
-
-        teleportLand("ectophial") {
-            player.message("... and the world changes around you.", ChatType.Filter)
-            val ectofuntus = objects[Tile(3658, 3518), "ectofuntus"] ?: return@teleportLand
-            val slot = player.inventory.indexOf("ectophial")
-            player.mode = Interact(player, ectofuntus, ItemOnObject(player, ectofuntus, Item("ectophial_empty"), slot, "inventory"))
-        }
+    @TeleportLand("ectophial")
+    fun land(player: Player) {
+        player.message("... and the world changes around you.", ChatType.Filter)
+        val ectofuntus = objects[Tile(3658, 3518), "ectofuntus"] ?: return
+        val slot = player.inventory.indexOf("ectophial")
+        player.mode = Interact(player, ectofuntus, ItemOnObject(player, ectofuntus, Item("ectophial_empty"), slot, "inventory"))
     }
 }

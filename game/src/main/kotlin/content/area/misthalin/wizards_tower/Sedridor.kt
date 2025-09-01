@@ -11,8 +11,8 @@ import content.quest.questComplete
 import content.quest.refreshQuestJournal
 import content.skill.runecrafting.EssenceMine
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.entity.character.npc.NPCOption
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.name
 import world.gregs.voidps.engine.event.Context
@@ -21,35 +21,33 @@ import world.gregs.voidps.engine.inv.holdsItem
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.queue.softQueue
-import world.gregs.voidps.engine.suspend.SuspendableContext
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class Sedridor {
 
-    init {
-        npcOperate("Talk-to", "sedridor") {
-            when (player.quest("rune_mysteries")) {
-                "unstarted" -> {
-                    npc<Happy>("Welcome adventurer, to the world renowned Wizards' Tower, home to the Order of Wizards. How may I help you?")
-                    player<Neutral>("I'm just looking around.")
-                    npc<Uncertain>("Well, take care adventurer. You stand on the ruins of the old destroyed Wizards' Tower. Strange and powerful magicks lurk here.")
-                }
-                "started" -> started()
-                "talisman_delivered" -> visitAubury()
-                "research_package" -> checkPackageDelivered()
-                "research_notes" -> checkResearchDelivered()
-                else -> completed()
+    @Option("Talk-to", "sedridor")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        when (player.quest("rune_mysteries")) {
+            "unstarted" -> {
+                npc<Happy>("Welcome adventurer, to the world renowned Wizards' Tower, home to the Order of Wizards. How may I help you?")
+                player<Neutral>("I'm just looking around.")
+                npc<Uncertain>("Well, take care adventurer. You stand on the ruins of the old destroyed Wizards' Tower. Strange and powerful magicks lurk here.")
             }
-        }
-
-        npcOperate("Teleport", "sedridor") {
-            player["what_is_this_place_task"] = true
-            EssenceMine.teleport(target, player)
+            "started" -> started()
+            "talisman_delivered" -> visitAubury()
+            "research_package" -> checkPackageDelivered()
+            "research_notes" -> checkResearchDelivered()
+            else -> completed()
         }
     }
 
-    suspend fun SuspendableContext<Player>.started() {
+    @Option("Teleport", "sedridor")
+    fun teleport(player: Player, target: NPC) {
+        player["what_is_this_place_task"] = true
+        EssenceMine.teleport(target, player)
+    }
+
+    suspend fun Dialogue.started() {
         npc<Happy>("Welcome adventurer, to the world renowned Wizards' Tower, home to the Order of Wizards. We are the oldest and most prestigious group of wizards around. Now, how may I help you?")
         player<Quiz>("Are you Sedridor?")
         npc<Quiz>("Sedridor? What is it you want with him?")
@@ -78,7 +76,7 @@ class Sedridor {
         }
     }
 
-    suspend fun SuspendableContext<Player>.okHere() {
+    suspend fun Dialogue.okHere() {
         player<Neutral>("Okay, here you are.")
         if (player.inventory.contains("air_talisman")) {
             player["rune_mysteries"] = "talisman_delivered"
@@ -127,7 +125,7 @@ class Sedridor {
         }
     }
 
-    suspend fun SuspendableContext<Player>.discovery() {
+    suspend fun Dialogue.discovery() {
         npc<Happy>("It is critical I share this discovery with my associate, Aubury, as soon as possible. He's not much of a wizard, but he's an expert on runecrafting, and his insight will be essential.")
         npc<Quiz>("Would you be willing to visit him for me? I would go myself, but I wish to study this talisman some more.")
         choice {
@@ -136,7 +134,7 @@ class Sedridor {
         }
     }
 
-    suspend fun SuspendableContext<Player>.visitAubury() {
+    suspend fun Dialogue.visitAubury() {
         npc<Quiz>("Hello again, adventurer. You have already done so much, but I would really appreciate it if you were to visit my associate, Aubury. Would you be willing to?")
         choice {
             yesCertainly()
@@ -144,7 +142,7 @@ class Sedridor {
         }
     }
 
-    suspend fun SuspendableContext<Player>.checkPackageDelivered() {
+    suspend fun Dialogue.checkPackageDelivered() {
         npc<Quiz>("Hello again, adventurer. Did you take that package to Aubury?")
         if (player.ownsItem("research_package_rune_mysteries")) {
             player<Neutral>("Not yet.")
@@ -165,7 +163,7 @@ class Sedridor {
         }
     }
 
-    suspend fun SuspendableContext<Player>.checkResearchDelivered() {
+    suspend fun Dialogue.checkResearchDelivered() {
         npc<Neutral>("Ah, ${player.name}. How goes your quest? Have you delivered my research to Aubury yet?")
         player<Neutral>("Yes, I have. He gave me some notes to give to you.")
         npc<Happy>("Wonderful! Let's have a look then.")
@@ -208,7 +206,7 @@ class Sedridor {
         npc<Happy>("Best of luck, ${player.name}.")
     }
 
-    suspend fun NPCOption<Player>.completed() {
+    suspend fun Dialogue.completed() {
         player<Neutral>("Hello there.")
         npc<Happy>("Hello again, ${player.name}. What can I do for you?")
         choice {
@@ -221,12 +219,12 @@ class Sedridor {
         }
     }
 
-    fun ChoiceBuilder<NPCOption<Player>>.teleportEssenceMine(): Unit = option<Quiz>("Can you teleport me to the Rune Essence Mine?") {
+    fun ChoiceBuilder<Dialogue>.teleportEssenceMine(): Unit = option<Quiz>("Can you teleport me to the Rune Essence Mine?") {
         player["what_is_this_place_task"] = true
         EssenceMine.teleport(target, player)
     }
 
-    suspend fun ChoiceBuilder<NPCOption<Player>>.whoElseKnows(): Unit = option<Quiz>("Who else knows the teleport to the Rune Essence Mine?") {
+    suspend fun ChoiceBuilder<Dialogue>.whoElseKnows(): Unit = option<Quiz>("Who else knows the teleport to the Rune Essence Mine?") {
         npc<Happy>("Apart from myself, there's also Aubury in Varrock, Wizard Cromperty in East Ardougne, Brimstail in the Tree Gnome Stronghold and Wizard Distentor in Yanille's Wizards' Guild.")
         player["enter_abyss_knows_mages"] = true
         choice {
@@ -236,7 +234,7 @@ class Sedridor {
         }
     }
 
-    suspend fun ChoiceBuilder<NPCOption<Player>>.oldWizardsTower(): Unit = option<Quiz>("Could you tell me about the old Wizards' Tower?") {
+    suspend fun ChoiceBuilder<Dialogue>.oldWizardsTower(): Unit = option<Quiz>("Could you tell me about the old Wizards' Tower?") {
         npc<Happy>("Of course. The first Wizards' Tower was built at the same time the Order of Wizards was founded. It was at the dawn of the Fifth Age, when the secrets of runecrafting were rediscovered.")
         npc<Happy>("For years, the tower was a hub of magical research. Wizards of all races and religions were welcomed into our order.")
         npc<Sad>("Alas, that openness is what ultimately led to disaster. The wizards who served Zamorak, the evil god of chaos, tried to claim our magical discoveries in his name.")

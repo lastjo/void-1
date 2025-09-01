@@ -9,6 +9,7 @@ import content.quest.questCompleted
 import net.pearx.kasechange.toTitleCase
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.chat.toDigitGroupString
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.client.ui.event.interfaceRefresh
 import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
@@ -24,135 +25,140 @@ import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.queue.strongQueue
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
+import world.gregs.voidps.type.sub.Close
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.Option
+import world.gregs.voidps.type.sub.Refresh
 
-@Script
-class CharterShip {
+class CharterShip(
+    private val ships: CharterShips,
+    private val teles: ObjectTeleports,
+) {
 
-    val locations = listOf(
+    private val locations = listOf(
         "catherby",
         "brimhaven",
         "port_khazard",
         "port_sarim",
     )
 
-    val ships: CharterShips by inject()
-    val teles: ObjectTeleports by inject()
+    @Refresh("charter_ship_map")
+    fun refresh(player: Player, id: String) {
+        val currentLocation = player["charter_ship", ""]
+        val prices = ships.get(currentLocation)
+        player.interfaces.sendVisibility(id, "mos_le_harmless", hasQuestRequirements(player, "mos_le_harmless") && prices.containsKey("mos_le_harmless"))
+        player.interfaces.sendVisibility(id, "shipyard", hasQuestRequirements(player, "shipyard") && prices.containsKey("shipyard"))
+        player.interfaces.sendVisibility(id, "port_tyras", hasQuestRequirements(player, "port_tyras") && prices.containsKey("port_tyras"))
+        player.interfaces.sendVisibility(id, "port_phasmatys", hasQuestRequirements(player, "port_phasmatys") && prices.containsKey("port_phasmatys"))
+        player.interfaces.sendVisibility(id, "oo_glog", hasQuestRequirements(player, "oo_glog") && prices.containsKey("oo_glog"))
+        player.interfaces.sendVisibility(id, "crandor", false)
+        player.interfaces.sendVisibility(id, "musa_point", false)
 
-    init {
-        interfaceRefresh("charter_ship_map") { player ->
-            val currentLocation = player["charter_ship", ""]
-            val prices = ships.get(currentLocation)
-            player.interfaces.sendVisibility(id, "mos_le_harmless", hasQuestRequirements(player, "mos_le_harmless") && prices.containsKey("mos_le_harmless"))
-            player.interfaces.sendVisibility(id, "shipyard", hasQuestRequirements(player, "shipyard") && prices.containsKey("shipyard"))
-            player.interfaces.sendVisibility(id, "port_tyras", hasQuestRequirements(player, "port_tyras") && prices.containsKey("port_tyras"))
-            player.interfaces.sendVisibility(id, "port_phasmatys", hasQuestRequirements(player, "port_phasmatys") && prices.containsKey("port_phasmatys"))
-            player.interfaces.sendVisibility(id, "oo_glog", hasQuestRequirements(player, "oo_glog") && prices.containsKey("oo_glog"))
-            player.interfaces.sendVisibility(id, "crandor", false)
-            player.interfaces.sendVisibility(id, "musa_point", false)
-
-            for (location in locations) {
-                player.interfaces.sendVisibility(id, location, location != currentLocation && prices.containsKey(location))
-            }
+        for (location in locations) {
+            player.interfaces.sendVisibility(id, location, location != currentLocation && prices.containsKey(location))
         }
+    }
 
-        npcOperate("Talk-To", "trader_stan", "trader_crewmember*") {
-            npc<Quiz>("Can I help you?")
-            choice {
-                option("Yes, who are you?") {
-                    player<Quiz>("Yes, who are you?")
-                    npc<Happy>("${if (target.id == "trader_stan") "Why, I'm Trader Stan, owner and operator" else "I'm one of Trader Stan's crew; we are all part"} of the largest fleet of trading ships and chartered vessels to ever sail the seas!")
-                    if (target.id == "trader_stan") {
-                        npc<Talk>("If you want to get to a port in a hurry then you can charter one of my ships to take you there - if the price is right...")
-                    }
-                    player<Quiz>("So, where exactly can I go with your ships?")
-                    npc<Talk>("We run ships from Port Phasmatys over to Port Tyras, stopping at Port Sarim, Catherby, Brimhaven, Musa Point, the Shipyard and Port Khazard.")
-                    npc<Shifty>("We might dock at Mos Le'Harmless once in a while, as well, if you catch my meaning...")
-                    player<Talk>("Wow, that's a lot of ports. I take it you have some exotic stuff to trade?")
-                    npc<Happy>("We certainly do! ${if (target.id == "trader_stan") "I and my crewmen" else "We"} have access to items bought and sold from around the world. Would you like to take a look? Or would you like to charter a ship?")
-                    choice {
-                        trading()
-                        charter()
-                        if (target.id != "trader_stan") {
-                            option("Isn't it tricky to sail about in those clothes?") {
-                                player<Quiz>("Isn't it tricky to sail about in those clothes?")
-                                npc<Surprised>("Tricky? Tricky!")
-                                npc<Talk>("Do you have even the slightest idea how tricky it is to sail in this stuff?")
-                                npc<Shifty>("Some of us tried tearing it and arguing that it was too fragile to wear when on a boat, but he just had it enchanted to re-stitch itself.")
-                                player<Talk>("Wow, that's kind of harsh.")
-                                npc<Upset>("Anyway, would you like to take a look at our exotic wares from around the world? Or would you like to charter a ship?")
-                                choice {
-                                    trading()
-                                    charter()
-                                    option<Upset>("No thanks.")
-                                }
+    @Option("Talk-to", "trader_stan", "trader_crewmember*")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        npc<Quiz>("Can I help you?")
+        choice {
+            option("Yes, who are you?") {
+                player<Quiz>("Yes, who are you?")
+                npc<Happy>("${if (target.id == "trader_stan") "Why, I'm Trader Stan, owner and operator" else "I'm one of Trader Stan's crew; we are all part"} of the largest fleet of trading ships and chartered vessels to ever sail the seas!")
+                if (target.id == "trader_stan") {
+                    npc<Talk>("If you want to get to a port in a hurry then you can charter one of my ships to take you there - if the price is right...")
+                }
+                player<Quiz>("So, where exactly can I go with your ships?")
+                npc<Talk>("We run ships from Port Phasmatys over to Port Tyras, stopping at Port Sarim, Catherby, Brimhaven, Musa Point, the Shipyard and Port Khazard.")
+                npc<Shifty>("We might dock at Mos Le'Harmless once in a while, as well, if you catch my meaning...")
+                player<Talk>("Wow, that's a lot of ports. I take it you have some exotic stuff to trade?")
+                npc<Happy>("We certainly do! ${if (target.id == "trader_stan") "I and my crewmen" else "We"} have access to items bought and sold from around the world. Would you like to take a look? Or would you like to charter a ship?")
+                choice {
+                    trading()
+                    charter()
+                    if (target.id != "trader_stan") {
+                        option("Isn't it tricky to sail about in those clothes?") {
+                            player<Quiz>("Isn't it tricky to sail about in those clothes?")
+                            npc<Surprised>("Tricky? Tricky!")
+                            npc<Talk>("Do you have even the slightest idea how tricky it is to sail in this stuff?")
+                            npc<Shifty>("Some of us tried tearing it and arguing that it was too fragile to wear when on a boat, but he just had it enchanted to re-stitch itself.")
+                            player<Talk>("Wow, that's kind of harsh.")
+                            npc<Upset>("Anyway, would you like to take a look at our exotic wares from around the world? Or would you like to charter a ship?")
+                            choice {
+                                trading()
+                                charter()
+                                option<Upset>("No thanks.")
                             }
                         }
-                        option<Upset>("No thanks.")
                     }
+                    option<Upset>("No thanks.")
                 }
-                option("Yes, I would like to charter a ship.") {
-                    player<Talk>("Yes, I would like to charter a ship.")
-                    npc<Talk>("Certainly sir. Where would you like to go?")
-                }
-                option<Upset>("No thanks.")
             }
+            option("Yes, I would like to charter a ship.") {
+                player<Talk>("Yes, I would like to charter a ship.")
+                npc<Talk>("Certainly sir. Where would you like to go?")
+            }
+            option<Upset>("No thanks.")
         }
+    }
 
-        npcOperate("Charter", "trader_stan", "trader_crewmember*") {
-            player["charter_ship"] = location(target)
-            player.open("charter_ship_map")
+    @Option("Charter", "trader_stan", "trader_crewmember*")
+    suspend fun charter(player: Player, target: NPC) = player.talkWith(target) {
+        player["charter_ship"] = location(target)
+        player.open("charter_ship_map")
+    }
+
+    @Interface("Ok", id = "charter_ship_map")
+    fun click(player: Player, component: String) {
+        val currentLocation = player["charter_ship", ""]
+        if (component == currentLocation) {
+            return
         }
-
-        interfaceOption("Ok", "*", "charter_ship_map") {
-            val currentLocation = player["charter_ship", ""]
-            if (component == currentLocation) {
-                return@interfaceOption
-            }
-            val price = ships.get(currentLocation, component) ?: return@interfaceOption
-            if (!hasQuestRequirements(player, component)) {
-                return@interfaceOption
-            }
-            val readablePrice = price.toDigitGroupString()
-            player.strongQueue("charter_ship") {
-                if (!player.inventory.contains("coins", price)) {
-                    choice("Sailing to ${component.toTitleCase()} costs $readablePrice coins.") {
-                        option("Choose again") {
-                            player.open("charter_ship_map")
-                        }
-                        option("No")
-                    }
-                    return@strongQueue
-                }
-                statement("To sail to ${component.toTitleCase()} from here will cost you $readablePrice gold. Are you sure you want to pay that?")
-                choice {
-                    option("Ok") {
-                        if (player.inventory.remove("coins", price)) {
-                            player.jingle("sailing_theme_short")
-                            player.open("fade_out")
-                            delay(4)
-                            val teleport = teles.get("${component}_gangplank_enter", "Cross").first()
-                            player.tele(teleport.to)
-                            player.open("fade_in")
-                            delay(3)
-                            player.message("You pay the fare and sail to ${component.toTitleCase()}.", ChatType.Filter)
-                        }
-                    }
+        val price = ships.get(currentLocation, component) ?: return
+        if (!hasQuestRequirements(player, component)) {
+            return
+        }
+        val readablePrice = price.toDigitGroupString()
+        player.strongQueue("charter_ship") {
+            if (!player.inventory.contains("coins", price)) {
+                choice("Sailing to ${component.toTitleCase()} costs $readablePrice coins.") {
                     option("Choose again") {
                         player.open("charter_ship_map")
                     }
                     option("No")
                 }
+                return@strongQueue
+            }
+            statement("To sail to ${component.toTitleCase()} from here will cost you $readablePrice gold. Are you sure you want to pay that?")
+            choice {
+                option("Ok") {
+                    if (player.inventory.remove("coins", price)) {
+                        player.jingle("sailing_theme_short")
+                        player.open("fade_out")
+                        delay(4)
+                        val teleport = teles.get("${component}_gangplank_enter", "Cross").first()
+                        player.tele(teleport.to)
+                        player.open("fade_in")
+                        delay(3)
+                        player.message("You pay the fare and sail to ${component.toTitleCase()}.", ChatType.Filter)
+                    }
+                }
+                option("Choose again") {
+                    player.open("charter_ship_map")
+                }
+                option("No")
             }
         }
     }
 
-    fun ChoiceBuilder<NPCOption<Player>>.trading() {
+    fun ChoiceBuilder<Dialogue>.trading() {
         option<Talk>("Yes, let's see what you're trading.") {
             player.openShop("trader_stans_trading_post")
         }
     }
 
-    fun ChoiceBuilder<NPCOption<Player>>.charter() {
+    fun ChoiceBuilder<Dialogue>.charter() {
         option<Talk>("Yes, I would like to charter a ship.") {
             npc<Talk>("Certainly sir. Where would you like to go?")
             player["charter_ship"] = location(target)

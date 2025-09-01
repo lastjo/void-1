@@ -4,6 +4,7 @@ import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.statement
 import content.entity.sound.sound
 import content.skill.woodcutting.Hatchet
+import world.gregs.voidps.cache.definition.data.ObjectDefinition
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.closeMenu
 import world.gregs.voidps.engine.client.ui.event.interfaceOpen
@@ -17,6 +18,7 @@ import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
+import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.ObjectOption
 import world.gregs.voidps.engine.entity.obj.objectOperate
@@ -25,165 +27,134 @@ import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.suspend.StringSuspension
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.Open
+import world.gregs.voidps.type.sub.Option
+import world.gregs.voidps.type.sub.Spawn
 
-@Script
-class Canoes {
+class Canoes(
+    private val objects: GameObjects,
+    private val stations: CanoeDefinitions,
+) {
 
-    val objects: GameObjects by inject()
-
-    val stations: CanoeDefinitions by inject()
-
-    init {
-        playerSpawn { player ->
-            player.sendVariable("canoe_state_lumbridge")
-            player.sendVariable("canoe_state_champions_guild")
-            player.sendVariable("canoe_state_barbarian_village")
-            player.sendVariable("canoe_state_edgeville")
-            player.sendVariable("canoe_state_wilderness_pond")
-        }
-
-        objectOperate("Chop-down", "canoe_station") {
-            if (!player.has(Skill.Woodcutting, 12, false)) {
-                statement("You must have at least level 12 woodcutting to start making canoes.")
-                return@objectOperate
-            }
-            val hatchet = Hatchet.best(player)
-            if (hatchet == null) {
-                player.message("You need a hatchet to chop down this tree.")
-                player.message("You do not have a hatchet which you have the woodcutting level to use.")
-                return@objectOperate
-            }
-            val location = target.id.removePrefix("canoe_station_")
-            when (target.rotation) {
-                1 -> player.walkToDelay(target.tile.add(-1, 4))
-                2 -> player.walkToDelay(target.tile.add(3, 2))
-                3 -> player.walkToDelay(target.tile.add(2))
-            }
-            player.face(Direction.cardinal[target.rotation])
-            delay()
-            player.anim("${hatchet.id}_shape_canoe")
-            delay()
-            target.anim("canoe_fall")
-            player.clearAnim()
-            player.sound("fell_tree")
-            player["canoe_state_$location"] = "falling"
-            delay()
-            player["canoe_state_$location"] = "fallen"
-        }
-
-        interfaceOpen("canoe") { player ->
-            val dugout = player.levels.get(Skill.Woodcutting) > 26
-            player.interfaces.sendVisibility(id, "visible_dugout", dugout)
-            player.interfaces.sendVisibility(id, "invisible_dugout", !dugout)
-
-            val stable = player.levels.get(Skill.Woodcutting) > 41
-            player.interfaces.sendVisibility(id, "visible_stable_dugout", stable)
-            player.interfaces.sendVisibility(id, "invisible_stable_dugout", !stable)
-
-            val waka = player.levels.get(Skill.Woodcutting) > 56
-            player.interfaces.sendVisibility(id, "visible_waka", waka)
-            player.interfaces.sendVisibility(id, "invisible_waka", !waka)
-        }
-
-        interfaceOption("Select", "a_*", "canoe") {
-            val type = component.removePrefix("a_")
-            (player.dialogueSuspension as? StringSuspension)?.resume(type)
-        }
-
-        objectOperate("Shape-canoe", "canoe_station_fallen") {
-            val hatchet = Hatchet.best(player)
-            if (hatchet == null) {
-                player.message("You need a hatchet to shape a canoe.")
-                player.message("You do not have a hatchet which you have the woodcutting level to use.")
-                return@objectOperate
-            }
-            when (target.rotation) {
-                1 -> player.walkToDelay(target.tile.add(-1, 2))
-                2 -> player.walkToDelay(target.tile.add(2, 2))
-                3 -> player.walkToDelay(target.tile.add(2, 2))
-            }
-            arriveDelay()
-            val location = target.id.removePrefix("canoe_station_")
-            player.face(Direction.cardinal[target.rotation])
-            player.open("canoe")
-            val canoe = StringSuspension.get(player)
-            player.closeMenu()
-            val required = when (canoe) {
-                "log" -> 12
-                "dugout" -> 26
-                "stable_dugout" -> 41
-                "waka" -> 56
-                else -> return@objectOperate
-            }
-            if (!player.has(Skill.Woodcutting, required, message = true)) {
-                return@objectOperate
-            }
-            val level = player.levels.get(Skill.Woodcutting)
-            val min = hatchet.def.getOrNull<Int>("canoe_chance_min") ?: return@objectOperate
-            val max = hatchet.def.getOrNull<Int>("canoe_chance_max") ?: return@objectOperate
-            val chance: IntRange = min until max
-            var count = 0
-            while (count++ < 50) {
-                player.anim("${hatchet.id}_shape_canoe")
-                delay(3)
-                if (Level.success(level, chance)) {
-                    break
-                }
-            }
-            player["canoe_state_$location"] = canoe
-            player.clearAnim()
-            player.exp(
-                Skill.Woodcutting,
-                when (canoe) {
-                    "log" -> 30.0
-                    "dugout" -> 60.0
-                    "stable_dugout" -> 90.0
-                    "waka" -> 150.0
-                    else -> 0.0
-                },
-            )
-        }
-
-        objectOperate("Float Log", "canoe_station_log") {
-            float()
-        }
-
-        objectOperate("Float Canoe", "canoe_station_*") {
-            float()
-        }
-
-        objectOperate("Paddle Canoe", "canoe_station_water_*") {
-            player.face(Direction.cardinal[target.rotation])
-            val station = target.id.removePrefix("canoe_station_")
-            val canoe = def.stringId.removePrefix("canoe_station_water_")
-            val destination = canoeStationMap(canoe, station)
-            if (destination == null || destination == station) {
-                return@objectOperate
-            }
-            if (destination == "wilderness_pond" && player["wilderness_canoe_warning", true]) {
-                statement("<red>Warning</col> This canoe will take you deep into the <red>Wilderness</col>. There are no trees suitable to make a canoe there. You will have to walk back.")
-                choice("Are you sure you wish to travel") {
-                    option("Yes, I'm brave.")
-                    option("Eeep! The Wilderness... No thank you.") {
-                        return@option
-                    }
-                    option("Yes, and don't show this warning again.") {
-                        player["wilderness_canoe_warning"] = false
-                    }
-                }
-            }
-            canoeTravel(canoe, station, destination)
-            val definition = stations.get(destination)
-            player.tele(definition.destination)
-            player["canoe_state_$station"] = "tree"
-            player["canoe_state_$destination"] = "tree"
-            objects.add("a_sinking_canoe_$canoe", tile = definition.sink, rotation = 1, ticks = 3)
-            player.sound("canoe_sink")
-            player.message(definition.message, type = ChatType.Filter)
-        }
+    @Spawn
+    fun spawn(player: Player) {
+        player.sendVariable("canoe_state_lumbridge")
+        player.sendVariable("canoe_state_champions_guild")
+        player.sendVariable("canoe_state_barbarian_village")
+        player.sendVariable("canoe_state_edgeville")
+        player.sendVariable("canoe_state_wilderness_pond")
     }
 
-    suspend fun ObjectOption<Player>.float() {
+    @Option("Chop-down", "canoe_station")
+    suspend fun chop(player: Player, target: GameObject) {
+        if (!player.has(Skill.Woodcutting, 12, false)) {
+            player.dialogue { statement("You must have at least level 12 woodcutting to start making canoes.") }
+            return
+        }
+        val hatchet = Hatchet.best(player)
+        if (hatchet == null) {
+            player.message("You need a hatchet to chop down this tree.")
+            player.message("You do not have a hatchet which you have the woodcutting level to use.")
+            return
+        }
+        val location = target.id.removePrefix("canoe_station_")
+        when (target.rotation) {
+            1 -> player.walkToDelay(target.tile.add(-1, 4))
+            2 -> player.walkToDelay(target.tile.add(3, 2))
+            3 -> player.walkToDelay(target.tile.add(2))
+        }
+        player.face(Direction.cardinal[target.rotation])
+        player.delay()
+        player.anim("${hatchet.id}_shape_canoe")
+        player.delay()
+        target.anim("canoe_fall")
+        player.clearAnim()
+        player.sound("fell_tree")
+        player["canoe_state_$location"] = "falling"
+        player.delay()
+        player["canoe_state_$location"] = "fallen"
+    }
+
+    @Open("canoe")
+    fun open(player: Player, id: String) {
+        val dugout = player.levels.get(Skill.Woodcutting) > 26
+        player.interfaces.sendVisibility(id, "visible_dugout", dugout)
+        player.interfaces.sendVisibility(id, "invisible_dugout", !dugout)
+
+        val stable = player.levels.get(Skill.Woodcutting) > 41
+        player.interfaces.sendVisibility(id, "visible_stable_dugout", stable)
+        player.interfaces.sendVisibility(id, "invisible_stable_dugout", !stable)
+
+        val waka = player.levels.get(Skill.Woodcutting) > 56
+        player.interfaces.sendVisibility(id, "visible_waka", waka)
+        player.interfaces.sendVisibility(id, "invisible_waka", !waka)
+    }
+
+    @Interface("Sekect", "a_*", "canoe")
+    fun click(player: Player, component: String) {
+        val type = component.removePrefix("a_")
+        (player.dialogueSuspension as? StringSuspension)?.resume(type)
+    }
+
+    @Option("Shape-canoe", "canoe_station_fallen")
+    suspend fun operate(player: Player, target: GameObject) {
+        val hatchet = Hatchet.best(player)
+        if (hatchet == null) {
+            player.message("You need a hatchet to shape a canoe.")
+            player.message("You do not have a hatchet which you have the woodcutting level to use.")
+            return
+        }
+        when (target.rotation) {
+            1 -> player.walkToDelay(target.tile.add(-1, 2))
+            2 -> player.walkToDelay(target.tile.add(2, 2))
+            3 -> player.walkToDelay(target.tile.add(2, 2))
+        }
+        player.arriveDelay()
+        val location = target.id.removePrefix("canoe_station_")
+        player.face(Direction.cardinal[target.rotation])
+        player.open("canoe")
+        val canoe = StringSuspension.get(player)
+        player.closeMenu()
+        val required = when (canoe) {
+            "log" -> 12
+            "dugout" -> 26
+            "stable_dugout" -> 41
+            "waka" -> 56
+            else -> return
+        }
+        if (!player.has(Skill.Woodcutting, required, message = true)) {
+            return
+        }
+        val level = player.levels.get(Skill.Woodcutting)
+        val min = hatchet.def.getOrNull<Int>("canoe_chance_min") ?: return
+        val max = hatchet.def.getOrNull<Int>("canoe_chance_max") ?: return
+        val chance: IntRange = min until max
+        var count = 0
+        while (count++ < 50) {
+            player.anim("${hatchet.id}_shape_canoe")
+            player.delay(3)
+            if (Level.success(level, chance)) {
+                break
+            }
+        }
+        player["canoe_state_$location"] = canoe
+        player.clearAnim()
+        player.exp(
+            Skill.Woodcutting,
+            when (canoe) {
+                "log" -> 30.0
+                "dugout" -> 60.0
+                "stable_dugout" -> 90.0
+                "waka" -> 150.0
+                else -> 0.0
+            },
+        )
+    }
+
+    @Option("Float log", "canoe_station_log")
+    @Option("Float Canoe", "canoe_station_*")
+    suspend fun float(player: Player, target: GameObject, def: ObjectDefinition) {
         when (target.rotation) {
             1 -> player.walkToDelay(target.tile.add(-1, 2))
             2 -> player.walkToDelay(target.tile.add(2, 2))
@@ -196,7 +167,39 @@ class Canoes {
         player.face(Direction.cardinal[target.rotation])
         target.anim("canoe_fall")
         player.sound("canoe_roll")
-        delay(2)
+        player.delay(2)
         player["canoe_state_$location"] = "water_$canoe"
     }
+
+    @Option("Paddle Canoe", "canoe_station_water_*")
+    suspend fun paddle(player: Player, target: GameObject, def: ObjectDefinition) = player.dialogue {
+        player.face(Direction.cardinal[target.rotation])
+        val station = target.id.removePrefix("canoe_station_")
+        val canoe = def.stringId.removePrefix("canoe_station_water_")
+        val destination = canoeStationMap(canoe, station)
+        if (destination == null || destination == station) {
+            return@dialogue
+        }
+        if (destination == "wilderness_pond" && player["wilderness_canoe_warning", true]) {
+            statement("<red>Warning</col> This canoe will take you deep into the <red>Wilderness</col>. There are no trees suitable to make a canoe there. You will have to walk back.")
+            choice("Are you sure you wish to travel") {
+                option("Yes, I'm brave.")
+                option("Eeep! The Wilderness... No thank you.") {
+                    return@option
+                }
+                option("Yes, and don't show this warning again.") {
+                    player["wilderness_canoe_warning"] = false
+                }
+            }
+        }
+        canoeTravel(canoe, station, destination)
+        val definition = stations.get(destination)
+        player.tele(definition.destination)
+        player["canoe_state_$station"] = "tree"
+        player["canoe_state_$destination"] = "tree"
+        objects.add("a_sinking_canoe_$canoe", tile = definition.sink, rotation = 1, ticks = 3)
+        player.sound("canoe_sink")
+        player.message(definition.message, type = ChatType.Filter)
+    }
+
 }

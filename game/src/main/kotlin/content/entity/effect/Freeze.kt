@@ -10,6 +10,9 @@ import world.gregs.voidps.engine.timer.characterTimerStart
 import world.gregs.voidps.engine.timer.characterTimerStop
 import world.gregs.voidps.engine.timer.characterTimerTick
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.TimerStart
+import world.gregs.voidps.type.sub.TimerStop
+import world.gregs.voidps.type.sub.TimerTick
 import kotlin.math.sign
 
 val Character.frozen: Boolean get() = movementDelay > 0
@@ -48,29 +51,31 @@ fun Character.freezeImmune(ticks: Int) {
     softTimers.start("movement_delay")
 }
 
-@Script
 class Freeze {
 
-    init {
-        characterTimerStart("movement_delay") { character ->
-            character.start("movement_delay", -1)
-            interval = 1
-        }
+    @TimerStart("movement_delay")
+    fun start(character: Character): Int {
+        character.start("movement_delay", -1)
+        return 1
+    }
 
-        characterTimerTick("movement_delay") { character ->
-            val frozen = character.frozen
-            character.movementDelay -= character.movementDelay.sign
-            if (character.movementDelay == 0) {
-                if (frozen) {
-                    character.movementDelay = -5
-                } else {
-                    cancel()
-                }
+    @TimerTick("movement_delay")
+    fun tick(character: Character): Int {
+        val frozen = character.frozen
+        character.movementDelay -= character.movementDelay.sign
+        if (character.movementDelay == 0) {
+            if (frozen) {
+                character.movementDelay = -5
+            } else {
+                return 0
             }
         }
-
-        characterTimerStop("movement_delay") { character ->
-            character.stop("movement_delay")
-        }
+        return -1
     }
+
+    @TimerStop("movement_delay")
+    fun stop(character: Character) {
+        character.stop("movement_delay")
+    }
+
 }

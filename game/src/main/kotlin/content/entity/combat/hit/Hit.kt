@@ -19,6 +19,7 @@ import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.queue.strongQueue
 import world.gregs.voidps.engine.timer.CLIENT_TICKS
+import world.gregs.voidps.type.CombatStage
 import world.gregs.voidps.type.random
 import kotlin.math.floor
 
@@ -156,7 +157,7 @@ fun Character.hit(
 ): Int {
     val actualDamage = Damage.modify(this, target, offensiveType, damage, weapon, spell, special)
         .coerceAtMost(target.levels.get(Skill.Constitution))
-    Publishers.all.combatAttack(this, target, offensiveType, actualDamage, weapon, spell, special, delay)
+    Publishers.all.combatAttack(this, target, offensiveType, actualDamage, weapon, spell, special, delay, CombatStage.ATTACK)
     emit(CombatAttack(target, offensiveType, actualDamage, weapon, spell, special, delay))
     target.strongQueue("hit", if (delay == 0) 0 else CLIENT_TICKS.toTicks(delay) + 1) {
         target.directHit(this@hit, actualDamage, offensiveType, weapon, spell, special)
@@ -176,7 +177,7 @@ fun Character.directHit(source: Character, damage: Int, type: String = "damage",
     if (source.dead) {
         return
     }
-    Publishers.all.combatAttack(source, this, type, damage, weapon, spell, special, delay = -1)
+    Publishers.all.combatAttack(source, this, type, damage, weapon, spell, special, delay = -1, CombatStage.DAMAGE)
     emit(CombatDamage(source, type, damage, weapon, spell, special))
     if (source["debug", false] || this["debug", false]) {
         val player = if (this["debug", false] && this is Player) this else source as Player

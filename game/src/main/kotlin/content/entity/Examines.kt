@@ -1,45 +1,31 @@
 package content.entity
 
-import content.entity.player.inv.inventoryOption
+import world.gregs.voidps.cache.definition.data.NPCDefinition
+import world.gregs.voidps.cache.definition.data.ObjectDefinition
 import world.gregs.voidps.engine.client.instruction.instruction
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.data.definition.NPCDefinitions
 import world.gregs.voidps.engine.data.definition.ObjectDefinitions
-import world.gregs.voidps.engine.entity.character.npc.npcApproach
+import world.gregs.voidps.engine.entity.character.npc.NPC
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
-import world.gregs.voidps.engine.entity.obj.objectApproach
-import world.gregs.voidps.engine.inject
+import world.gregs.voidps.engine.entity.item.Item
+import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.network.client.instruction.ExamineItem
 import world.gregs.voidps.network.client.instruction.ExamineNpc
 import world.gregs.voidps.network.client.instruction.ExamineObject
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.Inventory
+import world.gregs.voidps.type.sub.Option
 
-@Script
-class Examines {
-
-    val itemDefinitions: ItemDefinitions by inject()
-    val npcDefinitions: NPCDefinitions by inject()
-    val objectDefinitions: ObjectDefinitions by inject()
+class Examines(
+    private val itemDefinitions: ItemDefinitions,
+    private val npcDefinitions: NPCDefinitions,
+    private val objectDefinitions: ObjectDefinitions,
+) {
 
     init {
-        interfaceOption("Examine", id = "equipment_bonuses") {
-            player.message(item.def.getOrNull("examine") ?: return@interfaceOption, ChatType.ItemExamine)
-        }
-
-        inventoryOption("Examine") {
-            player.message(item.def.getOrNull("examine") ?: return@inventoryOption, ChatType.ItemExamine)
-        }
-
-        objectApproach("Examine") {
-            player.message(def.getOrNull("examine") ?: return@objectApproach, ChatType.ObjectExamine)
-        }
-
-        npcApproach("Examine") {
-            player.message(def.getOrNull("examine") ?: return@npcApproach, ChatType.NPCExamine)
-        }
-
         instruction<ExamineItem> { player ->
             val definition = itemDefinitions.get(itemId)
             if (definition.contains("examine")) {
@@ -61,4 +47,25 @@ class Examines {
             }
         }
     }
+
+    @Interface("Examine", id = "equipment_bonuses")
+    fun equipment(player: Player, item: Item) {
+        player.message(item.def.getOrNull("examine") ?: return, ChatType.ItemExamine)
+    }
+
+    @Inventory("Examine", inventory = "*")
+    fun item(player: Player, item: Item) {
+        player.message(item.def.getOrNull("examine") ?: return, ChatType.ItemExamine)
+    }
+
+    @Option("Examine", approach = true)
+    fun operate(player: Player, target: GameObject, def: ObjectDefinition) {
+        player.message(def.getOrNull("examine") ?: return, ChatType.ObjectExamine)
+    }
+
+    @Option("Examine")
+    fun operate(player: Player, target: NPC, def: NPCDefinition) {
+        player.message(def.getOrNull("examine") ?: return, ChatType.NPCExamine)
+    }
+
 }

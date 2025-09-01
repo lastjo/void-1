@@ -7,45 +7,50 @@ import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.chat.plural
 import world.gregs.voidps.engine.client.ui.interact.itemOnItem
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
+import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.charges
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.replace
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Inventory
+import world.gregs.voidps.type.sub.UseOn
 
-@Script
-class Camulet {
+class Camulet(private val areas: AreaDefinitions) {
 
-    val areas: AreaDefinitions by inject()
-
-    init {
-        inventoryItem("Rub", "camulet") {
-            if (jewelleryTeleport(player, inventory, slot, areas["camulet_teleport"])) {
-                player.message("You rub the amulet...")
-            } else {
+    @Inventory("Rub", "camulet")
+    suspend fun rub(player: Player, inventory: String, itemSlot: Int) {
+        if (jewelleryTeleport(player, inventory, itemSlot, areas["camulet_teleport"])) {
+            player.message("You rub the amulet...")
+        } else {
+            player.dialogue {
                 statement("Your Camulet has run out of teleport charges. You can renew them by applying camel dung.")
             }
         }
+    }
 
-        inventoryItem("Check-charge", "camulet", "inventory") {
-            val charges = player.inventory.charges(player, slot)
-            player.message("Your Camulet has $charges ${"charge".plural(charges)} left.")
-            if (charges == 0) {
-                player.message("You can recharge it by applying camel dung.")
-            }
-        }
-
-        itemOnItem("ugthanki_dung", "camulet") { player ->
-            val slot = if (fromItem.id == "camulet") fromSlot else toSlot
-            val charges = player.inventory.charges(player, slot)
-            if (charges == 4) {
-                player.message("Your Camulet already has 4 charges.")
-                return@itemOnItem
-            }
-            if (player.inventory.replace("ugthanki_dung", "bucket")) {
-                player.message("You recharge the Camulet using camel dung. Yuck!")
-                player["camulet_charges"] = 4
-            }
+    @Inventory("Check-charge", "camulet", "inventory")
+    fun check(player: Player, itemSlot: Int) {
+        val charges = player.inventory.charges(player, itemSlot)
+        player.message("Your Camulet has $charges ${"charge".plural(charges)} left.")
+        if (charges == 0) {
+            player.message("You can recharge it by applying camel dung.")
         }
     }
+
+   @UseOn("ugthanki_dung", "camulet")
+   fun use(player: Player, fromItem: Item, fromSlot: Int, toSlot: Int) {
+       val slot = if (fromItem.id == "camulet") fromSlot else toSlot
+       val charges = player.inventory.charges(player, slot)
+       if (charges == 4) {
+           player.message("Your Camulet already has 4 charges.")
+           return
+       }
+       if (player.inventory.replace("ugthanki_dung", "bucket")) {
+           player.message("You recharge the Camulet using camel dung. Yuck!")
+           player["camulet_charges"] = 4
+       }
+   }
+
 }

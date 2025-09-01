@@ -14,37 +14,32 @@ import world.gregs.voidps.engine.entity.character.player.skill.level.npcLevelCha
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.LevelChange
+import world.gregs.voidps.type.sub.UseOn
 
-@Script
 class Lizard {
 
-    val levelHandler: suspend CurrentLevelChanged.(NPC) -> Unit = { npc ->
-        if (to <= 10) {
-            for (attacker in npc.attackers) {
-                attacker.mode = EmptyMode
-                if (attacker is Player && attacker["killing_blow", false]) {
-                    // TODO message
-                    iceCooler(attacker, npc)
-                }
+    @LevelChange(Skill.CONSTITUTION, "lizard")
+    @LevelChange(Skill.CONSTITUTION, "small_lizard*")
+    @LevelChange(Skill.CONSTITUTION, "desert_lizard*")
+    fun change(npc: NPC, to: Int) {
+        if (to > 10) {
+            return
+        }
+        for (attacker in npc.attackers) {
+            attacker.mode = EmptyMode
+            if (attacker is Player && attacker["killing_blow", false]) {
+                // TODO message
+                iceCooler(attacker, npc)
             }
         }
     }
-    val iceCooler: suspend ItemOnNPC.() -> Unit = itemOnNPCOperate@{
+
+    @UseOn("ice_cooler", "lizard")
+    @UseOn("ice_cooler", "small_lizard*")
+    @UseOn("ice_cooler", "desert_lizard*")
+    fun use(player: Player, target: NPC) {
         iceCooler(player, target)
-    }
-
-    init {
-        npcLevelChange("lizard", Skill.Constitution, handler = levelHandler)
-
-        npcLevelChange("small_lizard*", Skill.Constitution, handler = levelHandler)
-
-        npcLevelChange("desert_lizard*", Skill.Constitution, handler = levelHandler)
-
-        itemOnNPCOperate("ice_cooler", "lizard", iceCooler)
-
-        itemOnNPCOperate("ice_cooler", "small_lizard*", iceCooler)
-
-        itemOnNPCOperate("ice_cooler", "desert_lizard*", iceCooler)
     }
 
     fun iceCooler(player: Player, target: NPC) {

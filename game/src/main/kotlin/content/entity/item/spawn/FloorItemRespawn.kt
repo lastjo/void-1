@@ -1,24 +1,20 @@
 package content.entity.item.spawn
 
-import world.gregs.voidps.engine.entity.floorItemDespawn
 import world.gregs.voidps.engine.entity.item.floor.FloorItem
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
 import world.gregs.voidps.engine.entity.item.floor.ItemSpawns
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Despawn
 
-@Script
-class FloorItemRespawn {
+class FloorItemRespawn(
+    private val items: FloorItems,
+    private val spawns: ItemSpawns,
+) {
 
-    val items: FloorItems by inject()
-    val spawns: ItemSpawns by inject()
-
-    init {
-        floorItemDespawn { floorItem ->
-            if (isSpawnItem(floorItem)) {
-                val spawn = spawns.get(floorItem.tile) ?: return@floorItemDespawn
-                items.add(floorItem.tile, spawn.id, spawn.amount, revealTicks = spawn.delay, owner = "")
-            }
+    @Despawn
+    fun despawn(floorItem: FloorItem) {
+        if (isSpawnItem(floorItem)) {
+            val spawn = spawns.get(floorItem.tile) ?: return
+            items.add(floorItem.tile, spawn.id, spawn.amount, revealTicks = spawn.delay, owner = "")
         }
     }
 

@@ -18,31 +18,31 @@ import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.queue.queue
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Close
+import world.gregs.voidps.type.sub.Spawn
 
-@Script
 class Introduction {
 
-    init {
-        playerSpawn(priority = true) { player ->
-            player.message("Welcome to ${Settings["server.name"]}.", ChatType.Welcome)
-            if (player.contains("creation")) {
-                return@playerSpawn
-            }
-            if (Settings["world.start.creation", true] && !player.isBot) {
-                player["delay"] = -1
-                World.queue("welcome_${player.name}", 1) {
-                    player.open("character_creation")
-                }
-            } else {
-                player.flagAppearance()
-                setup(player)
-            }
+    @Spawn
+    fun spawn(player: Player) {
+        if (player.contains("creation")) {
+            return
         }
-
-        interfaceClose("character_creation") { player ->
+        if (Settings["world.start.creation", true] && !player.isBot) {
+            player["delay"] = -1
+            World.queue("welcome_${player.name}", 1) {
+                player.open("character_creation")
+            }
+        } else {
             player.flagAppearance()
             setup(player)
         }
+    }
+
+    @Close("character_creation")
+    fun close(player: Player) {
+        player.flagAppearance()
+        setup(player)
     }
 
     fun setup(player: Player) {

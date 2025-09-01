@@ -4,32 +4,24 @@ import content.bot.isBot
 import world.gregs.voidps.engine.client.instruction.instruction
 import world.gregs.voidps.engine.client.update.view.Viewport
 import world.gregs.voidps.engine.entity.MAX_PLAYERS
-import world.gregs.voidps.engine.entity.character.mode.move.ReloadRegion
-import world.gregs.voidps.engine.entity.character.mode.move.move
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
-import world.gregs.voidps.engine.entity.playerDespawn
-import world.gregs.voidps.engine.event.onEvent
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.engine.map.region.RegionRetry
-import world.gregs.voidps.engine.map.zone.ClearRegion
 import world.gregs.voidps.engine.map.zone.DynamicZones
-import world.gregs.voidps.engine.map.zone.RegionLoad
-import world.gregs.voidps.engine.map.zone.ReloadZone
 import world.gregs.voidps.network.client.instruction.FinishRegionLoad
 import world.gregs.voidps.network.login.protocol.encode.dynamicMapRegion
 import world.gregs.voidps.network.login.protocol.encode.mapRegion
 import world.gregs.voidps.type.Distance
 import world.gregs.voidps.type.Region
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.Zone
+import world.gregs.voidps.type.sub.Despawn
+import world.gregs.voidps.type.sub.Move
+import world.gregs.voidps.type.sub.Subscribe
 
-@Script
-class RegionLoading {
-
-    val players: Players by inject()
-    val dynamicZones: DynamicZones by inject()
-
+class RegionLoading(
+    private val players: Players,
+    private val dynamicZones: DynamicZones,
+) {
     val playerRegions = IntArray(MAX_PLAYERS - 1)
 
     init {
@@ -39,52 +31,66 @@ class RegionLoading {
             }
             player.viewport?.loaded = true
         }
+    }
 
-        onEvent<Player, RegionLoad> { player ->
-            player.viewport?.seen(player)
-            playerRegions[player.index - 1] = player.tile.regionLevel.id
-            val viewport = player.viewport ?: return@onEvent
-            players.forEach { other ->
-                viewport.seen(other)
-            }
-            updateRegion(player, true, crossedDynamicBoarder(player))
-            viewport.players.addSelf(player)
+    @Subscribe("region_load")
+    fun load(player: Player) {
+        player.viewport?.seen(player)
+        playerRegions[player.index - 1] = player.tile.regionLevel.id
+        val viewport = player.viewport ?: return
+        players.forEach { other ->
+            viewport.seen(other)
         }
+        updateRegion(player, true, crossedDynamicBoarder(player))
+        viewport.players.addSelf(player)
+    }
 
-        onEvent<Player, RegionRetry> { player ->
-            if (player.networked) {
-                println("Failed to load region. Retrying...")
+    /**
+     * Resend region load when FinishRegionLoad wasn't received
+     */
+    @Subscribe("region_retry")
+    fun retry(player: Player) {
+        if (player.networked) {
+            println("Failed to load region. Retrying...")
+            updateRegion(player, initial = false, force = true)
+        }
+    }
+
+    @Despawn
+    fun despawn(player: Player) {
+        playerRegions[player.index - 1] = 0
+    }
+
+    @Move
+    fun move(player: Player, from: Tile, to: Tile) {
+        if (from.regionLevel != to.regionLevel) {
+            playerRegions[player.index - 1] = to.regionLevel.id
+        }
+    }
+
+    @Subscribe("reload_region")
+    fun reload(player: Player) {
+        if (player.networked && needsRegionChange(player)) {
+            updateRegion(player, false, crossedDynamicBoarder(player))
+        }
+    }
+
+    @Subscribe("reload_zone")
+    fun reloadZone(zone: Any) {
+        zone as Zone
+        players.forEach { player ->
+            if (player.networked && inViewOfZone(player, zone)) {
                 updateRegion(player, initial = false, force = true)
             }
         }
+    }
 
-        playerDespawn { player ->
-            playerRegions[player.index - 1] = 0
-        }
-
-        move({ from.regionLevel != to.regionLevel }) { player ->
-            playerRegions[player.index - 1] = to.regionLevel.id
-        }
-
-        onEvent<Player, ReloadRegion> { player ->
-            if (player.networked && needsRegionChange(player)) {
-                updateRegion(player, false, crossedDynamicBoarder(player))
-            }
-        }
-
-        onEvent<ReloadZone> {
-            players.forEach { player ->
-                if (player.networked && inViewOfZone(player, zone)) {
-                    updateRegion(player, initial = false, force = true)
-                }
-            }
-        }
-
-        onEvent<ClearRegion> {
-            players.forEach { player ->
-                if (player.networked && inViewOfRegion(player, region)) {
-                    updateRegion(player, initial = false, force = true)
-                }
+    @Subscribe("clear_region")
+    fun clearRegion(region: Any) {
+        region as Region
+        players.forEach { player ->
+            if (player.networked && inViewOfRegion(player, region)) {
+                updateRegion(player, initial = false, force = true)
             }
         }
     }

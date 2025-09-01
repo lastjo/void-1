@@ -5,26 +5,26 @@ import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import world.gregs.voidps.engine.client.message
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class GhostlyPiper {
 
-    init {
-        npcOperate("Talk-to", "ghostly_piper") {
-            if (player.equipped(EquipSlot.Amulet).id != "ghostspeak_amulet") {
-                npc<Pleased>("Woo, wooo. Woooo.")
-                player.message("The ghost seems barely aware of your existence,")
-                player.message("but you sense that resting here might recharge you for battle!")
-                return@npcOperate
-            }
-            choice()
+    @Option("Talk-to", "ghostly_piper")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        if (player.equipped(EquipSlot.Amulet).id != "ghostspeak_amulet") {
+            npc<Pleased>("Woo, wooo. Woooo.")
+            player.message("The ghost seems barely aware of your existence,")
+            player.message("but you sense that resting here might recharge you for battle!")
+            return@talkWith
         }
+        choice()
     }
 
     suspend fun SuspendableContext<Player>.choice() {

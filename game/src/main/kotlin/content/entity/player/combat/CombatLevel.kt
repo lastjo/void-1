@@ -1,6 +1,7 @@
 package content.entity.player.combat
 
 import world.gregs.voidps.engine.entity.World
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.combatLevel
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Levels
@@ -8,23 +9,22 @@ import world.gregs.voidps.engine.entity.character.player.skill.level.maxLevelCha
 import world.gregs.voidps.engine.entity.character.player.summoningCombatLevel
 import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.LevelChange
+import world.gregs.voidps.type.sub.Spawn
 import kotlin.math.max
 
-@Script
 class CombatLevel {
 
-    val combatSkills = Skill.entries.filter { it.ordinal <= 6 || it.ordinal == 23 }.toTypedArray()
+    @Spawn
+    fun spawn(player: Player) {
+        player.combatLevel = calculateCombatLevel(player.levels)
+        player.summoningCombatLevel = calculateCombatLevel(player.levels, true)
+    }
 
-    init {
-        playerSpawn { player ->
-            player.combatLevel = calculateCombatLevel(player.levels)
-            player.summoningCombatLevel = calculateCombatLevel(player.levels, true)
-        }
-
-        maxLevelChange(skills = combatSkills) { player ->
-            player.combatLevel = calculateCombatLevel(player.levels)
-            player.summoningCombatLevel = calculateCombatLevel(player.levels, true)
-        }
+    @LevelChange(Skill.ATTACK, Skill.DEFENCE, Skill.STRENGTH, Skill.CONSTITUTION, Skill.RANGED, Skill.PRAYER, Skill.MAGIC, Skill.SUMMONING)
+    fun level(player: Player) {
+        player.combatLevel = calculateCombatLevel(player.levels)
+        player.summoningCombatLevel = calculateCombatLevel(player.levels, true)
     }
 
     fun calculateCombatLevel(levels: Levels, summoning: Boolean = false): Int {

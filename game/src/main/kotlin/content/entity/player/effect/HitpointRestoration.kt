@@ -11,39 +11,45 @@ import world.gregs.voidps.engine.timer.timerTick
 import world.gregs.voidps.engine.timer.toTicks
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.TimerState
+import world.gregs.voidps.type.sub.LevelChange
+import world.gregs.voidps.type.sub.Spawn
+import world.gregs.voidps.type.sub.TimerStart
+import world.gregs.voidps.type.sub.TimerTick
 import java.util.concurrent.TimeUnit
 
-@Script
 class HitpointRestoration {
 
-    init {
-        playerSpawn { player ->
-            if (player.levels.getOffset(Skill.Constitution) < 0) {
-                player.softTimers.start("restore_hitpoints")
-            }
-        }
-
-        levelChange(Skill.Constitution) { player ->
-            if (to <= 0 || to >= player.levels.getMax(skill) || player.softTimers.contains("restore_hitpoints")) {
-                return@levelChange
-            }
+    @Spawn
+    fun spawn(player: Player) {
+        if (player.levels.getOffset(Skill.Constitution) < 0) {
             player.softTimers.start("restore_hitpoints")
         }
+    }
 
-        timerStart("restore_hitpoints") {
-            interval = TimeUnit.SECONDS.toTicks(6)
+    @LevelChange(Skill.CONSTITUTION)
+    fun level(player: Player, skill: Skill, to: Int) {
+        if (to <= 0 || to >= player.levels.getMax(skill) || player.softTimers.contains("restore_hitpoints")) {
+            return
         }
+        player.softTimers.start("restore_hitpoints")
+    }
 
-        timerTick("restore_hitpoints") { player ->
-            if (player.levels.get(Skill.Constitution) == 0) {
-                cancel()
-                return@timerTick
-            }
-            val total = player.levels.restore(Skill.Constitution, healAmount(player))
-            if (total == 0) {
-                cancel()
-            }
+    @TimerStart("restore_hitpoints")
+    fun start(player: Player): Int {
+        return TimeUnit.SECONDS.toTicks(6)
+    }
+
+    @TimerTick("restore_hitpoints")
+    fun tick(player: Player): Int {
+        if (player.levels.get(Skill.Constitution) == 0) {
+            return TimerState.CANCEL
         }
+        val total = player.levels.restore(Skill.Constitution, healAmount(player))
+        if (total == 0) {
+            return TimerState.CANCEL
+        }
+        return TimerState.CONTINUE
     }
 
     /**

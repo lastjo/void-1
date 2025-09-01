@@ -11,78 +11,75 @@ import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.mode.move.exitArea
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
+import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
-import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.*
 import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Exit
+import world.gregs.voidps.type.sub.ItemAdded
+import world.gregs.voidps.type.sub.ItemRemoved
+import world.gregs.voidps.type.sub.Spawn
 
-@Script
-class Greegrees {
+class Greegrees(
+    private val items: FloorItems,
+    private val areas: AreaDefinitions,
+) {
 
-    val items: FloorItems by inject()
-    val areas: AreaDefinitions by inject()
-
-    init {
-        playerSpawn { player ->
-            val item = player.equipped(EquipSlot.Weapon).id
-            if (item.endsWith("_greegree")) {
-                if (player.tile in areas["ape_atoll"] || player.tile in areas["ape_atoll_agility_dungeon"]) {
-                    player.transform(item.replace("_greegree", ""))
-                    player.closeType("spellbook_tab")
-                } else {
-                    forceRemove(player)
-                }
+    @Spawn
+    fun spawn(player: Player) {
+        val item = player.equipped(EquipSlot.Weapon).id
+        if (item.endsWith("_greegree")) {
+            if (player.tile in areas["ape_atoll"] || player.tile in areas["ape_atoll_agility_dungeon"]) {
+                player.transform(item.replace("_greegree", ""))
+                player.closeType("spellbook_tab")
+            } else {
+                forceRemove(player)
             }
-        }
-
-        itemAdded("*_greegree", EquipSlot.Weapon, "worn_equipment") { player ->
-            val sound = when {
-                item.id.endsWith("gorilla_greegree") -> "human_into_gorilla"
-                item.id.endsWith("zombie_monkey_greegree") -> "human_into_zombie_monkey"
-                item.id.startsWith("small") -> "human_into_small_monkey"
-                else -> "human_into_monkey"
-            }
-            player.sound(sound)
-            player.gfx("monkey_transform")
-            player.transform(item.id.replace("_greegree", ""))
-            player.closeType("spellbook_tab")
-        }
-
-        itemRemoved("*_greegree", EquipSlot.Weapon, "worn_equipment") { player ->
-            if (!player.equipment[index].id.endsWith("_greegree")) {
-                val sound = when {
-                    item.id.endsWith("gorilla_greegree") -> "gorilla_into_human"
-                    item.id.endsWith("zombie_monkey_greegree") -> "zombie_monkey_into_human"
-                    item.id.startsWith("small") -> "small_monkey_into_human"
-                    else -> "monkey_into_human"
-                }
-                player.sound(sound)
-                player.gfx("monkey_transform")
-                player.clearTransform()
-                val book = player["spellbook_config", 0] and 0x3
-                player.open(
-                    when (book) {
-                        1 -> "ancient_spellbook"
-                        2 -> "lunar_spellbook"
-                        3 -> "dungeoneering_spellbook"
-                        else -> "modern_spellbook"
-                    },
-                )
-            }
-        }
-
-        exitArea("ape_atoll") {
-            forceRemove(player)
-        }
-
-        exitArea("ape_atoll_agility_dungeon") {
-            forceRemove(player)
         }
     }
 
+    @ItemAdded("*_greegree", slots = [EquipSlot.WEAPON], inventory = "worn_equipment")
+    fun equip(player: Player, item: Item) {
+        val sound = when {
+            item.id.endsWith("gorilla_greegree") -> "human_into_gorilla"
+            item.id.endsWith("zombie_monkey_greegree") -> "human_into_zombie_monkey"
+            item.id.startsWith("small") -> "human_into_small_monkey"
+            else -> "human_into_monkey"
+        }
+        player.sound(sound)
+        player.gfx("monkey_transform")
+        player.transform(item.id.replace("_greegree", ""))
+        player.closeType("spellbook_tab")
+    }
+
+    @ItemRemoved("*_greegree", slots = [EquipSlot.WEAPON], inventory = "worn_equipment")
+    fun removed(player: Player, item: Item, itemSlot: Int) {
+        if (player.equipment[itemSlot].id.endsWith("_greegree")) {
+            return
+        }
+        val sound = when {
+            item.id.endsWith("gorilla_greegree") -> "gorilla_into_human"
+            item.id.endsWith("zombie_monkey_greegree") -> "zombie_monkey_into_human"
+            item.id.startsWith("small") -> "small_monkey_into_human"
+            else -> "monkey_into_human"
+        }
+        player.sound(sound)
+        player.gfx("monkey_transform")
+        player.clearTransform()
+        val book = player["spellbook_config", 0] and 0x3
+        player.open(
+            when (book) {
+                1 -> "ancient_spellbook"
+                2 -> "lunar_spellbook"
+                3 -> "dungeoneering_spellbook"
+                else -> "modern_spellbook"
+            },
+        )
+    }
+
+    @Exit("ape_atoll")
+    @Exit("ape_atoll_agility_dungeon")
     fun forceRemove(player: Player) {
         if (player["logged_out", false]) {
             return // TODO check if removed on logout or not

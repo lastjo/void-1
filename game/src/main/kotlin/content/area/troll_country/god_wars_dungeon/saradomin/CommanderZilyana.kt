@@ -9,82 +9,89 @@ import content.entity.sound.sound
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCs
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.npcDespawn
 import world.gregs.voidps.engine.entity.npcSpawn
 import world.gregs.voidps.engine.inject
+import world.gregs.voidps.type.CombatStage
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.Combat
+import world.gregs.voidps.type.sub.Despawn
+import world.gregs.voidps.type.sub.Spawn
 
-@Script
-class CommanderZilyana {
-
-    val players: Players by inject()
-    val areas: AreaDefinitions by inject()
-    val npcs: NPCs by inject()
+class CommanderZilyana(
+    private val players: Players,
+    private val areas: AreaDefinitions,
+    private val npcs: NPCs,
+) {
 
     var starlight: NPC? = null
     var bree: NPC? = null
     var growler: NPC? = null
 
-    init {
-        npcCombatSwing("commander_zilyana") { npc ->
-            when (random.nextInt(2)) {
-                0 -> { // Magic
-                    npc.anim("commander_zilyana_magic")
-                    areaSound("commander_zilyana_magic", target.tile, delay = 1)
-                    val targets = players.filter { it.tile in areas["saradomin_chamber"] }
-                    for (target in targets) {
-                        val hit = npc.hit(target, offensiveType = "magic")
-                        if (hit > 0) {
-                            target.gfx("commander_zilyana_magic_strike")
-                        }
+    @Combat(id = "commander_zilyana", stage = CombatStage.SWING)
+    fun swing(npc: NPC, target: Player) {
+        when (random.nextInt(2)) {
+            0 -> { // Magic
+                npc.anim("commander_zilyana_magic")
+                areaSound("commander_zilyana_magic", target.tile, delay = 1)
+                val targets = players.filter { it.tile in areas["saradomin_chamber"] }
+                for (target in targets) {
+                    val hit = npc.hit(target, offensiveType = "magic")
+                    if (hit > 0) {
+                        target.gfx("commander_zilyana_magic_strike")
                     }
                 }
-                else -> { // Melee
-                    target.sound("commander_zilyana_attack")
-                    npc.hit(target, offensiveType = "melee")
-                }
             }
-        }
-
-        npcSpawn("commander_zilyana") {
-            if (starlight == null) {
-                starlight = npcs.add("starlight", Tile(2903, 5260))
-            }
-            if (bree == null) {
-                bree = npcs.add("bree", Tile(2902, 5270))
-            }
-            if (growler == null) {
-                growler = npcs.add("growler", Tile(2898, 5262))
-            }
-        }
-
-        npcDespawn("starlight") {
-            starlight = null
-        }
-
-        npcDespawn("bree") {
-            bree = null
-        }
-
-        npcDespawn("growler") {
-            growler = null
-        }
-
-        npcCombatAttack("commander_zilyana") {
-            if (type == "magic") {
-                if (damage > 0) {
-                    areaSound("commander_zilyana_magic_impact", target.tile)
-                    target.gfx("commander_zilyana_magic_impact")
-                } else {
-                    areaSound("spell_splash", target.tile)
-                    areaSound("spell_splash", target.tile, delay = 20)
-                    areaGfx("spell_splash", target.tile.addY(1), height = 100)
-                    areaGfx("spell_splash", target.tile.addY(-1), delay = 20, height = 100)
-                }
+            else -> { // Melee
+                target.sound("commander_zilyana_attack")
+                npc.hit(target, offensiveType = "melee")
             }
         }
     }
+
+    @Combat(id = "commander_zilyana", type = "magic")
+    fun hit(npc: NPC, target: Player, damage: Int) {
+        if (damage > 0) {
+            areaSound("commander_zilyana_magic_impact", target.tile)
+            target.gfx("commander_zilyana_magic_impact")
+        } else {
+            areaSound("spell_splash", target.tile)
+            areaSound("spell_splash", target.tile, delay = 20)
+            areaGfx("spell_splash", target.tile.addY(1), height = 100)
+            areaGfx("spell_splash", target.tile.addY(-1), delay = 20, height = 100)
+        }
+    }
+
+    @Spawn("commander_zilyana")
+    fun spawn(npc: NPC) {
+        if (starlight == null) {
+            starlight = npcs.add("starlight", Tile(2903, 5260))
+        }
+        if (bree == null) {
+            bree = npcs.add("bree", Tile(2902, 5270))
+        }
+        if (growler == null) {
+            growler = npcs.add("growler", Tile(2898, 5262))
+        }
+    }
+
+    @Despawn("starlight")
+    fun starlight(npc: NPC) {
+        starlight = null
+    }
+
+    @Despawn("bree")
+    fun bree(npc: NPC) {
+        bree = null
+    }
+
+    @Despawn("growler")
+    fun growler(npc: NPC) {
+        growler = null
+    }
+
 }

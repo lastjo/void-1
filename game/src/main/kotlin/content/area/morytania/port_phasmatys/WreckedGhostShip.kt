@@ -12,14 +12,11 @@ import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
-import world.gregs.voidps.engine.entity.obj.ObjectOption
-import world.gregs.voidps.engine.entity.obj.objectApproach
-import world.gregs.voidps.engine.entity.obj.objectOperate
+import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.type.Direction
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class WreckedGhostShip {
 
     val rocks = mapOf(
@@ -35,48 +32,52 @@ class WreckedGhostShip {
         Tile(3601, 3564) to Direction.WEST,
     )
 
-    init {
-        objectOperate("Cross", "wrecked_ghost_ship_gangplank") {
-            player.walkOverDelay(Tile(3605, 3546, 1))
-            player.tele(3605, 3548, 0)
-            player.message("You cross the gangplank.", ChatType.Filter)
-        }
+    @Option("Cross", "wrecked_ghost_ship_gangplank")
+    suspend fun crossGangplank(player: Player, target: GameObject) {
+        player.walkOverDelay(Tile(3605, 3546, 1))
+        player.tele(3605, 3548, 0)
+        player.message("You cross the gangplank.", ChatType.Filter)
+    }
 
-        objectOperate("Cross", "wrecked_ghost_ship_gangplank_end") {
-            player.walkOverDelay(Tile(3605, 3547))
-            player.tele(3605, 3545, 1)
-            player.message("You cross the gangplank.", ChatType.Filter)
-        }
+    @Option("Cross", "wrecked_ghost_ship_gangplank_end")
+    suspend fun crossEnd(player: Player, target: GameObject) {
+        player.walkOverDelay(Tile(3605, 3547))
+        player.tele(3605, 3545, 1)
+        player.message("You cross the gangplank.", ChatType.Filter)
+    }
 
-        objectOperate("Jump-to", "wrecked_ghost_ship_rock") {
-            val direction = rocks[target.tile] ?: return@objectOperate
-            jump(target.tile.add(direction).add(direction), direction)
-        }
+    @Option("Jump-to", "wrecked_ghost_ship_rock")
+    suspend fun rock(player: Player, target: GameObject) {
+        val direction = rocks[target.tile] ?: return
+        jump(player, target, target.tile.add(direction).add(direction), direction)
+    }
 
-        objectApproach("Jump-to", "wrecked_ghost_ship_rock") {
-            val direction = rocks[target.tile] ?: return@objectApproach
-            val sameSide = when (direction) {
-                Direction.NORTH -> player.tile.y <= target.tile.y
-                Direction.EAST -> player.tile.x <= target.tile.x
-                Direction.SOUTH -> player.tile.y >= target.tile.y
-                Direction.WEST -> player.tile.x >= target.tile.x
-                else -> false
-            }
-            if (sameSide) {
-                jump(target.tile.add(direction).add(direction), direction)
-            } else {
-                jump(target.tile, direction.inverse())
-            }
+    @Option("Jump-to", "wrecked_ghost_ship_rock", approach = true)
+    suspend fun approach(player: Player, target: GameObject) {
+        val direction = rocks[target.tile] ?: return
+        val sameSide = when (direction) {
+            Direction.NORTH -> player.tile.y <= target.tile.y
+            Direction.EAST -> player.tile.x <= target.tile.x
+            Direction.SOUTH -> player.tile.y >= target.tile.y
+            Direction.WEST -> player.tile.x >= target.tile.x
+            else -> false
+        }
+        if (sameSide) {
+            jump(player, target, target.tile.add(direction).add(direction), direction)
+        } else {
+            jump(player, target, target.tile, direction.inverse())
         }
     }
 
-    suspend fun ObjectOption<Player>.jump(opposite: Tile, direction: Direction) {
-        character.clear("face_entity")
+    suspend fun jump(player: Player, target: GameObject, opposite: Tile, direction: Direction) {
+        player.clear("face_entity")
         player.walkToDelay(target.tile)
-        delay()
+        player.delay()
         if (!player.has(Skill.Agility, 25)) {
             player.message("You need level 25 agility to make that jump.")
-            statement("You need level 25 agility to make that jump.")
+            player.dialogue {
+                statement("You need level 25 agility to make that jump.")
+            }
             return
         }
         if (player.runEnergy < 500) {

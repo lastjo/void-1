@@ -14,6 +14,7 @@ import world.gregs.voidps.engine.data.settingsReload
 import world.gregs.voidps.engine.entity.MAX_PLAYERS
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.move.running
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.appearance
 import world.gregs.voidps.engine.entity.character.player.sex
@@ -30,92 +31,98 @@ import world.gregs.voidps.engine.timer.worldTimerTick
 import world.gregs.voidps.network.client.DummyClient
 import world.gregs.voidps.network.login.protocol.visual.update.player.BodyColour
 import world.gregs.voidps.network.login.protocol.visual.update.player.BodyPart
+import world.gregs.voidps.type.PlayerRights
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.*
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 import kotlin.reflect.KClass
 
-@Script
-class BotSpawns {
+class BotSpawns(
+    areas: AreaDefinitions,
+    private val enums: EnumDefinitions,
+    private val structs: StructDefinitions,
+    private val loader: PlayerAccountLoader,
+) {
 
-    val areas: AreaDefinitions by inject()
     val lumbridge = areas["lumbridge_teleport"]
 
     val bots = mutableListOf<Player>()
-    val enums: EnumDefinitions by inject()
-    val structs: StructDefinitions by inject()
 
     var counter = 0
 
-    val loader: PlayerAccountLoader by inject()
-
-    init {
-        worldSpawn {
-            if (Settings["bots.count", 0] > 0) {
-                World.timers.start("bot_spawn")
-            }
-            Events.events.all = { player, event ->
-                handleSuspensions(player, event)
-            }
+    @Spawn
+    fun spawn(world: World) {
+        if (Settings["bots.count", 0] > 0) {
+            World.timers.start("bot_spawn")
         }
-
-        settingsReload {
-            if (Settings["bots.count", 0] > bots.size) {
-                World.timers.start("bot_spawn")
-            }
+        Events.events.all = { player, event ->
+            handleSuspensions(player, event)
         }
+    }
 
-        worldTimerStart("bot_spawn") {
-            interval = TimeUnit.SECONDS.toTicks(Settings["bots.spawnSeconds", 60])
+    @Subscribe("settings_reload")
+    fun reload() {
+        if (Settings["bots.count", 0] > bots.size) {
+            World.timers.start("bot_spawn")
         }
+    }
 
-        worldTimerTick("bot_spawn") {
-            if (counter > Settings["bots.count", 0]) {
-                cancel()
-                return@worldTimerTick
-            }
-            spawn()
+    @TimerStart("bot_spawn")
+    fun start(world: World): Int {
+        return TimeUnit.SECONDS.toTicks(Settings["bots.spawnSeconds", 60])
+    }
+
+    @TimerTick("bot_spawn")
+    fun tick(world: World): Int {
+        if (counter > Settings["bots.count", 0]) {
+            return 0
         }
+        spawn()
+        return -1
+    }
 
-        adminCommand("bots (count)", "spawn (count) number of bots") {
-            val count = content.toIntOrNull() ?: 1
-            GlobalScope.launch {
-                repeat(count) {
-                    if (it % Settings["network.maxLoginsPerTick", 25] == 0) {
-                        suspendCancellableCoroutine { cont ->
-                            World.queue("bot_$counter") {
-                                cont.resume(Unit)
-                            }
+    @Command("bots (count)", description = "spawn (count) number of bots", rights = PlayerRights.ADMIN)
+    fun spawnBots(player: Player, content: String) {
+        val count = content.toIntOrNull() ?: 1
+        GlobalScope.launch {
+            repeat(count) {
+                if (it % Settings["network.maxLoginsPerTick", 25] == 0) {
+                    suspendCancellableCoroutine { cont ->
+                        World.queue("bot_$counter") {
+                            cont.resume(Unit)
                         }
                     }
-                    spawn()
                 }
+                spawn()
             }
         }
+    }
 
-        adminCommand("clear_bots [count]", "clear all or some amount of bots") {
-            val count = content.toIntOrNull() ?: MAX_PLAYERS
-            World.queue("bot_$counter") {
-                val manager = get<AccountManager>()
-                for (bot in bots.take(count)) {
-                    manager.logout(bot, false)
-                }
+    @Command("clear_bots [count]", description = "clear all or some amount of bots", rights = PlayerRights.ADMIN)
+    fun clearBots(player: Player, content: String) {
+        val count = content.toIntOrNull() ?: MAX_PLAYERS
+        World.queue("bot_$counter") {
+            val manager = get<AccountManager>()
+            for (bot in bots.take(count)) {
+                manager.logout(bot, false)
             }
         }
+    }
 
-        adminCommand("bot", "toggle yourself on/off as a bot player") {
-            if (player.isBot) {
-                player.clear("bot")
-                player.message("Bot disabled.")
-            } else {
-                val bot = player.initBot()
-                if (content.isNotBlank()) {
-                    player["task_bot"] = content
-                }
-                bot.emit(StartBot)
-                player.message("Bot enabled.")
+    @Command("bot", description = "toggle yourself on/off as a bot player", rights = PlayerRights.ADMIN)
+    fun toggleBot(player: Player, content: String) {
+        if (player.isBot) {
+            player.clear("bot")
+            player.message("Bot disabled.")
+        } else {
+            val bot = player.initBot()
+            if (content.isNotBlank()) {
+                player["task_bot"] = content
             }
+            bot.emit(StartBot)
+            player.message("Bot enabled.")
         }
     }
 

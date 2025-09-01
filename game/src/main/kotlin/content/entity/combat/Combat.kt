@@ -1,9 +1,6 @@
 package content.entity.combat
 
 import content.area.wilderness.inSingleCombat
-import content.entity.combat.hit.characterCombatDamage
-import content.entity.combat.hit.hit
-import content.entity.death.characterDeath
 import content.entity.player.combat.special.specialAttack
 import content.skill.magic.spell.spell
 import content.skill.melee.weapon.attackRange
@@ -23,13 +20,44 @@ import world.gregs.voidps.engine.entity.character.mode.interact.Interact
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.entity.characterDespawn
 import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.event.onEvent
+import world.gregs.voidps.type.CombatStage
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Combat
+import world.gregs.voidps.type.sub.Death
+import world.gregs.voidps.type.sub.Despawn
 
 @Script
 class Combat {
+
+    @Despawn
+    fun despawn(character: Character) {
+        for (attacker in character.attackers) {
+            attacker.mode = EmptyMode
+        }
+    }
+
+    @Death
+    fun death(character: Character) {
+        character.stop("in_combat")
+        for (attacker in character.attackers) {
+            if (attacker.target == character) {
+                attacker.stop("in_combat")
+            }
+        }
+    }
+
+    @Combat(stage = CombatStage.DAMAGE)
+    fun retaliate(source: Character, character: Character, type: String) {
+        if (source == character || type == "poison" || type == "disease" || type == "healed") {
+            return
+        }
+        if (character.mode !is CombatMovement && character.mode !is PauseMode) {
+            retaliate(character, source)
+        }
+    }
+
 
     init {
         onEvent<CombatInteraction<*>> {
@@ -38,12 +66,6 @@ class Combat {
 
         onEvent<Character, CombatReached> { character ->
             combat(character, target)
-        }
-
-        characterDespawn { character ->
-            for (attacker in character.attackers) {
-                attacker.mode = EmptyMode
-            }
         }
 
         characterCombatStart { character ->
@@ -63,24 +85,6 @@ class Combat {
             }
             character.target?.attackers?.remove(character)
             character.target = null
-        }
-
-        characterDeath { character ->
-            character.stop("in_combat")
-            for (attacker in character.attackers) {
-                if (attacker.target == character) {
-                    attacker.stop("in_combat")
-                }
-            }
-        }
-
-        characterCombatDamage { character ->
-            if (source == character || type == "poison" || type == "disease" || type == "healed") {
-                return@characterCombatDamage
-            }
-            if (character.mode !is CombatMovement && character.mode !is PauseMode) {
-                retaliate(character, source)
-            }
         }
     }
 
@@ -116,7 +120,7 @@ class Combat {
         }
         val prepare = CombatPrepare(target)
         character.emit(prepare)
-        if (prepare.cancelled) {
+        if (Publishers.all.combatAttack(character, target, character.fightStyle, -1, character.weapon, character.spell, stage = CombatStage.PREPARE)) {
             character.mode = EmptyMode
             return
         }
@@ -125,11 +129,12 @@ class Combat {
             player.message("---- Swing (${character.identifier}) -> (${target.identifier}) -----")
         }
         if (!target.hasClock("in_combat")) {
+            Publishers.all.combatAttack(character, target, character.fightStyle, -1, character.weapon, character.spell, stage = CombatStage.START)
             character.emit(CombatStart(target))
         }
         target.start("in_combat", 8)
 
-        Publishers.all.combatAttack(character, target, character.fightStyle, -1, character.weapon, character.spell)
+        Publishers.all.combatAttack(character, target, character.fightStyle, -1, character.weapon, character.spell, stage = CombatStage.SWING)
         val swing = CombatSwing(target)
         character.emit(swing)
         (character as? Player)?.specialAttack = false

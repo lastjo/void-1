@@ -5,6 +5,7 @@ import content.bot.TaskManager
 import content.bot.interact.navigation.graph.NavigationGraph
 import content.bot.interact.path.Dijkstra
 import content.bot.interact.path.DijkstraFrontier
+import content.entity.obj.ObjectTeleports
 import content.entity.obj.ship.CharterShips
 import content.entity.player.modal.book.Books
 import content.entity.world.music.MusicTracks
@@ -14,6 +15,7 @@ import content.social.trade.exchange.history.ExchangeHistory
 import kotlinx.io.pool.DefaultPool
 import org.koin.dsl.module
 import org.rsmod.game.pathfinder.LineValidator
+import world.gregs.voidps.engine.client.PlayerAccountLoader
 import world.gregs.voidps.engine.client.instruction.InstructionHandlers
 import world.gregs.voidps.engine.client.instruction.InterfaceHandler
 import world.gregs.voidps.engine.client.ui.chat.plural
@@ -21,10 +23,13 @@ import world.gregs.voidps.engine.data.*
 import world.gregs.voidps.engine.data.definition.*
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Players
+import world.gregs.voidps.engine.entity.item.drop.DropTables
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
 import world.gregs.voidps.engine.entity.item.floor.ItemSpawns
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.event.Publishers
+import world.gregs.voidps.engine.map.collision.Collisions
+import world.gregs.voidps.engine.map.zone.DynamicZones
 import world.gregs.voidps.engine.script.PublishersImpl
 
 fun gameModule(files: ConfigFiles) = module {
@@ -82,22 +87,69 @@ fun gameModule(files: ConfigFiles) = module {
         val structDefinitions = get<StructDefinitions>()
         val lineValidator = get<LineValidator>()
         val patrols = get<PatrolDefinitions>()
+        val taskManager = get<TaskManager>()
+        val playerAccountLoader = get<PlayerAccountLoader>()
+        val animationDefinitions = get<AnimationDefinitions>()
+        val canoeDefinitions = get<CanoeDefinitions>()
+        val npcDefinitions = get<NPCDefinitions>()
+        val soundDefinitions = get<SoundDefinitions>()
+        val spellDefinitions = get<SpellDefinitions>()
+        val itemSpawns = get<ItemSpawns>()
+        val charterShips = get<CharterShips>()
+
+        val objectTeleports = get<ObjectTeleports>()
+        val grandExchange = get<GrandExchange>()
+        val dropTables = get<DropTables>()
+        val interfaceDefinitions = get<InterfaceDefinitions>()
+        val collisions = get<Collisions>()
+        val books = get<Books>()
+        val itemOnItemDefinitions = get<ItemOnItemDefinitions>()
+        val musicTracks = get<MusicTracks>()
+        val accountManager = get<AccountManager>()
+        val saveQueue = get<SaveQueue>()
+        val questDefinitions = get<QuestDefinitions>()
+        val dynamicZones = get<DynamicZones>()
+        val fontDefinitions = get<FontDefinitions>()
+        val objectDefinitions = get<ObjectDefinitions>()
         val start = System.currentTimeMillis()
         val publishers = PublishersImpl(
-            fairyCodes = fairyCodes,
+            fairyRingCodes = fairyCodes,
             lineValidator = lineValidator,
-            areas = areas,
-            enums = enumDefinitions,
+            areaDefinitions = areas,
+            enumDefinitions = enumDefinitions,
             inventoryDefinitions = inventoryDefinitions,
             itemDefinitions = itemDefinitions,
-            patrols = patrols,
+            patrolDefinitions = patrols,
             structDefinitions = structDefinitions,
             variableDefinitions = variableDefinitions,
-            styleDefinitions = styleDefinitions,
+            weaponStyleDefinitions = styleDefinitions,
             npcs = npcs,
             players = players,
             floorItems = floorItems,
-            objects = objects
+            gameObjects = objects,
+            taskManager = taskManager,
+            playerAccountLoader = playerAccountLoader,
+            animationDefinitions = animationDefinitions,
+            canoeDefinitions = canoeDefinitions,
+            npcDefinitions = npcDefinitions,
+            soundDefinitions = soundDefinitions,
+            spellDefinitions = spellDefinitions,
+            itemSpawns = itemSpawns,
+            charterShips = charterShips,
+            objectTeleports = objectTeleports,
+            grandExchange = grandExchange,
+            dropTables = dropTables,
+            interfaceDefinitions = interfaceDefinitions,
+            collisions = collisions,
+            books = books,
+            itemOnItemDefinitions = itemOnItemDefinitions,
+            musicTracks = musicTracks,
+            accountManager = accountManager,
+            saveQueue = saveQueue,
+            questDefinitions = questDefinitions,
+            dynamicZones = dynamicZones,
+            fontDefinitions = fontDefinitions,
+            objectDefinitions = objectDefinitions,
         )
         Publishers.set(publishers)
         logger.info { "Loaded ${publishers.subscriptions} publisher ${"subscriptions".plural(publishers.subscriptions)} in ${System.currentTimeMillis() - start} ms" }

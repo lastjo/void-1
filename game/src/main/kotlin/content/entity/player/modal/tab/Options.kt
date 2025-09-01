@@ -4,35 +4,40 @@ import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.hasMenuOpen
 import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.Spawn
 
-@Script
 class Options {
 
-    init {
-        interfaceOption("Graphics Settings", "graphics", "options") {
-            if (player.hasMenuOpen()) {
-                player.message("Please close the interface you have open before setting your graphics options.")
-                return@interfaceOption
-            }
-            player.open("graphics_options")
+    @Interface("Graphics Settings", "graphics", "options")
+    fun graphics(player: Player) {
+        if (player.hasMenuOpen()) {
+            player.message("Please close the interface you have open before setting your graphics options.")
+            return
         }
-
-        interfaceOption("Audio Settings", "audio", "options") {
-            if (player.hasMenuOpen()) {
-                player.message("Please close the interface you have open before setting your audio options.")
-                return@interfaceOption
-            }
-            player.open("audio_options")
-        }
-
-        playerSpawn { player ->
-            player.sendVariable("accept_aid")
-        }
-
-        interfaceOption("Toggle Accept Aid", "aid", "options") {
-            player.toggle("accept_aid")
-        }
+        player.open("graphics_options")
     }
+
+    @Interface("Audio Settings", "audio", "options")
+    fun audio(player: Player) {
+        if (player.hasMenuOpen()) {
+            player.message("Please close the interface you have open before setting your audio options.")
+            return
+        }
+        player.open("audio_options")
+    }
+
+    @Spawn
+    fun spawn(player: Player) {
+        player.sendVariable("accept_aid")
+    }
+
+    @Interface("Toggle Accept Aid", "aid", "options")
+    fun aid(player: Player) {
+        player.toggle("accept_aid")
+    }
+
 }

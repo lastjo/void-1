@@ -1,53 +1,55 @@
 package content.entity.player.bank
 
-import world.gregs.voidps.engine.client.ui.interfaceOption
-import world.gregs.voidps.engine.client.ui.interfaceSwap
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.inv.Inventory
-import world.gregs.voidps.engine.inv.inventoryUpdate
 import world.gregs.voidps.engine.inv.shift
 import world.gregs.voidps.engine.inv.swap
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.InventoryUpdated
+import world.gregs.voidps.type.sub.Swap
 
-@Script
 class BankTabs {
 
-    init {
-        inventoryUpdate("bank") { player ->
-            player["bank_spaces_used_free"] = player.bank.countFreeToPlayItems()
-            player["bank_spaces_used_member"] = player.bank.count
-        }
+    @InventoryUpdated("bank")
+    fun update(player: Player) {
+        player["bank_spaces_used_free"] = player.bank.countFreeToPlayItems()
+        player["bank_spaces_used_member"] = player.bank.count
+    }
 
-        interfaceSwap("bank", "inventory") { player ->
-            when (player["bank_item_mode", "swap"]) {
-                "swap" -> player.bank.swap(fromSlot, toSlot)
-                "insert" -> {
-                    val fromTab = Bank.getTab(player, fromSlot)
-                    val toTab = Bank.getTab(player, toSlot)
-                    shiftTab(player, fromSlot, toSlot, fromTab, toTab)
-                }
+    @Swap("bank", "inventory")
+    fun swap(player: Player, fromSlot: Int, toSlot: Int) {
+        when (player["bank_item_mode", "swap"]) {
+            "swap" -> player.bank.swap(fromSlot, toSlot)
+            "insert" -> {
+                val fromTab = Bank.getTab(player, fromSlot)
+                val toTab = Bank.getTab(player, toSlot)
+                shiftTab(player, fromSlot, toSlot, fromTab, toTab)
             }
         }
+    }
 
-        interfaceOption("View all", "tab_1", "bank") {
-            player["open_bank_tab"] = 1
-        }
+    @Interface("View all", "tab_1", "bank")
+    fun viewAll(player: Player) {
+        player["open_bank_tab"] = 1
+    }
 
-        interfaceOption("View Tab", "tab_#", "bank") {
-            player["open_bank_tab"] = component.removePrefix("tab_").toInt()
-        }
+    @Interface("View Tab", "tab_*", "bank")
+    fun viewTab(player: Player, component: String) {
+        player["open_bank_tab"] = component.removePrefix("tab_").toInt()
+    }
 
-        interfaceOption("Toggle swap/insert", "item_mode", "bank") {
-            val value: String = player["bank_item_mode", "swap"]
-            player["bank_item_mode"] = if (value == "insert") "swap" else "insert"
-        }
+    @Interface("Toggle swap/insert", "item_mode", "bank")
+    fun toggleMode(player: Player, component: String) {
+        val value: String = player["bank_item_mode", "swap"]
+        player["bank_item_mode"] = if (value == "insert") "swap" else "insert"
+    }
 
-        interfaceSwap("bank", "inventory", toComponent = "tab_#") { player ->
-            val fromTab = Bank.getTab(player, fromSlot)
-            val toTab = toComponent.removePrefix("tab_").toInt() - 1
-            val toIndex = if (toTab == Bank.MAIN_TAB) player.bank.freeIndex() else Bank.tabIndex(player, toTab + 1)
-            shiftTab(player, fromSlot, toIndex, fromTab, toTab)
-        }
+    @Swap("bank", "inventory", toComponent = "tab_*")
+    fun swapTab(player: Player, fromSlot: Int, toComponent: String) {
+        val fromTab = Bank.getTab(player, fromSlot)
+        val toTab = toComponent.removePrefix("tab_").toInt() - 1
+        val toIndex = if (toTab == Bank.MAIN_TAB) player.bank.freeIndex() else Bank.tabIndex(player, toTab + 1)
+        shiftTab(player, fromSlot, toIndex, fromTab, toTab)
     }
 
     fun Inventory.countFreeToPlayItems(): Int = items.count { it.isNotEmpty() && !it.def.members }

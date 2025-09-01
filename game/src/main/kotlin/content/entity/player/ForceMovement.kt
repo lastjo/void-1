@@ -1,15 +1,15 @@
 package content.entity.player
 
+import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.mode.move.characterMove
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Move
 
-@Script
 class ForceMovement {
-
-    init {
-        characterMove({ it.contains("force_walk") }) { character ->
-            val block: () -> Unit = character.remove("force_walk") ?: return@characterMove
-            block.invoke()
-        }
+    @Move
+    fun move(character: Character) {
+        val block: () -> Unit = character.remove("force_walk") ?: return
+        block.invoke()
     }
 }

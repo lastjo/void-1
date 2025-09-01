@@ -17,10 +17,12 @@ import world.gregs.voidps.engine.client.moveCamera
 import world.gregs.voidps.engine.client.shakeCamera
 import world.gregs.voidps.engine.client.turnCamera
 import world.gregs.voidps.engine.client.ui.close
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.character.mode.Face
 import world.gregs.voidps.engine.entity.character.move.running
 import world.gregs.voidps.engine.entity.character.move.tele
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
@@ -34,59 +36,62 @@ import world.gregs.voidps.engine.timer.npcTimerTick
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Region
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
+import world.gregs.voidps.type.sub.TimerStart
+import world.gregs.voidps.type.sub.TimerTick
 
-@Script
 class GypsyAris {
 
-    init {
-        npcOperate("Talk-to", "gypsy_aris") {
-            when (player.quest("demon_slayer")) {
-                "unstarted" -> {
-                    npc<Talk>("Hello, young one.")
-                    npc<Talk>("Cross my palm with silver and the future will be revealed to you.")
-                    if (!player.inventory.contains("coins")) {
-                        player<Upset>("Oh dear. I don't have any money.")
-                        return@npcOperate
-                    }
-                    if (player.combatLevel < 15) {
-                        statement("Before starting this quest, be aware that your combat level is lower than the recommended level of 15.")
-                    }
-                    choice {
-                        hereYouGo()
-                        whoYouCallingYoung()
-                        notBeliever()
-                        withSilver()
-                    }
+    @Option("Talk-to", "gypsy_aris")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        when (player.quest("demon_slayer")) {
+            "unstarted" -> {
+                npc<Talk>("Hello, young one.")
+                npc<Talk>("Cross my palm with silver and the future will be revealed to you.")
+                if (!player.inventory.contains("coins")) {
+                    player<Upset>("Oh dear. I don't have any money.")
+                    return@talkWith
                 }
-                "sir_prysin", "key_hunt" -> howGoesQuest()
-                "completed" -> {
-                    npc<Neutral>("Greetings young one.")
-                    npc<Happy>("You're a hero now. That was a good bit of demon-slaying.")
-                    choice {
-                        option<Uncertain>("How do you know I killed it?") {
-                            npc<Talk>("You forget. I'm good at knowing things.")
-                        }
-                        option<Neutral>("Thanks.")
-                        stopCallingMeThat()
-                    }
+                if (player.combatLevel < 15) {
+                    statement("Before starting this quest, be aware that your combat level is lower than the recommended level of 15.")
+                }
+                choice {
+                    hereYouGo()
+                    whoYouCallingYoung()
+                    notBeliever()
+                    withSilver()
                 }
             }
-        }
-
-        npcTimerStart("demon_slayer_crystal_ball", "gypsy_aris") {
-            interval = 2
-        }
-
-        npcTimerTick("demon_slayer_crystal_ball") { npc ->
-            if (npc.mode !is Face) {
-                cancel()
-                return@npcTimerTick
+            "sir_prysin", "key_hunt" -> howGoesQuest()
+            "completed" -> {
+                npc<Neutral>("Greetings young one.")
+                npc<Happy>("You're a hero now. That was a good bit of demon-slaying.")
+                choice {
+                    option<Uncertain>("How do you know I killed it?") {
+                        npc<Talk>("You forget. I'm good at knowing things.")
+                    }
+                    option<Neutral>("Thanks.")
+                    stopCallingMeThat()
+                }
             }
-            areaSound("demon_slayer_crystal_ball_anim", npc.tile)
         }
     }
 
-    suspend fun SuspendableContext<Player>.whatToDo() {
+    @TimerStart("demon_slayer_crystal_ball")
+    fun start(npc: NPC): Int {
+        return 2
+    }
+
+    @TimerTick("demon_slayer_crystal_ball")
+    fun tick(npc: NPC): Int {
+        if (npc.mode !is Face) {
+            return 0
+        }
+        areaSound("demon_slayer_crystal_ball_anim", npc.tile)
+        return -1
+    }
+
+    suspend fun Dialogue.whatToDo() {
         choice {
             cityDestroyer {
                 wallyQuestions()
@@ -96,7 +101,7 @@ class GypsyAris {
         }
     }
 
-    suspend fun SuspendableContext<Player>.howToDo() {
+    suspend fun Dialogue.howToDo() {
         choice {
             cityDestroyer {
                 wallyQuestions()
@@ -106,12 +111,12 @@ class GypsyAris {
         }
     }
 
-    suspend fun PlayerChoice.howWallyWon(): Unit = option<Quiz>("So, how did Wally kill Delrith?") {
+    suspend fun ChoiceBuilder<Dialogue>.howWallyWon(): Unit = option<Quiz>("So, how did Wally kill Delrith?") {
         player.playTrack("wally_the_hero")
         cutscene()
     }
 
-    suspend fun SuspendableContext<Player>.finalQuestions() {
+    suspend fun Dialogue.finalQuestions() {
         choice {
             cityDestroyer {
                 otherQuestions()
@@ -126,7 +131,7 @@ class GypsyAris {
         }
     }
 
-    suspend fun SuspendableContext<Player>.otherQuestions() {
+    suspend fun Dialogue.otherQuestions() {
         choice {
             whereIsHe()
             notVeryHeroicName()
@@ -142,26 +147,26 @@ class GypsyAris {
         }
     }
 
-    suspend fun PlayerChoice.cityDestroyer(end: suspend Context<Player>.() -> Unit): Unit = option<Afraid>("How am I meant to fight a demon who can destroy cities?") {
+    suspend fun ChoiceBuilder<Dialogue>.cityDestroyer(end: suspend Context<Player>.() -> Unit): Unit = option<Afraid>("How am I meant to fight a demon who can destroy cities?") {
         npc<Talk>("If you face Delrith while he is still weak from being summoned, and use the correct weapon, you will not find the task too arduous.")
         npc<Talk>("Do not fear. If you follow the path of the great hero Wally, then you are sure to defeat the demon.")
         end.invoke(this)
     }
 
-    suspend fun PlayerChoice.whereIsHe(): Unit = option<Happy>("Okay, where is he? I'll kill him for you.") {
+    suspend fun ChoiceBuilder<Dialogue>.whereIsHe(): Unit = option<Happy>("Okay, where is he? I'll kill him for you.") {
         npc<Chuckle>("Ah, the overconfidence of the young!")
         npc<Talk>("Delrith can't be harmed by ordinary weapons. You must face him using the same weapon that Wally used.")
         howToDo()
     }
 
-    suspend fun PlayerChoice.notVeryHeroicName(): Unit = option<Happy>("Wally doesn't sound like a very heroic name.") {
+    suspend fun ChoiceBuilder<Dialogue>.notVeryHeroicName(): Unit = option<Happy>("Wally doesn't sound like a very heroic name.") {
         npc<Talk>("Yes, I know. Maybe that is why history doesn't remember him. However, he was a great hero.")
         npc<Talk>("Who knows how much pain and suffering Delrith would have brought forth without Wally to stop him!")
         npc<Talk>("It looks like you are needed to perform similar heroics.")
         howToDo()
     }
 
-    suspend fun SuspendableContext<Player>.incantation() {
+    suspend fun Dialogue.incantation() {
         player<Talk>("What is the magical incantation?")
         npc<Talk>("Oh yes, let me think a second.")
         npc<Neutral>("Aright, I think I've got it now, it goes... ${getWord(player, 1)}... ${getWord(player, 2)}... ${getWord(player, 3)}.,. ${getWord(player, 4)}.,. ${getWord(player, 5)}. Have you got that?")
@@ -172,7 +177,7 @@ class GypsyAris {
         npc<Upset>("Ok suit yourself.")
     }
 
-    suspend fun ChoiceBuilder<NPCOption<Player>>.hereYouGo(): Unit = option<Talk>("Okay, here you go.") {
+    suspend fun ChoiceBuilder<Dialogue>.hereYouGo(): Unit = option<Talk>("Okay, here you go.") {
         player.inventory.remove("coins", 1)
         npc<Happy>("Come closer and listen carefully to what the future holds, as I peer into the swirling mists o the crystal ball.")
         player.sound("demon_slayer_crystal_ball_start")
@@ -195,7 +200,7 @@ class GypsyAris {
         whatToDo()
     }
 
-    suspend fun ChoiceBuilder<NPCOption<Player>>.whoYouCallingYoung(): Unit = option<Frustrated>("Who are you called 'young one'?") {
+    suspend fun ChoiceBuilder<Dialogue>.whoYouCallingYoung(): Unit = option<Frustrated>("Who are you called 'young one'?") {
         npc<Talk>("You have been on this world a relatively short time. At least compared to me.")
         npc<Talk>("So, do you want your fortune told or not?")
         choice {
@@ -208,7 +213,7 @@ class GypsyAris {
         }
     }
 
-    suspend fun SuspendableContext<Player>.cutscene() {
+    suspend fun Dialogue.cutscene() {
         val region = Region(12852)
         player.open("fade_out")
         statement("", clickToContinue = false)
@@ -286,7 +291,7 @@ class GypsyAris {
         delrithWillCome()
     }
 
-    suspend fun ChoiceBuilder<NPCOption<Player>>.withSilver(): Unit = option<Quiz>("With silver?") {
+    suspend fun ChoiceBuilder<Dialogue>.withSilver(): Unit = option<Quiz>("With silver?") {
         npc<Neutral>("Oh, sorry, I forgot. With gold, I mean. They haven't used silver coins since before you were born! So, do you want your fortune told?")
         choice {
             hereYouGo()
@@ -294,7 +299,7 @@ class GypsyAris {
         }
     }
 
-    suspend fun SuspendableContext<Player>.delrithWillCome() {
+    suspend fun Dialogue.delrithWillCome() {
         npc<Upset>("Delrith will come forth from the stone circle again.")
         npc<Upset>("I would imagine an evil sorcerer is already beginning the rituals to summon Delrith as we speak.")
         choice {
@@ -313,13 +318,13 @@ class GypsyAris {
         }
     }
 
-    suspend fun SuspendableContext<Player>.whereSilverlight() {
+    suspend fun Dialogue.whereSilverlight() {
         player<Frustrated>("Where can I find Silverlight?")
         npc<Talk>("Silverlight has been passed down by Wally's descendants. I believe it is currently in the care of one of the king's knights called Sir Prysin.")
         npc<Pleased>("He shouldn't be too hard to find. He lives in the royal palace in this city. Tell him Gypsy Aris sent you.")
     }
 
-    suspend fun NPCOption<Player>.howGoesQuest() {
+    suspend fun Dialogue.howGoesQuest() {
         npc<Happy>("Greetings. How goes thy quest?")
         player<Talk>("I'm still working on it.")
         npc<Talk>("Well if you need any advice I'm always here, young one.")
@@ -333,11 +338,11 @@ class GypsyAris {
         }
     }
 
-    suspend fun PlayerChoice.okThanks(): Unit = option<Talk>("Ok thanks. I'll do my best to stop the demon.") {
+    suspend fun ChoiceBuilder<Dialogue>.okThanks(): Unit = option<Talk>("Ok thanks. I'll do my best to stop the demon.") {
         npc<Happy>("Good luck, and may Guthix be with you!")
     }
 
-    suspend fun PlayerChoice.silverlightReminder(): Unit = option("Where can I find Silverlight?") {
+    suspend fun ChoiceBuilder<Dialogue>.silverlightReminder(): Unit = option("Where can I find Silverlight?") {
         whereSilverlight()
         choice {
             okThanks()
@@ -345,7 +350,7 @@ class GypsyAris {
         }
     }
 
-    suspend fun PlayerChoice.incantationReminder(): Unit = option("What is the magical incantation?") {
+    suspend fun ChoiceBuilder<Dialogue>.incantationReminder(): Unit = option("What is the magical incantation?") {
         incantation()
         choice {
             okThanks()
@@ -353,7 +358,7 @@ class GypsyAris {
         }
     }
 
-    suspend fun PlayerChoice.stopCallingMeThat(): Unit = option<Angry>("Stop calling me that!") {
+    suspend fun ChoiceBuilder<Dialogue>.stopCallingMeThat(): Unit = option<Angry>("Stop calling me that!") {
         npc<Talk>("In the scheme of things you are very young.")
         choice {
             option<Talk>("Ok but how old are you?") {
@@ -366,7 +371,7 @@ class GypsyAris {
         }
     }
 
-    suspend fun SuspendableContext<Player>.wallyQuestions() {
+    suspend fun Dialogue.wallyQuestions() {
         choice {
             whereIsHe()
             notVeryHeroicName()

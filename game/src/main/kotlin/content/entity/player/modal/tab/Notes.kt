@@ -1,14 +1,12 @@
 package content.entity.player.modal.tab
 
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.type.sub.Open
 
-@Script
 class Notes {
 
-    init {
-        interfaceOpen("notes") { player ->
-            player.interfaceOptions.unlockAll(id, "notes", 0..30)
-        }
+    @Open("notes")
+    fun open(player: Player, id: String) {
+        player.interfaceOptions.unlockAll(id, "notes", 0..30)
     }
 }

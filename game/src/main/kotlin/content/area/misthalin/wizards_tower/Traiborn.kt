@@ -5,12 +5,8 @@ import content.entity.player.dialogue.type.*
 import content.entity.sound.sound
 import content.quest.quest
 import world.gregs.voidps.engine.client.ui.chat.plural
-import world.gregs.voidps.engine.client.ui.dialogue.talkWith
-import world.gregs.voidps.engine.client.ui.interact.itemOnNPCOperate
-import world.gregs.voidps.engine.entity.character.mode.interact.TargetInteraction
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.NPCOption
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
 import world.gregs.voidps.engine.entity.obj.GameObjects
@@ -22,9 +18,9 @@ import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.map.collision.blocked
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Direction
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
+import world.gregs.voidps.type.sub.UseOn
 
-@Script
 class Traiborn {
 
     val floorItems: FloorItems by inject()
@@ -34,29 +30,30 @@ class Traiborn {
         get() = get("demon_slayer_bones", -1)
         set(value) = set("demon_slayer_bones", value)
 
-    init {
-        npcOperate("Talk-to", "traiborn") {
-            npc<Uncertain>("Ello young thingummywut.")
-            if (player.quest("demon_slayer") == "key_hunt") {
-                if (player.inventory.contains("silverlight_key_wizard_traiborn")) {
-                    somewhereToBe()
-                } else {
-                    bonesCheck()
-                }
+    @Option("Talk-to", "traiborn")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        npc<Uncertain>("Ello young thingummywut.")
+        if (player.quest("demon_slayer") == "key_hunt") {
+            if (player.inventory.contains("silverlight_key_wizard_traiborn")) {
+                somewhereToBe()
             } else {
-                choice {
-                    thingummywut()
-                    teachMe()
-                    option<Uncertain>("I'd better go.") {
-                        npc<Neutral>("Cheerrio then.")
-                    }
+                bonesCheck()
+            }
+        } else {
+            choice {
+                thingummywut()
+                teachMe()
+                option<Uncertain>("I'd better go.") {
+                    npc<Neutral>("Cheerrio then.")
                 }
             }
         }
+    }
 
-        itemOnNPCOperate("bones", "traiborn") {
-            if (player.bonesRequired > 0) {
-                player.talkWith(target)
+    @UseOn("bones", "traiborn")
+    suspend fun use(player: Player, npc: NPC) {
+        if (player.bonesRequired > 0) {
+            player.talkWith(npc) {
                 giveBones()
             }
         }
@@ -188,7 +185,7 @@ class Traiborn {
         }
     }
 
-    suspend fun TargetInteraction<Player, NPC>.startSpell() {
+    suspend fun Dialogue.startSpell() {
         npc<Neutral>("Hurrah! That's all 25 sets of bones.")
         target.anim("traiborn_bone_spell")
         target.gfx("traiborn_bone_spell")
@@ -213,12 +210,12 @@ class Traiborn {
         npc<Neutral>("Not a problem for a friend of Sir What's-his-face.")
     }
 
-    suspend fun SuspendableContext<Player>.somewhereToBe() {
+    suspend fun Dialogue.somewhereToBe() {
         npc<Uncertain>("Don't you have somewhere to be, young thingummywut? You still have that key you asked me for.")
         player<Talk>("You're right. I've got a demon to slay.")
     }
 
-    suspend fun NPCOption<Player>.bonesCheck() {
+    suspend fun Dialogue.bonesCheck() {
         when (player.bonesRequired) {
             0 -> lostKey()
             -1 -> choice {
@@ -247,7 +244,7 @@ class Traiborn {
         player.bonesRequired = 25
     }
 
-    suspend fun TargetInteraction<Player, NPC>.giveBones() {
+    suspend fun Dialogue.giveBones() {
         val removed = player.inventory.removeToLimit("bones", player.bonesRequired)
         statement("You give Traiborn $removed ${"set".plural(removed)} of bones.")
         player.bonesRequired -= removed

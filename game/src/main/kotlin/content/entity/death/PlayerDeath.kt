@@ -22,6 +22,7 @@ import world.gregs.voidps.engine.data.Settings
 import world.gregs.voidps.engine.data.definition.EnumDefinitions
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.move.tele
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
@@ -38,12 +39,15 @@ import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.Death
+import world.gregs.voidps.type.sub.Spawn
 
-@Script
-class PlayerDeath {
-
-    val floorItems: FloorItems by inject()
-    val enums: EnumDefinitions by inject()
+class PlayerDeath(
+    private val floorItems: FloorItems,
+    private val enums: EnumDefinitions,
+    private val players: Players,
+    private val npcs: NPCs,
+) {
 
     val Character.damageDealers: MutableMap<Character, Int>
         get() = getOrPut("damage_dealers") { mutableMapOf() }
@@ -51,50 +55,47 @@ class PlayerDeath {
     val respawnTile: Tile
         get() = Tile(Settings["world.home.x", 0], Settings["world.home.y", 0], Settings["world.home.level", 0])
 
-    val players: Players by inject()
-    val npcs: NPCs by inject()
+    @Spawn
+    fun spawn(character: Character) {
+        character["damage_dealers"] = Object2IntOpenHashMap<Character>(1)
+        character["attackers"] = ObjectArrayList<Character>(1)
+    }
 
-    init {
-        characterSpawn { character ->
-            character["damage_dealers"] = Object2IntOpenHashMap<Character>(1)
-            character["attackers"] = ObjectArrayList<Character>(1)
-        }
-
-        playerDeath { player ->
-            player.dead = true
-            player.strongQueue("death") {
-                player.steps.clear()
-                val dealer = player.damageDealers.maxByOrNull { it.value }
-                val killer = dealer?.key
-                while (true) {
-                    player.instructions.tryReceive().getOrNull() ?: break
-                }
-                val tile = player.tile.copy()
-                val wilderness = player.inWilderness
-                retribution(player)
-                wrath(player)
-                player.message("Oh dear, you are dead!")
-                player.anim("human_death")
-                delay(5)
-                val after = AfterDeath()
-                player.emit(after)
-                player.clearAnim()
-                player.attackers.clear()
-                player.damageDealers.clear()
-                player.jingle("death")
-                player.timers.stopAll()
-                player.softTimers.stopAll()
-                player.clear(player.getActivePrayerVarKey())
-                if (after.dropItems) {
-                    dropItems(player, killer, tile, wilderness)
-                }
-                player.levels.clear()
-                if (after.teleport) {
-                    player.tele(respawnTile)
-                }
-                player.face(Direction.SOUTH, update = false)
-                player.dead = false
+    @Death
+    fun death(player: Player) {
+        player.dead = true
+        player.strongQueue("death") {
+            player.steps.clear()
+            val dealer = player.damageDealers.maxByOrNull { it.value }
+            val killer = dealer?.key
+            while (true) {
+                player.instructions.tryReceive().getOrNull() ?: break
             }
+            val tile = player.tile.copy()
+            val wilderness = player.inWilderness
+            retribution(player)
+            wrath(player)
+            player.message("Oh dear, you are dead!")
+            player.anim("human_death")
+            delay(5)
+            val after = AfterDeath()
+            player.emit(after)
+            player.clearAnim()
+            player.attackers.clear()
+            player.damageDealers.clear()
+            player.jingle("death")
+            player.timers.stopAll()
+            player.softTimers.stopAll()
+            player.clear(player.getActivePrayerVarKey())
+            if (after.dropItems) {
+                dropItems(player, killer, tile, wilderness)
+            }
+            player.levels.clear()
+            if (after.teleport) {
+                player.tele(respawnTile)
+            }
+            player.face(Direction.SOUTH, update = false)
+            player.dead = false
         }
     }
 

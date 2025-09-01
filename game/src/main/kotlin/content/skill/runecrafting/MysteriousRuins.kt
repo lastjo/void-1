@@ -81,7 +81,7 @@ class MysteriousRuins {
                     choice("Are you sure you wish to use this portal?") {
                         option("Yes, I'm brave.") {
                             player.start("chaos_altar_skip", 1)
-                            teleports.teleport(this, player, target, obj, option)
+                            teleports.teleport(player, target, obj, option)
                         }
                         option("Eeep! The Wilderness... No thank you.") {
                             player.message("You decide not to use this portal.")

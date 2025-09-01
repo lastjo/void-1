@@ -1,24 +1,17 @@
 package content.entity.player.effect
 
-import content.entity.player.inv.inventoryItem
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
+import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
-import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
-import world.gregs.voidps.engine.inv.inventoryChanged
-import world.gregs.voidps.engine.inv.itemAdded
-import world.gregs.voidps.engine.timer.timerStart
-import world.gregs.voidps.engine.timer.timerTick
 import world.gregs.voidps.engine.timer.toTicks
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.*
 import java.util.concurrent.TimeUnit
 
-@Script
-class AvasDevices {
+class AvasDevices(private val floorItems: FloorItems) {
 
     val attractor = setOf(
         "iron_arrow",
@@ -71,43 +64,40 @@ class AvasDevices {
         "toy_mouse",
     )
 
-    val floorItems: FloorItems by inject()
+    @Spawn
+    fun spawn(player: Player) {
+        update(player)
+    }
 
-    init {
-        playerSpawn { player ->
+    @InventorySlotChanged("worn_equipment", EquipSlot.CHEST)
+    fun chest(player: Player, item: Item, fromItem: Item) {
+        if (item.def["material", ""] == "metal" || fromItem.def["material", ""] == "metal") {
             update(player)
         }
+    }
 
-        inventoryChanged("worn_equipment", EquipSlot.Chest) { player ->
-            if (item.def["material", ""] == "metal" || fromItem.def["material", ""] == "metal") {
-                update(player)
-            }
-        }
+    @ItemAdded("avas_*", slots = [EquipSlot.CAPE], inventory = "worn_equipment")
+    fun added(player: Player) {
+        update(player)
+    }
 
-        itemAdded("avas_*", EquipSlot.Cape, "worn_equipment") { player ->
-            update(player)
-        }
+    @Inventory("Toggle", "avas_*")
+    fun toggle(player: Player) {
+        player["collect_junk"] = !player["collect_junk", false]
+        update(player)
+    }
 
-        inventoryItem("Toggle", "avas_*", "worn_equipment") {
-            player["collect_junk"] = !player["collect_junk", false]
-            update(player)
-        }
+    @TimerStart("junk_collection")
+    fun start(player: Player): Int {
+        return TimeUnit.SECONDS.toTicks(90)
+    }
 
-        inventoryItem("Toggle", "avas_*", "inventory") {
-            player["collect_junk"] = !player["collect_junk", false]
-            update(player)
-        }
-
-        timerStart("junk_collection") {
-            interval = TimeUnit.SECONDS.toTicks(90)
-        }
-
-        timerTick("junk_collection") { player ->
-            val junk = if (player.equipped(EquipSlot.Cape).id == "avas_attractor") attractor else accumulator
-            val item = junk.random()
-            if (!player.inventory.add(item)) {
-                floorItems.add(player.tile, item, revealTicks = 100, disappearTicks = 200, owner = player)
-            }
+    @TimerTick("junk_collection")
+    fun tick(player: Player) {
+        val junk = if (player.equipped(EquipSlot.Cape).id == "avas_attractor") attractor else accumulator
+        val item = junk.random()
+        if (!player.inventory.add(item)) {
+            floorItems.add(player.tile, item, revealTicks = 100, disappearTicks = 200, owner = player)
         }
     }
 

@@ -6,27 +6,27 @@ import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import content.quest.quest
 import world.gregs.voidps.engine.client.message
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.inv.equipment
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class RestlessGhost {
 
-    init {
-        npcOperate("Talk-to", "restless_ghost") {
-            when (player.quest("the_restless_ghost")) {
-                "unstarted" -> {
-                    npc<Neutral>("Wooooo! Ooooooh!")
-                    player<Uncertain>("I can't understand a word you are saying. Maybe Father Aereck will be able to help.")
-                }
-                "started", "ghost" -> ghost()
-                "mining_spot", "found_skull" -> miningSpot()
-                else -> player.message("The ghost doesn't appear to be interested in talking.")
+    @Option("Talk-to", "restless_ghost")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        when (player.quest("the_restless_ghost")) {
+            "unstarted" -> {
+                npc<Neutral>("Wooooo! Ooooooh!")
+                player<Uncertain>("I can't understand a word you are saying. Maybe Father Aereck will be able to help.")
             }
+            "started", "ghost" -> ghost()
+            "mining_spot", "found_skull" -> miningSpot()
+            else -> player.message("The ghost doesn't appear to be interested in talking.")
         }
     }
 

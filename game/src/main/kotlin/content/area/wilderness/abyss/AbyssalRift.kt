@@ -1,48 +1,46 @@
 package content.area.wilderness.abyss
 
-import content.entity.obj.objTeleportTakeOff
 import content.quest.questCompleted
+import world.gregs.voidps.cache.definition.data.ObjectDefinition
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.entity.obj.GameObject
+import world.gregs.voidps.type.sub.Option
+import world.gregs.voidps.type.sub.Teleport
 
-@Script
 class AbyssalRift {
 
-    init {
-        objTeleportTakeOff("Exit-through", "*_rift") {
-            when {
-                obj.stringId == "cosmic_rift" && !player.questCompleted("lost_city") -> {
-                    player.message("You need to have completed the Lost City Quest to use this rift.")
-                    cancel()
-                    return@objTeleportTakeOff
-                }
-                obj.stringId == "law_rift" -> {
-                    // TODO proper message
-                    player.message("You cannot carry any weapons or armour through this rift.")
-                    cancel()
-                    return@objTeleportTakeOff
-                }
-                obj.stringId == "death_rift" && !player.questCompleted("mournings_end_part_2") -> {
-                    player.message("A strange power blocks your exit.")
-                    cancel()
-                    return@objTeleportTakeOff
-                }
-                obj.stringId == "blood_rift" && !player.questCompleted("legacy_of_seergaze") -> {
-                    player.message("You need to have completed the Legacy of Seergaze quest to use this rift.")
-                    cancel()
-                    return@objTeleportTakeOff
-                }
-                obj.stringId == "soul_rift" -> {
-                    cancel()
-                    return@objTeleportTakeOff
-                }
+    @Teleport("Exit-through", "*_rift")
+    fun tele(player: Player, target: GameObject, obj: ObjectDefinition): Int {
+        when {
+            obj.stringId == "cosmic_rift" && !player.questCompleted("lost_city") -> {
+                player.message("You need to have completed the Lost City Quest to use this rift.")
+                return -1
+            }
+            obj.stringId == "law_rift" -> {
+                // TODO proper message
+                player.message("You cannot carry any weapons or armour through this rift.")
+                return -1
+            }
+            obj.stringId == "death_rift" && !player.questCompleted("mournings_end_part_2") -> {
+                player.message("A strange power blocks your exit.")
+                return -1
+            }
+            obj.stringId == "blood_rift" && !player.questCompleted("legacy_of_seergaze") -> {
+                player.message("You need to have completed the Legacy of Seergaze quest to use this rift.")
+                return -1
+            }
+            obj.stringId == "soul_rift" -> {
+                return -1
             }
         }
-
-        objectOperate("Exit-through", "soul_rift") {
-            player.message("You have not yet unlocked this rift.")
-            cancel()
-        }
+        return 0
     }
+
+    @Option("Exit-through", "soul_rift")
+    fun operate(player: Player, target: GameObject): Boolean {
+        player.message("You have not yet unlocked this rift.")
+        return true
+    }
+
 }

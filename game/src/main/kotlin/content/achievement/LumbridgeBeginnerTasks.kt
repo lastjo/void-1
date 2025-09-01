@@ -239,7 +239,7 @@ class LumbridgeBeginnerTasks(
         }
     }
 
-    @Teleport("Climb-up", "lumbridge_castle_ladder", land = true)
+    @TeleportLand("Climb-up", "lumbridge_castle_ladder")
     fun climbLadder(player: Player, target: GameObject) {
         player["master_of_all_i_survey_task"] = true
     }
@@ -251,7 +251,7 @@ class LumbridgeBeginnerTasks(
         }
     }
 
-    @InventoryChanged("worn_equipment")
+    @InventorySlotChanged("worn_equipment")
     fun equipped(player: Player, slot: Int, item: Item) {
         when (slot) {
             EquipSlot.Feet.index, EquipSlot.Shield.index, EquipSlot.Legs.index, EquipSlot.Chest.index -> {

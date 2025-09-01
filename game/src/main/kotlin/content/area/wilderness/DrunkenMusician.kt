@@ -8,18 +8,18 @@ import content.entity.player.dialogue.type.PlayerChoice
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class DrunkenMusician {
 
-    init {
-        npcOperate("Talk-to", "drunken_musician") {
-            choice()
-        }
+    @Option("Talk-to", "drunken_musician")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        choice()
     }
 
     suspend fun SuspendableContext<Player>.choice() {

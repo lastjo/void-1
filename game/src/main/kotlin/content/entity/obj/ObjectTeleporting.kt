@@ -1,27 +1,25 @@
 package content.entity.obj
 
+import world.gregs.voidps.cache.definition.data.ObjectDefinition
 import world.gregs.voidps.engine.client.variable.start
+import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
+import world.gregs.voidps.type.sub.Teleport
 
-@Script
-class ObjectTeleporting {
+class ObjectTeleporting(private val teleports: ObjectTeleports) {
 
-    val teleports: ObjectTeleports by inject()
-
-    init {
-        for (option in teleports.options()) {
-            objectOperate(option) {
-                delay()
-                teleports.teleport(this)
-            }
+    @Option
+    suspend fun teleport(player: Player, target: GameObject, def: ObjectDefinition, option: String) {
+        val teleport = teleports.get(option)
+        if (teleport.isEmpty()) {
+            return
         }
-
-        objTeleportTakeOff {
-            if (delay != null) {
-                player.start("teleport_delay", 1)
-            }
-        }
+        player.delay()
+        teleports.teleport(player, target, def, option)
     }
+
 }

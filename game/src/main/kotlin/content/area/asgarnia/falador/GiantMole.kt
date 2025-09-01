@@ -112,7 +112,7 @@ class GiantMole {
         }
     }
 
-    @InventoryChanged
+    @InventoryUpdated
     fun update(player: Player) {
         if (!giantMoleLair.contains(player.tile)) {
             return

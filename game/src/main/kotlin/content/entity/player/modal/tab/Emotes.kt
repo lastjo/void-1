@@ -7,28 +7,23 @@ import content.entity.player.dialogue.type.statement
 import content.entity.sound.jingle
 import net.pearx.kasechange.toSnakeCase
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.event.interfaceRefresh
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.data.definition.InterfaceDefinitions
-import world.gregs.voidps.engine.entity.character.mode.interact.Interaction
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.engine.inv.inventoryChanged
+import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.map.collision.blocked
 import world.gregs.voidps.engine.queue.strongQueue
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.Direction
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.InventorySlotChanged
+import world.gregs.voidps.type.sub.Open
+import world.gregs.voidps.type.sub.Refresh
 
-@Script
-class Emotes {
-
-    val definitions: InterfaceDefinitions by inject()
+class Emotes(val definitions: InterfaceDefinitions) {
 
     val unlockableEmotes = listOf(
         "glass_box", "climb_rope", "lean", "glass_wall", "idea", "stomp", "flap", "slap_head", "zombie_walk", "zombie_dance",
@@ -36,74 +31,76 @@ class Emotes {
         "around_the_world_in_eggty_days", "dramatic_point", "faint", "puppet_master", "taskmaster", "seal_of_approval",
     )
 
-    init {
-        interfaceOpen("emotes") { player ->
-            for (compId in unlockableEmotes) {
-                val component = definitions.getComponent(id, compId) ?: continue
-                player.sendVariable("unlocked_emote_${component.stringId}")
-            }
-            player.sendVariable("unlocked_emote_lost_tribe")
+    @Open("emotes")
+    fun open(player: Player, id: String) {
+        for (compId in unlockableEmotes) {
+            val component = definitions.getComponent(id, compId) ?: continue
+            player.sendVariable("unlocked_emote_${component.stringId}")
         }
+        player.sendVariable("unlocked_emote_lost_tribe")
+    }
 
-        interfaceRefresh("emotes") { player ->
-            player.interfaceOptions.unlockAll("emotes", "emotes", 0..190)
+    @Refresh("emotes")
+    fun refresh(player: Player) {
+        player.interfaceOptions.unlockAll("emotes", "emotes", 0..190)
+    }
+
+    @Interface(id = "emotes")
+    suspend fun play(player: Player, id: String, component: String, option: String) {
+        if (player.queue.contains("emote")) {
+            return
         }
-
-        interfaceOption(id = "emotes") {
-            if (player.queue.contains("emote")) {
-                return@interfaceOption
-            }
-            val id = option.toSnakeCase()
-            val componentId = definitions.getComponent(this.id, component)!!
-            if (componentId.index > 23 && !unlocked(id, option)) {
-                return@interfaceOption
-            }
-            player.strongQueue("emote") {
-                when {
-                    id == "skillcape" -> {
-                        val cape = player.equipped(EquipSlot.Cape)
-                        val skill: Skill? = cape.def.getOrNull("skillcape_skill")
-                        when {
-                            cape.id == "quest_point_cape" -> playSkillCapeEmote(player, "quest_point")
-                            cape.id == "dungeoneering_master_cape" -> playDungeoneeringMasterCapeEmote(player)
-                            skill == Skill.Dungeoneering -> playDungeoneeringCapeEmote(player)
-                            skill != null -> playSkillCapeEmote(player, skill.name.lowercase())
-                        }
+        val componentId = definitions.getComponent(id, component)!!
+        val emote = option.toSnakeCase()
+        if (componentId.index > 23 && !unlocked(player, emote, option)) {
+            return
+        }
+        player.strongQueue("emote") {
+            when {
+                emote == "skillcape" -> {
+                    val cape = player.equipped(EquipSlot.Cape)
+                    val skill: Skill? = cape.def.getOrNull("skillcape_skill")
+                    when {
+                        cape.id == "quest_point_cape" -> playSkillCapeEmote(player, "quest_point")
+                        cape.id == "dungeoneering_master_cape" -> playDungeoneeringMasterCapeEmote(player)
+                        skill == Skill.Dungeoneering -> playDungeoneeringCapeEmote(player)
+                        skill != null -> playSkillCapeEmote(player, skill.name.lowercase())
                     }
-                    id == "seal_of_approval" -> playSealOfApprovalEmote(player)
-                    id == "give_thanks" -> playGiveThanksEmote(player)
-                    id == "angry" && player.equipped(EquipSlot.Hat).id == "a_powdered_wig" -> playEnhancedEmote(player, id)
-                    id == "yawn" && player.equipped(EquipSlot.Hat).id == "sleeping_cap" -> playEnhancedYawnEmote(player)
-                    id == "bow" && player.equipped(EquipSlot.Legs).id == "pantaloons" -> playEnhancedEmote(player, id)
-                    id == "dance" && player.equipped(EquipSlot.Legs).id == "flared_trousers" -> playEnhancedEmote(player, id)
-                    id == "flap" && player.equipped(EquipSlot.Feet).id == "chicken_feet" && player.equipped(EquipSlot.Legs).id == "chicken_legs" && player.equipped(EquipSlot.Chest).id == "chicken_wings" && player.equipped(EquipSlot.Hat).id == "chicken_head" -> playEnhancedEmote(player, id)
-                    else -> {
-                        if (id == "air_guitar") {
-                            player.jingle(id)
-                        }
-                        player.gfx("emote_$id")
-                        character.anim("emote_$id")
+                }
+                emote == "seal_of_approval" -> playSealOfApprovalEmote(player)
+                emote == "give_thanks" -> playGiveThanksEmote(player)
+                emote == "angry" && player.equipped(EquipSlot.Hat).id == "a_powdered_wig" -> playEnhancedEmote(player, emote)
+                emote == "yawn" && player.equipped(EquipSlot.Hat).id == "sleeping_cap" -> playEnhancedYawnEmote(player)
+                emote == "bow" && player.equipped(EquipSlot.Legs).id == "pantaloons" -> playEnhancedEmote(player, emote)
+                emote == "dance" && player.equipped(EquipSlot.Legs).id == "flared_trousers" -> playEnhancedEmote(player, emote)
+                emote == "flap" && player.equipped(EquipSlot.Feet).id == "chicken_feet" && player.equipped(EquipSlot.Legs).id == "chicken_legs" && player.equipped(EquipSlot.Chest).id == "chicken_wings" && player.equipped(EquipSlot.Hat).id == "chicken_head" -> playEnhancedEmote(player, emote)
+                else -> {
+                    if (emote == "air_guitar") {
+                        player.jingle(emote)
                     }
+                    player.gfx("emote_$emote")
+                    character.anim("emote_$emote")
                 }
             }
         }
-
-        inventoryChanged("worn_equipment", EquipSlot.Cape) { player ->
-            player["unlocked_emote_skillcape"] = item.def.contains("skill_cape") || item.def.contains("skill_cape_t") || item.id == "quest_point_cape"
-        }
     }
 
-    suspend fun SuspendableContext<Player>.unlocked(id: String, emote: String): Boolean {
+    @InventorySlotChanged("worn_equipment", slot = EquipSlot.CAPE)
+    fun update(player: Player, item: Item) {
+        player["unlocked_emote_skillcape"] = item.def.contains("skill_cape") || item.def.contains("skill_cape_t") || item.id == "quest_point_cape"
+    }
+
+    private suspend fun unlocked(player: Player, id: String, emote: String): Boolean {
         if (emote.startsWith("Goblin")) {
             if (player["unlocked_emote_lost_tribe", false]) {
                 return true
             }
-            statement("This emote can be unlocked during the Lost Tribe quest.")
+            player.dialogue { statement("This emote can be unlocked during the Lost Tribe quest.") }
             return false
         }
         if (emote == "Taskmaster") {
             if (player["task_progress_overall", 0] < 417) {
-                statement("Complete the Task Master achievement to unlock this emote.")
+                player.dialogue { statement("Complete the Task Master achievement to unlock this emote.") }
                 return false
             }
             if (!areaClear(player)) {
@@ -111,40 +108,42 @@ class Emotes {
             }
         }
         if (!player["unlocked_emote_$id", false]) {
-            when (emote) {
-                "Glass Wall", "Glass Box", "Climb Rope", "Lean" -> statement("This emote can be unlocked during the mine random event.")
-                "Zombie Dance", "Zombie Walk" -> statement("This emote can be unlocked during the gravedigger random event.")
-                "Scared", "Trick", "Puppet master", "Zombie Hand" -> statement("This emote can be unlocked by playing a Halloween seasonal quest.")
-                "Bunny Hop", "Around the World in Eggty Days" -> statement("This emote can be unlocked by playing an Easter seasonal event.")
-                "Skillcape" -> player.message("You need to be wearing a skillcape in order to perform that emote.")
-                "Air Guitar" -> player.message("You need to have 500 music tracks unlocked to perform that emote.")
-                "Safety First" -> {
-                    statement(
-                        """
+            player.dialogue {
+                when (emote) {
+                    "Glass Wall", "Glass Box", "Climb Rope", "Lean" -> statement("This emote can be unlocked during the mine random event.")
+                    "Zombie Dance", "Zombie Walk" -> statement("This emote can be unlocked during the gravedigger random event.")
+                    "Scared", "Trick", "Puppet master", "Zombie Hand" -> statement("This emote can be unlocked by playing a Halloween seasonal quest.")
+                    "Bunny Hop", "Around the World in Eggty Days" -> statement("This emote can be unlocked by playing an Easter seasonal event.")
+                    "Skillcape" -> player.message("You need to be wearing a skillcape in order to perform that emote.")
+                    "Air Guitar" -> player.message("You need to have 500 music tracks unlocked to perform that emote.")
+                    "Safety First" -> {
+                        statement(
+                            """
                        You can't use this emote yet. Visit the Stronghold of Player Safety to
                        unlock it.
                     """,
-                    )
-                }
-                "Explore" -> {
-                    statement(
-                        """
+                        )
+                    }
+                    "Explore" -> {
+                        statement(
+                            """
                         You can't use this emote yet. You will need to complete the Beginner
                         Tasks in the Lumbridge and Draynor Achievement Diary to use it.
                     """,
-                    )
-                }
-                "Give Thanks" -> player.message("This emote can be unlocked by playing a Thanksgiving seasonal event.")
-                "Snowman Dance", "Freeze", "Dramatic Point", "Seal of Approval" -> statement("This emote can be unlocked by playing a Christmas seasonal event.")
-                "Flap", "Slap Head", "Idea", "Stomp" -> {
-                    statement(
-                        """
+                        )
+                    }
+                    "Give Thanks" -> player.message("This emote can be unlocked by playing a Thanksgiving seasonal event.")
+                    "Snowman Dance", "Freeze", "Dramatic Point", "Seal of Approval" -> statement("This emote can be unlocked by playing a Christmas seasonal event.")
+                    "Flap", "Slap Head", "Idea", "Stomp" -> {
+                        statement(
+                            """
                         You can't use that emote yet. Visit the Stronghold of Security to
                         unlock it.
                     """,
-                    )
+                        )
+                    }
+                    "Faint" -> statement("This emote can be unlocked by completing the mime court case.")
                 }
-                "Faint" -> statement("This emote can be unlocked by completing the mime court case.")
             }
             return false
         }
@@ -164,16 +163,16 @@ class Emotes {
         return true
     }
 
-    suspend fun Interaction<Player>.playEnhancedEmote(player: Player, type: String) {
+    suspend fun SuspendableContext<Player>.playEnhancedEmote(player: Player, type: String) {
         player.animDelay("emote_enhanced_$type")
     }
 
-    suspend fun Interaction<Player>.playEnhancedYawnEmote(player: Player) {
+    suspend fun SuspendableContext<Player>.playEnhancedYawnEmote(player: Player) {
         player.gfx("emote_enhanced_yawn")
         player.animDelay("emote_enhanced_yawn")
     }
 
-    suspend fun Interaction<Player>.playGiveThanksEmote(player: Player) {
+    suspend fun SuspendableContext<Player>.playGiveThanksEmote(player: Player) {
         player.gfx("emote_give_thanks")
         player.animDelay("emote_turkey_transform")
         player.transform("turkey")
@@ -183,7 +182,7 @@ class Emotes {
         player.animDelay("emote_turkey_return")
     }
 
-    suspend fun Interaction<Player>.playSealOfApprovalEmote(player: Player) {
+    suspend fun SuspendableContext<Player>.playSealOfApprovalEmote(player: Player) {
         player.gfx("emote_seal_of_approval")
         player.animDelay("emote_seal_of_approval")
         player.transform("seal")
@@ -194,12 +193,12 @@ class Emotes {
         player.animDelay("emote_seal_stand")
     }
 
-    suspend fun Interaction<Player>.playSkillCapeEmote(player: Player, skill: String) {
+    suspend fun SuspendableContext<Player>.playSkillCapeEmote(player: Player, skill: String) {
         player.gfx("emote_$skill")
         player.animDelay("emote_$skill")
     }
 
-    suspend fun Interaction<Player>.playDungeoneeringCapeEmote(player: Player) {
+    suspend fun SuspendableContext<Player>.playDungeoneeringCapeEmote(player: Player) {
         player.gfx("emote_dungeoneering_start")
         player.animDelay("emote_dungeoneering_start")
         when (random.nextInt(3)) {
@@ -219,7 +218,7 @@ class Emotes {
         player.clearTransform()
     }
 
-    suspend fun Interaction<Player>.playDungeoneeringMasterCapeEmote(player: Player) {
+    suspend fun SuspendableContext<Player>.playDungeoneeringMasterCapeEmote(player: Player) {
         val direction = player.direction
 
         player.transform("sagittarian_ranger")

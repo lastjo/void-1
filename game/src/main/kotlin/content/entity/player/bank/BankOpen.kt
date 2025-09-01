@@ -10,61 +10,70 @@ import world.gregs.voidps.engine.client.ui.event.interfaceClose
 import world.gregs.voidps.engine.client.ui.event.interfaceOpen
 import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
+import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.inv.sendInventory
+import world.gregs.voidps.type.PlayerRights
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.*
 
-@Script
 class BankOpen {
 
-    init {
-        adminCommand("bank", "open your bank anywhere") {
-            player.open("bank")
-        }
+    @Command("bank", description = "open your bank anywhere", rights = PlayerRights.ADMIN)
+    fun command(player: Player, content: String) {
+        player.open("bank")
+    }
 
-        objectOperate("Use-quickly") {
-            player.open("bank")
-        }
+    @Option("Use-quickly")
+    fun bank(player: Player, target: GameObject) {
+        player.open("bank")
+    }
 
-        objectOperate("Collect") {
-            player.open("collection_box")
-        }
+    @Option("Collect")
+    fun collect(player: Player, target: GameObject) {
+        player.open("collection_box")
+    }
 
-        interfaceClose("bank") { player ->
-            player["bank_hidden"] = true
-            player.close("bank_side")
-            player.sendScript("clear_dialogues")
-        }
+    @Close("bank")
+    fun close(player: Player) {
+        player["bank_hidden"] = true
+        player.close("bank_side")
+        player.sendScript("clear_dialogues")
+    }
 
-        interfaceOpen("bank") { player ->
+    @Open("bank")
+    fun open(player: Player) {
+        player["bank_hidden"] = false
+        player.sendInventory("bank")
+        player.open("bank_side")
+        player.sendVariable("open_bank_tab")
+        player.sendVariable("bank_item_mode")
+        player.sendVariable("bank_notes")
+        for (tab in tabs) {
+            player.sendVariable("bank_tab_$tab")
+        }
+        player.sendVariable("last_bank_amount")
+        player.sendScript("update_bank_slots")
+        player["bank_search_reset"] = true
+        player.interfaceOptions.unlockAll("bank", "inventory", 0 until 516)
+        player.interfaceOptions.unlockAll("bank_side", "inventory", 0 until 28)
+        player.tab(Tab.Inventory)
+    }
+
+    @Interface("Show Equipment Stats", "equipment", "bank")
+    fun stats(player: Player) {
+        player["equipment_bank_button"] = true
+        player["bank_hidden"] = true
+        player.open("equipment_bonuses")
+    }
+
+    @Interface("Show bank", "bank", "equipment_bonuses")
+    fun show(player: Player) {
+        if (player["equipment_bank_button", false]) {
             player["bank_hidden"] = false
-            player.sendInventory("bank")
-            player.open("bank_side")
-            player.sendVariable("open_bank_tab")
-            player.sendVariable("bank_item_mode")
-            player.sendVariable("bank_notes")
-            for (tab in tabs) {
-                player.sendVariable("bank_tab_$tab")
-            }
-            player.sendVariable("last_bank_amount")
-            player.sendScript("update_bank_slots")
-            player["bank_search_reset"] = true
-            player.interfaceOptions.unlockAll("bank", "inventory", 0 until 516)
-            player.interfaceOptions.unlockAll("bank_side", "inventory", 0 until 28)
-            player.tab(Tab.Inventory)
-        }
-
-        interfaceOption("Show Equipment Stats", "equipment", "bank") {
-            player["equipment_bank_button"] = true
-            player["bank_hidden"] = true
-            player.open("equipment_bonuses")
-        }
-
-        interfaceOption("Show bank", "bank", "equipment_bonuses") {
-            if (player["equipment_bank_button", false]) {
-                player["bank_hidden"] = false
-                player.open("bank")
-            }
+            player.open("bank")
         }
     }
+
 }

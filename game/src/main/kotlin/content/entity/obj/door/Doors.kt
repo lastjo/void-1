@@ -3,44 +3,46 @@ package content.entity.obj.door
 import content.entity.obj.door.Door.closeDoor
 import content.entity.obj.door.Door.isDoor
 import content.entity.obj.door.Door.openDoor
+import world.gregs.voidps.cache.definition.data.ObjectDefinition
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.variable.hasClock
 import world.gregs.voidps.engine.client.variable.remaining
 import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.timer.epochSeconds
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class Doors {
 
-    val doorStuckCount = 5
+    // Times a door can be closed consecutively before getting stuck
+    private val doorStuckCount = 5
 
-    init {
-        objectOperate("Close") {
-            if (!def.isDoor()) {
-                return@objectOperate
-            }
-            // Prevent players from trapping one another
-            if (stuck(player)) {
-                return@objectOperate
-            }
-            closeDoor(player, target, def)
+    @Option("Close")
+    fun close(player: Player, target: GameObject, def: ObjectDefinition) {
+        if (!def.isDoor()) {
+            return
         }
+        // Prevent players from trapping one another
+        if (stuck(player)) {
+            return
+        }
+        closeDoor(player, target, def)
+    }
 
-        objectOperate("Open") {
-            if (!def.isDoor()) {
-                return@objectOperate
-            }
-            if (openDoor(player, target, def)) {
-                delay(0)
-                player.emit(DoorOpened)
-            }
+    @Option("Open")
+    suspend fun open(player: Player, target: GameObject, def: ObjectDefinition) {
+        if (!def.isDoor()) {
+            return
+        }
+        if (openDoor(player, target, def)) {
+            player.delay(0)
+            player.emit(DoorOpened)
         }
     }
 
-    // Times a door can be closed consecutively before getting stuck
 
     fun stuck(player: Player): Boolean {
         if (player.remaining("stuck_door", epochSeconds()) > 0) {

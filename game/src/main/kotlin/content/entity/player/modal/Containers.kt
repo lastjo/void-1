@@ -4,13 +4,14 @@ import world.gregs.voidps.engine.client.sendInterfaceItemUpdate
 import world.gregs.voidps.engine.data.definition.InventoryDefinitions
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.type.sub.Subscribe
+import world.gregs.voidps.type.sub.InventoryUpdated
 
 class Containers(
     private val itemDefinitions: ItemDefinitions,
     private val inventoryDefinitions: InventoryDefinitions
 ) {
-    @Subscribe("inventory_update")
+
+    @InventoryUpdated
     fun sendUpdates(player: Player, id: String) {
         val secondary = id.startsWith("_")
         val actualId = if (secondary) id.removePrefix("_") else id

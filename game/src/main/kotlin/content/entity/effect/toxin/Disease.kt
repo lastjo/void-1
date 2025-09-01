@@ -13,7 +13,9 @@ import world.gregs.voidps.engine.timer.characterTimerStop
 import world.gregs.voidps.engine.timer.characterTimerTick
 import world.gregs.voidps.engine.timer.toTicks
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
+import world.gregs.voidps.type.PlayerRights
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.sign
 
@@ -56,58 +58,59 @@ fun Player.antiDisease(duration: Int, timeUnit: TimeUnit) {
     timers.startIfAbsent("disease")
 }
 
-@Script
 class Disease {
 
-    init {
-        characterSpawn { character ->
-            if (character.diseaseCounter != 0) {
-                val timers = if (character is Player) character.timers else character.softTimers
-                timers.restart("disease")
-            }
+    @Spawn
+    fun spawn(character: Character) {
+        if (character.diseaseCounter != 0) {
+            val timers = if (character is Player) character.timers else character.softTimers
+            timers.restart("disease")
         }
+    }
 
-        characterTimerStart("disease") { character ->
-            if (character.antiDisease || immune(character)) {
-                cancel()
-                return@characterTimerStart
-            }
-            if (!restart && character.diseaseCounter == 0) {
-                (character as? Player)?.message("You have been diseased.")
-                damage(character)
-            }
-            interval = 30
+    @TimerStart("disease")
+    fun start(character: Character, restart: Boolean): Int {
+        if (character.antiDisease || immune(character)) {
+            return -1
         }
+        if (!restart && character.diseaseCounter == 0) {
+            (character as? Player)?.message("You have been diseased.")
+            damage(character)
+        }
+        return 30
+    }
 
-        characterTimerTick("disease") { character ->
-            val diseased = character.diseased
-            character.diseaseCounter -= character.diseaseCounter.sign
-            when {
-                character.diseaseCounter == 0 -> {
-                    if (!diseased) {
-                        (character as? Player)?.message("Your disease resistance has worn off.")
-                    }
-                    cancel()
-                    return@characterTimerTick
+    @TimerTick("disease")
+    fun tick(character: Character): Int {
+        val diseased = character.diseased
+        character.diseaseCounter -= character.diseaseCounter.sign
+        when {
+            character.diseaseCounter == 0 -> {
+                if (!diseased) {
+                    (character as? Player)?.message("Your disease resistance has worn off.")
                 }
-                character.diseaseCounter == -1 -> (character as? Player)?.message("Your disease resistance is about to wear off.")
-                diseased -> damage(character)
+                return 0
             }
+            character.diseaseCounter == -1 -> (character as? Player)?.message("Your disease resistance is about to wear off.")
+            diseased -> damage(character)
         }
+        return -1
+    }
 
-        characterTimerStop("disease") { character ->
-            character.diseaseCounter = 0
-            character.clear("disease_damage")
-            character.clear("disease_source")
-        }
+    @TimerStop("disease")
+    fun stop(character: Character) {
+        character.diseaseCounter = 0
+        character.clear("disease_damage")
+        character.clear("disease_source")
+    }
 
-        adminCommand("disease [damage]", "toggle hitting player with disease") {
-            val damage = content.toIntOrNull() ?: 100
-            if (player.diseased || damage < 0) {
-                player.cureDisease()
-            } else {
-                player.disease(player, damage)
-            }
+    @Command("disease [damage]", description = "toggle hitting player with disease", rights = PlayerRights.ADMIN)
+    fun command(player: Player, content: String) {
+        val damage = content.toIntOrNull() ?: 100
+        if (player.diseased || damage < 0) {
+            player.cureDisease()
+        } else {
+            player.disease(player, damage)
         }
     }
 

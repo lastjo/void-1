@@ -18,56 +18,59 @@ import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItemLimit.addToLimit
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.Option
 import kotlin.math.min
 
-@Script
-class ShopBuy {
+class ShopBuy(
+    private val itemDefs: ItemDefinitions
+) {
 
-    val itemDefs: ItemDefinitions by inject()
     val logger = InlineLogger()
 
-    init {
-        interfaceOption("Buy *", "button", "item_info") {
-            val amount = when (option) {
-                "Buy 1" -> 1
-                "Buy 5" -> 5
-                "Buy 10" -> 10
-                "Buy 50" -> 50
-                else -> return@interfaceOption
-            }
-            val id: Int = player["info_item"] ?: return@interfaceOption
-            val item = itemDefs.get(id).stringId
-            val inventory = player.shopInventory()
-            val index = inventory.indexOf(item)
-            if (player.hasShopSample()) {
-                take(player, inventory, index, amount)
-            } else {
-                buy(player, inventory, index, amount)
-            }
+    @Interface("Buy *", "button", "item_info")
+    fun buy(player: Player, option: String) {
+        val amount = when (option) {
+            "Buy 1" -> 1
+            "Buy 5" -> 5
+            "Buy 10" -> 10
+            "Buy 50" -> 50
+            else -> return
         }
+        val id: Int = player["info_item"] ?: return
+        val item = itemDefs.get(id).stringId
+        val inventory = player.shopInventory()
+        val index = inventory.indexOf(item)
+        if (player.hasShopSample()) {
+            take(player, inventory, index, amount)
+        } else {
+            buy(player, inventory, index, amount)
+        }
+    }
 
-        interfaceOption("Take-*", "sample", "shop") {
-            val amount = when (option) {
-                "Take-1" -> 1
-                "Take-5" -> 5
-                "Take-10" -> 10
-                "Take-50" -> 50
-                else -> return@interfaceOption
-            }
-            take(player, player.shopInventory(true), itemSlot / 4, amount)
+    @Interface("Take-*", "sample", "shop")
+    fun take(player: Player, option: String, itemSlot: Int) {
+        val amount = when (option) {
+            "Take-1" -> 1
+            "Take-5" -> 5
+            "Take-10" -> 10
+            "Take-50" -> 50
+            else -> return
         }
+        take(player, player.shopInventory(true), itemSlot / 4, amount)
+    }
 
-        interfaceOption("Buy-*", "stock", "shop") {
-            val amount = when (option) {
-                "Buy-1" -> 1
-                "Buy-5" -> 5
-                "Buy-10" -> 10
-                "Buy-50" -> 50
-                "Buy-500" -> 500
-                else -> return@interfaceOption
-            }
-            buy(player, player.shopInventory(false), itemSlot / 6, amount)
+    @Interface("Buy-*", "stock", "shop")
+    fun click(player: Player, option: String, itemSlot: Int) {
+        val amount = when (option) {
+            "Buy-1" -> 1
+            "Buy-5" -> 5
+            "Buy-10" -> 10
+            "Buy-50" -> 50
+            "Buy-500" -> 500
+            else -> return
         }
+        buy(player, player.shopInventory(false), itemSlot / 6, amount)
     }
 
     fun take(player: Player, shop: Inventory, index: Int, amount: Int) {

@@ -15,38 +15,42 @@ import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.npcLevelChange
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.LevelChange
+import world.gregs.voidps.type.sub.Option
+import world.gregs.voidps.type.sub.UseOn
 
-@Script
 class Gargoyle {
 
-    init {
-        npcLevelChange("gargoyle", Skill.Constitution) { npc ->
-            if (to <= 90) {
-                for (attacker in npc.attackers) {
-                    attacker.mode = EmptyMode
-                    if (attacker is Player && attacker["killing_blow", false]) {
-                        smash(attacker, npc)
-                        break
-                    }
-                }
+    @LevelChange(Skill.CONSTITUTION, id = "gargoyle")
+    fun change(npc: NPC, to: Int) {
+        if (to > 90) {
+            return
+        }
+        for (attacker in npc.attackers) {
+            attacker.mode = EmptyMode
+            if (attacker is Player && attacker["killing_blow", false]) {
+                smash(attacker, npc)
+                break
             }
         }
+    }
 
-        npcOperate("Smash", "gargoyle") {
-            if (target.inCombat && target.attacker != player) {
-                player.message("Someone else is fighting that.")
-                return@npcOperate
-            }
-            smash(player, target)
+    @Option("Smash", "gargoyle")
+    fun operate(player: Player, target: NPC) {
+        if (target.inCombat && target.attacker != player) {
+            player.message("Someone else is fighting that.")
+            return
         }
+        smash(player, target)
+    }
 
-        itemOnNPCOperate("rock_hammer", "gargoyle") {
-            if (target.inCombat && target.attacker != player) {
-                player.message("Someone else is fighting that.")
-                return@itemOnNPCOperate
-            }
-            smash(player, target)
+    @UseOn("rock_hammer", "gargoyle")
+    fun use(player: Player, target: NPC) {
+        if (target.inCombat && target.attacker != player) {
+            player.message("Someone else is fighting that.")
+            return
         }
+        smash(player, target)
     }
 
     fun smash(player: Player, target: NPC) {

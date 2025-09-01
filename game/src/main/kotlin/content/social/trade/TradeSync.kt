@@ -9,6 +9,7 @@ import world.gregs.voidps.engine.entity.character.player.req.removeRequest
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.*
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.InventoryUpdated
 
 @Script
 class TradeSync {
@@ -34,11 +35,12 @@ class TradeSync {
             val warn = player.hasRequest(other, "accept_trade") && removedAnyItems(this)
             modified(player, other, warn)
         }
+    }
 
-        inventoryUpdate("inventory") { player ->
-            val other: Player = Trade.getPartner(player) ?: return@inventoryUpdate
-            updateInventorySpaces(other, player)
-        }
+    @InventoryUpdated
+    fun update(player: Player) {
+        val other: Player = Trade.getPartner(player) ?: return
+        updateInventorySpaces(other, player)
     }
 
     /**

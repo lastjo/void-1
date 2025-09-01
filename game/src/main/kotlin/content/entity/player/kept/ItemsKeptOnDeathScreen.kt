@@ -12,41 +12,22 @@ import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.timer.timerStart
 import world.gregs.voidps.engine.timer.timerStop
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Refresh
+import world.gregs.voidps.type.sub.TimerStart
 
-@Script
-class ItemsKeptOnDeathScreen {
+class ItemsKeptOnDeathScreen(private val enums: EnumDefinitions) {
 
-    val enums: EnumDefinitions by inject()
-
-    init {
-        timerStart("skull") { player ->
-            if (player.interfaces.contains("items_kept_on_death")) {
-                player.open("items_kept_on_death", close = true)
-            }
-        }
-
-        timerStop("skull") { player ->
-            if (player.interfaces.contains("items_kept_on_death")) {
-                player.open("items_kept_on_death", close = true)
-            }
-        }
-
-        interfaceRefresh("items_kept_on_death") { player ->
-            val items = ItemsKeptOnDeath.getAllOrdered(player)
-            val savedItems = ItemsKeptOnDeath.kept(player, items, enums)
-            val carriedWealth = items.sumOf { it.def.cost * it.amount }
-            val savedWealth = savedItems.sumOf { it.def.cost * it.amount }
-            player.updateItemsOnDeath(
-                savedItems,
-                carriedWealth = carriedWealth,
-                riskedWealth = carriedWealth - savedWealth,
-                skull = player.skulled,
-            )
-        }
-    }
-
-    fun Player.updateItemsOnDeath(items: List<Item>, carriedWealth: Int, riskedWealth: Int, familiar: Boolean = false, gravestone: Boolean = false, skull: Boolean = false) {
-        sendScript(
+    @Refresh("items_kept_on_death")
+    fun refresh(player: Player) {
+        val items = ItemsKeptOnDeath.getAllOrdered(player)
+        val savedItems = ItemsKeptOnDeath.kept(player, items, enums)
+        val carriedWealth = items.sumOf { it.def.cost * it.amount }
+        val savedWealth = savedItems.sumOf { it.def.cost * it.amount }
+        val riskedWealth = carriedWealth - savedWealth
+        val skull = player.skulled
+        val familiar = false
+        val gravestone = false // FIXME
+        player.sendScript(
             "items_kept_on_death",
             AreaType.Dangerous.ordinal,
             items.size.coerceAtMost(4),

@@ -5,43 +5,41 @@ import content.entity.player.dialogue.*
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.suspend.SuspendableContext
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class Tarquin {
 
-    init {
-        npcOperate("Talk-To", "tarquin") {
-            player<Neutral>("Hello there.")
-            npc<RollEyes>("Hello old bean. Is there something I can help you with?")
-            choice {
-                option<Neutral>("Who are you?") {
-                    npc<RollEyes>("My name is Tarquin Marjoribanks.")
-                    npc<Neutral>("I'd be surprised if you haven't already heard of me?")
-                    player<Quiz>("Why would I have heard of you Mr. Marjoribanks?")
-                    npc<Frustrated>("It's pronounced 'Marchbanks'!")
-                    npc<Neutral>("You should know of me because I am a member of the royal family of Misthalin!")
-                    player<Quiz>("Are you related to King Roald?")
-                    npc<Happy>("Oh yes! Quite closely actually")
-                    npc<Neutral>("I'm his 4th cousin, once removed on his mothers side.")
-                    player<Uncertain>("Er... Okay. What are you doing here then?")
-                    npc<Neutral>("I'm canoeing on the river! It's enormous fun! Would you like to know how?")
-                    choice {
-                        option("Yes") {
-                            canoeing()
-                        }
-                        option("No") {
-                            player<Neutral>("No thanks, not right now.")
-                        }
+    @Option("Talk-to", "tarquin")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        player<Neutral>("Hello there.")
+        npc<RollEyes>("Hello old bean. Is there something I can help you with?")
+        choice {
+            option<Neutral>("Who are you?") {
+                npc<RollEyes>("My name is Tarquin Marjoribanks.")
+                npc<Neutral>("I'd be surprised if you haven't already heard of me?")
+                player<Quiz>("Why would I have heard of you Mr. Marjoribanks?")
+                npc<Frustrated>("It's pronounced 'Marchbanks'!")
+                npc<Neutral>("You should know of me because I am a member of the royal family of Misthalin!")
+                player<Quiz>("Are you related to King Roald?")
+                npc<Happy>("Oh yes! Quite closely actually")
+                npc<Neutral>("I'm his 4th cousin, once removed on his mothers side.")
+                player<Uncertain>("Er... Okay. What are you doing here then?")
+                npc<Neutral>("I'm canoeing on the river! It's enormous fun! Would you like to know how?")
+                choice {
+                    option("Yes") {
+                        canoeing()
+                    }
+                    option("No") {
+                        player<Neutral>("No thanks, not right now.")
                     }
                 }
-                option("Can you teach me about Canoeing?") {
-                    canoeing()
-                }
+            }
+            option("Can you teach me about Canoeing?") {
+                canoeing()
             }
         }
     }

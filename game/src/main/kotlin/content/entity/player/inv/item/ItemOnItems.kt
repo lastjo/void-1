@@ -20,6 +20,7 @@ import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
+import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.Inventory
 import world.gregs.voidps.engine.inv.charges
@@ -31,48 +32,49 @@ import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.inv.transact.operation.SetCharge.setCharge
 import world.gregs.voidps.engine.queue.weakQueue
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Close
+import world.gregs.voidps.type.sub.Open
+import world.gregs.voidps.type.sub.UseOn
 
-@Script
-class ItemOnItems {
+class ItemOnItems(private val itemOnItemDefs: ItemOnItemDefinitions) {
 
-    val itemOnItemDefs: ItemOnItemDefinitions by inject()
-
-    init {
-        itemOnItem(bidirectional = false) { player ->
-            val overlaps = itemOnItemDefs.getOrNull(fromItem, toItem)
-            if (overlaps.isNullOrEmpty()) {
-                player.noInterest()
-                return@itemOnItem
+    @UseOn
+    fun use(player: Player, fromItem: Item, toItem: Item) {
+        val overlaps = itemOnItemDefs.getOrNull(fromItem, toItem)
+        if (overlaps.isNullOrEmpty()) {
+            player.noInterest()
+            return
+        }
+        player.closeInterfaces()
+        player.weakQueue("item_on_item") {
+            player.softTimers.start("item_on_item")
+            val maximum = getMaximum(overlaps, player)
+            val (def, amount) = if (makeImmediately(player, overlaps, maximum, player.inventory)) {
+                player.closeDialogue()
+                overlaps.first() to 1
+            } else {
+                val definition = overlaps.first()
+                val type = definition.type
+                val (selection, amount) = makeAmount(
+                    overlaps.map { it.add.first().id }.distinct().toList(),
+                    type = type.toSentenceCase(),
+                    maximum = maximum,
+                    text = definition.question,
+                )
+                overlaps.first { it.add.first().id == selection } to amount
             }
-            player.closeInterfaces()
-            player.weakQueue("item_on_item") {
-                player.softTimers.start("item_on_item")
-                val maximum = getMaximum(overlaps, player)
-                val (def, amount) = if (makeImmediately(player, overlaps, maximum, player.inventory)) {
-                    player.closeDialogue()
-                    overlaps.first() to 1
-                } else {
-                    val definition = overlaps.first()
-                    val type = definition.type
-                    val (selection, amount) = makeAmount(
-                        overlaps.map { it.add.first().id }.distinct().toList(),
-                        type = type.toSentenceCase(),
-                        maximum = maximum,
-                        text = definition.question,
-                    )
-                    overlaps.first { it.add.first().id == selection } to amount
-                }
-                useItemOnItem(player, def.skill, def, amount, 0)
-            }
+            useItemOnItem(player, def.skill, def, amount, 0)
         }
+    }
 
-        interfaceClose("dialogue_skill_creation") { player ->
-            player.clear("selecting_amount")
-        }
+    @Open("dialogue_skill_creation")
+    fun open(player: Player) {
+        player["selecting_amount"] = true
+    }
 
-        interfaceOpen("dialogue_skill_creation") { player ->
-            player["selecting_amount"] = true
-        }
+    @Close("dialogue_skill_creation")
+    fun close(player: Player) {
+        player.clear("selecting_amount")
     }
 
     fun useItemOnItem(

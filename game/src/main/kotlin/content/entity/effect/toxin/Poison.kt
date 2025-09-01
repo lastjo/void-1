@@ -15,8 +15,10 @@ import world.gregs.voidps.engine.timer.characterTimerStop
 import world.gregs.voidps.engine.timer.characterTimerTick
 import world.gregs.voidps.engine.timer.toTicks
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
+import world.gregs.voidps.type.PlayerRights
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.sign
 
@@ -59,70 +61,72 @@ fun Player.antiPoison(duration: Int, timeUnit: TimeUnit) {
     timers.startIfAbsent("poison")
 }
 
-@Script
 class Poison {
 
-    init {
-        characterSpawn { character ->
-            if (character.poisonCounter != 0) {
-                val timers = if (character is Player) character.timers else character.softTimers
-                timers.restart("poison")
-            }
+    @Spawn
+    fun spawn(character: Character) {
+        if (character.poisonCounter != 0) {
+            val timers = if (character is Player) character.timers else character.softTimers
+            timers.restart("poison")
         }
+    }
 
-        characterTimerStart("poison") { character ->
-            if (character.antiPoison || immune(character)) {
-                cancel()
-                return@characterTimerStart
-            }
-            if (!restart && character.poisonCounter == 0) {
-                (character as? Player)?.message("<green>You have been poisoned.")
-                damage(character)
-            }
-            interval = 30
+    @TimerStart("poison")
+    fun start(character: Character, restart: Boolean): Int {
+        if (character.antiPoison || immune(character)) {
+            return -1
         }
+        if (!restart && character.poisonCounter == 0) {
+            (character as? Player)?.message("<green>You have been poisoned.")
+            damage(character)
+        }
+        return 30
+    }
 
-        characterTimerTick("poison") { character ->
-            val poisoned = character.poisoned
-            character.poisonCounter -= character.poisonCounter.sign
-            when {
-                character.poisonCounter == 0 -> {
-                    if (!poisoned) {
-                        (character as? Player)?.message("<purple>Your poison resistance has worn off.")
-                    }
-                    cancel()
-                    return@characterTimerTick
+    @TimerTick("poison")
+    fun tick(character: Character): Int {
+        val poisoned = character.poisoned
+        character.poisonCounter -= character.poisonCounter.sign
+        when {
+            character.poisonCounter == 0 -> {
+                if (!poisoned) {
+                    (character as? Player)?.message("<purple>Your poison resistance has worn off.")
                 }
-                character.poisonCounter == -1 -> (character as? Player)?.message("<purple>Your poison resistance is about to wear off.")
-                poisoned -> damage(character)
+                return 0
             }
+            character.poisonCounter == -1 -> (character as? Player)?.message("<purple>Your poison resistance is about to wear off.")
+            poisoned -> damage(character)
         }
+        return -1
+    }
 
-        characterTimerStop("poison") { character ->
-            character.poisonCounter = 0
-            character.clear("poison_damage")
-            character.clear("poison_source")
+    @TimerStop("poison")
+    fun stop(character: Character) {
+        character.poisonCounter = 0
+        character.clear("poison_damage")
+        character.clear("poison_source")
+    }
+
+    @Combat
+    fun combat(source: Character, target: Character, weapon: Item, type: String, damage: Int) {
+        if (damage <= 0 || !poisonous(source, weapon)) {
+            return
         }
-
-        characterCombatAttack { source ->
-            if (damage <= 0 || !poisonous(source, weapon)) {
-                return@characterCombatAttack
-            }
-            val poison = 20 + weapon.id.count { it == '+' } * 10
-            if (type == "range" && random.nextDouble() < 0.125) {
-                source.poison(target, if (weapon.id == "emerald_bolts_e") 50 else poison)
-            } else if (type == "melee" && random.nextDouble() < 0.25) {
-                source.poison(target, poison + 20)
-            }
+        val poison = 20 + weapon.id.count { it == '+' } * 10
+        if (type == "range" && random.nextDouble() < 0.125) {
+            source.poison(target, if (weapon.id == "emerald_bolts_e") 50 else poison)
+        } else if (type == "melee" && random.nextDouble() < 0.25) {
+            source.poison(target, poison + 20)
         }
+    }
 
-        adminCommand("poison [damage]", "toggle hitting player with poison") {
-            val damage = content.toIntOrNull() ?: 100
-            if (player.poisoned || damage < 0) {
-                player.curePoison()
-            } else {
-                player.poison(player, damage)
-            }
+    @Command("poison [damage]", description = "toggle hitting player with poison", rights = PlayerRights.ADMIN)
+    fun command(player: Player, content: String) {
+        val damage = content.toIntOrNull() ?: 100
+        if (player.poisoned || damage < 0) {
+            player.curePoison()
+        } else {
+            player.poison(player, damage)
         }
     }
 

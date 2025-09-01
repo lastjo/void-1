@@ -37,8 +37,8 @@ import world.gregs.voidps.engine.queue.strongQueue
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
+import world.gregs.voidps.type.sub.Death
 
-@Script
 class NPCDeath {
 
     val npcs: NPCs by inject()
@@ -53,43 +53,42 @@ class NPCDeath {
 
     val logger = InlineLogger()
 
-    init {
-        npcDeath { npc ->
-            npc.mode = PauseMode
-            npc.dead = true
-            npc.steps.clear()
-            npc.strongQueue(name = "death", 1) {
-                val killer = npc.killer
-                val tile = npc.tile
-                npc["death_tile"] = tile
-                npc.anim(NPCAttack.anim(animationDefinitions, npc, "death"))
-                (killer as? Player)?.sound(NPCAttack.sound(soundDefinitions, npc, "death"))
-                delay(4)
-                if (killer is Player) {
-                    slay(killer, npc)
-                    dropLoot(npc, killer, tile)
+    @Death
+    fun death(npc: NPC) {
+        npc.mode = PauseMode
+        npc.dead = true
+        npc.steps.clear()
+        npc.strongQueue(name = "death", 1) {
+            val killer = npc.killer
+            val tile = npc.tile
+            npc["death_tile"] = tile
+            npc.anim(NPCAttack.anim(animationDefinitions, npc, "death"))
+            (killer as? Player)?.sound(NPCAttack.sound(soundDefinitions, npc, "death"))
+            delay(4)
+            if (killer is Player) {
+                slay(killer, npc)
+                dropLoot(npc, killer, tile)
+            }
+            npc.attackers.clear()
+            npc.softTimers.stopAll()
+            npc.hide = true
+            val respawn = npc.get<Tile>("respawn_tile")
+            if (respawn != null) {
+                npc.tele(respawn)
+                delay(npc["respawn_delay", 60])
+                npc.clearTransform()
+                npc.damageDealers.clear()
+                npc.levels.clear()
+                npc.face(npc["respawn_direction", Direction.NORTH], update = false)
+                npc.hide = false
+                npc.dead = false
+                npc.mode = EmptyMode
+                npc.emit(Spawn)
+            } else {
+                World.queue("remove_npc") {
+                    npcs.remove(npc)
                 }
-                npc.attackers.clear()
-                npc.softTimers.stopAll()
-                npc.hide = true
-                val respawn = npc.get<Tile>("respawn_tile")
-                if (respawn != null) {
-                    npc.tele(respawn)
-                    delay(npc["respawn_delay", 60])
-                    npc.clearTransform()
-                    npc.damageDealers.clear()
-                    npc.levels.clear()
-                    npc.face(npc["respawn_direction", Direction.NORTH], update = false)
-                    npc.hide = false
-                    npc.dead = false
-                    npc.mode = EmptyMode
-                    npc.emit(Spawn)
-                } else {
-                    World.queue("remove_npc") {
-                        npcs.remove(npc)
-                    }
-                    npc.emit(Despawn)
-                }
+                npc.emit(Despawn)
             }
         }
     }

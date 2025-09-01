@@ -5,10 +5,7 @@ import world.gregs.voidps.engine.client.ui.closeInterfaces
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.CancellableEvent
-import world.gregs.voidps.engine.event.Context
-import world.gregs.voidps.engine.event.EventDispatcher
-import world.gregs.voidps.engine.event.Events
+import world.gregs.voidps.engine.event.*
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.map.collision.random
 import world.gregs.voidps.engine.queue.strongQueue
@@ -44,9 +41,8 @@ data class Teleport(
             }
             player.closeInterfaces()
             player.strongQueue("teleport", onCancel = null) {
-                val teleport = Teleport(player, tile, type)
-                player.emit(teleport)
-                if (teleport.cancelled) {
+                val teleport = Publishers.all.teleport(player, type)
+                if (teleport == -1) {
                     return@strongQueue
                 }
                 player.steps.clear()
@@ -62,12 +58,11 @@ data class Teleport(
                 }
                 player.gfx("teleport_land_$type")
                 player.animDelay("teleport_land_$type")
-                if (type == "ancient" || type == "ectophial") {
-                    delay(1)
+                if (teleport > 0) {
+                    delay(teleport)
                     player.clearAnim()
                 }
-                teleport.land = true
-                player.emit(teleport)
+                Publishers.all.teleportLand(player, type)
             }
         }
     }

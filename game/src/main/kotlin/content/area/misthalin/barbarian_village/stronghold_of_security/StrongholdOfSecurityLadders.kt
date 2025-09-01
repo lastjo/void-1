@@ -49,7 +49,7 @@ class StrongholdOfSecurityLadders {
                     player.message("You climb down the ladder to the next level.")
                     player.clear("stronghold_safe_space")
                     val definition = teleports.get(option)[target.tile.id]!!
-                    teleports.teleportContinue(this, player, definition, this@objTeleportTakeOff)
+                    teleports.teleportContinue(player, target, target.def, option, definition, 0)
                 }
             }
             cancel()

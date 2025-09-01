@@ -11,35 +11,32 @@ import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
 import world.gregs.voidps.engine.entity.character.mode.PauseMode
 import world.gregs.voidps.engine.entity.character.mode.move.npcMove
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCs
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.map.collision.Collisions
 import world.gregs.voidps.network.client.instruction.Walk
 import world.gregs.voidps.type.Distance.nearestTo
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.Zone
 import world.gregs.voidps.type.area.Rectangle
+import world.gregs.voidps.type.sub.Death
+import world.gregs.voidps.type.sub.Despawn
+import world.gregs.voidps.type.sub.Move
+import world.gregs.voidps.type.sub.Spawn
 
-@Script
-class Movement {
-
-    val collisions: Collisions by inject()
-    val npcs: NPCs by inject()
-    val players: Players by inject()
+class Movement(
+    private val collisions: Collisions,
+    private val npcs: NPCs,
+    private val players: Players,
+    private val areas: AreaDefinitions,
+) {
     val borders = mutableMapOf<Zone, Rectangle>()
-    val areas: AreaDefinitions by inject()
 
     init {
-        worldSpawn {
-            for (border in areas.getTagged("border")) {
-                val passage = border.area as Rectangle
-                for (zone in passage.toZones()) {
-                    borders[zone] = passage
-                }
-            }
-        }
-
         instruction<Walk> { player ->
             if (player.contains("delay")) {
                 return@instruction
@@ -65,37 +62,53 @@ class Movement {
                 player.walkTo(target)
             }
         }
+    }
 
-        playerSpawn { player ->
-            if (players.add(player) && Settings["world.players.collision", false]) {
-                add(player)
+    @Spawn
+    fun spawn(world: World) {
+        for (border in areas.getTagged("border")) {
+            val passage = border.area as Rectangle
+            for (zone in passage.toZones()) {
+                borders[zone] = passage
             }
         }
+    }
 
-        playerDespawn { player ->
-            if (Settings["world.players.collision", false]) {
-                remove(player)
-            }
+    @Spawn
+    fun spawn(player: Player) {
+        if (players.add(player) && Settings["world.players.collision", false]) {
+            add(player)
         }
+    }
 
-        npcSpawn { npc ->
-            if (Settings["world.npcs.collision", false]) {
-                add(npc)
-            }
+    @Despawn
+    fun despawn(player: Player) {
+        if (Settings["world.players.collision", false]) {
+            remove(player)
         }
+    }
 
-        npcMove {
-            npcs.update(from, to, npc)
+    @Spawn
+    fun spawn(npc: NPC) {
+        if (Settings["world.npcs.collision", false]) {
+            add(npc)
         }
+    }
 
-        npcDeath { npc ->
+    @Move
+    fun move(npc: NPC, from: Tile, to: Tile) {
+        npcs.update(from, to, npc)
+    }
+
+    @Death
+    fun death(npc: NPC) {
+        remove(npc)
+    }
+
+    @Despawn
+    fun despawn(npc: NPC) {
+        if (Settings["world.npcs.collision", false]) {
             remove(npc)
-        }
-
-        npcDespawn { npc ->
-            if (Settings["world.npcs.collision", false]) {
-                remove(npc)
-            }
         }
     }
 

@@ -8,50 +8,53 @@ import content.social.trade.lend.Loan.getSecondsRemaining
 import world.gregs.voidps.engine.client.ui.dialogue.talkWith
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.Settings
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.npc.npcApproach
 import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.event.Context
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
-class Banker {
+class Banker(private val npcs: NPCs) {
 
-    val npcs: NPCs by inject()
+    @Option("Talk-to", "banker*", approach = true)
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        player.approachRange(2)
+        npc<Quiz>("Good day. How may I help you?")
+        val loanReturned = getSecondsRemaining(player, "lend_timeout") < 0
+        val collection = false
 
-    init {
-        npcApproach("Talk-to", "banker*") {
-            approachRange(2)
-            npc<Quiz>("Good day. How may I help you?")
-            val loanReturned = getSecondsRemaining(player, "lend_timeout") < 0
-            val collection = false
+        if (loanReturned) {
+            npc<Talk>("Before we go any further, I should inform you that an item you lent out has been returned to you.")
+        } else if (collection) {
+            npc<Talk>("Before we go any further, I should inform you that you have items ready for collection from the Grand Exchange.")
+        }
+        menu()
+    }
 
-            if (loanReturned) {
-                npc<Talk>("Before we go any further, I should inform you that an item you lent out has been returned to you.")
-            } else if (collection) {
-                npc<Talk>("Before we go any further, I should inform you that you have items ready for collection from the Grand Exchange.")
-            }
+    @Option("Use", "bank_*") // TODO arrive = false
+    suspend fun operate(player: Player, target: GameObject) {
+        val banker = npcs.first { it.def.name == "Banker" }
+        player.talkWith(banker) {
             menu()
         }
+    }
 
-        objectOperate("Use", "bank_*", arrive = false) {
-            val banker = npcs.first { it.def.name == "Banker" }
-            player.talkWith(banker)
-            menu()
-        }
+    @Option("Bank", "banker*", approach = true)
+    suspend fun bank(player: Player, target: NPC) {
+        player.approachRange(2)
+        player.open("bank")
+    }
 
-        npcApproach("Bank", "banker*") {
-            approachRange(2)
-            player.open("bank")
-        }
-
-        npcApproach("Collect", "banker*") {
-            approachRange(2)
-            player.open("collection_box")
-        }
+    @Option("Collect", "banker*", approach = true)
+    suspend fun collect(player: Player, target: NPC) {
+        player.approachRange(2)
+        player.open("collection_box")
     }
 
     suspend fun SuspendableContext<Player>.menu() {

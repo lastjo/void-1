@@ -1,41 +1,45 @@
 package content.entity.npc.combat.melee
 
-import content.entity.combat.hit.npcCombatDamage
 import content.entity.gfx.areaGfx
 import content.entity.sound.areaSound
 import world.gregs.voidps.engine.entity.character.mode.PauseMode
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.npc.NPC
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.entity.npcSpawn
 import world.gregs.voidps.engine.map.collision.random
 import world.gregs.voidps.engine.queue.softQueue
-import world.gregs.voidps.engine.timer.npcTimerStart
-import world.gregs.voidps.engine.timer.npcTimerTick
+import world.gregs.voidps.type.CombatStage
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.Combat
+import world.gregs.voidps.type.sub.Spawn
+import world.gregs.voidps.type.sub.TimerStart
+import world.gregs.voidps.type.sub.TimerTick
 
 @Script
 class Imp {
 
-    init {
-        npcSpawn("imp") { npc ->
-            npc.softTimers.start("teleport_timer")
-        }
+    @Spawn("imp")
+    fun spawn(npc: NPC) {
+        npc.softTimers.start("teleport_timer")
+    }
 
-        npcTimerStart("teleport_timer") {
-            interval = random.nextInt(50, 200)
-        }
+    @TimerStart("teleport_timer")
+    fun start(npc: NPC): Int {
+        return random.nextInt(50, 200)
+    }
 
-        npcTimerTick("teleport_timer") { npc ->
-            teleportImp(npc, teleportChance)
-        }
+    @TimerTick("teleport_timer")
+    fun tick(npc: NPC) {
+        teleportImp(npc, teleportChance)
+    }
 
-        npcCombatDamage("imp") { npc ->
-            if (npc.levels.get(Skill.Constitution) - damage > 0) {
-                teleportImp(npc, teleportChanceHit)
-            }
+    @Combat(id = "imp", stage = CombatStage.DAMAGE)
+    fun combat(npc: NPC, target: Player, damage: Int) {
+        if (npc.levels.get(Skill.Constitution) - damage > 0) {
+            teleportImp(npc, teleportChanceHit)
         }
     }
 

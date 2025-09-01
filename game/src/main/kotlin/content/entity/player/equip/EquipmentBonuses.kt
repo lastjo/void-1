@@ -6,95 +6,92 @@ import content.entity.player.modal.Tab
 import content.entity.player.modal.tab
 import world.gregs.voidps.cache.definition.data.ItemDefinition
 import world.gregs.voidps.engine.client.sendScript
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.event.interfaceRefresh
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.menu
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.appearance
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.event.Publishers
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.equipment
-import world.gregs.voidps.engine.inv.inventoryChanged
 import world.gregs.voidps.network.login.protocol.visual.VisualMask.APPEARANCE_MASK
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.*
 import java.math.RoundingMode
 import java.text.DecimalFormat
 
-@Script
-class EquipmentBonuses {
-
-    val definitions: ItemDefinitions by inject()
+class EquipmentBonuses(private val definitions: ItemDefinitions) {
 
     val df = DecimalFormat("0.0").apply {
         roundingMode = RoundingMode.FLOOR
     }
 
-    init {
-        playerSpawn { player ->
-            updateStats(player)
-            player["bank_hidden"] = true
-        }
+    @Spawn
+    fun spawn(player: Player) {
+        updateStats(player)
+        player["bank_hidden"] = true
+    }
 
-        inventoryChanged("worn_equipment") { player ->
-            updateStats(player, fromItem, false)
-            updateStats(player, item, true)
-        }
+    @InventorySlotChanged("worn_equipment")
+    fun update(player: Player, item: Item, fromItem: Item) {
+        updateStats(player, fromItem, false)
+        updateStats(player, item, true)
+    }
 
-        interfaceOpen("equipment_bonuses") { player ->
-            player.interfaces.sendVisibility("equipment_bonuses", "close", !player["equipment_bank_button", false])
-            updateEmote(player)
-            player.open("equipment_side")
-            player.interfaceOptions.unlockAll("equipment_bonuses", "inventory", 0 until 16)
-            updateStats(player)
-            player["bank_hidden"] = true
-            player.sendScript("bank_show_equip_screen")
-            player.tab(Tab.Inventory)
-        }
+    @Open("equipment_bonuses")
+    fun open(player: Player) {
+        player.interfaces.sendVisibility("equipment_bonuses", "close", !player["equipment_bank_button", false])
+        updateEmote(player)
+        player.open("equipment_side")
+        player.interfaceOptions.unlockAll("equipment_bonuses", "inventory", 0 until 16)
+        updateStats(player)
+        player["bank_hidden"] = true
+        player.sendScript("bank_show_equip_screen")
+        player.tab(Tab.Inventory)
+    }
 
-        interfaceClose("equipment_bonuses") { player ->
-            player.open("inventory")
-        }
+    @Close("equipment_bonuses")
+    fun close(player: Player) {
+        player.open("inventory")
+    }
 
-        interfaceRefresh("equipment_side") { player ->
-            player.interfaceOptions.send("equipment_side", "inventory")
-            player.interfaceOptions.unlockAll("equipment_side", "inventory", 0 until 28)
-        }
+    @Refresh("equipment_side")
+    fun refresh(player: Player) {
+        player.interfaceOptions.send("equipment_side", "inventory")
+        player.interfaceOptions.unlockAll("equipment_side", "inventory", 0 until 28)
+    }
 
-        interfaceOption("Stats", "inventory", "equipment_bonuses") {
-            if (player.equipping()) {
-                showStats(player, definitions.get(item.id))
-            }
+    @Interface("Stats", "inventory", "equipment_bonuses")
+    fun stats(player: Player, item: Item) {
+        if (player.equipping()) {
+            showStats(player, definitions.get(item.id))
         }
+    }
 
-        interfaceOption("Done", "stats_done", "equipment_bonuses") {
-            if (player.equipping()) {
-                player.clear("equipment_titles")
-                player.clear("equipment_names")
-                player.clear("equipment_stats")
-                player.clear("equipment_name")
-            }
+    @Interface("Done", "stats_done", "equipment_bonuses")
+    fun done(player: Player) {
+        if (player.equipping()) {
+            player.clear("equipment_titles")
+            player.clear("equipment_names")
+            player.clear("equipment_stats")
+            player.clear("equipment_name")
         }
+    }
 
-        interfaceOption("Equip", "inventory", "equipment_side") {
-            if (player.equipping()) {
-                Publishers.all.inventoryOption(player, item, "inventory", "Wield", itemSlot)
-                player.emit(InventoryOption(player, "inventory", item, itemSlot, "Wield"))
-                checkEmoteUpdate(player)
-            }
+    @Interface("Equip", "inventory", "equipment_side")
+    suspend fun equip(player: Player, item: Item, itemSlot: Int) {
+        if (player.equipping()) {
+            Publishers.all.inventoryOption(player, item, "inventory", "Wield", itemSlot)
+            player.emit(InventoryOption(player, "inventory", item, itemSlot, "Wield"))
+            checkEmoteUpdate(player)
         }
+    }
 
-        interfaceOption("Remove", "inventory", "equipment_bonuses") {
-            if (player.equipping()) {
-                Publishers.all.inventoryOption(player, item, "worn_equipment", "Remove", itemSlot)
-                player.emit(InventoryOption(player, "worn_equipment", item, itemSlot, "Remove"))
-                checkEmoteUpdate(player)
-            }
+    @Interface("Remove", "inventory", "equipment_bonuses")
+    suspend fun remove(player: Player, item: Item, itemSlot: Int) {
+        if (player.equipping()) {
+            Publishers.all.inventoryOption(player, item, "worn_equipment", "Remove", itemSlot)
+            player.emit(InventoryOption(player, "worn_equipment", item, itemSlot, "Remove"))
+            checkEmoteUpdate(player)
         }
     }
 

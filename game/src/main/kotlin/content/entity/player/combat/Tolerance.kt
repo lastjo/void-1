@@ -2,31 +2,38 @@ package content.entity.player.combat
 
 import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.entity.character.mode.move.move
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.timer.epochSeconds
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.Tile
+import world.gregs.voidps.type.sub.Move
+import world.gregs.voidps.type.sub.Spawn
+import world.gregs.voidps.type.sub.Variable
 import java.util.concurrent.TimeUnit
 
-@Script
 class Tolerance {
-
-    val toleranceTime = TimeUnit.MINUTES.toSeconds(10)
-
-    init {
-        playerSpawn { player ->
-            if (!player.contains("tolerance")) {
-                player.start("tolerance", toleranceTime.toInt(), epochSeconds())
-            }
-            player["tolerance_area"] = player.tile.toCuboid(10)
-        }
-
-        move({ to !in it.getOrPut("tolerance_area") { player.tile.toCuboid(10) } }) { player ->
-            player["tolerance_area"] = player.tile.toCuboid(10)
-            player.start("tolerance", toleranceTime.toInt(), epochSeconds())
-        }
-    }
 
     /**
      * Certain NPCs stop being aggressive towards the player if they stay inside their tolerance area for [toleranceTime]
      */
+    private val toleranceTime = TimeUnit.MINUTES.toSeconds(10)
+
+    @Spawn
+    fun spawn(player: Player) {
+        if (!player.contains("tolerance")) {
+            player.start("tolerance", toleranceTime.toInt(), epochSeconds())
+        }
+        player["tolerance_area"] = player.tile.toCuboid(10)
+    }
+
+    @Move
+    fun set(player: Player, to: Tile) {
+        if (to in player.getOrPut("tolerance_area") { player.tile.toCuboid(10) }) {
+            return
+        }
+        player["tolerance_area"] = player.tile.toCuboid(10)
+        player.start("tolerance", toleranceTime.toInt(), epochSeconds())
+    }
+
 }

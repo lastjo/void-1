@@ -129,7 +129,7 @@ class MakeoverMage {
     }
 
     @TimerTick("makeover")
-    fun tick(npc: NPC): Int {
+    fun tick(npc: NPC) {
         val current: String = npc["transform_id", "makeover_mage_male"]
         val toFemale = current == "makeover_mage_male"
         npc.transform(if (toFemale) "makeover_mage_female" else "makeover_mage_male")
@@ -138,7 +138,6 @@ class MakeoverMage {
         npc.softQueue("transform", 1) {
             npc.say(if (toFemale) "Ooh!" else "Aha!")
         }
-        return -1
     }
 
     suspend fun ChoiceBuilder<Dialogue>.more(): Unit = option<Quiz>("Tell me more about this 'makeover'.") {

@@ -8,62 +8,61 @@ import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.flagHits
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.network.login.protocol.visual.update.HitSplat
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.CombatStage
+import world.gregs.voidps.type.sub.Combat
 import kotlin.collections.set
 import kotlin.math.floor
 
-@Script
-class CombatHitsplats {
+class CombatHitsplats(
+    private val definitions: SpellDefinitions
+) {
 
-    val definitions: SpellDefinitions by inject()
+    @Combat(stage = CombatStage.DAMAGE)
+    fun combat(source: Character, character: Character, type: String, spell: String, damage: Int) {
+        if (damage < 0 || type == "magic" && definitions.get(spell).maxHit == -1 || type == "healed") {
+            return
+        }
+        var damage = damage
+        var soak = 0
+        if (Settings["combat.damageSoak", true] && damage > 200) {
+            val percent = character["absorb_$type", 10] / 100.0
+            soak = floor((damage - 200) * percent).toInt()
+            damage -= soak
+        }
+        if (Settings["combat.showSoak", true] || soak <= 0) {
+            soak = -1
+        }
+        val dealers = character.damageDealers
+        dealers[source] = dealers.getOrDefault(source, 0) + damage
+        val maxHit = source["max_hit", 0]
+        val mark = Weapon.mark(type)
+        val critical = mark.id < 3 && damage > 10 && maxHit > 0 && damage > (maxHit * 0.9)
+        character.hit(
+            source = source,
+            amount = damage,
+            mark = mark,
+            critical = critical,
+            soak = soak,
+        )
+        character.levels.drain(Skill.Constitution, damage)
+    }
 
-    init {
-        characterCombatDamage { character ->
-            if (damage < 0 || type == "magic" && definitions.get(spell).maxHit == -1 || type == "healed") {
-                return@characterCombatDamage
-            }
-            var damage = damage
-            var soak = 0
-            if (Settings["combat.damageSoak", true] && damage > 200) {
-                val percent = character["absorb_$type", 10] / 100.0
-                soak = floor((damage - 200) * percent).toInt()
-                damage -= soak
-            }
-            if (Settings["combat.showSoak", true] || soak <= 0) {
-                soak = -1
-            }
-            val dealers = character.damageDealers
-            dealers[source] = dealers.getOrDefault(source, 0) + damage
-            val maxHit = source["max_hit", 0]
-            val mark = Weapon.mark(type)
-            val critical = mark.id < 3 && damage > 10 && maxHit > 0 && damage > (maxHit * 0.9)
+    @Combat(stage = CombatStage.DAMAGE)
+    fun hit(source: Character, character: Character, type: String, damage: Int) {
+        if (damage < 0) {
+            character.hit(
+                source = source,
+                amount = 0,
+                mark = HitSplat.Mark.Missed,
+            )
+        } else if (type == "healed") {
             character.hit(
                 source = source,
                 amount = damage,
-                mark = mark,
-                critical = critical,
-                soak = soak,
+                mark = HitSplat.Mark.Healed,
             )
-            character.levels.drain(Skill.Constitution, damage)
-        }
-
-        characterCombatDamage { character ->
-            if (damage < 0) {
-                character.hit(
-                    source = source,
-                    amount = 0,
-                    mark = HitSplat.Mark.Missed,
-                )
-            } else if (type == "healed") {
-                character.hit(
-                    source = source,
-                    amount = damage,
-                    mark = HitSplat.Mark.Healed,
-                )
-                character.levels.restore(Skill.Constitution, damage)
-            }
+            character.levels.restore(Skill.Constitution, damage)
         }
     }
 

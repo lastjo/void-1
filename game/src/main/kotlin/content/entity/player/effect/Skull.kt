@@ -2,7 +2,10 @@ package content.entity.player.effect
 
 import content.area.wilderness.inWilderness
 import content.entity.combat.attackers
+import world.gregs.voidps.engine.client.ui.open
+import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.mode.combat.combatStart
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.appearance
 import world.gregs.voidps.engine.entity.character.player.flagAppearance
@@ -11,7 +14,10 @@ import world.gregs.voidps.engine.timer.timerStart
 import world.gregs.voidps.engine.timer.timerStop
 import world.gregs.voidps.engine.timer.timerTick
 import world.gregs.voidps.engine.timer.toTicks
+import world.gregs.voidps.type.CombatStage
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.TimerState
+import world.gregs.voidps.type.sub.*
 import java.util.concurrent.TimeUnit
 
 val Player.skulled: Boolean get() = skullCounter > 0
@@ -32,40 +38,49 @@ fun Player.unskull() {
     softTimers.stop("skull")
 }
 
-@Script
 class Skull {
 
-    init {
-        playerSpawn { player ->
-            if (player.skulled) {
-                player.softTimers.restart("skull")
-            }
-        }
-
-        combatStart { player ->
-            if (player.inWilderness && target is Player && !player.attackers.contains(target)) {
-                player.skull()
-            }
-        }
-
-        timerStart("skull") { player ->
-            interval = 50
-            player.appearance.skull = player["skull", 0]
-            player.flagAppearance()
-        }
-
-        timerTick("skull") { player ->
-            if (--player.skullCounter <= 0) {
-                cancel()
-                return@timerTick
-            }
-        }
-
-        timerStop("skull") { player ->
-            player.clear("skull")
-            player.clear("skull_duration")
-            player.appearance.skull = -1
-            player.flagAppearance()
+    @Spawn
+    fun spawn(player: Player) {
+        if (player.skulled) {
+            player.softTimers.restart("skull")
         }
     }
+
+    @Combat(stage = CombatStage.START)
+    fun combat(player: Player, target: Player) {
+        if (player.inWilderness && !player.attackers.contains(target)) {
+            player.skull()
+        }
+    }
+
+    @TimerStart("skull")
+    fun start(player: Player): Int {
+        player.appearance.skull = player["skull", 0]
+        player.flagAppearance()
+        if (player.interfaces.contains("items_kept_on_death")) {
+            player.open("items_kept_on_death", close = true)
+        }
+        return 50
+    }
+
+    @TimerTick("skull")
+    fun tick(player: Player): Int {
+        if (--player.skullCounter <= 0) {
+            return TimerState.CANCEL
+        }
+        return TimerState.CONTINUE
+    }
+
+    @TimerStop("skull")
+    fun stop(player: Player) {
+        player.clear("skull")
+        player.clear("skull_duration")
+        player.appearance.skull = -1
+        player.flagAppearance()
+        if (player.interfaces.contains("items_kept_on_death")) {
+            player.open("items_kept_on_death", close = true)
+        }
+    }
+
 }

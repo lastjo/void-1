@@ -15,130 +15,143 @@ import world.gregs.voidps.engine.inv.sendInventory
 import world.gregs.voidps.network.login.protocol.visual.update.player.BodyColour
 import world.gregs.voidps.network.login.protocol.visual.update.player.BodyPart
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Close
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.Open
 
-@Script
-class CharacterCreation {
+class CharacterCreation(
+    private val enums: EnumDefinitions,
+    private val structs: StructDefinitions,
+) {
 
-    val enums: EnumDefinitions by inject()
-    val structs: StructDefinitions by inject()
+    @Open("character_creation")
+    fun open(player: Player, id: String) {
+        player.interfaceOptions.unlockAll(id, "skin_colour", 0 until enums.get("character_skin_interfaces").length)
+        player.interfaceOptions.unlockAll(id, "colours", 0 until enums.get("character_top_interfaces").length)
+        player.interfaceOptions.unlockAll(id, "styles", 0 until enums.get("character_top_styles_female").length)
+        player["character_creation_female"] = !player.body.male
+        player.sendVariable("character_creation_style")
+        player.sendVariable("character_creation_sub_style")
+        player.sendVariable("character_creation_hair_style")
+        player.sendVariable("character_creation_colour_offset")
+        for (i in 1 until 20) {
+            player.sendInventory("character_creation_$i")
+        }
+    }
 
-    init {
-        interfaceOpen("character_creation") { player ->
-            player.interfaceOptions.unlockAll(id, "skin_colour", 0 until enums.get("character_skin_interfaces").length)
-            player.interfaceOptions.unlockAll(id, "colours", 0 until enums.get("character_top_interfaces").length)
-            player.interfaceOptions.unlockAll(id, "styles", 0 until enums.get("character_top_styles_female").length)
-            player["character_creation_female"] = !player.body.male
-            player.sendVariable("character_creation_style")
-            player.sendVariable("character_creation_sub_style")
-            player.sendVariable("character_creation_hair_style")
-            player.sendVariable("character_creation_colour_offset")
-            for (i in 1 until 20) {
-                player.sendInventory("character_creation_$i")
+    @Close("character_creation")
+    fun close(player: Player) {
+        for (i in 1 until 20) {
+            player.inventories.clear("character_creation_$i")
+        }
+    }
+
+    @Interface("Female", "female", "character_creation")
+    fun female(player: Player) {
+        swapSex(player, true)
+    }
+
+    @Interface("Male", "male", "character_creation")
+    fun male(player: Player) {
+        swapSex(player, false)
+    }
+
+    @Interface(component = "skin_colour", id = "character_creation")
+    fun skinColour(player: Player, itemSlot: Int) {
+        player["makeover_colour_skin"] = enums.get("character_skin").getInt(itemSlot)
+    }
+
+    @Interface(component = "style_*", id = "character_creation")
+    fun style(player: Player, component: String) {
+        val index = component.removePrefix("style_").toInt()
+        updateStyle(player, index, 0)
+    }
+
+    @Interface(component = "type_*", id = "character_creation")
+    fun type(player: Player, component: String) {
+        val index = component.removePrefix("type_").toInt()
+        val style: Int = player["character_creation_style", 0]
+        updateStyle(player, style - 1, index)
+    }
+
+    @Interface(component = "part_*", id = "character_creation")
+    fun bodyPart(player: Player, component: String) {
+        val part = component.removePrefix("part_")
+        player["character_part"] = part
+    }
+
+    @Interface(component = "colours", id = "character_creation")
+    fun colours(player: Player, itemSlot: Int) {
+        var part = player["character_part", "skin"]
+        if (part == "beard") {
+            part = "hair"
+        }
+        player["makeover_colour_$part"] = enums.get("character_$part").getInt(itemSlot)
+    }
+
+    @Interface("Choose My Colour", "choose_colour", "character_creation")
+    fun colours(player: Player) {
+        val colourProfile = (player["character_creation_colour_offset", 0] + 1).rem(8)
+        player["character_creation_colour_offset"] = colourProfile
+        updateColours(player, hairStyle = player["character_creation_hair_style", 0] + colourProfile)
+    }
+
+    @Interface(component = "styles", id = "character_creation")
+    fun styles(player: Player, itemSlot: Int) {
+        val sex = if (player["makeover_female", false]) "female" else "male"
+        val part = player["character_part", "skin"]
+        val value = if (part == "hair") {
+            enums.getStruct("character_${part}_styles_$sex", itemSlot, "body_look_id")
+        } else {
+            enums.get("character_${part}_styles_$sex").getInt(itemSlot)
+        }
+        if (part == "top") {
+            onStyle(value) {
+                setStyle(player, it.id)
+                player["makeover_arms"] = it.get<Int>("character_style_arms")
+                player["makeover_wrists"] = it.get<Int>("character_style_wrists")
             }
+            player["character_creation_sub_style"] = 1
         }
+        player["character_creation_colour_offset"] = 0
+        player["makeover_$part"] = value
+    }
 
-        interfaceClose("character_creation") { player ->
-            for (i in 1 until 20) {
-                player.inventories.clear("character_creation_$i")
-            }
-        }
+    @Open("character_creation")
+    fun open(player: Player) {
+        player["makeover_female"] = !player.body.male
+        player["makeover_hair"] = player.body.getLook(BodyPart.Hair)
+        player["makeover_beard"] = player.body.getLook(BodyPart.Beard)
+        player["makeover_top"] = player.body.getLook(BodyPart.Chest)
+        player["makeover_arms"] = player.body.getLook(BodyPart.Arms)
+        player["makeover_wrists"] = player.body.getLook(BodyPart.Hands)
+        player["makeover_legs"] = player.body.getLook(BodyPart.Legs)
+        player["makeover_shoes"] = player.body.getLook(BodyPart.Feet)
+        player["makeover_colour_hair"] = player.body.getColour(BodyColour.Hair)
+        player["makeover_colour_top"] = player.body.getColour(BodyColour.Top)
+        player["makeover_colour_legs"] = player.body.getColour(BodyColour.Legs)
+        player["makeover_colour_shoes"] = player.body.getColour(BodyColour.Feet)
+        player["makeover_colour_skin"] = player.body.getColour(BodyColour.Skin)
+    }
 
-        interfaceOption("Female", "female", "character_creation") {
-            swapSex(player, true)
-        }
-
-        interfaceOption("Male", "male", "character_creation") {
-            swapSex(player, false)
-        }
-
-        interfaceOption(component = "skin_colour", id = "character_creation") {
-            player["makeover_colour_skin"] = enums.get("character_skin").getInt(itemSlot)
-        }
-
-        interfaceOption(component = "style_*", id = "character_creation") {
-            val index = component.removePrefix("style_").toInt()
-            updateStyle(player, index, 0)
-        }
-
-        interfaceOption(component = "type_*", id = "character_creation") {
-            val index = component.removePrefix("type_").toInt()
-            val style: Int = player["character_creation_style", 0]
-            updateStyle(player, style - 1, index)
-        }
-
-        interfaceOption(component = "part_*", id = "character_creation") {
-            val part = component.removePrefix("part_")
-            player["character_part"] = part
-        }
-
-        interfaceOption(component = "colours", id = "character_creation") {
-            var part = player["character_part", "skin"]
-            if (part == "beard") {
-                part = "hair"
-            }
-            player["makeover_colour_$part"] = enums.get("character_$part").getInt(itemSlot)
-        }
-
-        interfaceOption("Choose My Colour", "choose_colour", "character_creation") {
-            val colourProfile = (player["character_creation_colour_offset", 0] + 1).rem(8)
-            player["character_creation_colour_offset"] = colourProfile
-            updateColours(player, hairStyle = player["character_creation_hair_style", 0] + colourProfile)
-        }
-
-        interfaceOption(component = "styles", id = "character_creation") {
-            val sex = if (player["makeover_female", false]) "female" else "male"
-            val part = player["character_part", "skin"]
-            val value = if (part == "hair") {
-                enums.getStruct("character_${part}_styles_$sex", itemSlot, "body_look_id")
-            } else {
-                enums.get("character_${part}_styles_$sex").getInt(itemSlot)
-            }
-            if (part == "top") {
-                onStyle(value) {
-                    setStyle(player, it.id)
-                    player["makeover_arms"] = it.get<Int>("character_style_arms")
-                    player["makeover_wrists"] = it.get<Int>("character_style_wrists")
-                }
-                player["character_creation_sub_style"] = 1
-            }
-            player["character_creation_colour_offset"] = 0
-            player["makeover_$part"] = value
-        }
-
-        interfaceOpen("character_creation") { player ->
-            player["makeover_female"] = !player.body.male
-            player["makeover_hair"] = player.body.getLook(BodyPart.Hair)
-            player["makeover_beard"] = player.body.getLook(BodyPart.Beard)
-            player["makeover_top"] = player.body.getLook(BodyPart.Chest)
-            player["makeover_arms"] = player.body.getLook(BodyPart.Arms)
-            player["makeover_wrists"] = player.body.getLook(BodyPart.Hands)
-            player["makeover_legs"] = player.body.getLook(BodyPart.Legs)
-            player["makeover_shoes"] = player.body.getLook(BodyPart.Feet)
-            player["makeover_colour_hair"] = player.body.getColour(BodyColour.Hair)
-            player["makeover_colour_top"] = player.body.getColour(BodyColour.Top)
-            player["makeover_colour_legs"] = player.body.getColour(BodyColour.Legs)
-            player["makeover_colour_shoes"] = player.body.getColour(BodyColour.Feet)
-            player["makeover_colour_skin"] = player.body.getColour(BodyColour.Skin)
-        }
-
-        interfaceOption(component = "confirm", id = "character_creation") {
-            val male = !player["makeover_female", false]
-            player.body.setLook(BodyPart.Hair, player["makeover_hair", 0])
-            player.body.setLook(BodyPart.Beard, if (male) player["makeover_beard", 0] else -1)
-            player.body.male = male
-            player.body.setLook(BodyPart.Chest, player["makeover_top", 0])
-            player.body.setLook(BodyPart.Arms, player["makeover_arms", 0])
-            player.body.setLook(BodyPart.Hands, player["makeover_wrists", 0])
-            player.body.setLook(BodyPart.Legs, player["makeover_legs", 0])
-            player.body.setLook(BodyPart.Feet, player["makeover_shoes", 0])
-            player.body.setColour(BodyColour.Hair, player["makeover_colour_hair", 0])
-            player.body.setColour(BodyColour.Top, player["makeover_colour_top", 0])
-            player.body.setColour(BodyColour.Legs, player["makeover_colour_legs", 0])
-            player.body.setColour(BodyColour.Feet, player["makeover_colour_shoes", 0])
-            player.body.setColour(BodyColour.Skin, player["makeover_colour_skin", 0])
-            player.flagAppearance()
-            player.open(player.interfaces.gameFrame)
-        }
+    @Interface(component = "confirm", id = "character_creation")
+    fun confirm(player: Player) {
+        val male = !player["makeover_female", false]
+        player.body.setLook(BodyPart.Hair, player["makeover_hair", 0])
+        player.body.setLook(BodyPart.Beard, if (male) player["makeover_beard", 0] else -1)
+        player.body.male = male
+        player.body.setLook(BodyPart.Chest, player["makeover_top", 0])
+        player.body.setLook(BodyPart.Arms, player["makeover_arms", 0])
+        player.body.setLook(BodyPart.Hands, player["makeover_wrists", 0])
+        player.body.setLook(BodyPart.Legs, player["makeover_legs", 0])
+        player.body.setLook(BodyPart.Feet, player["makeover_shoes", 0])
+        player.body.setColour(BodyColour.Hair, player["makeover_colour_hair", 0])
+        player.body.setColour(BodyColour.Top, player["makeover_colour_top", 0])
+        player.body.setColour(BodyColour.Legs, player["makeover_colour_legs", 0])
+        player.body.setColour(BodyColour.Feet, player["makeover_colour_shoes", 0])
+        player.body.setColour(BodyColour.Skin, player["makeover_colour_skin", 0])
+        player.flagAppearance()
+        player.open(player.interfaces.gameFrame)
     }
 
     fun updateStyle(
