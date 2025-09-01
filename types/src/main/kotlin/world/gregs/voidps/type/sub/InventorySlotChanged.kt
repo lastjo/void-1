@@ -8,7 +8,7 @@ package world.gregs.voidps.type.sub
 @Repeatable
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.SOURCE)
-annotation class InventoryChanged(
+annotation class InventorySlotChanged(
     val inventory: String = "inventory",
     val slot: Int = -1
 )

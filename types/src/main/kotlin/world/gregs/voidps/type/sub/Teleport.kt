@@ -12,6 +12,6 @@ package world.gregs.voidps.type.sub
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.SOURCE)
 annotation class Teleport(
-    val option: String = "",
+    val type: String = "",
     vararg val ids: String,
 )

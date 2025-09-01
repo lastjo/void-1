@@ -44,10 +44,8 @@ class PublisherProcessorTest {
     }
 
     @Test
-    fun `Find schema throws when schema not found`() {
+    fun `Find schema returns null when schema not found`() {
         val processor = PublisherProcessor(codeGenerator, logger, emptyMap(), Publishers::class.asClassName())
-        assertThrows(IllegalStateException::class.java) {
-            processor.findSchema("Missing", listOf(Pair("id", STRING)))
-        }
+        assertNull(processor.findSchema("Missing", listOf(Pair("id", STRING))))
     }
 }

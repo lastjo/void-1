@@ -35,7 +35,8 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
                 OptionPublisher(Publishers::characterNPCOption, Publishers::hasCharacterNPCOption),
                 OptionPublisher(Publishers::characterGameObjectOption, Publishers::hasCharacterGameObjectOption),
             ),
-            Interface::class.qualifiedName!! to listOf(InterfacePublisher()),
+            Interface::class.qualifiedName!! to listOf(InterfacePublisher(Publishers::interfaceOption)),
+            Continue::class.qualifiedName!! to listOf(InterfacePublisher(Publishers::continueDialogue)),
             Inventory::class.qualifiedName!! to listOf(InventoryPublisher()),
             UseOn::class.qualifiedName!! to listOf(
                 InterfaceOnPublisher(Publishers::interfaceOnPlayer, Publishers::hasInterfaceOnPlayer),
@@ -107,11 +108,18 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
             ),
             ItemAdded::class.qualifiedName!! to listOf(ItemChangePublisher(Publishers::itemAdded)),
             ItemRemoved::class.qualifiedName!! to listOf(ItemChangePublisher(Publishers::itemRemoved)),
-            InventoryChanged::class.qualifiedName!! to listOf(InventoryChangePublisher(Publishers::inventoryChanged)),
+            InventorySlotChanged::class.qualifiedName!! to listOf(InventoryChangePublisher(Publishers::inventoryChanged)),
+            InventoryUpdated::class.qualifiedName!! to listOf(InventoryChangePublisher(Publishers::inventoryUpdated)),
             Swap::class.qualifiedName!! to listOf(InventorySwapPublisher(Publishers::inventorySwap)),
             Command::class.qualifiedName!! to listOf(CommandPublisher()),
-            Teleport::class.qualifiedName!! to listOf(TeleportPublisher(Publishers::teleport, notification = false)),
-            TeleportLand::class.qualifiedName!! to listOf(TeleportPublisher(Publishers::teleportLand, notification = true)),
+            Teleport::class.qualifiedName!! to listOf(
+                TeleportPublisher(Publishers::teleportGameObject, notification = false),
+                TeleportPublisher(Publishers::teleport, notification = false),
+            ),
+            TeleportLand::class.qualifiedName!! to listOf(
+                TeleportPublisher(Publishers::teleportLandGameObject, notification = true),
+                TeleportPublisher(Publishers::teleportLand, notification = true),
+            ),
             Enter::class.qualifiedName!! to listOf(AreaPublisher(Publishers::enterArea)),
             Exit::class.qualifiedName!! to listOf(AreaPublisher(Publishers::exitArea)),
             Move::class.qualifiedName!! to listOf(
@@ -124,6 +132,7 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
                 LevelChangePublisher(Publishers::levelChangeNPC),
                 LevelChangePublisher(Publishers::levelChangeCharacter),
             ),
+            Experience::class.qualifiedName!! to listOf(ExperiencePublisher(Publishers::experience)),
             Variable::class.qualifiedName!! to listOf(
                 VariableSetPublisher(Publishers::variableSetPlayer),
                 VariableSetPublisher(Publishers::variableSetNPC),
