@@ -23,9 +23,12 @@ class InventorySlotChangedTest {
     @Test
     fun `Track changes`() {
         var changes = 0
-        inventoryUpdate {
-            changes++
-        }
+        Publishers.set(object : Publishers() {
+            override fun inventoryUpdated(player: Player, inventory: String): Boolean {
+                changes++
+                return super.inventoryUpdated(player, inventory)
+            }
+        })
         val manager = inventory.transaction.changes
         manager.track("inventory", 1, Item.EMPTY, 1, Item("item", 1))
         manager.send()

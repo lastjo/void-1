@@ -43,7 +43,7 @@ class ItemInformation {
     }
 
     @InventorySlotChanged
-    fun update(player: Player, inventory: String, item: Item, index: Int) {
+    fun update(player: Player, inventory: String, item: Item, itemSlot: Int) {
         if (player.interfaces.contains("item_info")) {
             player.sendScript("refresh_item_info")
         }
@@ -51,9 +51,9 @@ class ItemInformation {
             return
         }
         val shop: String = player["shop"] ?: return
-        val idx: Int = player["info_index"] ?: return
-        if (inventory == shop && index == idx) {
-            player["item_info_price"] = if (item.amount == 0) 0 else Price.getPrice(player, item.id, idx, item.amount)
+        val index: Int = player["info_index"] ?: return
+        if (inventory == shop && itemSlot == index) {
+            player["item_info_price"] = if (item.amount == 0) 0 else Price.getPrice(player, item.id, index, item.amount)
         }
     }
 

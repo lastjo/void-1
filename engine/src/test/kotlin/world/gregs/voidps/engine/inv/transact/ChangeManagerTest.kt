@@ -65,7 +65,7 @@ internal class ChangeManagerTest {
         change.track("inventory", 1, Item.EMPTY, 1, Item("item", 1))
         change.clear()
         change.send()
-        assertTrue(change.itemChanges.isEmpty())
+        assertTrue(change.changes.isEmpty())
 
     }
 }

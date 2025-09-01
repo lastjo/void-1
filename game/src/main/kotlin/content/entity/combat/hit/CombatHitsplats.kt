@@ -19,50 +19,50 @@ class CombatHitsplats(
 ) {
 
     @Combat(stage = CombatStage.DAMAGE)
-    fun combat(source: Character, character: Character, type: String, spell: String, damage: Int) {
+    fun combat(source: Character, target: Character, type: String, spell: String, damage: Int) {
         if (damage < 0 || type == "magic" && definitions.get(spell).maxHit == -1 || type == "healed") {
             return
         }
         var damage = damage
         var soak = 0
         if (Settings["combat.damageSoak", true] && damage > 200) {
-            val percent = character["absorb_$type", 10] / 100.0
+            val percent = target["absorb_$type", 10] / 100.0
             soak = floor((damage - 200) * percent).toInt()
             damage -= soak
         }
         if (Settings["combat.showSoak", true] || soak <= 0) {
             soak = -1
         }
-        val dealers = character.damageDealers
+        val dealers = target.damageDealers
         dealers[source] = dealers.getOrDefault(source, 0) + damage
         val maxHit = source["max_hit", 0]
         val mark = Weapon.mark(type)
         val critical = mark.id < 3 && damage > 10 && maxHit > 0 && damage > (maxHit * 0.9)
-        character.hit(
+        target.hit(
             source = source,
             amount = damage,
             mark = mark,
             critical = critical,
             soak = soak,
         )
-        character.levels.drain(Skill.Constitution, damage)
+        target.levels.drain(Skill.Constitution, damage)
     }
 
     @Combat(stage = CombatStage.DAMAGE)
-    fun hit(source: Character, character: Character, type: String, damage: Int) {
+    fun hit(source: Character, target: Character, type: String, damage: Int) {
         if (damage < 0) {
-            character.hit(
+            target.hit(
                 source = source,
                 amount = 0,
                 mark = HitSplat.Mark.Missed,
             )
         } else if (type == "healed") {
-            character.hit(
+            target.hit(
                 source = source,
                 amount = damage,
                 mark = HitSplat.Mark.Healed,
             )
-            character.levels.restore(Skill.Constitution, damage)
+            target.levels.restore(Skill.Constitution, damage)
         }
     }
 

@@ -10,17 +10,15 @@ import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.Inventory
 import world.gregs.voidps.engine.inv.sendInventory
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.*
 
-@Script
-class ShopOpen {
+class ShopOpen(
+    private val itemDefinitions: ItemDefinitions,
+    private val inventoryDefinitions: InventoryDefinitions,
+) {
 
-    val itemDefinitions: ItemDefinitions by inject()
-    val inventoryDefinitions: InventoryDefinitions by inject()
     val logger = InlineLogger()
 
     @Option("Trade")
@@ -30,6 +28,7 @@ class ShopOpen {
             player.openShop(def["shop"])
         }
     }
+
     @Close("shop")
     fun close(player: Player) {
         player.close("item_info")
@@ -71,9 +70,9 @@ class ShopOpen {
     }
 
     @InventorySlotChanged
-    fun update(player: Player, inventory: String, item: Item, index: Int) {
+    fun update(player: Player, inventory: String, item: Item, itemSlot: Int) {
         if (player.contains("shop") && player["shop", ""] == inventory) {
-            player["amount_$index"] = item.amount
+            player["amount_$itemSlot"] = item.amount
         }
     }
 

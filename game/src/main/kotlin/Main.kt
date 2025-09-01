@@ -95,11 +95,7 @@ object Main {
             )
         }
         Scripts.load()
-        Runtime.getRuntime().addShutdownHook(
-            thread(start = false) {
-                World.emit(Despawn)
-            },
-        )
+        Runtime.getRuntime().addShutdownHook(thread(start = false, block = World::shutdown))
     }
 
     private fun cache(cache: Cache, files: ConfigFiles) = module {

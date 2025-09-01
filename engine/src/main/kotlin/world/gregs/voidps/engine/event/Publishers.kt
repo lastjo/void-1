@@ -5,7 +5,6 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import world.gregs.voidps.cache.definition.data.ItemDefinition
 import world.gregs.voidps.cache.definition.data.NPCDefinition
 import world.gregs.voidps.cache.definition.data.ObjectDefinition
 import world.gregs.voidps.engine.entity.Entity
@@ -120,7 +119,7 @@ abstract class Publishers {
 
     open suspend fun inventoryOption(player: Player, item: Item = Item.EMPTY, inventory: String = "", option: String = "", itemSlot: Int = -1): Boolean = false
 
-    open fun inventoryChanged(player: Player, inventory: String = "", index: Int = -1, item: Item = Item.EMPTY, from: String = "", fromIndex: Int = -1, fromItem: Item = Item.EMPTY): Boolean = false
+    open fun inventoryChanged(player: Player, inventory: String = "", itemSlot: Int = -1, item: Item = Item.EMPTY, from: String = "", fromIndex: Int = -1, fromItem: Item = Item.EMPTY): Boolean = false
     open fun inventoryUpdated(player: Player, inventory: String = ""): Boolean = false
 
     open fun inventorySwap(player: Player, id: String = "", component: String = "", fromItem: Item = Item.EMPTY, fromSlot: Int = -1, fromInventory: String = "", toId: String = "", toComponent: String = "", toItem: Item = Item.EMPTY, toSlot: Int = -1, toInventory: String = ""): Boolean = false

@@ -42,8 +42,8 @@ class TaverleyDungeon {
     @UseOn("raw_rat_meat", "cauldron_of_thunder")
     @UseOn("raw_bear_meat", "cauldron_of_thunder")
     @UseOn("raw_chicken", "cauldron_of_thunder")
-    fun dip(player: Player, item: Item) {
-        val required = item.id
+    fun dip(player: Player, fromItem: Item) {
+        val required = fromItem.id
         if (player.quest("druidic_ritual") == "cauldron") {
             if (player.inventory.replace(required, required.replace("raw_", "enchanted_"))) {
                 player.message("You dip the ${required.toLowerSpaceCase()} in the cauldron.")

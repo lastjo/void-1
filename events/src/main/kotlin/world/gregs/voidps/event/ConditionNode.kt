@@ -1,6 +1,7 @@
 package world.gregs.voidps.event
 
 import com.squareup.kotlinpoet.CodeBlock
+import com.squareup.kotlinpoet.TypeName
 
 data class ConditionNode(
     val comparator: Comparator? = null,
@@ -104,12 +105,19 @@ data class ConditionNode(
          * Map arguments between what the [method] wants and what the [schema] has.
          * Match by name first, fallback to type if names aren't identical.
          */
-        fun arguments(method: Subscriber, schema: Publisher) = method.parameters.map { (name, type) ->
-            val param = schema.parameters.firstOrNull { it.first == name }
-            if (param != null && param.second == type) {
-                name
-            } else {
-                schema.parameters.firstOrNull { it.second == type }?.first ?: error("No matching parameter $name: $type of ${method.methodName} in ${method.className} for schema ${schema.name}.")
+        fun arguments(method: Subscriber, schema: Publisher): List<String> {
+            val count = mutableMapOf<TypeName, Int>()
+            for ((_, type) in schema.parameters) {
+                count[type] = count.getOrDefault(type, 0) + 1
+            }
+            return method.parameters.map { (name, type) ->
+                if (count.getOrDefault(type, 0) > 1) {
+                    // match by name
+                    schema.parameters.firstOrNull { it.first == name }
+                } else {
+                    // match by type
+                    schema.parameters.firstOrNull { it.second == type }
+                }?.first ?: error("Expected parameter [${schema.parameters.filter { it.second == type }.joinToString(", ") { it.first }}] for ${method.methodName}($name: ${type.toString().substringAfter(".")}) in ${method.className}.")
             }
         }
     }

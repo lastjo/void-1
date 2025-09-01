@@ -23,12 +23,10 @@ import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.event.onEvent
 import world.gregs.voidps.type.CombatStage
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Combat
 import world.gregs.voidps.type.sub.Death
 import world.gregs.voidps.type.sub.Despawn
 
-@Script
 class Combat {
 
     @Despawn
@@ -49,12 +47,12 @@ class Combat {
     }
 
     @Combat(stage = CombatStage.DAMAGE)
-    fun retaliate(source: Character, character: Character, type: String) {
-        if (source == character || type == "poison" || type == "disease" || type == "healed") {
+    fun retaliate(source: Character, target: Character, type: String) {
+        if (source == target || type == "poison" || type == "disease" || type == "healed") {
             return
         }
-        if (character.mode !is CombatMovement && character.mode !is PauseMode) {
-            retaliate(character, source)
+        if (target.mode !is CombatMovement && target.mode !is PauseMode) {
+            retaliate(target, source)
         }
     }
 

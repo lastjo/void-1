@@ -84,7 +84,6 @@ object World : Entity, Variable, EventDispatcher, Runnable, KoinComponent {
     }
 
     fun shutdown() {
-        get<Publishers>().despawnWorld(this)
-        emit(Despawn)
+        Publishers.all.despawnWorld(this)
     }
 }

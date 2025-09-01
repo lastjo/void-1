@@ -46,7 +46,6 @@ import world.gregs.voidps.engine.map.collision.CollisionDecoder
 import world.gregs.voidps.engine.map.collision.Collisions
 import world.gregs.voidps.engine.map.collision.GameObjectCollisionAdd
 import world.gregs.voidps.engine.map.collision.GameObjectCollisionRemove
-import world.gregs.voidps.engine.script.PublishersImpl
 import world.gregs.voidps.engine.script.Scripts
 import world.gregs.voidps.engine.timer.setCurrentTime
 import world.gregs.voidps.network.client.Client
@@ -103,7 +102,9 @@ abstract class WorldTest : KoinTest {
         return player to client
     }
 
-    fun createPlayer(tile: Tile = Tile.EMPTY, name: String = "player"): Player {
+    private var playerCounter = 0
+
+    fun createPlayer(tile: Tile = Tile.EMPTY, name: String = "player${playerCounter++}"): Player {
         val player = Player(tile = tile, accountName = name, passwordHash = "")
         assertTrue(accounts.setup(player, null, 0))
         accountDefs.add(player)
@@ -254,7 +255,7 @@ abstract class WorldTest : KoinTest {
     fun afterAll() {
         saves?.deleteRecursively()
         Events.events.clear()
-        World.shutdown()
+//        World.shutdown()
         stopKoin()
     }
 

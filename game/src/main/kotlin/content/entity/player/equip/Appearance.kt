@@ -10,8 +10,8 @@ import world.gregs.voidps.type.sub.InventorySlotChanged
 class Appearance {
 
     @InventorySlotChanged
-    fun update(player: Player, index: Int) {
-        if (needsUpdate(index, player.body)) {
+    fun update(player: Player, itemSlot: Int) {
+        if (needsUpdate(itemSlot, player.body)) {
             player.flagAppearance()
         }
     }

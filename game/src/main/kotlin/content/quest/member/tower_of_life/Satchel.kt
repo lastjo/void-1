@@ -40,7 +40,7 @@ class Satchel {
 
     @UseOn("*_satchel", "cake")
     @UseOn("cake", "*_satchel")
-    fun cake(player: Player, item: Item, fromSlot: Int, toSlot: Int) {
+    fun cake(player: Player, fromItem: Item, fromSlot: Int, toSlot: Int) {
         val charges = player.inventory.charges(player, toSlot)
         if (charges and cake != 0) {
             player.message("You already have a cake in there.")
@@ -54,7 +54,7 @@ class Satchel {
 
     @UseOn("*_satchel", "banana")
     @UseOn("banana", "*_satchel")
-    fun banana(player: Player, item: Item, fromSlot: Int, toSlot: Int) {
+    fun banana(player: Player, fromItem: Item, fromSlot: Int, toSlot: Int) {
         val charges = player.inventory.charges(player, toSlot)
         if (charges and banana != 0) {
             player.message("You already have a banana in there.")
@@ -68,7 +68,7 @@ class Satchel {
 
     @UseOn("*_satchel", "triangle_sandwich")
     @UseOn("triangle_sandwich", "*_satchel")
-    fun sandwich(player: Player, item: Item, fromSlot: Int, toSlot: Int) {
+    fun sandwich(player: Player, fromItem: Item, fromSlot: Int, toSlot: Int) {
         val charges = player.inventory.charges(player, toSlot)
         if (charges and sandwich != 0) {
             player.message("You already have a sandwich in there.")

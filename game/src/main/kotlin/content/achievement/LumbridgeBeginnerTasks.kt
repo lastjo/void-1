@@ -252,8 +252,8 @@ class LumbridgeBeginnerTasks(
     }
 
     @InventorySlotChanged("worn_equipment")
-    fun equipped(player: Player, slot: Int, item: Item) {
-        when (slot) {
+    fun equipped(player: Player, item: Item, itemSlot: Int) {
+        when (itemSlot) {
             EquipSlot.Feet.index, EquipSlot.Shield.index, EquipSlot.Legs.index, EquipSlot.Chest.index -> {
                 if (item.id.contains("iron")) {
                     player["alls_ferrous_in_love_and_war_task"] = true
