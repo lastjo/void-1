@@ -96,7 +96,7 @@ abstract class Publisher(
             var addedElse = false
             val methodComparisons = methods.map { it to comparisons(it) }
             for ((method, comparisons) in methodComparisons.filter { it.second.isNotEmpty() }) {
-                generateStatement(builder, method, comparisons, check)
+                generateStatement(builder, method, comparisons, check, returnSomething)
             }
             val remaining = methodComparisons.filter { it.second.isEmpty() }
             for ((method, _) in remaining) {
@@ -138,7 +138,7 @@ abstract class Publisher(
                 errorHandling.addStatement("return %L", returnsDefault)
             }
             funSpec.addCode(
-                    errorHandling
+                errorHandling
                     .endControlFlow()
                     .build(),
             )
@@ -160,7 +160,7 @@ abstract class Publisher(
         }
     }
 
-    private fun generateStatement(builder: CodeBlock.Builder, method: Subscriber, comparisons: List<List<Comparator>>, check: Boolean) {
+    private fun generateStatement(builder: CodeBlock.Builder, method: Subscriber, comparisons: List<List<Comparator>>, check: Boolean, returnSomething: Boolean) {
         val methodName = method.className.simpleName.replaceFirstChar { it.lowercase() }
         for (comparison in comparisons) {
             // If statement
@@ -171,14 +171,26 @@ abstract class Publisher(
                 val statement = comparison[i].statement() ?: continue
                 builder.add(statement.code, *statement.args)
             }
+            builder.add(" -> ")
             if (check) {
-                builder.addStatement(" -> {}")
+                builder.addStatement("{}")
             } else {
                 val args = ConditionNode.arguments(method, this)
-                builder.addStatement(
-                    " -> $methodName.%L(${args.joinToString(", ")})",
-                    method.methodName,
-                )
+                if (returnSomething && method.returnType == "kotlin.Unit") {
+                    builder.addStatement("{")
+                    builder.addStatement("  $methodName.%L(${args.joinToString(", ")})", method.methodName)
+                    if (method.schema.returnsDefault is String) {
+                        builder.addStatement("  %S", method.schema.returnsDefault)
+                    } else {
+                        builder.addStatement("  %L", method.schema.returnsDefault)
+                    }
+                    builder.addStatement("}")
+                } else {
+                    builder.addStatement(
+                        "$methodName.%L(${args.joinToString(", ")})",
+                        method.methodName,
+                    )
+                }
             }
         }
     }

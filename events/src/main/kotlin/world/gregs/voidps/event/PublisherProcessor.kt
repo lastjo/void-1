@@ -54,8 +54,9 @@ class PublisherProcessor(
                     dependencies[methodName] = method.className
                     if (allScripts.putIfAbsent(methodName, method.className) == null) {
                         // Add all params to publisher classes
-                        for ((param, type) in method.classParams) {
-                            allDependencies.putIfAbsent(type, param)
+                        for ((_, type) in method.classParams) {
+                            val name = (type as ClassName).simpleName.replace("NPC", "Npc").replaceFirstChar { it.lowercase() }
+                            allDependencies.putIfAbsent(type, name)
                         }
                         // Initialize scripts classes as variables with injected params
                         val classParams = method.classParams.joinToString(", ") {
@@ -172,7 +173,7 @@ class PublisherProcessor(
      * Looks up the [Publisher] schema by matching the subscribing methods [args] against the [annotation]
      * list of [Publisher.required] args
      */
-    fun findSchema(annotation: String, args: List<Pair<String, TypeName>>): Publisher {
+    fun findSchema(annotation: String, args: List<Pair<String, TypeName>>): Publisher? {
         val publishers = schemas[annotation] ?: error("No schema found for annotation: $annotation.")
         for (publisher in publishers) {
             if (publisher.required.isEmpty()) {
@@ -186,7 +187,7 @@ class PublisherProcessor(
                 }
             }
         }
-        error("Unable to find required parameters for $annotation subscription.")
+        return null
     }
 
     /**
@@ -203,9 +204,9 @@ class PublisherProcessor(
             val annoType = annotation.annotationType.resolve().declaration.qualifiedName?.asString() ?: continue
             val args = annotation.arguments.associate { it.name?.asString().orEmpty() to it.value!! }
             val params = fn.parameters.map { it.name!!.getShortName() to it.type.resolve().toTypeName() }
-            val schema = findSchema(annoType, params)
+            val schema = findSchema(annoType, params) ?: error("Unable to find required $annotation parameters for ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()}.")
             if (fn.modifiers.contains(Modifier.SUSPEND) && !schema.suspendable) {
-                error("Method ${parentClass.simpleName.asString()}.${fn.simpleName.asString()} cannot be suspendable.")
+                error("Method ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()} cannot be suspendable.")
             }
             val returnType = fn.returnType!!.resolve().declaration.qualifiedName!!.asString()
             if (schema.notification) {
@@ -214,7 +215,7 @@ class PublisherProcessor(
                 } else if (returnType != "kotlin.Unit" && returnType != "kotlin.Boolean") {
                     error("Method ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()} is a cancellable notification so must return a Boolean or nothing. (returns ${returnType})")
                 }
-            } else if (schema.returnsDefault != false && returnType != schema.returnsDefault::class.qualifiedName) {
+            } else if (returnType != "kotlin.Unit" && returnType != schema.returnsDefault::class.qualifiedName) {
                 error("Method ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()} must return a ${schema.returnsDefault::class.simpleName}. (returns ${returnType})")
             }
             val classParams: List<Pair<String, TypeName>> = parentClass.primaryConstructor?.parameters?.map { param ->

@@ -8,7 +8,7 @@ sealed interface Comparator {
     fun statement(): Statement?
 }
 
-data class Equals(override val key: String, override val value: Any?) : Comparator {
+data class Equals(override val key: String, override val value: Any?, val simplify: Boolean = true) : Comparator {
     override fun statement(): Statement? {
         return when (value) {
             is String -> when {
@@ -18,7 +18,11 @@ data class Equals(override val key: String, override val value: Any?) : Comparat
                 value.contains("*") -> Statement("%T($key, %S)", arrayOf(ClassName("world.gregs.voidps.engine.event", "wildcardEquals"), value))
                 else -> Statement("$key == %S", arrayOf(value))
             }
-            is Boolean -> Statement("${if (value) "" else "!"}$key", arrayOf(value))
+            is Boolean -> if (simplify) {
+                Statement("${if (value) "" else "!"}$key", arrayOf(value))
+            } else {
+                Statement("$key == %L", arrayOf(value))
+            }
             else -> Statement("$key == %L", arrayOf(value))
         }
     }
