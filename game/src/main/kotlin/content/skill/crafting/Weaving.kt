@@ -14,16 +14,14 @@ import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.event.Context
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.queue.weakQueue
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
+import world.gregs.voidps.type.sub.UseOn
 
-@Script
 class Weaving {
 
     val materials = listOf(
@@ -36,34 +34,34 @@ class Weaving {
     val Item.weaving: Weaving
         get() = def["weaving"]
 
-    init {
-        objectOperate("Weave", "loom_*", arrive = false) {
-            val strings = materials.map { it.weaving.to }
-            val (index, amount) = makeAmountIndex(
-                items = strings,
-                type = "Make",
-                maximum = 28,
-                text = "How many would you like to make?",
-            )
-            val item = materials[index]
-            weave(target, item, amount)
-        }
-
-        itemOnObjectOperate(obj = "loom_*", arrive = false) {
-            if (!item.def.contains("weaving")) {
-                return@itemOnObjectOperate
-            }
-            val (_, amount) = makeAmount(
-                items = listOf(item.weaving.to),
-                type = "Make",
-                maximum = player.inventory.count(item.id) / item.weaving.amount,
-                text = "How many would you like to make?",
-            )
-            weave(target, item, amount)
-        }
+    @Option("Weave", "loom_*") // arrive = false
+    suspend fun operate(player: Player, target: GameObject) {
+        val strings = materials.map { it.weaving.to }
+        val (index, amount) = player.makeAmountIndex(
+            items = strings,
+            type = "Make",
+            maximum = 28,
+            text = "How many would you like to make?",
+        )
+        val item = materials[index]
+        startWeave(player, target, item, amount)
     }
 
-    fun Context<Player>.weave(obj: GameObject, item: Item, amount: Int) {
+    @UseOn(on = "loom_*") // arrive = false
+    suspend fun use(player: Player, target: GameObject, item: Item) {
+        if (!item.def.contains("weaving")) {
+            return
+        }
+        val (_, amount) = player.makeAmount(
+            items = listOf(item.weaving.to),
+            type = "Make",
+            maximum = player.inventory.count(item.id) / item.weaving.amount,
+            text = "How many would you like to make?",
+        )
+        startWeave(player, target, item, amount)
+    }
+
+    fun startWeave(player: Player, obj: GameObject, item: Item, amount: Int) {
         val data = item.weaving
         val current = player.inventory.count(item.id)
         if (current < data.amount) {

@@ -23,7 +23,7 @@ class HeadlessArrows {
                 return@itemOnItem
             }
             it.weakQueue("feather_to_shaft_dialog") {
-                val (selected, amount) = makeAmount(
+                val (selected, amount) = player.makeAmount(
                     listOf("headless_arrow"),
                     type = "Make sets: ",
                     maximum = 10,

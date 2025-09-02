@@ -14,9 +14,12 @@ import world.gregs.voidps.engine.map.collision.Collisions
 import world.gregs.voidps.engine.timer.*
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
+import world.gregs.voidps.type.TimerState
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.Spawn
+import world.gregs.voidps.type.sub.TimerStart
+import world.gregs.voidps.type.sub.TimerTick
 
-@Script
 class FishingSpot {
 
     val areas: AreaDefinitions by inject()
@@ -26,20 +29,21 @@ class FishingSpot {
     val water = CollisionStrategies.Blocked
     val land = CollisionStrategies.Normal
 
-    init {
-        npcSpawn("fishing_spot_*") { npc ->
-            npc.softTimers.start("fishing_spot_respawn")
-        }
+    @Spawn("fishing_spot_*")
+    fun spawn(npc: NPC) {
+        npc.softTimers.start("fishing_spot_respawn")
+    }
 
-        npcTimerStart("fishing_spot_respawn") {
-            // https://x.com/JagexAsh/status/1604892218380021761
-            interval = random.nextInt(280, 530)
-        }
+    @TimerStart("fishing_spot_respawn")
+    fun start(npc: NPC): Int {
+        // https://x.com/JagexAsh/status/1604892218380021761
+        return random.nextInt(280, 530)
+    }
 
-        npcTimerTick("fishing_spot_respawn") { npc ->
-            nextInterval = random.nextInt(280, 530)
-            move(npc)
-        }
+    @TimerTick("fishing_spot_respawn")
+    fun tick(npc: NPC): Int {
+        move(npc)
+        return random.nextInt(280, 530)
     }
 
     fun move(npc: NPC) {

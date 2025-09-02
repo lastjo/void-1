@@ -7,9 +7,8 @@ import world.gregs.voidps.type.sub.Consume
 class HolyBiscuits {
 
     @Consume("holy_biscuits")
-    fun eat(player: Player): Boolean {
+    fun eat(player: Player) {
         player.levels.restore(Skill.Prayer, 10)
-        return false
     }
 
 }

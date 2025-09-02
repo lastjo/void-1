@@ -14,7 +14,7 @@ private const val INTERFACE_ID = "dialogue_skill_creation"
 private const val INTERFACE_AMOUNT_ID = "skill_creation_amount"
 private const val DEFAULT_TEXT = "Choose how many you wish to make, then<br>click on the chosen item to begin."
 
-suspend fun Context<Player>.makeAmount(
+suspend fun Player.makeAmount(
     items: List<String>,
     type: String,
     maximum: Int,
@@ -27,7 +27,7 @@ suspend fun Context<Player>.makeAmount(
     return id to amount
 }
 
-suspend fun Context<Player>.makeAmountIndex(
+suspend fun Player.makeAmountIndex(
     items: List<String>,
     type: String,
     maximum: Int,
@@ -35,21 +35,21 @@ suspend fun Context<Player>.makeAmountIndex(
     allowAll: Boolean = true,
     names: List<String>? = null,
 ): Pair<Int, Int> {
-    check(player.open(INTERFACE_ID) && player.open(INTERFACE_AMOUNT_ID)) { "Unable to open make amount dialogue for $player" }
+    check(open(INTERFACE_ID) && open(INTERFACE_AMOUNT_ID)) { "Unable to open make amount dialogue for $this" }
     if (allowAll) {
-        player.interfaceOptions.unlockAll(INTERFACE_AMOUNT_ID, "all")
+        interfaceOptions.unlockAll(INTERFACE_AMOUNT_ID, "all")
     }
-    player.interfaces.sendVisibility(INTERFACE_ID, "all", allowAll)
-    player.interfaces.sendVisibility(INTERFACE_ID, "custom", false)
-    player.interfaces.sendText(INTERFACE_AMOUNT_ID, "line1", text)
-    player["skill_creation_type"] = type
+    interfaces.sendVisibility(INTERFACE_ID, "all", allowAll)
+    interfaces.sendVisibility(INTERFACE_ID, "custom", false)
+    interfaces.sendText(INTERFACE_AMOUNT_ID, "line1", text)
+    this["skill_creation_type"] = type
 
-    setItemOptions(player, items, names)
-    setMax(player, maximum.coerceAtLeast(1))
-    val choice: Int = IntSuspension.get(player)
-    player.close(INTERFACE_ID)
-    player.close(INTERFACE_AMOUNT_ID)
-    val amount = player["skill_creation_amount", 1]
+    setItemOptions(this, items, names)
+    setMax(this, maximum.coerceAtLeast(1))
+    val choice: Int = IntSuspension.get(this)
+    close(INTERFACE_ID)
+    close(INTERFACE_AMOUNT_ID)
+    val amount = this["skill_creation_amount", 1]
     return choice to amount
 }
 

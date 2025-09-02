@@ -25,7 +25,7 @@ class FletchUnfinished {
         itemOnItem("knife", "*logs*") {
             val displayItems = toItem.def.extras?.get("fletchables") as? List<String> ?: return@itemOnItem
             it.weakQueue("fletching_make_dialog") {
-                val (selected, amount) = makeAmount(
+                val (selected, amount) = player.makeAmount(
                     displayItems,
                     type = "Make",
                     maximum = 27,

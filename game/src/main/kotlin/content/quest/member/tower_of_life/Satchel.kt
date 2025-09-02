@@ -38,7 +38,6 @@ class Satchel {
         withdraw(player, itemSlot, charges, "triangle_sandwich", sandwich)
     }
 
-    @UseOn("*_satchel", "cake")
     @UseOn("cake", "*_satchel")
     fun cake(player: Player, fromItem: Item, fromSlot: Int, toSlot: Int) {
         val charges = player.inventory.charges(player, toSlot)
@@ -52,7 +51,6 @@ class Satchel {
         }
     }
 
-    @UseOn("*_satchel", "banana")
     @UseOn("banana", "*_satchel")
     fun banana(player: Player, fromItem: Item, fromSlot: Int, toSlot: Int) {
         val charges = player.inventory.charges(player, toSlot)
@@ -66,7 +64,6 @@ class Satchel {
         }
     }
 
-    @UseOn("*_satchel", "triangle_sandwich")
     @UseOn("triangle_sandwich", "*_satchel")
     fun sandwich(player: Player, fromItem: Item, fromSlot: Int, toSlot: Int) {
         val charges = player.inventory.charges(player, toSlot)

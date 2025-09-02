@@ -22,24 +22,21 @@ import world.gregs.voidps.type.sub.UseOn
 class Tea {
 
     @Consume("cup_of_tea")
-    fun tea(player: Player): Boolean {
+    fun tea(player: Player) {
         player.levels.boost(Skill.Attack, 3)
-        return false
     }
 
     @Consume("guthix_rest_4", "guthix_rest_3", "guthix_rest_2", "guthix_rest_1")
-    fun guthixRest(player: Player): Boolean {
+    fun guthixRest(player: Player) {
         if (player.poisoned) {
             player["poison_damage"] = player["poison_damage", 0] - 10
         }
         player.runEnergy += (MAX_RUN_ENERGY / 100) * 5
-        return false
     }
 
     @Consume("nettle_tea")
-    fun nettleTea(player: Player): Boolean {
+    fun nettleTea(player: Player) {
         player.runEnergy = (MAX_RUN_ENERGY / 100) * 5
-        return false
     }
 
     @Inventory("Look-in", "tea_flask")

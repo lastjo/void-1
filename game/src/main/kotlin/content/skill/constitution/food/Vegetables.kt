@@ -9,14 +9,12 @@ import world.gregs.voidps.type.sub.Consume
 class Vegetables {
 
     @Consume("cabbage")
-    fun cabbage(player: Player): Boolean {
+    fun cabbage(player: Player) {
         player.message("You don't really like it much.", ChatType.Filter)
-        return false
     }
 
     @Consume("onion")
-    fun onion(player: Player): Boolean {
+    fun onion(player: Player) {
         player.message("It hurts to see a grown ${if (player.male) "male" else "female"} cry.", ChatType.Filter)
-        return false
     }
 }

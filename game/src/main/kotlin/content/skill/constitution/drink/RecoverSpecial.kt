@@ -4,6 +4,7 @@ import content.entity.player.combat.special.MAX_SPECIAL_ATTACK
 import content.entity.player.combat.special.specialAttackEnergy
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.type.TimerState
 import world.gregs.voidps.type.sub.Consume
 import world.gregs.voidps.type.sub.TimerStart
 import world.gregs.voidps.type.sub.TimerStop
@@ -31,9 +32,9 @@ class RecoverSpecial {
     @TimerTick("recover_special")
     fun tick(player: Player): Int {
         if (player.dec("recover_special_delay") <= 0) {
-            return 0
+            return TimerState.CANCEL
         }
-        return -1
+        return TimerState.CONTINUE
     }
 
     @TimerStop("recover_special")

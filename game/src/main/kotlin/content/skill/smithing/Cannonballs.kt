@@ -38,7 +38,7 @@ class Cannonballs {
                 return@itemOnObjectOperate
             }
             val max = player.inventory.count("steel_bar")
-            val (item, amount) = makeAmount(listOf("cannonball"), "Make", max, names = listOf("Cannonball<br>(set of 4)"))
+            val (item, amount) = player.makeAmount(listOf("cannonball"), "Make", max, names = listOf("Cannonball<br>(set of 4)"))
             smelt(player, target, item, amount)
         }
     }

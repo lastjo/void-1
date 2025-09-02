@@ -7,9 +7,8 @@ import world.gregs.voidps.type.sub.Consume
 class PoisonKarambwan {
 
     @Consume("poison_karambwan")
-    fun eat(player: Player): Boolean {
+    fun eat(player: Player) {
         player.directHit(50, "poison")
-        return false
     }
 
 }

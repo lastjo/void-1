@@ -7,27 +7,24 @@ import world.gregs.voidps.type.sub.Consume
 class Bottled {
 
     @Consume("karamjan_rum")
-    fun rum(player: Player): Boolean {
+    fun rum(player: Player) {
         player.levels.boost(Skill.Strength, 5)
         player.levels.drain(Skill.Attack, 4)
-        return false
     }
 
     @Consume("vodka", "gin", "brandy", "whisky")
-    fun spirits(player: Player): Boolean {
+    fun spirits(player: Player) {
         player.levels.boost(Skill.Strength, 1, 0.05)
         player.levels.drain(Skill.Attack, 3, 0.02)
-        return false
     }
 
     @Consume("bottle_of_wine")
-    fun wine(player: Player): Boolean {
+    fun wine(player: Player) {
         player.levels.drain(Skill.Attack, 3)
-        return false
     }
 
     @Consume("braindeath_rum")
-    fun braindeath(player: Player): Boolean {
+    fun braindeath(player: Player) {
         player.levels.boost(Skill.Strength, 3)
         player.levels.boost(Skill.Mining, 1)
         player.levels.drain(Skill.Defence, multiplier = 0.10)
@@ -37,7 +34,6 @@ class Bottled {
         player.levels.drain(Skill.Magic, multiplier = 0.05)
         player.levels.drain(Skill.Agility, multiplier = 0.05)
         player.levels.drain(Skill.Herblore, multiplier = 0.05)
-        return false
     }
 
 }

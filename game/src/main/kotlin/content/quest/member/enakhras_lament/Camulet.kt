@@ -40,9 +40,8 @@ class Camulet(private val areas: AreaDefinitions) {
     }
 
    @UseOn("ugthanki_dung", "camulet")
-   fun use(player: Player, fromItem: Item, fromSlot: Int, toSlot: Int) {
-       val slot = if (fromItem.id == "camulet") fromSlot else toSlot
-       val charges = player.inventory.charges(player, slot)
+   fun use(player: Player, fromItem: Item, toSlot: Int) {
+       val charges = player.inventory.charges(player, toSlot)
        if (charges == 4) {
            player.message("Your Camulet already has 4 charges.")
            return

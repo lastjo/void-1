@@ -24,7 +24,7 @@ class BoneOffering {
             val tile = target.nearestTo(player.tile)
             val count = player.inventory.count(item.id)
             if (count > 1) {
-                val (_, amount) = makeAmount(listOf(item.id), "", count)
+                val (_, amount) = player.makeAmount(listOf(item.id), "", count)
                 offer(amount, tile)
             } else {
                 offer(1, tile)

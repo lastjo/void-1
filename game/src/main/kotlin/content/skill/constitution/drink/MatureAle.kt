@@ -9,80 +9,72 @@ import kotlin.math.ceil
 class MatureAle {
 
     @Consume("asgarnian_ale*")
-    fun asgarnian(player: Player, item: Item): Boolean {
+    fun asgarnian(player: Player, item: Item) {
         val mature = item.id.endsWith("_m")
         player.levels.boost(Skill.Strength, if (mature) 3 else 2)
         player.levels.drain(Skill.Attack, if (mature) 6 else 4)
-        return false
     }
 
     @Consume("axemans_folly*")
-    fun axemans(player: Player, item: Item): Boolean {
+    fun axemans(player: Player, item: Item) {
         val mature = item.id.endsWith("_m")
         player.levels.boost(Skill.Woodcutting, if (mature) 2 else 1)
         player.levels.drain(Skill.Attack, if (mature) 4 else 3)
         player.levels.drain(Skill.Strength, if (mature) 4 else 3)
-        return false
     }
 
     @Consume("chefs_delight*")
-    fun chefs(player: Player, item: Item): Boolean {
+    fun chefs(player: Player, item: Item) {
         val mature = item.id.endsWith("_m")
         val boost = ceil((player.levels.getMax(Skill.Cooking) + if (mature) 1 else 0) * 0.05).toInt()
         player.levels.boost(Skill.Cooking, boost)
         player.levels.drain(Skill.Attack, if (mature) 3 else 2)
         player.levels.drain(Skill.Strength, if (mature) 3 else 2)
-        return false
     }
 
     @Consume("*cider")
-    fun cider(player: Player, item: Item): Boolean {
+    fun cider(player: Player, item: Item) {
         val mature = item.id.startsWith("mature_")
         player.levels.boost(Skill.Farming, if (mature) 2 else 1)
         player.levels.drain(Skill.Attack, if (mature) 5 else 2)
         player.levels.drain(Skill.Strength, if (mature) 5 else 2)
-        return false
     }
 
     @Consume("dragon_bitter*")
-    fun bitter(player: Player, item: Item): Boolean {
+    fun bitter(player: Player, item: Item) {
         val mature = item.id.endsWith("_m")
         player.levels.boost(Skill.Strength, if (mature) 3 else 2)
         player.levels.drain(Skill.Attack, if (mature) 6 else 4)
-        return false
     }
 
     @Consume("dwarven_stout*")
-    fun stout(player: Player, item: Item): Boolean {
+    fun stout(player: Player, item: Item) {
         val mature = item.id.endsWith("_m")
         player.levels.boost(Skill.Smithing, if (mature) 2 else 1)
         player.levels.boost(Skill.Mining, if (mature) 2 else 1)
         player.levels.drain(Skill.Attack, if (mature) 7 else 2)
         player.levels.drain(Skill.Strength, if (mature) 7 else 2)
         player.levels.drain(Skill.Defence, if (mature) 7 else 2)
-        return false
     }
 
     @Consume("greenmans_ale*")
-    fun ale(player: Player, item: Item): Boolean {
+    fun ale(player: Player, item: Item) {
         val mature = item.id.endsWith("_m")
         player.levels.boost(Skill.Herblore, if (mature) 2 else 1)
         player.levels.drain(Skill.Attack, if (mature) 2 else 3)
         player.levels.drain(Skill.Strength, if (mature) 2 else 3)
-        return false
     }
 
     @Consume("slayers_respite*")
-    fun respite(player: Player, item: Item): Boolean {
+    fun respite(player: Player, item: Item) {
         val mature = item.id.endsWith("_m")
         player.levels.boost(Skill.Slayer, if (mature) 4 else 2)
         player.levels.drain(Skill.Attack, 2)
         player.levels.drain(Skill.Strength, 2)
-        return false
     }
 
     @Consume("*wizards_mind_bomb")
-    fun mindBomb(player: Player, item: Item): Boolean {
+    fun mindBomb(player: Player, item: Item) {
         val mature = item.id.startsWith("mature_")
         val boost = (if (player.levels.getMax(Skill.Magic) < 50) 2 else 3) + if (mature) 1 else 0
         player.levels.boost(Skill.Magic, boost)
@@ -93,7 +85,6 @@ class MatureAle {
             player.levels.drain(Skill.Attack, 1, 0.05)
             player.levels.drain(Skill.Strength, 1, 0.05)
         }
-        return false
     }
 
 }

@@ -8,35 +8,30 @@ import world.gregs.voidps.type.sub.Consume
 class Pies {
 
     @Consume("admiral_pie*")
-    fun admiral(player: Player): Boolean {
+    fun admiral(player: Player) {
         player.levels.boost(Skill.Fishing, 5)
-        return false
     }
 
     @Consume("fish_pie*")
-    fun fish(player: Player): Boolean {
+    fun fish(player: Player) {
         player.levels.boost(Skill.Fishing, 3)
-        return false
     }
 
     @Consume("garden_pie*")
-    fun garden(player: Player): Boolean {
+    fun garden(player: Player) {
         player.levels.boost(Skill.Farming, 5)
-        return false
     }
 
     @Consume("summer_pie*")
-    fun summer(player: Player): Boolean {
+    fun summer(player: Player) {
         player.runEnergy += (player.runEnergy / 100) * 10
         player.levels.boost(Skill.Agility, 5)
-        return false
     }
 
     @Consume("wild_pie*")
-    fun wild(player: Player): Boolean {
+    fun wild(player: Player) {
         player.levels.boost(Skill.Slayer, 4)
         player.levels.boost(Skill.Ranged, 4)
-        return false
     }
 
 }

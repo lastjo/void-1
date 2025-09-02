@@ -8,9 +8,6 @@ import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.chat.plural
 import world.gregs.voidps.engine.client.ui.closeDialogue
 import world.gregs.voidps.engine.client.ui.closeInterfaces
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.interact.itemOnItem
 import world.gregs.voidps.engine.data.config.ItemOnItemDefinition
 import world.gregs.voidps.engine.data.definition.ItemOnItemDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
@@ -21,7 +18,7 @@ import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.inject
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.Inventory
 import world.gregs.voidps.engine.inv.charges
 import world.gregs.voidps.engine.inv.inventory
@@ -31,7 +28,6 @@ import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.inv.transact.operation.SetCharge.setCharge
 import world.gregs.voidps.engine.queue.weakQueue
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Close
 import world.gregs.voidps.type.sub.Open
 import world.gregs.voidps.type.sub.UseOn
@@ -55,7 +51,7 @@ class ItemOnItems(private val itemOnItemDefs: ItemOnItemDefinitions) {
             } else {
                 val definition = overlaps.first()
                 val type = definition.type
-                val (selection, amount) = makeAmount(
+                val (selection, amount) = player.makeAmount(
                     overlaps.map { it.add.first().id }.distinct().toList(),
                     type = type.toSentenceCase(),
                     maximum = maximum,
@@ -143,7 +139,12 @@ class ItemOnItems(private val itemOnItemDefs: ItemOnItemDefinitions) {
             if (skill != null) {
                 player.exp(skill, def.xp)
             }
-            player.emit(ItemUsedOnItem(def))
+            for (item in def.requires) {
+                Publishers.all.publishPlayer(player, "craft_required", item.id)
+            }
+            for (item in def.add) {
+                Publishers.all.publishPlayer(player, "crafted", item.id)
+            }
         } else {
             if (def.failure.isNotEmpty()) {
                 player.message(def.failure, ChatType.Filter)

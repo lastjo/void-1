@@ -7,9 +7,8 @@ import world.gregs.voidps.type.sub.Consume
 class JugOfWine {
 
     @Consume("jug_of_wine")
-    fun drink(player: Player): Boolean {
+    fun drink(player: Player) {
         player.levels.drain(Skill.Attack, 2)
-        return false
     }
 
 }

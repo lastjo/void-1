@@ -8,6 +8,7 @@ import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.queue.queue
 import world.gregs.voidps.engine.timer.toTicks
+import world.gregs.voidps.type.TimerState
 import world.gregs.voidps.type.sub.*
 import java.util.concurrent.TimeUnit
 
@@ -77,12 +78,12 @@ class Overload {
     @TimerTick("overload")
     fun start(player: Player): Int {
         if (player.dec("overload_refreshes_remaining") <= 0) {
-            return 0
+            return TimerState.CANCEL
         }
         if (!player.inWilderness) {
             applyBoost(player)
         }
-        return -1
+        return TimerState.CONTINUE
     }
 
     @TimerStop("overload")

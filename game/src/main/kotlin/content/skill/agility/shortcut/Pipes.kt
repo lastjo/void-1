@@ -6,41 +6,43 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
+import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.ObjectOption
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class Pipes {
 
-    init {
-        objectOperate("Squeeze-through", "brimhaven_pipe_moss") {
-            if (target.tile.y == 9567 && !player.has(Skill.Agility, 22)) {
-                player.message("You need an Agility level of 22 to squeeze through the pipe.")
-                return@objectOperate
-            }
-            squeezeThroughVertical(9573, 9570, 9566, 8.5)
+    @Option("Squeeze-through", "brimhaven_pipe_moss")
+    suspend fun brimhavenMoss(player: Player, target: GameObject) {
+        if (target.tile.y == 9567 && !player.has(Skill.Agility, 22)) {
+            player.message("You need an Agility level of 22 to squeeze through the pipe.")
+            return
         }
-
-        objectOperate("Squeeze-through", "brimhaven_pipe_dragon") {
-            if (target.tile.y == 9498 && !player.has(Skill.Agility, 34)) {
-                player.message("You need an Agility level of 34 to squeeze through the pipe.")
-                return@objectOperate
-            }
-            squeezeThroughVertical(9499, 9495, 9492, 10.0)
-        }
-
-        objectOperate("Squeeze-through", "varrock_dungeon_pipe") {
-            if (!player.has(Skill.Agility, 51)) {
-                player.message("You need an Agility level of 51 to squeeze through the pipe.")
-                return@objectOperate
-            }
-            squeezeThroughHorizontal(3149, 3152, 3155, 10.0)
-        }
+        squeezeThroughVertical(player, target, 9573, 9570, 9566, 8.5)
     }
 
-    suspend fun ObjectOption<Player>.squeezeThroughVertical(north: Int, middle: Int, south: Int, exp: Double) {
+    @Option("Squeeze-through", "brimhaven_pipe_dragon")
+    suspend fun brimhavenDragon(player: Player, target: GameObject) {
+        if (target.tile.y == 9498 && !player.has(Skill.Agility, 34)) {
+            player.message("You need an Agility level of 34 to squeeze through the pipe.")
+            return
+        }
+        squeezeThroughVertical(player, target, 9499, 9495, 9492, 10.0)
+    }
+
+    @Option("Squeeze-through", "varrock_dungeon_pipe")
+    suspend fun varrock(player: Player, target: GameObject) {
+        if (!player.has(Skill.Agility, 51)) {
+            player.message("You need an Agility level of 51 to squeeze through the pipe.")
+            return
+        }
+        squeezeThroughHorizontal(player, target, 3149, 3152, 3155, 10.0)
+    }
+
+    suspend fun squeezeThroughVertical(player: Player, target: GameObject, north: Int, middle: Int, south: Int, exp: Double) {
         val above = player.tile.y >= middle
         val y = if (above) north else south
         val targetTile = target.tile.copy(y = if (above) south else north)
@@ -55,7 +57,7 @@ class Pipes {
         player.exp(Skill.Agility, exp)
     }
 
-    suspend fun ObjectOption<Player>.squeezeThroughHorizontal(east: Int, middle: Int, west: Int, exp: Double) {
+    suspend fun squeezeThroughHorizontal(player: Player, target: GameObject, east: Int, middle: Int, west: Int, exp: Double) {
         val right = player.tile.x < middle
         val targetTile = target.tile.copy(if (right) west else east)
         player.walkToDelay(target.tile.copy(if (right) east else west))

@@ -8,18 +8,17 @@ import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.type.Area
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.Spawn
 
-@Script
 class Fish {
 
     val minRespawnTick = 280
     val maxRespawnTick = 530
 
-    init {
-        npcSpawn("fishing_spot*") { npc ->
-            val area: Area = npc["area"] ?: return@npcSpawn
-            move(npc, area)
-        }
+    @Spawn("fishing_spot*")
+    fun spawn(npc: NPC) {
+        val area: Area = npc["area"] ?: return
+        move(npc, area)
     }
 
     fun move(npc: NPC, area: Area) {

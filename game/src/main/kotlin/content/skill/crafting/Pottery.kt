@@ -4,47 +4,45 @@ import content.entity.player.dialogue.type.makeAmount
 import content.entity.sound.sound
 import net.pearx.kasechange.toLowerSpaceCase
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interact.itemOnObjectOperate
 import world.gregs.voidps.engine.data.definition.data.Pottery
-import world.gregs.voidps.engine.entity.character.mode.interact.TargetInteraction
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.replace
 import world.gregs.voidps.engine.queue.weakQueue
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
+import world.gregs.voidps.type.sub.UseOn
 
-@Script
 class Pottery {
 
-    init {
-        itemOnObjectOperate("soft_clay", "potters_wheel*", arrive = false) {
-            make("spinning", item)
-        }
+    @UseOn("soft_clay", "potters_wheel*") // arrive = false
+    suspend fun spin(player: Player, target: GameObject, item: Item) {
+        make(player, target, "spinning", item)
+    }
 
-        itemOnObjectOperate(obj = "pottery_oven*", arrive = false) {
-            if (!item.def.contains("pottery")) {
-                return@itemOnObjectOperate
-            }
-            if (item.id != "soft_clay") {
-                make("cook_range", item)
-            }
+    @UseOn(on = "pottery_oven*") // arrive = false
+    suspend fun fire(player: Player, target: GameObject, item: Item) {
+        if (!item.def.contains("pottery")) {
+            return
         }
-
-        objectOperate("Fire", "pottery_oven*", arrive = false) {
-            val item = player.inventory.items.firstOrNull { it.def.contains("pottery") && it.id != "soft_clay" } ?: return@objectOperate
-            make("cook_range", item)
+        if (item.id != "soft_clay") {
+            make(player, target, "cook_range", item)
         }
     }
 
-    suspend fun TargetInteraction<Player, GameObject>.make(animation: String, item: Item) {
+    @Option("Fire", "pottery_oven*") // arrive = false
+    suspend fun operate(player: Player, target: GameObject) {
+        val item = player.inventory.items.firstOrNull { it.def.contains("pottery") && it.id != "soft_clay" } ?: return
+        make(player, target, "cook_range", item)
+    }
+
+    suspend fun make(player: Player, target: GameObject, animation: String, item: Item) {
         val pottery = item.def.getOrNull<Pottery>("pottery")?.map ?: return
-        val (id, amount) = makeAmount(
+        val (id, amount) = player.makeAmount(
             items = pottery.keys.toList(),
             type = "Make",
             maximum = 28,

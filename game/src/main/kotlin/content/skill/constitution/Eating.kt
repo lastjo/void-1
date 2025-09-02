@@ -9,28 +9,23 @@ import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.event.Publishers
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.inv.replace
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Consume
 import world.gregs.voidps.type.sub.Inventory
 
-@Script
-class Eating {
+class Eating(private val publishers: Publishers) {
 
-    val publishers: Publishers by inject()
-
-    @world.gregs.voidps.type.sub.Consume
-    fun consume(player: Player, item: Item): Boolean {
-        val range: IntRange = item.def.getOrNull("heals") ?: return false
+    @Consume
+    fun consume(player: Player, item: Item) {
+        val range: IntRange = item.def.getOrNull("heals") ?: return
         val amount = range.random()
         if (amount > 0) {
             if (player.levels.restore(Skill.Constitution, amount) > 0) {
                 player["om_nom_nom_nom_task"] = true
             }
         }
-        return false
     }
 
     @Inventory("Heal")

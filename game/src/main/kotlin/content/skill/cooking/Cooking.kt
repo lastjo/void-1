@@ -6,7 +6,7 @@ import net.pearx.kasechange.toSentenceCase
 import world.gregs.voidps.engine.GameLoop
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.closeDialogue
-import world.gregs.voidps.engine.client.ui.interact.itemOnObjectOperate
+import world.gregs.voidps.engine.client.ui.dialogue
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.data.definition.data.Uncooked
 import world.gregs.voidps.engine.entity.character.player.Player
@@ -20,52 +20,52 @@ import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.GameObjects
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.replace
 import world.gregs.voidps.engine.queue.weakQueue
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.UseOn
 
-@Script
-class Cooking {
+class Cooking(
+    private val definitions: ItemDefinitions,
+    private val objects: GameObjects,
+) {
 
-    val definitions: ItemDefinitions by inject()
-    val objects: GameObjects by inject()
+    private val GameObject.cookingRange: Boolean get() = id.startsWith("cooking_range")
 
-    val GameObject.cookingRange: Boolean get() = id.startsWith("cooking_range")
-
-    init {
-        itemOnObjectOperate(objects = setOf("fire_*", "cooking_range*")) {
-            val start = GameLoop.tick
-            var sinew = false
-            if (item.id == "raw_beef" && target.id.startsWith("cooking_range")) {
+    @UseOn(on = "fire_*")
+    @UseOn(on = "cooking_range*")
+    suspend fun use(player: Player, target: GameObject, item: Item) {
+        val start = GameLoop.tick
+        var sinew = false
+        if (item.id == "raw_beef" && target.id.startsWith("cooking_range")) {
+            player.dialogue {
                 val choice = choice(listOf("Dry the meat into sinew.", "Cook the meat."))
                 sinew = choice == 1
             }
-            val definition = if (sinew) {
-                definitions.get("sinew")
-            } else if (item.id == "sinew") {
-                return@itemOnObjectOperate
-            } else {
-                item.def
-            }
-            val cooking: Uncooked = definition.getOrNull("cooking") ?: return@itemOnObjectOperate
-            var amount = player.inventory.count(item.id)
-            if (amount != 1) {
-                amount = makeAmount(
-                    listOf(item.id),
-                    type = cooking.type.toSentenceCase(),
-                    maximum = player.inventory.count(item.id),
-                    text = "How many would you like to ${cooking.type}?",
-                ).second
-            }
-            val offset = (4 - (GameLoop.tick - start)).coerceAtLeast(0)
-            player.closeDialogue()
-            player.softTimers.start("cooking")
-            player.cook(item, amount, target, cooking, offset)
         }
+        val definition = if (sinew) {
+            definitions.get("sinew")
+        } else if (item.id == "sinew") {
+            return
+        } else {
+            item.def
+        }
+        val cooking: Uncooked = definition.getOrNull("cooking") ?: return
+        var amount = player.inventory.count(item.id)
+        if (amount != 1) {
+            amount = player.makeAmount(
+                listOf(item.id),
+                type = cooking.type.toSentenceCase(),
+                maximum = player.inventory.count(item.id),
+                text = "How many would you like to ${cooking.type}?",
+            ).second
+        }
+        val offset = (4 - (GameLoop.tick - start)).coerceAtLeast(0)
+        player.closeDialogue()
+        player.softTimers.start("cooking")
+        player.cook(item, amount, target, cooking, offset)
     }
 
     fun Player.cook(item: Item, count: Int, obj: GameObject, cooking: Uncooked, offset: Int? = null) {

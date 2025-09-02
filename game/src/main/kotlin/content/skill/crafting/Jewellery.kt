@@ -20,6 +20,7 @@ import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.item.Item
+import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.event.Context
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.TransactionError
@@ -27,8 +28,11 @@ import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.inv.transact.operation.ReplaceItem.replace
 import world.gregs.voidps.engine.queue.weakQueue
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Close
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.Refresh
+import world.gregs.voidps.type.sub.UseOn
 
-@Script
 class Jewellery {
 
     val moulds = listOf("ring", "necklace", "amulet_unstrung", "bracelet")
@@ -39,32 +43,30 @@ class Jewellery {
     val Item.jewellery: Jewellery?
         get() = def.getOrNull("jewellery")
 
-    init {
-        itemOnObjectOperate("*_mould", "furnace*", arrive = false) {
-            player.open("make_mould${if (World.members) "_slayer" else ""}")
-        }
-
-        interfaceRefresh("make_mould*") { player ->
-            makeMould(player)
-        }
-
-        interfaceOption("Make *", "make*", "make_mould*") {
-            val amount = when (option) {
-                "Make 1" -> 1
-                "Make 5" -> 5
-                "Make All" -> Int.MAX_VALUE
-                "Make X" -> intEntry("Enter amount:")
-                else -> return@interfaceOption
-            }
-            make(component, amount)
-        }
-
-        interfaceClose("make_mould*") { player ->
-            player.sendScript("clear_dialogues")
-        }
+    @UseOn("*_mould", "furnace*") // TODO arrive = false
+    fun use(player: Player, target: GameObject) {
+        player.open("make_mould${if (World.members) "_slayer" else ""}")
     }
 
-    fun InterfaceRefreshed.makeMould(player: Player) {
+    @Interface("Make *", "make*", "make_mould*")
+    suspend fun click(player: Player, component: String, option: String) = player.dialogue {
+        val amount = when (option) {
+            "Make 1" -> 1
+            "Make 5" -> 5
+            "Make All" -> Int.MAX_VALUE
+            "Make X" -> intEntry("Enter amount:")
+            else -> return@dialogue
+        }
+        make(component, amount)
+    }
+
+    @Close("make_mould*")
+    fun close(player: Player) {
+        player.sendScript("clear_dialogues")
+    }
+
+    @Refresh("make_mould*")
+    fun makeMould(player: Player, id: String) {
         for (type in moulds) {
             val showText = !player.inventory.contains("${type}_mould")
             player.interfaces.sendVisibility(id, "${type}_text", showText)

@@ -26,12 +26,12 @@ import java.util.concurrent.TimeUnit
 class Potions {
 
     @Consume("*_4", "*_3", "*_2", "*_1")
-    fun potion(player: Player, item: Item, itemSlot: Int): Boolean {
+    fun potion(player: Player, item: Item, itemSlot: Int){
         val doses = item.id.last().digitToInt()
         if (doses != 1) {
             player.message("You have ${doses - 1} ${"dose".plural(doses - 1)} of the potion left.")
             effects(player, item.id)
-            return false
+            return
         }
         player.message("You have finished your potion.")
         if (player.contains("smash_vials")) {
@@ -39,7 +39,6 @@ class Potions {
             player.message("You quickly smash the empty vial using the tick a Barbarian taught you.")
         }
         effects(player, item.id)
-        return false
     }
 
     fun hasHolyItem(player: Player) = player.equipped(EquipSlot.Cape).id.startsWith("prayer_cape") || player.holdsItem("holy_wrench")

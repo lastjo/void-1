@@ -2,13 +2,10 @@ package content.skill.firemaking
 
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.closeDialogue
-import world.gregs.voidps.engine.client.ui.interact.itemOnFloorItemOperate
-import world.gregs.voidps.engine.client.ui.interact.itemOnItem
 import world.gregs.voidps.engine.client.variable.remaining
 import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.data.definition.data.Fire
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
-import world.gregs.voidps.engine.entity.character.mode.interact.Interaction
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
@@ -24,52 +21,52 @@ import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.ObjectLayer
 import world.gregs.voidps.engine.entity.obj.ObjectShape
 import world.gregs.voidps.engine.event.Publishers
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.suspend.awaitDialogues
 import world.gregs.voidps.type.Direction
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
+import world.gregs.voidps.type.sub.Option
+import world.gregs.voidps.type.sub.UseOn
 
-@Script
-class Firemaking {
+class Firemaking(
+    private val floorItems: FloorItems,
+    private val objects: GameObjects,
+) {
 
-    val floorItems: FloorItems by inject()
-    val objects: GameObjects by inject()
-
-    val directions = listOf(Direction.WEST, Direction.EAST, Direction.SOUTH, Direction.NORTH)
+    private val directions = listOf(Direction.WEST, Direction.EAST, Direction.SOUTH, Direction.NORTH)
 
     val Item.burnable: Boolean
         get() = def.contains("firemaking")
 
-    init {
-        itemOnItem("tinderbox*", "*logs*") { player ->
-            val log = if (toItem.burnable) toItem else fromItem
-            val logSlot = if (toItem.burnable) toSlot else fromSlot
-            player.closeDialogue()
-            player.queue.clearWeak()
-            if (player.inventory.remove(logSlot, log.id)) {
-                val floorItem = floorItems.add(player.tile, log.id, disappearTicks = 300, owner = player)
-                Publishers.launch {
-                    Publishers.all.playerFloorItemOption(player, floorItem, "Light")
-                }
-                player.mode = Interact(player, floorItem, FloorItemOption(player, floorItem, "Light"))
+    @UseOn("tinderbox*", "*logs*")
+    fun burn(player: Player, fromItem: Item, fromSlot: Int, toItem: Item, toSlot: Int) {
+        val log = if (toItem.burnable) toItem else fromItem
+        val logSlot = if (toItem.burnable) toSlot else fromSlot
+        player.closeDialogue()
+        player.queue.clearWeak()
+        if (player.inventory.remove(logSlot, log.id)) {
+            val floorItem = floorItems.add(player.tile, log.id, disappearTicks = 300, owner = player)
+            Publishers.launch {
+                Publishers.all.playerFloorItemOption(player, floorItem, "Light")
             }
+            player.mode = Interact(player, floorItem, FloorItemOption(player, floorItem, "Light"))
         }
+    }
 
-        itemOnFloorItemOperate("tinderbox*", "*log*") {
-            if (floorItem.def.contains("firemaking")) {
-                lightFire(player, floorItem)
-            }
-        }
-
-        floorItemOperate("Light") {
+    @UseOn("tinderbox*", "*log*")
+    suspend fun burn(player: Player, target: FloorItem) {
+        if (target.def.contains("firemaking")) {
             lightFire(player, target)
         }
     }
 
-    suspend fun Interaction<Player>.lightFire(
+    @Option("Light")
+    suspend fun light(player: Player, target: FloorItem) {
+        lightFire(player, target)
+    }
+
+    suspend fun lightFire(
         player: Player,
         floorItem: FloorItem,
     ) {
@@ -80,7 +77,7 @@ class Firemaking {
         val log = Item(floorItem.id)
         val fire: Fire = log.def.getOrNull("firemaking") ?: return
         var first = true
-        while (awaitDialogues()) {
+        while (player.awaitDialogues()) {
             if (!player.canLight(log.id, fire, floorItem)) {
                 break
             }
@@ -92,9 +89,9 @@ class Firemaking {
                 }
                 player.anim("light_fire")
                 player.start("action_delay", 4)
-                pause(4)
+                player.pause(4)
             } else if (remaining > 0) {
-                pause(remaining)
+                player.pause(remaining)
             }
             if (Level.success(player.levels.get(Skill.Firemaking), fire.chance) && floorItems.remove(floorItem)) {
                 player.message("The fire catches and the logs begin to burn.", ChatType.Filter)

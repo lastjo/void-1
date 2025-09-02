@@ -85,7 +85,7 @@ class Furnace {
             player.message("You don't have any ores to smelt.")
             return
         }
-        val (item, amount) = makeAmount(available, "Make", max)
+        val (item, amount) = player.makeAmount(available, "Make", max)
         smelt(player, gameObject, item, amount)
     }
 

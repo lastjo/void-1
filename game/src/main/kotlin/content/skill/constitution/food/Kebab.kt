@@ -50,11 +50,10 @@ class Kebab {
     }
 
     @Consume("ugthanki_kebab")
-    fun ugthanki(player: Player): Boolean {
+    fun ugthanki(player: Player) {
         if (player.levels.get(Skill.Constitution) != player.levels.getMax(Skill.Constitution)) {
             player.say(phrases.random())
         }
-        return false
     }
 
 }
