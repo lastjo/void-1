@@ -11,7 +11,7 @@ data class Subscriber(
     val className: ClassName,
     val methodName: String,
     val parameters: List<Pair<String, TypeName>>,
-    val schema: Publisher,
+    val schema: PublisherMapping,
     val annotationArgs: Map<String, Any>,
     val classParams: List<Pair<String, TypeName>>,
     val returnType: String

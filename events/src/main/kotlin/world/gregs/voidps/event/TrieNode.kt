@@ -55,7 +55,7 @@ data class TrieNode(
     /**
      * Generate a nested if else statement for all [children]
      */
-    fun generate(context: Publisher, callOnly: Boolean = false, skipElse: Boolean = false): CodeBlock {
+    fun generate(context: PublisherMapping, callOnly: Boolean = false, skipElse: Boolean = false): CodeBlock {
         val block = CodeBlock.builder()
         if (condition != null) {
             val (string, args) = condition.statement()!!
@@ -80,7 +80,7 @@ data class TrieNode(
     /**
      * Build a block of [methods] with the appropriate return type.
      */
-    private fun codeBlock(context: Publisher): CodeBlock {
+    private fun codeBlock(context: PublisherMapping): CodeBlock {
         val block = CodeBlock.builder()
         if (!context.notification) {
             val branch = methods.firstOrNull()

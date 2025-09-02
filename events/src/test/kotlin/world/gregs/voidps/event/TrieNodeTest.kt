@@ -328,7 +328,7 @@ class TrieNodeTest {
 
     private fun emit(node: TrieNode, allowMultiple: Boolean, returnValue: Any = Unit, callOnly: Boolean = false): String {
         val cb = CodeBlock.builder()
-        val context = object : Publisher(
+        val context = object : PublisherMapping(
             name = "",
             notification = allowMultiple,
             returnsDefault = returnValue,

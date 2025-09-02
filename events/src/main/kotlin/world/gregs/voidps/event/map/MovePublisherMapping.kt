@@ -1,13 +1,13 @@
-package world.gregs.voidps.event.sub
+package world.gregs.voidps.event.map
 
 import world.gregs.voidps.event.Condition
 import world.gregs.voidps.event.Equals
-import world.gregs.voidps.event.Publisher
+import world.gregs.voidps.event.PublisherMapping
 import world.gregs.voidps.event.Subscriber
 import world.gregs.voidps.type.Tile
 import kotlin.reflect.KFunction
 
-class MovePublisher(function: KFunction<*>) : Publisher(function, notification = true) {
+class MovePublisherMapping(function: KFunction<*>) : PublisherMapping(function, notification = true) {
     override fun conditions(method: Subscriber): List<List<Condition>> {
         val from = method.annotationArgs["from"] as List<Int>
         val to = method.annotationArgs["to"] as List<Int>

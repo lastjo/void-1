@@ -7,14 +7,14 @@ import com.squareup.kotlinpoet.asClassName
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import world.gregs.voidps.event.PublisherProcessorIntegrationTest.Publishers
+import world.gregs.voidps.event.PublisherMappingProcessorIntegrationTest.Publishers
 
-class PublisherProcessorTest {
+class PublisherMappingProcessorTest {
 
     private val codeGenerator: CodeGenerator = mockk(relaxed = true)
     private val logger: KSPLogger = mockk(relaxed = true)
 
-    private val dummyPublisher = object : Publisher(
+    private val dummyMapping = object : PublisherMapping(
         name = "TestPublisher",
         suspendable = false,
         parameters = listOf("id" to STRING),
@@ -32,14 +32,14 @@ class PublisherProcessorTest {
     fun `Find schema matches expected parameters`() {
         val schemas = mapOf(
             "MyAnnotation" to listOf(
-                dummyPublisher,
+                dummyMapping,
             ),
         )
 
         val processor = PublisherProcessor(codeGenerator, logger, schemas, Publishers::class.asClassName())
         val found = processor.findSchema("MyAnnotation", listOf(Pair("id", STRING)))
 
-        assertEquals(dummyPublisher, found)
+        assertEquals(dummyMapping, found)
     }
 
     @Test

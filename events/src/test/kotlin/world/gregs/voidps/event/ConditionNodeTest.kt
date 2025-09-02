@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class ConditionNodeTest {
-    private val dummyPublisher = object : Publisher(
+    private val dummyMapping = object : PublisherMapping(
         name = "TestPublisher",
         suspendable = false,
         parameters = listOf("id" to ClassName("kotlin", "String")),
@@ -26,13 +26,13 @@ class ConditionNodeTest {
             className = ClassName("test", "MyHandler"),
             methodName = "onEvent",
             parameters = listOf("id" to STRING),
-            schema = dummyPublisher,
+            schema = dummyMapping,
             annotationArgs = emptyMap(),
             classParams = emptyList(),
             returnType = "kotlin.Unit",
         )
 
-        val root = ConditionNode.buildTree(dummyPublisher, listOf(subscriber))
+        val root = ConditionNode.buildTree(dummyMapping, listOf(subscriber))
 
         assertEquals(1, root.children.size)
         assertEquals(Equals("id", "123"), root.children.first().condition)
@@ -45,13 +45,13 @@ class ConditionNodeTest {
             className = ClassName("test", "MyHandler"),
             methodName = "onEvent",
             parameters = listOf("id" to STRING),
-            schema = dummyPublisher,
+            schema = dummyMapping,
             annotationArgs = emptyMap(),
             classParams = emptyList(),
             returnType = "kotlin.Unit",
         )
 
-        val args = dummyPublisher.arguments(subscriber)
+        val args = dummyMapping.arguments(subscriber)
         assertEquals(listOf(listOf("id")), args)
     }
 }

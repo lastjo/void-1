@@ -1,16 +1,16 @@
-package world.gregs.voidps.event.sub
+package world.gregs.voidps.event.map
 
 import world.gregs.voidps.event.Condition
 import world.gregs.voidps.event.Equals
-import world.gregs.voidps.event.Publisher
+import world.gregs.voidps.event.PublisherMapping
 import world.gregs.voidps.event.Subscriber
 import kotlin.reflect.KFunction
 
-open class IdPublisher(
+open class IdPublisherMapping(
     function: KFunction<*>,
     private val field: String = "id",
     notification: Boolean = false
-) : Publisher(function, notification = notification) {
+) : PublisherMapping(function, notification = notification) {
     override fun conditions(method: Subscriber): List<List<Condition>> {
         val ids = method.annotationArgs["ids"] as List<String>
         if (ids.isEmpty()) {

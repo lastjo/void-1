@@ -14,13 +14,13 @@ import java.util.*
 
 /**
  * Takes [Subscriber]s marked with annotations and generates:
- * 1. [Publisher] classes filled with if statements in order to publish events
+ * 1. [PublisherMapping] classes filled with if statements in order to publish events
  * 2. Publishers implementation with methods to call each individual Publisher class
  */
 class PublisherProcessor(
     private val codeGenerator: CodeGenerator,
     private val logger: KSPLogger,
-    private val schemas: Map<String, List<Publisher>>,
+    private val schemas: Map<String, List<PublisherMapping>>,
     private val superclass: ClassName,
 ) : SymbolProcessor {
 
@@ -92,7 +92,7 @@ class PublisherProcessor(
         return emptyList()
     }
 
-    private fun property(subs: List<Subscriber>, fieldName: String, schema: Publisher): PropertySpec {
+    private fun property(subs: List<Subscriber>, fieldName: String, schema: PublisherMapping): PropertySpec {
         val deps = subs.map { it.className.simpleName.replaceFirstChar { c -> c.lowercase() } }
             .distinct()
             .sorted()
@@ -139,7 +139,7 @@ class PublisherProcessor(
         return properties
     }
 
-    private fun overrideMethod(schema: Publisher, fieldName: String, check: Boolean): FunSpec {
+    private fun overrideMethod(schema: PublisherMapping, fieldName: String, check: Boolean): FunSpec {
         val method = FunSpec.builder(if (check) schema.checkMethodName!! else schema.methodName)
             .addModifiers(KModifier.OVERRIDE)
         if (schema.suspendable && !check) {
@@ -157,10 +157,10 @@ class PublisherProcessor(
     }
 
     /**
-     * Looks up the [Publisher] schema by matching the subscribing methods [args] against the [annotation]
-     * list of [Publisher.required] args
+     * Looks up the [PublisherMapping] schema by matching the subscribing methods [args] against the [annotation]
+     * list of [PublisherMapping.required] args
      */
-    fun findSchema(annotation: String, args: List<Pair<String, TypeName>>): Publisher? {
+    fun findSchema(annotation: String, args: List<Pair<String, TypeName>>): PublisherMapping? {
         val publishers = schemas[annotation] ?: return null
         for (publisher in publishers) {
             if (publisher.required.isEmpty()) {

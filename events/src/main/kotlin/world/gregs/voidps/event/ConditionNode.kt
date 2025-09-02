@@ -8,7 +8,7 @@ data class ConditionNode(
     val subscribers: MutableList<Subscriber> = mutableListOf(),
 ) {
 
-    fun generate(builder: CodeBlock.Builder, schema: Publisher) {
+    fun generate(builder: CodeBlock.Builder, schema: PublisherMapping) {
         if (children.isEmpty()) {
             leaf(schema, builder)
             return
@@ -43,7 +43,7 @@ data class ConditionNode(
         }
     }
 
-    private fun leaf(schema: Publisher, builder: CodeBlock.Builder) {
+    private fun leaf(schema: PublisherMapping, builder: CodeBlock.Builder) {
         val cancellable = subscribers.filter { it.returnType != "kotlin.Unit" }
         if (cancellable.isNotEmpty()) {
             builder.add("handled = handled")
@@ -83,7 +83,7 @@ data class ConditionNode(
          *      "Teleport - "aubury"
          *                - "sedridor"
          */
-        fun buildTree(schema: Publisher, methods: List<Subscriber>): ConditionNode {
+        fun buildTree(schema: PublisherMapping, methods: List<Subscriber>): ConditionNode {
             val root = ConditionNode()
             for (method in methods) {
                 val comparisons = schema.conditions(method)

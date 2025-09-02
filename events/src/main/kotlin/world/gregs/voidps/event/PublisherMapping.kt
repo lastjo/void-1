@@ -1,6 +1,5 @@
 package world.gregs.voidps.event
 
-import com.google.devtools.ksp.processing.KSPLogger
 import com.squareup.kotlinpoet.*
 import java.util.*
 import kotlin.reflect.KFunction
@@ -10,7 +9,7 @@ import kotlin.reflect.KParameter
  * Contains the mapping from a [Subscriber] method and [Annotation] into a number of [Method]s
  * @param required used to look up the schema based on the parameters given
  */
-abstract class Publisher(
+abstract class PublisherMapping(
     val name: String,
     val suspendable: Boolean = false,
     val parameters: List<Pair<String, TypeName>>,

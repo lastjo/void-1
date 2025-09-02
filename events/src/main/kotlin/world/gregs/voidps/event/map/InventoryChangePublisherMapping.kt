@@ -1,12 +1,12 @@
-package world.gregs.voidps.event.sub
+package world.gregs.voidps.event.map
 
 import world.gregs.voidps.event.Condition
 import world.gregs.voidps.event.Equals
-import world.gregs.voidps.event.Publisher
+import world.gregs.voidps.event.PublisherMapping
 import world.gregs.voidps.event.Subscriber
 import kotlin.reflect.KFunction
 
-class InventoryChangePublisher(function: KFunction<*>) : Publisher(function, notification = true) {
+class InventoryChangePublisherMapping(function: KFunction<*>) : PublisherMapping(function, notification = true) {
     override fun conditions(method: Subscriber): List<List<Condition>> {
         val slot = method.annotationArgs["slot"] as Int
         val inventory = method.annotationArgs["inventory"] as String

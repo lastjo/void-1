@@ -1,11 +1,10 @@
-package world.gregs.voidps.event.sub
+package world.gregs.voidps.event.map
 
-import com.google.devtools.ksp.processing.KSPLogger
 import com.squareup.kotlinpoet.TypeName
 import world.gregs.voidps.event.*
 import kotlin.reflect.KFunction
 
-class InterfaceOnPublisher(function: KFunction<*>, has: KFunction<*>) : Publisher(function, has, notification = true) {
+class InterfaceOnPublisherMapping(function: KFunction<*>, has: KFunction<*>) : PublisherMapping(function, has, notification = true) {
     override fun conditions(method: Subscriber): List<List<Condition>> {
         val item = method.annotationArgs["item"] as String
         val on = method.annotationArgs["on"] as String

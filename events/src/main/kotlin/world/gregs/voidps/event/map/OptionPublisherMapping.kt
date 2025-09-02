@@ -1,12 +1,12 @@
-package world.gregs.voidps.event.sub
+package world.gregs.voidps.event.map
 
 import world.gregs.voidps.event.Condition
 import world.gregs.voidps.event.Equals
-import world.gregs.voidps.event.Publisher
+import world.gregs.voidps.event.PublisherMapping
 import world.gregs.voidps.event.Subscriber
 import kotlin.reflect.KFunction
 
-class OptionPublisher(function: KFunction<*>, has: KFunction<*>) : Publisher(function, has) {
+class OptionPublisherMapping(function: KFunction<*>, has: KFunction<*>) : PublisherMapping(function, has) {
     override fun conditions(method: Subscriber): List<List<Condition>> {
         val option = method.annotationArgs["option"] as String
         val ids = method.annotationArgs["ids"] as List<String>

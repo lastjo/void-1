@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import kotlin.reflect.KFunction
 
-class PublisherProcessorIntegrationTest {
+class PublisherMappingProcessorIntegrationTest {
 
     abstract class Publishers {
         open suspend fun onEventSuspendInteract(id: String, name: String = "", approach: Boolean = false): Boolean = false
@@ -68,14 +68,14 @@ class PublisherProcessorIntegrationTest {
         messageOutputStream = System.out
     }
 
-    private class OnEventPublisher(
+    private class OnEventPublisherMapping(
         notification: Boolean = false,
         suspend: Boolean = false,
         default: Any = false,
         interaction: Boolean = false,
         cancellable: Boolean = false,
         required: List<TypeName>,
-    ) : Publisher(
+    ) : PublisherMapping(
         name = "OnEventPublisher",
         parameters = listOf(
             "id" to STRING,
@@ -106,9 +106,9 @@ class PublisherProcessorIntegrationTest {
         }
     }
 
-    private class OnMagicEventPublisher(
+    private class OnMagicEventPublisherMapping(
         function: KFunction<*>, hasFunction: KFunction<*>? = null, notification: Boolean = false, cancellable: Boolean = false, returnsDefault: Any? = null
-    ) : Publisher(function, hasFunction, notification, cancellable, returnsDefault) {
+    ) : PublisherMapping(function, hasFunction, notification, cancellable, returnsDefault) {
         override fun conditions(method: Subscriber): List<List<Condition>> {
             // Supports optional multiple annotation values
             val values = (method.annotationArgs["value"] as? List<String>)
@@ -131,7 +131,7 @@ class PublisherProcessorIntegrationTest {
             superclass = Publishers::class.asClassName(),
             schemas = mapOf(
                 "test.OnEvent" to listOf(
-                    OnEventPublisher(notification, suspend, default, interaction, cancellable, required),
+                    OnEventPublisherMapping(notification, suspend, default, interaction, cancellable, required),
                 ),
             ),
         )
@@ -146,7 +146,7 @@ class PublisherProcessorIntegrationTest {
             superclass = Publishers::class.asClassName(),
             schemas = mapOf(
                 "test.OnEvent" to listOf(
-                    OnMagicEventPublisher(function, hasFunction, notification, cancellable, returnsDefault),
+                    OnMagicEventPublisherMapping(function, hasFunction, notification, cancellable, returnsDefault),
                 ),
             ),
         )
