@@ -22,4 +22,5 @@ annotation class UseOn(
     val id: String = "*",
     val component: String = "*",
     val approach: Boolean = false,
+    val bidirectional: Boolean = true, // Only applies for item on item
 )

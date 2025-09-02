@@ -1,0 +1,166 @@
+package world.gregs.voidps.event
+
+import com.squareup.kotlinpoet.CodeBlock
+import java.util.TreeSet
+
+/**
+ * A nested trie storing [Method]'s in order of specificity ([Method.conditions] length)
+ * that can be used to [generate] valid if else statement code
+ */
+data class TrieNode(
+    val condition: Condition? = null,
+    val children: MutableSet<TrieNode> = TreeSet(Comparator<TrieNode> { a, b ->
+        when {
+            a.condition != null && b.condition == null -> -1 // a comes first (has condition)
+            a.condition == null && b.condition != null -> 1  // b comes first (has condition)
+            else -> {
+                // Both have conditions, sort by depth of branches (more conditions = higher priority)
+                val maxDepthA = a.maxDepth()
+                val maxDepthB = b.maxDepth()
+                val depthCompare = maxDepthB.compareTo(maxDepthA) // deeper first
+                if (depthCompare != 0) {
+                    depthCompare
+                } else {
+                    // Same depth, sort alphabetically for consistency
+                    a.condition!!.expression().compareTo(b.condition!!.expression())
+                }
+            }
+        }
+    }),
+    val methods: MutableSet<Method> = TreeSet(Comparator<Method> { a, b ->
+        val specA = a.conditions.size
+        val specB = b.conditions.size
+        if (specA != specB) {
+            specB - specA
+        } else {
+            val expected = a.conditions.joinToString { it.expression() }.compareTo(b.conditions.joinToString { it.expression() })
+            if (expected == 0) {
+                a.method().compareTo(b.methodName)
+            } else {
+                expected
+            }
+        }
+    }),
+) {
+    private fun maxDepth(): Int {
+        if (methods.isNotEmpty()) {
+            return methods.maxOf { it.conditions.size }
+        }
+        if (children.isEmpty()) {
+            return 0
+        }
+        return children.maxOf { it.maxDepth() }
+    }
+
+    /**
+     * Generate a nested if else statement for all [children]
+     */
+    fun generate(context: TrieContext, callOnly: Boolean = false, skipElse: Boolean = false): CodeBlock {
+        val block = CodeBlock.builder()
+        if (condition != null) {
+            block.beginControlFlow("${if (skipElse) "" else "else "}if (${condition.expression()})")
+        }
+        var first = true
+        for (child in children) {
+            block.add(child.generate(context, callOnly, first))
+            first = false
+        }
+        if (callOnly) {
+            block.addStatement("return ${methods.isNotEmpty()}")
+        } else {
+            block.add(codeBlock(context))
+        }
+        if (condition != null) {
+            block.endControlFlow()
+        }
+        return block.build()
+    }
+
+    /**
+     * Build a block of [methods] with the appropriate return type.
+     */
+    private fun codeBlock(context: TrieContext): CodeBlock {
+        val block = CodeBlock.builder()
+        if (!context.allowMultiple) {
+            val branch = methods.firstOrNull()
+            if (branch == null) {
+                block.addStatement("return ${context.defaultReturnValue}")
+            } else if (context.defaultReturnValue == Unit) {
+                block.addStatement(branch.method())
+                block.addStatement("return")
+                return block.build()
+            } else if (branch.methodReturnType == context.returnType) {
+                block.addStatement("return ${branch.method()}")
+            } else {
+                block.addStatement(branch.method())
+                block.addStatement("return ${context.defaultReturnValue}")
+            }
+            return block.build()
+        }
+        if (context.defaultReturnValue == Unit) {
+            for (branch in methods) {
+                block.addStatement(branch.method())
+            }
+            block.addStatement("return")
+            return block.build()
+        }
+        if (methods.none { it.methodReturnType == context.returnType }) {
+            for (branch in methods) {
+                block.addStatement(branch.method())
+            }
+            block.addStatement("return ${context.defaultReturnValue}")
+            return block.build()
+        }
+        if (methods.size == 1 && methods.all { it.methodReturnType == context.returnType }) {
+            // Single return optimization
+            val branch = methods.first()
+            block.addStatement("return ${branch.method()}")
+            return block.build()
+        }
+        block.addStatement("var value = ${context.defaultReturnValue}")
+        var first = true
+        for (branch in methods) {
+            if (branch.methodReturnType != context.returnType) {
+                // Ignore differing returned values
+                block.addStatement(branch.method())
+                continue
+            }
+            if (context.defaultReturnValue == false) {
+                // Boolean optimization
+                block.addStatement("value = value || ${branch.method()}")
+                continue
+            }
+            block.addStatement("${if (first) "var " else ""}result = ${branch.method()}")
+            block.addStatement("if (result != ${context.defaultReturnValue}) {")
+            block.addStatement("    value = result")
+            block.addStatement("}")
+            if (first) {
+                first = false
+            }
+        }
+        block.addStatement("return value")
+        return block.build()
+    }
+
+    /**
+     * Insert a [method] into the trie, optionally [allowMultiple] methods per leaf node
+     */
+    fun insert(method: Method, allowMultiple: Boolean = true) {
+        insertConditions(method.conditions, 0, method, allowMultiple)
+    }
+
+    private fun insertConditions(comparators: List<Condition>, idx: Int, method: Method, allowMultiple: Boolean) {
+        if (idx >= comparators.size) {
+            if (!allowMultiple && methods.size > 0) {
+                error("Method already exists for conditions: $method")
+            }
+            methods += method
+            return
+        }
+        val cond = comparators[idx]
+        val child = children.firstOrNull { it.condition?.expression() == cond.expression() }
+            ?: TrieNode(cond).also { children += it }
+        child.insertConditions(comparators, idx + 1, method, allowMultiple)
+    }
+
+}

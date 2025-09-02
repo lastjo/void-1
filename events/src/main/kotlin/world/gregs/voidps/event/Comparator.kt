@@ -6,6 +6,7 @@ sealed interface Comparator {
     val key: String
     val value: Any?
     fun statement(): Statement?
+    fun emitTest(): String = ""
 }
 
 data class Equals(override val key: String, override val value: Any?, val simplify: Boolean = true) : Comparator {

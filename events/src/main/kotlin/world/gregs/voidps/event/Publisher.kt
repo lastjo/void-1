@@ -6,6 +6,7 @@ import kotlin.reflect.KParameter
 
 /**
  * Contains the mapping from a [Subscriber] method and [Annotation] into a generated Publisher class
+ * @param required used to look up the schema based on the parameters given
  */
 abstract class Publisher(
     val name: String,
@@ -20,6 +21,20 @@ abstract class Publisher(
     val checkMethodName: String? = null,
 ) {
 
+    /*
+        Takes in annotated methods
+        for each annotation
+            For each annotated method
+                generate list of conditions -> method call with arguments
+                insert into tree
+            parse tree into code
+                if notification
+                else
+
+
+         for each method
+         add to publishers
+     */
     constructor(function: KFunction<*>, hasFunction: KFunction<*>? = null, notification: Boolean = false, cancellable: Boolean = false, returnsDefault: Any? = null) : this(
         name = "${function.name.replaceFirstChar { it.uppercase() }}Publisher",
         parameters = function.parameters.filter { it.kind == KParameter.Kind.VALUE }.map {
@@ -57,6 +72,30 @@ abstract class Publisher(
         if (interaction) {
             assert(parameters.any { it.first == "approach" }) { "Interactions must contain an approach/operate toggle." }
         }
+    }
+
+    /**
+     * Map arguments between what the [method] wants and what the [schema] has.
+     * Match by name first, fallback to type if names aren't identical.
+     */
+    open fun arguments(method: Subscriber): List<List<String>> {
+        val count = mutableMapOf<TypeName, Int>()
+        for ((_, type) in parameters) {
+            count[type] = count.getOrDefault(type, 0) + 1
+        }
+        return match(method, count)
+    }
+
+    open fun match(method: Subscriber, count: MutableMap<TypeName, Int>): List<List<String>> {
+        return listOf(method.parameters.map { (name, type) ->
+            if (count.getOrDefault(type, 0) > 1) {
+                // match by name
+                parameters.firstOrNull { it.first == name }
+            } else {
+                // match by type
+                parameters.firstOrNull { it.second == type }
+            }?.first ?: error("Expected parameter [${parameters.filter { it.second == type }.joinToString(", ") { it.first }}] for ${method.methodName}($name: ${type.toString().substringAfter(".")}) in ${method.className}.")
+        })
     }
 
     abstract fun comparisons(method: Subscriber): List<List<Comparator>>
@@ -151,11 +190,13 @@ abstract class Publisher(
         if (check) {
             builder.addStatement("else -> ${if (returnSomething) "" else "return "}false")
         } else {
-            val args = ConditionNode.arguments(method, this)
+            val list = arguments(method)
             val methodName = method.className.simpleName.replaceFirstChar { it.lowercase() }
             if (!returnSomething && method.returnType == "kotlin.Unit") {
                 builder.addStatement("else -> {")
-                builder.addStatement("  $methodName.%L(${args.joinToString(", ")})", method.methodName)
+                for (args in list) {
+                    builder.addStatement("  $methodName.%L(${args.joinToString(", ")})", method.methodName)
+                }
                 if (method.schema.returnsDefault is String) {
                     builder.addStatement("  return %S", method.schema.returnsDefault)
                 } else {
@@ -163,6 +204,8 @@ abstract class Publisher(
                 }
                 builder.addStatement("}")
             } else {
+                val args = list.first()
+                assert(list.size < 2) { "Multi else return type list args not supported" }
                 builder.addStatement(
                     "else -> ${if (returnSomething) "" else "return "}$methodName.%L(${args.joinToString(", ")})",
                     method.methodName,
@@ -186,10 +229,12 @@ abstract class Publisher(
             if (check) {
                 builder.addStatement("{}")
             } else {
-                val args = ConditionNode.arguments(method, this)
+                val list = arguments(method)
                 if (returnSomething && method.returnType == "kotlin.Unit") {
                     builder.addStatement("{")
-                    builder.addStatement("  $methodName.%L(${args.joinToString(", ")})", method.methodName)
+                    for (args in list) {
+                        builder.addStatement("  $methodName.%L(${args.joinToString(", ")})", method.methodName)
+                    }
                     if (method.schema.returnsDefault is String) {
                         builder.addStatement("  %S", method.schema.returnsDefault)
                     } else {
@@ -197,10 +242,10 @@ abstract class Publisher(
                     }
                     builder.addStatement("}")
                 } else {
-                    builder.addStatement(
-                        "$methodName.%L(${args.joinToString(", ")})",
-                        method.methodName,
-                    )
+                    assert(list.size < 2) { "Multi else return type list args not supported" }
+                    for (args in list) {
+                        builder.addStatement("$methodName.%L(${args.joinToString(", ")})", method.methodName,)
+                    }
                 }
             }
         }

@@ -1,7 +1,6 @@
 package world.gregs.voidps.event
 
 import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.TypeName
 
 data class ConditionNode(
     val comparator: Comparator? = null,
@@ -49,9 +48,11 @@ data class ConditionNode(
         if (cancellable.isNotEmpty()) {
             builder.add("handled = handled")
             for (sub in cancellable) {
-                val args = arguments(sub, schema)
+                val list = schema.arguments(sub)
                 val methodName = sub.className.simpleName.replaceFirstChar { it.lowercase() }
-                builder.addStatement(" || %L.%L(${args.joinToString(", ")})", methodName, sub.methodName)
+                for (args in list) {
+                    builder.addStatement(" || %L.%L(${args.joinToString(", ")})", methodName, sub.methodName)
+                }
             }
         }
         val uncancellable = subscribers.filter { it.returnType == "kotlin.Unit" }
@@ -60,9 +61,11 @@ data class ConditionNode(
                 builder.addStatement("if (!handled) {")
             }
             for (sub in uncancellable) {
-                val args = arguments(sub, schema)
+                val list = schema.arguments(sub)
                 val methodName = sub.className.simpleName.replaceFirstChar { it.lowercase() }
-                builder.addStatement("%L.%L(${args.joinToString(", ")})", methodName, sub.methodName)
+                for (args in list) {
+                    builder.addStatement("%L.%L(${args.joinToString(", ")})", methodName, sub.methodName)
+                }
             }
             if (cancellable.isNotEmpty()) {
                 builder.addStatement("}")
@@ -99,26 +102,6 @@ data class ConditionNode(
                 }
             }
             return root
-        }
-
-        /**
-         * Map arguments between what the [method] wants and what the [schema] has.
-         * Match by name first, fallback to type if names aren't identical.
-         */
-        fun arguments(method: Subscriber, schema: Publisher): List<String> {
-            val count = mutableMapOf<TypeName, Int>()
-            for ((_, type) in schema.parameters) {
-                count[type] = count.getOrDefault(type, 0) + 1
-            }
-            return method.parameters.map { (name, type) ->
-                if (count.getOrDefault(type, 0) > 1) {
-                    // match by name
-                    schema.parameters.firstOrNull { it.first == name }
-                } else {
-                    // match by type
-                    schema.parameters.firstOrNull { it.second == type }
-                }?.first ?: error("Expected parameter [${schema.parameters.filter { it.second == type }.joinToString(", ") { it.first }}] for ${method.methodName}($name: ${type.toString().substringAfter(".")}) in ${method.className}.")
-            }
         }
     }
 }

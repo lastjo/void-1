@@ -5,7 +5,7 @@ import com.squareup.kotlinpoet.STRING
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class ConditionNodeTest {
+class ComparatorNodeTest {
     private val dummyPublisher = object : Publisher(
         name = "TestPublisher",
         suspendable = false,
@@ -51,7 +51,7 @@ class ConditionNodeTest {
             returnType = "kotlin.Unit",
         )
 
-        val args = ConditionNode.arguments(subscriber, dummyPublisher)
+        val args = dummyPublisher.arguments(subscriber)
         assertEquals(listOf("id"), args)
     }
 }

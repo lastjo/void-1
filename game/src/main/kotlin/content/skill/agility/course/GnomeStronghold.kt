@@ -46,7 +46,7 @@ class GnomeStronghold(private val npcs: NPCs) {
         player.exp(Skill.Agility, 7.5)
     }
 
-    @Option("Climb-over", "gnome_obstacle_net")
+    @Option("Climb", "gnome_tree_branch_up")
     suspend fun climbBranch(player: Player, target: GameObject) {
         npcs.gnomeTrainer("That's it - straight up", listOf(Zone(5069109), Zone(5071157)))
         player.message("You climb the tree...", ChatType.Filter)

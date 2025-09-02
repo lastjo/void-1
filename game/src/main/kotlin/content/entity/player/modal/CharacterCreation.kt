@@ -37,6 +37,19 @@ class CharacterCreation(
         for (i in 1 until 20) {
             player.sendInventory("character_creation_$i")
         }
+        player["makeover_female"] = !player.body.male
+        player["makeover_hair"] = player.body.getLook(BodyPart.Hair)
+        player["makeover_beard"] = player.body.getLook(BodyPart.Beard)
+        player["makeover_top"] = player.body.getLook(BodyPart.Chest)
+        player["makeover_arms"] = player.body.getLook(BodyPart.Arms)
+        player["makeover_wrists"] = player.body.getLook(BodyPart.Hands)
+        player["makeover_legs"] = player.body.getLook(BodyPart.Legs)
+        player["makeover_shoes"] = player.body.getLook(BodyPart.Feet)
+        player["makeover_colour_hair"] = player.body.getColour(BodyColour.Hair)
+        player["makeover_colour_top"] = player.body.getColour(BodyColour.Top)
+        player["makeover_colour_legs"] = player.body.getColour(BodyColour.Legs)
+        player["makeover_colour_shoes"] = player.body.getColour(BodyColour.Feet)
+        player["makeover_colour_skin"] = player.body.getColour(BodyColour.Skin)
     }
 
     @Close("character_creation")
@@ -115,23 +128,6 @@ class CharacterCreation(
         }
         player["character_creation_colour_offset"] = 0
         player["makeover_$part"] = value
-    }
-
-    @Open("character_creation")
-    fun open(player: Player) {
-        player["makeover_female"] = !player.body.male
-        player["makeover_hair"] = player.body.getLook(BodyPart.Hair)
-        player["makeover_beard"] = player.body.getLook(BodyPart.Beard)
-        player["makeover_top"] = player.body.getLook(BodyPart.Chest)
-        player["makeover_arms"] = player.body.getLook(BodyPart.Arms)
-        player["makeover_wrists"] = player.body.getLook(BodyPart.Hands)
-        player["makeover_legs"] = player.body.getLook(BodyPart.Legs)
-        player["makeover_shoes"] = player.body.getLook(BodyPart.Feet)
-        player["makeover_colour_hair"] = player.body.getColour(BodyColour.Hair)
-        player["makeover_colour_top"] = player.body.getColour(BodyColour.Top)
-        player["makeover_colour_legs"] = player.body.getColour(BodyColour.Legs)
-        player["makeover_colour_shoes"] = player.body.getColour(BodyColour.Feet)
-        player["makeover_colour_skin"] = player.body.getColour(BodyColour.Skin)
     }
 
     @Interface(component = "confirm", id = "character_creation")

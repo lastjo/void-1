@@ -12,6 +12,7 @@ import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.queue.strongQueue
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.sub.Teleport
+import world.gregs.voidps.type.sub.TeleportLand
 
 class Ectopool(private val teleports: ObjectTeleports) {
 
@@ -25,7 +26,7 @@ class Ectopool(private val teleports: ObjectTeleports) {
         return 1
     }
 
-    @Teleport("Jump-down", "ectopool_shortcut_rail")
+    @TeleportLand("Jump-down", "ectopool_shortcut_rail")
     fun land(player: Player, target: GameObject) {
         player.anim("jump_land")
     }

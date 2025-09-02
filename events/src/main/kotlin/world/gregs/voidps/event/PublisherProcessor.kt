@@ -11,6 +11,7 @@ import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
 import world.gregs.voidps.engine.event.Publishers
 import java.util.*
+import kotlin.math.log
 
 /**
  * Takes [Subscriber]s marked with annotations and generates:
@@ -32,6 +33,7 @@ class PublisherProcessor(
         val allScripts = mutableMapOf<String, ClassName>()
         val allDependencies = TreeMap<TypeName, String>()
         allDependencies[Publishers::class.asTypeName()] = "this"
+        val producer = PublisherProducer()
         var total = 0
         var count = 0
         for (annotation in annotations) {
@@ -42,16 +44,40 @@ class PublisherProcessor(
             if (subscriptions.isEmpty()) {
                 continue
             }
-            for ((schema, methods) in subscriptions) {
-                total += methods.size
+            for ((schema, subs) in subscriptions) {
                 count++
+                val context = TrieContext(
+                    name = schema.name,
+                    allowMultiple = schema.notification,
+                    returnType = schema.returnsDefault::class.simpleName!!,
+                    defaultReturnValue = schema.returnsDefault,
+                    suspendable = schema.suspendable,
+                    methodParams = schema.parameters,
+                    checkMethod = schema.interaction,
+                )
+
+                val methods = subs.flatMap {
+                    schema.comparisons(it).map { comparisons ->
+                        Method(
+                            conditions = comparisons.map { EqualsCond(it.key, it.value) },
+                            suspendable = schema.suspendable,
+                            className = it.className,
+                            methodName = it.methodName,
+                            arguments = schema.arguments(it).first(),
+                            methodReturnType = it.returnType,
+                        )
+                    }
+
+                }
+                logger.info("${schema.name} ${methods}")
+                total += methods.size
+
+                logger.info("Methods: ${methods.map { it.method() }}")
+                val publisherClass = producer.produce(context, methods)
+
                 // Create a class per schema
-                val classBuilder = TypeSpec.classBuilder(schema.name)
-                val constructor = FunSpec.constructorBuilder()
-                val dependencies = TreeMap<String, ClassName>()
-                for (method in methods) {
+                for (method in subs) {
                     val methodName = method.className.simpleName.replaceFirstChar { it.lowercase() }
-                    dependencies[methodName] = method.className
                     if (allScripts.putIfAbsent(methodName, method.className) == null) {
                         // Add all params to publisher classes
                         for ((_, type) in method.classParams) {
@@ -70,26 +96,12 @@ class PublisherProcessor(
                         )
                     }
                 }
-                // Add dependencies to class constructor
-                for ((methodName, className) in dependencies) {
-                    constructor.addParameter(methodName, className)
-                    classBuilder.addProperty(
-                        PropertySpec.builder(methodName, className)
-                            .addModifiers(KModifier.PRIVATE)
-                            .initializer(methodName)
-                            .build(),
-                    )
-                }
-                classBuilder.primaryConstructor(constructor.build())
-                if (schema.interaction) {
-                    classBuilder.addFunction(schema.generate(methods, check = true))
-                }
-                classBuilder.addFunction(schema.generate(methods, check = false))
+
                 val fileSpec = FileSpec.builder("world.gregs.voidps.engine.script", schema.name)
-                fileSpec.addType(classBuilder.build())
+                fileSpec.addType(publisherClass)
 
                 // Create variables for each publisher
-                val deps = methods.map { it.className.simpleName.replaceFirstChar { c -> c.lowercase() } }
+                val deps = subs.map { it.className.simpleName.replaceFirstChar { c -> c.lowercase() } }
                     .distinct()
                     .sorted()
                     .joinToString(", ")

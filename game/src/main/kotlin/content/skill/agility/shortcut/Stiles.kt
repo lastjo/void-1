@@ -45,7 +45,7 @@ class Stiles {
         climbStile(player, target, rotation)
     }
 
-    @Option("Climb-over", "vinesweeper_stile")
+    @Option("Climb-over", "falador_crumbling_wall")
     suspend fun climbFaladorWall(player: Player, target: GameObject) {
         if (!player.has(Skill.Agility, 5)) {
             player.obstacle(5)
