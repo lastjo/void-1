@@ -8,7 +8,6 @@ interface Condition {
     fun statement(): Statement?
 }
 
-
 data class Equals(override val key: String, override val value: Any?, val simplify: Boolean = true) : Condition {
     override fun statement(): Statement? {
         return when (value) {
@@ -31,7 +30,7 @@ data class Equals(override val key: String, override val value: Any?, val simpli
 
 data class Contains(override val key: String, override val value: Any?) : Condition {
     override fun statement(): Statement {
-        return if(value is String) {
+        return if (value is String) {
             Statement("$key.contains(%S)", arrayOf(value))
         } else {
             Statement("$key.contains(%L)", arrayOf(value))
