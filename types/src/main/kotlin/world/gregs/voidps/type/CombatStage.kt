@@ -25,4 +25,9 @@ object CombatStage {
      * Hit is applied to target
      */
     const val DAMAGE = 4
+
+    /**
+     * End of combat
+     */
+    const val STOP = 5
 }

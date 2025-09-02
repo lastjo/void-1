@@ -56,6 +56,27 @@ class Combat {
         }
     }
 
+    @Combat(stage = CombatStage.START)
+    fun start(source: Character, target: Character) {
+        if (target.inSingleCombat) {
+            target.attackers.clear()
+            target.attacker = source
+        }
+        target.attackers.add(source)
+        retaliate(target, source)
+    }
+
+    @Combat(stage = CombatStage.STOP)
+    fun stop(source: Character, target: Character) {
+        if (target.dead) {
+            source["face_entity"] = target
+        } else {
+            source.clearWatch()
+        }
+        source.target?.attackers?.remove(source)
+        source.target = null
+    }
+
 
     init {
         onEvent<CombatInteraction<*>> {
@@ -64,25 +85,6 @@ class Combat {
 
         onEvent<Character, CombatReached> { character ->
             combat(character, target)
-        }
-
-        characterCombatStart { character ->
-            if (target.inSingleCombat) {
-                target.attackers.clear()
-                target.attacker = character
-            }
-            target.attackers.add(character)
-            retaliate(target, character)
-        }
-
-        characterCombatStop { character ->
-            if (target.dead) {
-                character["face_entity"] = target
-            } else {
-                character.clearWatch()
-            }
-            character.target?.attackers?.remove(character)
-            character.target = null
         }
     }
 

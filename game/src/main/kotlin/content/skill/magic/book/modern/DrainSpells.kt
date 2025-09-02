@@ -1,23 +1,18 @@
 package content.skill.magic.book.modern
 
-import content.entity.combat.characterCombatPrepare
 import content.skill.magic.spell.Spell
 import content.skill.magic.spell.spell
 import world.gregs.voidps.engine.data.definition.SpellDefinitions
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.engine.entity.character.Character
+import world.gregs.voidps.type.CombatStage
+import world.gregs.voidps.type.sub.Combat
 
-@Script
-class DrainSpells {
+class DrainSpells(private val spellDefinitions: SpellDefinitions) {
 
-    val spellDefinitions: SpellDefinitions by inject()
-
-    init {
-        characterCombatPrepare("magic") { character ->
-            val definition = spellDefinitions.get(character.spell)
-            if (definition.contains("drain_skill") && !Spell.canDrain(target, definition)) {
-                cancel()
-            }
-        }
+    @Combat(type = "magic", stage = CombatStage.PREPARE)
+    fun prepare(source: Character, target: Character): Boolean {
+        val definition = spellDefinitions.get(source.spell)
+        return definition.contains("drain_skill") && !Spell.canDrain(target, definition)
     }
+
 }

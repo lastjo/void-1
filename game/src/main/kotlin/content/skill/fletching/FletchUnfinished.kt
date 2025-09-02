@@ -9,38 +9,35 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
-import world.gregs.voidps.engine.inject
+import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.queue.weakQueue
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.UseOn
 
-@Script
-class FletchUnfinished {
+class FletchUnfinished(
+    private val itemDefinitions: ItemDefinitions
+) {
 
-    val itemDefinitions: ItemDefinitions by inject()
-
-    init {
-        itemOnItem("knife", "*logs*") {
-            val displayItems = toItem.def.extras?.get("fletchables") as? List<String> ?: return@itemOnItem
-            it.weakQueue("fletching_make_dialog") {
-                val (selected, amount) = player.makeAmount(
-                    displayItems,
-                    type = "Make",
-                    maximum = 27,
-                    text = "What would you like to fletch?",
-                )
-                val itemToFletch: Fletching = itemDefinitions.get(selected).getOrNull("fletching_unf") ?: return@weakQueue
-                if (!it.has(Skill.Fletching, itemToFletch.level, true)) {
-                    return@weakQueue
-                }
-                fletch(it, selected, itemToFletch, toItem.id, amount)
+    @UseOn("knife", "*logs*")
+    fun use(player: Player, fromItem: Item, toItem: Item) {
+        val displayItems = toItem.def.extras?.get("fletchables") as? List<String> ?: return
+        player.weakQueue("fletching_make_dialog") {
+            val (selected, amount) = this.player.makeAmount(
+                displayItems,
+                type = "Make",
+                maximum = 27,
+                text = "What would you like to fletch?",
+            )
+            val itemToFletch: Fletching = itemDefinitions.get(selected).getOrNull("fletching_unf") ?: return@weakQueue
+            if (!player.has(Skill.Fletching, itemToFletch.level, true)) {
+                return@weakQueue
             }
+            fletch(player, selected, itemToFletch, toItem.id, amount)
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
     fun fletch(player: Player, addItem: String, addItemDef: Fletching, removeItem: String, amount: Int) {
         if (amount <= 0) {
             player.softTimers.stop("fletching")

@@ -15,7 +15,7 @@ import world.gregs.voidps.engine.inv.replace
 import world.gregs.voidps.type.sub.Consume
 import world.gregs.voidps.type.sub.Inventory
 
-class Eating(private val publishers: Publishers) {
+class Eating {
 
     @Consume
     fun consume(player: Player, item: Item) {

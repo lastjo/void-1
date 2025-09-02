@@ -15,7 +15,9 @@ import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.cantReach
 import world.gregs.voidps.engine.entity.item.Item
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.map.Overlap
+import world.gregs.voidps.type.CombatStage
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Tile
 
@@ -113,6 +115,7 @@ class CombatMovement(
 
     override fun stop(replacement: Mode) {
         if (replacement !is CombatMovement || replacement.target != target) {
+            Publishers.all.combatAttack(character, target, stage = CombatStage.STOP)
             character.emit(CombatStop(target))
         }
     }

@@ -41,7 +41,7 @@ internal class MakeAmountTest : DialogueTest() {
         every { player["skill_creation_amount", 1] } returns 3
         var result: Pair<String, Int>? = null
         dialogue {
-            result = makeAmount(listOf("1", "2", "3"), "ants", 25)
+            result = player.makeAmount(listOf("1", "2", "3"), "ants", 25)
         }
         val suspend = player.dialogueSuspension as IntSuspension
         suspend.resume(1)
@@ -69,7 +69,7 @@ internal class MakeAmountTest : DialogueTest() {
     fun `Persistent amount exceeding maximum will be capped`() {
         player.variables.set("skill_creation_amount", 30)
         dialogue {
-            makeAmount(listOf("1", "2", "3"), "ants", 25)
+            player.makeAmount(listOf("1", "2", "3"), "ants", 25)
         }
         verify {
             player["skill_creation_maximum"] = 25
@@ -82,7 +82,7 @@ internal class MakeAmountTest : DialogueTest() {
         every { player.open("dialogue_skill_creation") } returns false
         assertThrows<IllegalStateException> {
             dialogueBlocking {
-                makeAmount(listOf("1", "2", "3"), "ants", 25)
+                player.makeAmount(listOf("1", "2", "3"), "ants", 25)
             }
         }
         verify(exactly = 0) {
@@ -95,7 +95,7 @@ internal class MakeAmountTest : DialogueTest() {
         every { player.open("skill_creation_amount") } returns false
         assertThrows<IllegalStateException> {
             dialogueBlocking {
-                makeAmount(listOf("1", "2", "3"), "ants", 25)
+                player.makeAmount(listOf("1", "2", "3"), "ants", 25)
             }
         }
         coVerify(exactly = 0) {
@@ -106,7 +106,7 @@ internal class MakeAmountTest : DialogueTest() {
     @Test
     fun `Make amount send text`() {
         dialogue {
-            makeAmount(listOf("1", "2", "3"), "ants", 25, text = "Just a test")
+            player.makeAmount(listOf("1", "2", "3"), "ants", 25, text = "Just a test")
         }
         verify {
             interfaces.sendText("skill_creation_amount", "line1", "Just a test")
@@ -119,7 +119,7 @@ internal class MakeAmountTest : DialogueTest() {
     @Test
     fun `Hide 'all' button`() {
         dialogue {
-            makeAmount(listOf("1", "2", "3"), "ants", 25, text = "test", allowAll = false)
+            player.makeAmount(listOf("1", "2", "3"), "ants", 25, text = "test", allowAll = false)
         }
         verify(exactly = 0) {
             interfaceOptions.unlockAll("skill_creation_amount", "all")

@@ -3,7 +3,7 @@ package world.gregs.voidps.event.map
 import world.gregs.voidps.event.*
 import kotlin.reflect.KFunction
 
-class CombatPublisherMapping(function: KFunction<*>) : PublisherMapping(function, notification = true) {
+class CombatPublisherMapping(function: KFunction<*>) : PublisherMapping(function, notification = true, cancellable = true) {
     override fun conditions(method: Subscriber): List<List<Condition>> {
         val weapon = method.annotationArgs["weapon"] as String
         val type = method.annotationArgs["type"] as String

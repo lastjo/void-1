@@ -11,6 +11,7 @@ import world.gregs.voidps.type.CombatStage
  * @param stage The [CombatStage] during a combat interaction when the subscriber will be called
  *
  */
+@Repeatable
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.SOURCE)
 annotation class Combat(

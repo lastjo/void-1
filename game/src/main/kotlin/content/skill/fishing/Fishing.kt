@@ -34,7 +34,7 @@ import world.gregs.voidps.type.sub.Option
 
 class Fishing(private val itemDefinitions: ItemDefinitions) {
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("Fishing")
 
     val NPC.spot: Map<String, Spot>
         get() = def["fishing", emptyMap()]

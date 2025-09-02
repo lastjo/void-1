@@ -6,31 +6,30 @@ import world.gregs.voidps.engine.client.ui.interact.itemOnItem
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
+import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.queue.weakQueue
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.UseOn
 
-@Script
 class HeadlessArrows {
 
-    init {
-        itemOnItem("feather", "arrow_shaft") {
-            if (fromItem.amount <= 15 || toItem.amount <= 15) {
-                val amountToMake = minOf(fromItem.amount, toItem.amount)
-                makeImmediately(it, "headless_arrow", amountToMake)
-                return@itemOnItem
-            }
-            it.weakQueue("feather_to_shaft_dialog") {
-                val (selected, amount) = player.makeAmount(
-                    listOf("headless_arrow"),
-                    type = "Make sets: ",
-                    maximum = 10,
-                    text = "How many sets of 15 do you wish to feather?",
-                )
-                makeHeadlessArrows(player, selected, amount)
-            }
+    @UseOn("feather", "arrow_shaft")
+    fun use(player: Player, fromItem: Item, toItem: Item) {
+        if (fromItem.amount <= 15 || toItem.amount <= 15) {
+            val amountToMake = minOf(fromItem.amount, toItem.amount)
+            makeImmediately(player, "headless_arrow", amountToMake)
+            return
+        }
+        player.weakQueue("feather_to_shaft_dialog") {
+            val (selected, amount) = this.player.makeAmount(
+                listOf("headless_arrow"),
+                type = "Make sets: ",
+                maximum = 10,
+                text = "How many sets of 15 do you wish to feather?",
+            )
+            makeHeadlessArrows(this.player, selected, amount)
         }
     }
 
