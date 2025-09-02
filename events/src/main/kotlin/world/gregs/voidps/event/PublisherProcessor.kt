@@ -11,7 +11,6 @@ import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
 import world.gregs.voidps.engine.event.Publishers
 import java.util.*
-import kotlin.math.log
 
 /**
  * Takes [Subscriber]s marked with annotations and generates:
@@ -33,7 +32,6 @@ class PublisherProcessor(
         val allScripts = mutableMapOf<String, ClassName>()
         val allDependencies = TreeMap<TypeName, String>()
         allDependencies[Publishers::class.asTypeName()] = "this"
-        val producer = PublisherProducer()
         var total = 0
         var count = 0
         for (annotation in annotations) {
@@ -45,81 +43,24 @@ class PublisherProcessor(
                 continue
             }
             for ((schema, subs) in subscriptions) {
-                count++
-                val context = TrieContext(
-                    name = schema.name,
-                    allowMultiple = schema.notification,
-                    returnType = schema.returnsDefault::class.simpleName!!,
-                    defaultReturnValue = schema.returnsDefault,
-                    suspendable = schema.suspendable,
-                    methodParams = schema.parameters,
-                    checkMethod = schema.interaction,
-                )
-
-                val methods = subs.flatMap {
-                    schema.comparisons(it).map { comparisons ->
-                        Method(
-                            conditions = comparisons.map { EqualsCond(it.key, it.value) },
-                            suspendable = schema.suspendable,
-                            className = it.className,
-                            methodName = it.methodName,
-                            arguments = schema.arguments(it).first(),
-                            methodReturnType = it.returnType,
-                        )
-                    }
-
-                }
-                logger.info("${schema.name} ${methods}")
+                val methods = subs.flatMap { schema.methods(it) }
                 total += methods.size
+                count++
 
-                logger.info("Methods: ${methods.map { it.method() }}")
-                val publisherClass = producer.produce(context, methods)
-
-                // Create a class per schema
-                for (method in subs) {
-                    val methodName = method.className.simpleName.replaceFirstChar { it.lowercase() }
-                    if (allScripts.putIfAbsent(methodName, method.className) == null) {
-                        // Add all params to publisher classes
-                        for ((_, type) in method.classParams) {
-                            val name = (type as ClassName).simpleName.replace("NPC", "Npc").replaceFirstChar { it.lowercase() }
-                            allDependencies.putIfAbsent(type, name)
-                        }
-                        // Initialize scripts classes as variables with injected params
-                        val classParams = method.classParams.joinToString(", ") {
-                            allDependencies.getValue(it.second)
-                        }
-                        mainClass.addProperty(
-                            PropertySpec.builder(methodName, method.className)
-                                .addModifiers(KModifier.PRIVATE)
-                                .initializer("${method.className.simpleName}($classParams)")
-                                .build(),
-                        )
-                    }
+                val properties = extractProperties(subs, allScripts, allDependencies)
+                for (property in properties) {
+                    mainClass.addProperty(property)
                 }
 
                 val fileSpec = FileSpec.builder("world.gregs.voidps.engine.script", schema.name)
-                fileSpec.addType(publisherClass)
+                fileSpec.addType(schema.produce(methods))
 
                 // Create variables for each publisher
-                val deps = subs.map { it.className.simpleName.replaceFirstChar { c -> c.lowercase() } }
-                    .distinct()
-                    .sorted()
-                    .joinToString(", ")
                 val fieldName = schema.name.replaceFirstChar { it.lowercase() }
-                mainClass.addProperty(
-                    PropertySpec.builder(
-                        fieldName,
-                        ClassName("world.gregs.voidps.engine.script", schema.name),
-                    )
-                        .addModifiers(KModifier.PRIVATE)
-                        .initializer("${schema.name}($deps)")
-                        .build(),
-                )
-                if (schema.methodName != "") {
-                    mainClass.addFunction(overrideMethod(schema, fieldName, check = false))
-                    if (schema.interaction) {
-                        mainClass.addFunction(overrideMethod(schema, fieldName, check = true))
-                    }
+                mainClass.addProperty(property(subs, fieldName, schema))
+                mainClass.addFunction(overrideMethod(schema, fieldName, check = false))
+                if (schema.interaction) {
+                    mainClass.addFunction(overrideMethod(schema, fieldName, check = true))
                 }
                 try {
                     fileSpec.build().writeTo(codeGenerator, Dependencies(false))
@@ -132,25 +73,12 @@ class PublisherProcessor(
             logger.info("Not symbols found; skipping.")
             return emptyList()
         }
+
         // Add all dependencies to main constructor
-        val constructor = FunSpec.constructorBuilder()
-        for ((type, param) in allDependencies) {
-            if (param == "this") {
-                continue
-            }
-            constructor.addParameter(param, type)
-        }
-        mainClass.primaryConstructor(constructor.build())
-        mainClass.addProperty(
-            PropertySpec.builder("subscriptions", INT)
-                .initializer(total.toString())
-                .build(),
-        )
-        mainClass.addProperty(
-            PropertySpec.builder("publishers", INT)
-                .initializer(count.toString())
-                .build(),
-        )
+        mainClass.primaryConstructor(constructor(allDependencies))
+        // Statistics
+        mainClass.addProperty(PropertySpec.builder("subscriptions", INT).initializer(total.toString()).build())
+        mainClass.addProperty(PropertySpec.builder("publishers", INT).initializer(count.toString()).build(),)
 
         // Save main file
         val fileSpec = FileSpec.builder("world.gregs.voidps.engine.script", "PublishersImpl")
@@ -162,6 +90,53 @@ class PublisherProcessor(
         }
         logger.info("PublisherProcessor took ${System.currentTimeMillis() - start} ms")
         return emptyList()
+    }
+
+    private fun property(subs: List<Subscriber>, fieldName: String, schema: Publisher): PropertySpec {
+        val deps = subs.map { it.className.simpleName.replaceFirstChar { c -> c.lowercase() } }
+            .distinct()
+            .sorted()
+            .joinToString(", ")
+        return PropertySpec.builder(fieldName, ClassName("world.gregs.voidps.engine.script", schema.name))
+            .addModifiers(KModifier.PRIVATE)
+            .initializer("${schema.name}($deps)")
+            .build()
+    }
+
+    private fun constructor(allDependencies: TreeMap<TypeName, String>): FunSpec {
+        val constructor = FunSpec.constructorBuilder()
+        for ((type, param) in allDependencies) {
+            if (param == "this") {
+                continue
+            }
+            constructor.addParameter(param, type)
+        }
+        return constructor.build()
+    }
+
+    private fun extractProperties(subs: List<Subscriber>, scripts: MutableMap<String, ClassName>, dependencies: MutableMap<TypeName, String>): List<PropertySpec> {
+        val properties = mutableListOf<PropertySpec>()
+        for (method in subs) {
+            val methodName = method.className.simpleName.replaceFirstChar { it.lowercase() }
+            if (scripts.putIfAbsent(methodName, method.className) == null) {
+                // Add all params to publisher classes
+                for ((_, type) in method.classParams) {
+                    val name = (type as ClassName).simpleName.replace("NPC", "Npc").replaceFirstChar { it.lowercase() }
+                    dependencies.putIfAbsent(type, name)
+                }
+                // Initialize scripts classes as variables with injected params
+                val classParams = method.classParams.joinToString(", ") {
+                    dependencies.getValue(it.second)
+                }
+                properties.add(
+                    PropertySpec.builder(methodName, method.className)
+                        .addModifiers(KModifier.PRIVATE)
+                        .initializer("${method.className.simpleName}($classParams)")
+                        .build()
+                )
+            }
+        }
+        return properties
     }
 
     private fun overrideMethod(schema: Publisher, fieldName: String, check: Boolean): FunSpec {
@@ -186,7 +161,7 @@ class PublisherProcessor(
      * list of [Publisher.required] args
      */
     fun findSchema(annotation: String, args: List<Pair<String, TypeName>>): Publisher? {
-        val publishers = schemas[annotation] ?: error("No schema found for annotation: $annotation.")
+        val publishers = schemas[annotation] ?: return null
         for (publisher in publishers) {
             if (publisher.required.isEmpty()) {
                 return publisher

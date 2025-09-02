@@ -1,18 +1,18 @@
 package world.gregs.voidps.event.sub
 
-import world.gregs.voidps.event.Comparator
+import world.gregs.voidps.event.Condition
 import world.gregs.voidps.event.Equals
 import world.gregs.voidps.event.Publisher
 import world.gregs.voidps.event.Subscriber
 import kotlin.reflect.KFunction
 
 class InventorySwapPublisher(function: KFunction<*>) : Publisher(function, notification = true) {
-    override fun comparisons(method: Subscriber): List<List<Comparator>> {
+    override fun conditions(method: Subscriber): List<List<Condition>> {
         val fromId = method.annotationArgs["fromId"] as String
         val fromComponent = method.annotationArgs["fromComponent"] as String
         val toId = method.annotationArgs["toId"] as String
         val toComponent = method.annotationArgs["toComponent"] as String
-        val list = mutableListOf<Comparator>()
+        val list = mutableListOf<Condition>()
         if (fromId != "*") {
             list.add(Equals("id", fromId))
         }

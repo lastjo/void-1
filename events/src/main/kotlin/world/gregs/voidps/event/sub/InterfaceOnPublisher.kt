@@ -1,21 +1,19 @@
 package world.gregs.voidps.event.sub
 
+import com.google.devtools.ksp.processing.KSPLogger
 import com.squareup.kotlinpoet.TypeName
-import world.gregs.voidps.event.Comparator
-import world.gregs.voidps.event.Equals
-import world.gregs.voidps.event.Publisher
-import world.gregs.voidps.event.Subscriber
+import world.gregs.voidps.event.*
 import kotlin.reflect.KFunction
 
 class InterfaceOnPublisher(function: KFunction<*>, has: KFunction<*>) : Publisher(function, has, notification = true) {
-    override fun comparisons(method: Subscriber): List<List<Comparator>> {
+    override fun conditions(method: Subscriber): List<List<Condition>> {
         val item = method.annotationArgs["item"] as String
         val on = method.annotationArgs["on"] as String
         val id = method.annotationArgs["id"] as String
         val component = method.annotationArgs["component"] as String
         val approach = method.annotationArgs["approach"] as Boolean
-
-        val list = mutableListOf<Comparator>()
+        val list = mutableListOf<Condition>()
+        list.add(Equals("approach", approach))
         if (item != "*") {
             list.add(Equals(if (name == "InterfaceOnItemPublisher") "fromItem.id" else "item.id", item))
         }
@@ -32,31 +30,32 @@ class InterfaceOnPublisher(function: KFunction<*>, has: KFunction<*>) : Publishe
         if (component != "*") {
             list.add(Equals("component", component))
         }
-        list.add(Equals("approach", approach))
         return listOf(list)
     }
 
-
-    override fun match(method: Subscriber, count: MutableMap<TypeName, Int>): List<List<String>> {
-        if (this.name == "InterfaceOnItemPublisher" && method.annotationArgs["bidirectional"] as Boolean) {
-            return super.match(method, count) + listOf(method.parameters.map { (name, type) ->
-                if (count.getOrDefault(type, 0) > 1) {
-                    val override = when (name) {
-                        "fromItem" -> "toItem"
-                        "toItem" -> "fromItem"
-                        "fromSlot" -> "toSlot"
-                        "toSlot" -> "fromSlot"
-                        else -> name
-                    }
-                    // match by name
-                    parameters.firstOrNull { it.first == override }
-                } else {
-                    // match by type
-                    parameters.firstOrNull { it.second == type }
-                }?.first ?: error("Expected parameter [${parameters.filter { it.second == type }.joinToString(", ") { it.first }}] for ${method.methodName}($name: ${type.toString().substringAfter(".")}) in ${method.className}.")
-            })
+    override fun methods(subscriber: Subscriber): List<Method> {
+        val conditions = conditions(subscriber).first()
+        val methods = mutableListOf<Method>()
+        val count = mutableMapOf<TypeName, Int>()
+        for ((_, type) in parameters) {
+            count[type] = count.getOrDefault(type, 0) + 1
         }
-        return super.match(method, count)
+        if (this.name == "InterfaceOnItemPublisher" && subscriber.annotationArgs["bidirectional"] as Boolean) {
+            val args = matchNames(subscriber.parameters.map {
+                when (it.first) {
+                    "fromItem" -> "toItem"
+                    "toItem" -> "fromItem"
+                    "fromSlot" -> "toSlot"
+                    "toSlot" -> "fromSlot"
+                    else -> it.first
+                } to it.second
+            }, count, subscriber)
+            val flipped = conditions.map { Equals(if (it.key == "toItem.id") "fromItem.id" else if (it.key == "fromItem.id") "toItem.id" else it.key, it.value) }
+            methods.add(Method(flipped, suspendable, subscriber.className, subscriber.methodName, args, subscriber.returnType))
+        }
+        val args = matchNames(subscriber.parameters, count, subscriber)
+        methods.add(Method(conditions, suspendable, subscriber.className, subscriber.methodName, args, subscriber.returnType))
+        return methods
     }
 
 }

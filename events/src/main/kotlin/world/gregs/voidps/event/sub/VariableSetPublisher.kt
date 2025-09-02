@@ -1,13 +1,13 @@
 package world.gregs.voidps.event.sub
 
-import world.gregs.voidps.event.Comparator
+import world.gregs.voidps.event.Condition
 import world.gregs.voidps.event.Equals
 import world.gregs.voidps.event.Publisher
 import world.gregs.voidps.event.Subscriber
 import kotlin.reflect.KFunction
 
 class VariableSetPublisher(function: KFunction<*>) : Publisher(function, notification = true) {
-    override fun comparisons(method: Subscriber): List<List<Comparator>> {
+    override fun conditions(method: Subscriber): List<List<Condition>> {
         val ids = method.annotationArgs["keys"] as List<String>
         val from = method.annotationArgs["from"] as String
         val to = method.annotationArgs["to"] as String
@@ -17,7 +17,7 @@ class VariableSetPublisher(function: KFunction<*>) : Publisher(function, notific
         val toNull = method.annotationArgs["toNull"] as Boolean
         val fromBool = method.annotationArgs["fromBool"] as String
         val toBool = method.annotationArgs["toBool"] as String
-        val list = mutableListOf<Comparator>()
+        val list = mutableListOf<Condition>()
         if (fromInt != -1) {
             list.add(Equals("from", fromInt))
         }

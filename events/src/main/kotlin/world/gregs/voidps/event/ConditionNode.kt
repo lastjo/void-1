@@ -3,7 +3,7 @@ package world.gregs.voidps.event
 import com.squareup.kotlinpoet.CodeBlock
 
 data class ConditionNode(
-    val comparator: Comparator? = null,
+    val condition: Condition? = null,
     val children: MutableList<ConditionNode> = mutableListOf(),
     val subscribers: MutableList<Subscriber> = mutableListOf(),
 ) {
@@ -15,11 +15,11 @@ data class ConditionNode(
         }
 
         // Generate when statement when all children use the same key
-        val firstKey = children.first().comparator?.key
-        if (children.all { it.comparator is Equals && it.comparator.key == firstKey && (it.comparator.value !is String || !(it.comparator.value as String).contains("*")) }) {
+        val firstKey = children.first().condition?.key
+        if (children.all { it.condition is Equals && it.condition.key == firstKey && (it.condition.value !is String || !(it.condition.value as String).contains("*")) }) {
             builder.beginControlFlow("when (%L)", firstKey)
             for (child in children) {
-                when (val value = child.comparator!!.value) {
+                when (val value = child.condition!!.value) {
                     is String -> builder.beginControlFlow("%S ->", value)
                     else -> builder.beginControlFlow("%L ->", value)
                 }
@@ -31,7 +31,7 @@ data class ConditionNode(
         } else {
             // Fall back to if else chains when there is a mix of different keys
             for (child in children) {
-                val statement = child.comparator!!.statement() ?: continue
+                val statement = child.condition!!.statement() ?: continue
                 builder.beginControlFlow("if (${statement.code})", *statement.args)
                 child.generate(builder, schema)
                 builder.endControlFlow()
@@ -86,7 +86,7 @@ data class ConditionNode(
         fun buildTree(schema: Publisher, methods: List<Subscriber>): ConditionNode {
             val root = ConditionNode()
             for (method in methods) {
-                val comparisons = schema.comparisons(method)
+                val comparisons = schema.conditions(method)
                 if (comparisons.isEmpty()) {
                     root.subscribers.add(method)
                     continue
@@ -94,7 +94,7 @@ data class ConditionNode(
                 for (chain in comparisons) {
                     var node = root
                     for (comparator in chain) {
-                        val child = node.children.find { it.comparator == comparator }
+                        val child = node.children.find { it.condition == comparator }
                             ?: ConditionNode(comparator).also { node.children.add(it) }
                         node = child
                     }

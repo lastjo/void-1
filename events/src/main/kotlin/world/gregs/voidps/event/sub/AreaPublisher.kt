@@ -4,10 +4,10 @@ import world.gregs.voidps.event.*
 import kotlin.reflect.KFunction
 
 class AreaPublisher(function: KFunction<*>) : Publisher(function, notification = true) {
-    override fun comparisons(method: Subscriber): List<List<Comparator>> {
+    override fun conditions(method: Subscriber): List<List<Condition>> {
         val area = method.annotationArgs["area"] as String
         val tag = method.annotationArgs["tag"] as String
-        val list = mutableListOf<Comparator>()
+        val list = mutableListOf<Condition>()
         if (area != "*") {
             list.add(Equals("name", area))
         }

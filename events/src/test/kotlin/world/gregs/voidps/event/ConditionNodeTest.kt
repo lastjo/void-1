@@ -5,7 +5,7 @@ import com.squareup.kotlinpoet.STRING
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class ComparatorNodeTest {
+class ConditionNodeTest {
     private val dummyPublisher = object : Publisher(
         name = "TestPublisher",
         suspendable = false,
@@ -15,9 +15,9 @@ class ComparatorNodeTest {
         methodName = "",
         required = listOf()
     ) {
-        override fun comparisons(
+        override fun conditions(
             method: Subscriber,
-        ): List<List<Comparator>> = listOf(listOf(Equals("id", "123")))
+        ): List<List<Condition>> = listOf(listOf(Equals("id", "123")))
     }
 
     @Test
@@ -35,7 +35,7 @@ class ComparatorNodeTest {
         val root = ConditionNode.buildTree(dummyPublisher, listOf(subscriber))
 
         assertEquals(1, root.children.size)
-        assertEquals(Equals("id", "123"), root.children.first().comparator)
+        assertEquals(Equals("id", "123"), root.children.first().condition)
         assertEquals(subscriber, root.children.first().subscribers.first())
     }
 
@@ -52,6 +52,6 @@ class ComparatorNodeTest {
         )
 
         val args = dummyPublisher.arguments(subscriber)
-        assertEquals(listOf("id"), args)
+        assertEquals(listOf(listOf("id")), args)
     }
 }

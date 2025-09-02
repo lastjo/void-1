@@ -22,19 +22,19 @@ class TrieNodeTest {
     @Test
     fun `Trie nodes are sorted by number of conditions`() {
         val root = TrieNode()
-        root.insert(method("use", cond("approach == false")))
-        root.insert(method("handle", cond("fromItem.id == \"banana\""), cond("toItem.id == \"*_satchel\"")))
+        root.insert(method("use", Equals("approach", false)))
+        root.insert(method("handle", Equals("fromItem.id", "banana"), Equals("toItem.id", "*_satchel")))
 
-        val code = emit(root, oneToMany = false, returnValue = 0)
+        val code = emit(root, allowMultiple = false, returnValue = 0)
 
         assertEquals(
             """
-            if (approach == false) {
+            if (!approach) {
               test.use()
               return 0
             }
             else if (fromItem.id == "banana") {
-              if (toItem.id == "*_satchel") {
+              if (toItem.id.endsWith("_satchel")) {
                 test.handle()
                 return 0
               }
@@ -49,7 +49,7 @@ class TrieNodeTest {
     fun `Empty trie`() {
         val root = TrieNode()
 
-        val code = emit(root, oneToMany = false, returnValue = 0)
+        val code = emit(root, allowMultiple = false, returnValue = 0)
 
         assertEquals(
             """
@@ -62,7 +62,7 @@ class TrieNodeTest {
     fun `Empty trie call only changes return type`() {
         val root = TrieNode()
 
-        val code = emit(root, oneToMany = false, returnValue = 0, callOnly = true)
+        val code = emit(root, allowMultiple = false, returnValue = 0, callOnly = true)
 
         assertEquals(
             """
@@ -77,7 +77,7 @@ class TrieNodeTest {
 
         root.insert(method("handleDefault"))
 
-        val code = emit(root, oneToMany = false)
+        val code = emit(root, allowMultiple = false)
 
         assertEquals(
             """
@@ -93,7 +93,7 @@ class TrieNodeTest {
 
         root.insert(method("handle", returnType = Boolean::class))
 
-        val code = emit(root, oneToMany = false, returnValue = true)
+        val code = emit(root, allowMultiple = false, returnValue = true)
 
         assertEquals(
             """
@@ -108,7 +108,7 @@ class TrieNodeTest {
 
         root.insert(method("handle", returnType = Boolean::class))
 
-        val code = emit(root, oneToMany = false, returnValue = true, callOnly = true)
+        val code = emit(root, allowMultiple = false, returnValue = true, callOnly = true)
 
         assertEquals(
             """
@@ -123,7 +123,7 @@ class TrieNodeTest {
 
         root.insert(method("handle", returnType = Boolean::class))
 
-        val code = emit(root, oneToMany = false, returnValue = 0)
+        val code = emit(root, allowMultiple = false, returnValue = 0)
 
         assertEquals(
             """
@@ -137,10 +137,10 @@ class TrieNodeTest {
     fun `No return types lists all methods`() {
         val root = TrieNode()
 
-        root.insert(method("handleA", cond("x == 0")))
-        root.insert(method("handleB", cond("x == 0")))
+        root.insert(method("handleA", Equals("x", 0)))
+        root.insert(method("handleB", Equals("x", 0)))
 
-        val code = emit(root, oneToMany = true)
+        val code = emit(root, allowMultiple = true)
 
         assertEquals(
             """
@@ -158,10 +158,10 @@ class TrieNodeTest {
     fun `Default return types lists all non-matching methods`() {
         val root = TrieNode()
 
-        root.insert(method("handleA", cond("x == 0"), returnType = Int::class))
-        root.insert(method("handleB", cond("x == 0"), returnType = Int::class))
+        root.insert(method("handleA", Equals("x", 0), returnType = Int::class))
+        root.insert(method("handleB", Equals("x", 0), returnType = Int::class))
 
-        val code = emit(root, oneToMany = true, returnValue = false)
+        val code = emit(root, allowMultiple = true, returnValue = false)
 
         assertEquals(
             """
@@ -179,11 +179,11 @@ class TrieNodeTest {
     fun `One matching return type`() {
         val root = TrieNode()
 
-        root.insert(method("handleA", cond("x == 0"), returnType = String::class))
-        root.insert(method("handleB", cond("x == 0"), returnType = Int::class))
-        root.insert(method("handleC", cond("x == 0"), returnType = Int::class))
+        root.insert(method("handleA", Equals("x", 0), returnType = String::class))
+        root.insert(method("handleB", Equals("x", 0), returnType = Int::class))
+        root.insert(method("handleC", Equals("x", 0), returnType = Int::class))
 
-        val code = emit(root, oneToMany = true, returnValue = 0)
+        val code = emit(root, allowMultiple = true, returnValue = 0)
         assertEquals(
             """
             if (x == 0) {
@@ -208,10 +208,10 @@ class TrieNodeTest {
     fun `Matching boolean returns are optimised`() {
         val root = TrieNode()
 
-        root.insert(method("handleA", cond("x == 0"), returnType = Int::class))
-        root.insert(method("handleB", cond("x == 0"), returnType = Boolean::class))
+        root.insert(method("handleA", Equals("x", 0), returnType = Int::class))
+        root.insert(method("handleB", Equals("x", 0), returnType = Boolean::class))
 
-        val code = emit(root, oneToMany = true, returnValue = false)
+        val code = emit(root, allowMultiple = true, returnValue = false)
         assertEquals(
             """
             if (x == 0) {
@@ -229,10 +229,10 @@ class TrieNodeTest {
     fun `Mixing conditions checks`() {
         val root = TrieNode()
 
-        root.insert(method("handleA", cond("x == 0"), returnType = Int::class))
-        root.insert(method("handleB", cond("x == 1"), returnType = Boolean::class))
+        root.insert(method("handleA", Equals("x", 0), returnType = Int::class))
+        root.insert(method("handleB", Equals("x", 1), returnType = Boolean::class))
 
-        val code = emit(root, oneToMany = true, returnValue = false)
+        val code = emit(root, allowMultiple = true, returnValue = false)
         assertEquals(
             """
             if (x == 0) {
@@ -251,9 +251,9 @@ class TrieNodeTest {
     fun `Multiple conditions`() {
         val root = TrieNode()
 
-        root.insert(method("handleA", cond("x == 0"), cond("y == 4"), cond("z == 1"), returnType = Int::class))
+        root.insert(method("handleA", Equals("x", 0), Equals("y", 4), Equals("z", 1), returnType = Int::class))
 
-        val code = emit(root, oneToMany = true, returnValue = -1)
+        val code = emit(root, allowMultiple = true, returnValue = -1)
         assertEquals(
             """
             if (x == 0) {
@@ -274,10 +274,10 @@ class TrieNodeTest {
     fun `Multiple conditions with overlap`() {
         val root = TrieNode()
 
-        root.insert(method("handleA", cond("x == 0"), cond("y == 4"), cond("z == 1"), returnType = Int::class))
-        root.insert(method("handleB", cond("x == 0"), cond("y == 2"), returnType = Int::class))
+        root.insert(method("handleA", Equals("x", 0), Equals("y", 4), Equals("z", 1), returnType = Int::class))
+        root.insert(method("handleB", Equals("x", 0), Equals("y", 2), returnType = Int::class))
 
-        val code = emit(root, oneToMany = true, returnValue = -1)
+        val code = emit(root, allowMultiple = true, returnValue = -1)
         assertEquals(
             """
             if (x == 0) {
@@ -301,11 +301,11 @@ class TrieNodeTest {
     fun `Multiple conditions with differing checks`() {
         val root = TrieNode()
 
-        root.insert(method("handleA", cond("x == 0"), cond("y == 4"), cond("z == 1"), returnType = Int::class))
-        root.insert(method("handleB", cond("x == 0"), cond("z == 2"), returnType = Int::class))
-        root.insert(method("handleC", cond("x == 0"), returnType = Boolean::class))
+        root.insert(method("handleA", Equals("x", 0), Equals("y", 4), Equals("z", 1), returnType = Int::class))
+        root.insert(method("handleB", Equals("x", 0), Equals("z", 2), returnType = Int::class))
+        root.insert(method("handleC", Equals("x", 0), returnType = Boolean::class))
 
-        val code = emit(root, oneToMany = true, returnValue = -1)
+        val code = emit(root, allowMultiple = true, returnValue = -1)
         assertEquals(
             """
             if (x == 0) {
@@ -326,13 +326,22 @@ class TrieNodeTest {
         )
     }
 
-    private fun cond(expr: String) = object : Condition {
-        override fun expression(): String = expr
-    }
-
-    private fun emit(node: TrieNode, oneToMany: Boolean, returnValue: Any = Unit, callOnly: Boolean = false): String {
+    private fun emit(node: TrieNode, allowMultiple: Boolean, returnValue: Any = Unit, callOnly: Boolean = false): String {
         val cb = CodeBlock.builder()
-        val context = TrieContext(allowMultiple = oneToMany, returnType = if (returnValue == Unit) "" else returnValue::class.simpleName!!, defaultReturnValue = returnValue)
+        val context = object : Publisher(
+            name = "",
+            notification = allowMultiple,
+            returnsDefault = returnValue,
+            suspendable = false,
+            parameters = emptyList(),
+            required = emptyList(),
+            cancellable = false,
+            methodName = ""
+        ) {
+            override fun conditions(method: Subscriber): List<List<Condition>> {
+                TODO("Not yet implemented")
+            }
+        }
         cb.add(node.generate(context, callOnly))
         val string = cb.build().toString().trim()
         return string
@@ -344,7 +353,7 @@ class TrieNodeTest {
             suspendable = false,
             className = ClassName("", "test"),
             methodName = name,
-            methodReturnType = returnType.simpleName!!,
+            methodReturnType = returnType.qualifiedName!!,
         )
     }
 }

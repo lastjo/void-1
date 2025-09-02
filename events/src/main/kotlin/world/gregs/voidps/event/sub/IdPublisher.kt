@@ -1,6 +1,6 @@
 package world.gregs.voidps.event.sub
 
-import world.gregs.voidps.event.Comparator
+import world.gregs.voidps.event.Condition
 import world.gregs.voidps.event.Equals
 import world.gregs.voidps.event.Publisher
 import world.gregs.voidps.event.Subscriber
@@ -11,10 +11,10 @@ open class IdPublisher(
     private val field: String = "id",
     notification: Boolean = false
 ) : Publisher(function, notification = notification) {
-    override fun comparisons(method: Subscriber): List<List<Comparator>> {
+    override fun conditions(method: Subscriber): List<List<Condition>> {
         val ids = method.annotationArgs["ids"] as List<String>
         if (ids.isEmpty()) {
-            return emptyList()
+            return listOf(emptyList())
         }
         return ids.map { listOf(Equals(field, it)) }
     }

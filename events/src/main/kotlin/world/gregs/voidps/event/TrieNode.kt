@@ -22,7 +22,7 @@ data class TrieNode(
                     depthCompare
                 } else {
                     // Same depth, sort alphabetically for consistency
-                    a.condition!!.expression().compareTo(b.condition!!.expression())
+                    (a.condition?.key ?: "").compareTo(b.condition?.key ?: "")
                 }
             }
         }
@@ -33,7 +33,7 @@ data class TrieNode(
         if (specA != specB) {
             specB - specA
         } else {
-            val expected = a.conditions.joinToString { it.expression() }.compareTo(b.conditions.joinToString { it.expression() })
+            val expected = a.conditions.joinToString { it.statement().toString() }.compareTo(b.conditions.joinToString { it.statement().toString() })
             if (expected == 0) {
                 a.method().compareTo(b.methodName)
             } else {
@@ -55,10 +55,11 @@ data class TrieNode(
     /**
      * Generate a nested if else statement for all [children]
      */
-    fun generate(context: TrieContext, callOnly: Boolean = false, skipElse: Boolean = false): CodeBlock {
+    fun generate(context: Publisher, callOnly: Boolean = false, skipElse: Boolean = false): CodeBlock {
         val block = CodeBlock.builder()
         if (condition != null) {
-            block.beginControlFlow("${if (skipElse) "" else "else "}if (${condition.expression()})")
+            val (string, args) = condition.statement()!!
+            block.beginControlFlow("${if (skipElse) "" else "else "}if (${string})", *args)
         }
         var first = true
         for (child in children) {
@@ -79,59 +80,59 @@ data class TrieNode(
     /**
      * Build a block of [methods] with the appropriate return type.
      */
-    private fun codeBlock(context: TrieContext): CodeBlock {
+    private fun codeBlock(context: Publisher): CodeBlock {
         val block = CodeBlock.builder()
-        if (!context.allowMultiple) {
+        if (!context.notification) {
             val branch = methods.firstOrNull()
             if (branch == null) {
-                block.addStatement("return ${context.defaultReturnValue}")
-            } else if (context.defaultReturnValue == Unit) {
+                block.addStatement("return ${if (context.returnsDefault is String) "%S" else "%L"}", context.returnsDefault)
+            } else if (context.returnsDefault == Unit) {
                 block.addStatement(branch.method())
                 block.addStatement("return")
                 return block.build()
-            } else if (branch.methodReturnType == context.returnType) {
+            } else if (branch.methodReturnType == context.returnsDefault::class.qualifiedName) {
                 block.addStatement("return ${branch.method()}")
             } else {
                 block.addStatement(branch.method())
-                block.addStatement("return ${context.defaultReturnValue}")
+                block.addStatement("return ${if (context.returnsDefault is String) "%S" else "%L"}", context.returnsDefault)
             }
             return block.build()
         }
-        if (context.defaultReturnValue == Unit) {
+        if (context.returnsDefault == Unit) {
             for (branch in methods) {
                 block.addStatement(branch.method())
             }
             block.addStatement("return")
             return block.build()
         }
-        if (methods.none { it.methodReturnType == context.returnType }) {
+        if (methods.none { it.methodReturnType == context.returnsDefault::class.qualifiedName }) {
             for (branch in methods) {
                 block.addStatement(branch.method())
             }
-            block.addStatement("return ${context.defaultReturnValue}")
+            block.addStatement("return ${if (context.returnsDefault is String) "%S" else "%L"}", context.returnsDefault)
             return block.build()
         }
-        if (methods.size == 1 && methods.all { it.methodReturnType == context.returnType }) {
+        if (methods.size == 1 && methods.all { it.methodReturnType == context.returnsDefault::class.qualifiedName }) {
             // Single return optimization
             val branch = methods.first()
             block.addStatement("return ${branch.method()}")
             return block.build()
         }
-        block.addStatement("var value = ${context.defaultReturnValue}")
+        block.addStatement("var value = ${if (context.returnsDefault is String) "%S" else "%L"}", context.returnsDefault)
         var first = true
         for (branch in methods) {
-            if (branch.methodReturnType != context.returnType) {
+            if (branch.methodReturnType != context.returnsDefault::class.qualifiedName) {
                 // Ignore differing returned values
                 block.addStatement(branch.method())
                 continue
             }
-            if (context.defaultReturnValue == false) {
+            if (context.returnsDefault == false) {
                 // Boolean optimization
                 block.addStatement("value = value || ${branch.method()}")
                 continue
             }
             block.addStatement("${if (first) "var " else ""}result = ${branch.method()}")
-            block.addStatement("if (result != ${context.defaultReturnValue}) {")
+            block.addStatement("if (result != ${if (context.returnsDefault is String) "%S" else "%L"}) {", context.returnsDefault)
             block.addStatement("    value = result")
             block.addStatement("}")
             if (first) {
@@ -149,18 +150,18 @@ data class TrieNode(
         insertConditions(method.conditions, 0, method, allowMultiple)
     }
 
-    private fun insertConditions(comparators: List<Condition>, idx: Int, method: Method, allowMultiple: Boolean) {
-        if (idx >= comparators.size) {
+    private fun insertConditions(conditions: List<Condition>, idx: Int, method: Method, allowMultiple: Boolean) {
+        if (idx >= conditions.size) {
             if (!allowMultiple && methods.size > 0) {
                 error("Method already exists for conditions: $method")
             }
             methods += method
             return
         }
-        val cond = comparators[idx]
-        val child = children.firstOrNull { it.condition?.expression() == cond.expression() }
+        val cond = conditions[idx]
+        val child = children.firstOrNull { it.condition == cond }
             ?: TrieNode(cond).also { children += it }
-        child.insertConditions(comparators, idx + 1, method, allowMultiple)
+        child.insertConditions(conditions, idx + 1, method, allowMultiple)
     }
 
 }

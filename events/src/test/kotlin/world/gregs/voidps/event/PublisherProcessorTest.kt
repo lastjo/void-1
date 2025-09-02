@@ -23,9 +23,9 @@ class PublisherProcessorTest {
         methodName = "",
         required = listOf(STRING)
     ) {
-        override fun comparisons(
+        override fun conditions(
             method: Subscriber,
-        ): List<List<Comparator>> = listOf(listOf(Equals("id", "123")))
+        ): List<List<Condition>> = listOf(listOf(Equals("id", "123")))
     }
 
     @Test

@@ -90,14 +90,17 @@ class PublisherProcessorIntegrationTest {
         checkMethodName = if (interaction) "hasOnEvent" else null,
         cancellable = cancellable
     ) {
-        override fun comparisons(method: Subscriber): List<List<Comparator>> {
+        override fun conditions(method: Subscriber): List<List<Condition>> {
             // Supports optional multiple annotation values
             val values = (method.annotationArgs["value"] as? List<String>)
                 ?: listOfNotNull(method.annotationArgs["value"] as? String)
-            val list = mutableListOf<Comparator>()
+            val list = mutableListOf<Condition>()
             val approach = method.annotationArgs["appraoch"] as? Boolean
             if (approach != null) {
                 list.add(Equals("approach", approach))
+            }
+            if (values.isEmpty()) {
+                return listOf(emptyList())
             }
             return values.map { list + listOf(Equals("id", it)) }
         }
@@ -106,7 +109,7 @@ class PublisherProcessorIntegrationTest {
     private class OnMagicEventPublisher(
         function: KFunction<*>, hasFunction: KFunction<*>? = null, notification: Boolean = false, cancellable: Boolean = false, returnsDefault: Any? = null
     ) : Publisher(function, hasFunction, notification, cancellable, returnsDefault) {
-        override fun comparisons(method: Subscriber): List<List<Comparator>> {
+        override fun conditions(method: Subscriber): List<List<Condition>> {
             // Supports optional multiple annotation values
             val values = (method.annotationArgs["value"] as? List<String>)
                 ?: listOfNotNull(method.annotationArgs["value"] as? String)
@@ -257,8 +260,8 @@ class PublisherProcessorIntegrationTest {
 
             class MyHandler {
                 @OnEvent("123")
-                suspend fun handler(id: String): Int {
-                    return 0
+                suspend fun handler(id: String): Boolean {
+                    return false
                 }
             }
         """.trimIndent()
@@ -346,7 +349,7 @@ class PublisherProcessorIntegrationTest {
     }
 
     @Test
-    fun `Non-notification generates when statements`() {
+    fun `Non-notification generates if else statements`() {
         @Language("kotlin")
         val source = """
             package test
@@ -354,10 +357,10 @@ class PublisherProcessorIntegrationTest {
 
             class MyHandler {
                 @OnEvent("A")
-                fun first(id: String, name: String) = "first"
+                fun first(id: String, name: String) = true
 
                 @OnEvent("B")
-                fun second(id: String, name: String) = "second"
+                fun second(id: String, name: String) = false
             }
         """.trimIndent()
 
@@ -366,9 +369,8 @@ class PublisherProcessorIntegrationTest {
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
         val content = compilation.kspSourcesDir.resolve("kotlin/world/gregs/voidps/engine/script/OnEventPublisher.kt").readText()
-        assertTrue(content.contains("when"), "Should generate when block")
-        assertTrue(content.contains("id == \"A\" ->"), "Should match first comparison")
-        assertTrue(content.contains("id == \"B\" ->"), "Should match second comparison")
+        assertTrue(content.contains("if (id == \"A\")"), "Should match first comparison")
+        assertTrue(content.contains("else if (id == \"B\")"), "Should match second comparison")
     }
 
     @Test
@@ -393,8 +395,8 @@ class PublisherProcessorIntegrationTest {
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
         val content = compilation.kspSourcesDir.resolve("kotlin/world/gregs/voidps/engine/script/OnEventPublisher.kt").readText()
-        assertTrue(content.contains("handled = handled || handlerOne.one"), "Multiple subscribers for same comparison allowed")
-        assertTrue(content.contains("|| handlerTwo.two"), "Second subscriber should also be included")
+        assertTrue(content.contains("value = value || handlerOne.one"), "Multiple subscribers for same comparison allowed")
+        assertTrue(content.contains("value = value || handlerTwo.two"), "Second subscriber should also be included")
     }
 
     @Test
@@ -444,7 +446,7 @@ class PublisherProcessorIntegrationTest {
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
         val content = compilation.kspSourcesDir.resolve("kotlin/world/gregs/voidps/engine/script/OnEventPublisher.kt").readText()
-        assertTrue(content.contains("handled = handled || handlerOne.one"), "Multiple subscribers for same comparison allowed")
+        assertTrue(content.contains("value = value || handlerOne.one"), "Multiple subscribers for same comparison allowed")
         assertTrue(content.contains("handlerTwo.two(id, name)"), "Second subscriber should be called independently")
     }
 
@@ -466,7 +468,7 @@ class PublisherProcessorIntegrationTest {
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
         val content = compilation.kspSourcesDir.resolve("kotlin/world/gregs/voidps/engine/script/OnEventPublisher.kt").readText()
-        assertTrue(content.contains("else -> return myHandler.catchAll"), "Subscribers without annotation values should be in else branch")
+        assertTrue(content.contains(" myHandler.catchAll(id, name)"), "Subscribers without annotation values should be in else branch")
     }
 
     @Test
@@ -488,7 +490,7 @@ class PublisherProcessorIntegrationTest {
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
         val publishersFile = compilation.kspSourcesDir.resolve("kotlin/world/gregs/voidps/engine/script/PublishersImpl.kt")
         val content = publishersFile.readText()
-        assertTrue(content.contains("dep: Int"), "PublishersImpl constructor should inject dep")
-        assertTrue(content.contains("NeedsDependency(dep)"), "Publisher should construct NeedsDependency with dep injected")
+        assertTrue(content.contains("int: Int"), "PublishersImpl constructor should inject dep")
+        assertTrue(content.contains("NeedsDependency(int)"), "Publisher should construct NeedsDependency with dep injected")
     }
 }

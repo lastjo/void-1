@@ -4,13 +4,13 @@ import world.gregs.voidps.event.*
 import kotlin.reflect.KFunction
 
 class CombatPublisher(function: KFunction<*>) : Publisher(function, notification = true) {
-    override fun comparisons(method: Subscriber): List<List<Comparator>> {
+    override fun conditions(method: Subscriber): List<List<Condition>> {
         val weapon = method.annotationArgs["weapon"] as String
         val type = method.annotationArgs["type"] as String
         val spell = method.annotationArgs["spell"] as String
         val id = method.annotationArgs["id"] as String
         val stage = method.annotationArgs["stage"] as Int
-        val list = mutableListOf<Comparator>()
+        val list = mutableListOf<Condition>()
         list.add(Equals("stage", stage))
         if (weapon != "*") {
             list.add(Equals("weapon.id", weapon))
