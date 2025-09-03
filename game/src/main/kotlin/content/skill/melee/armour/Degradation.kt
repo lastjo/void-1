@@ -13,7 +13,6 @@ import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Combat
 import world.gregs.voidps.type.sub.InventorySlotChanged
 
-@Script
 class Degradation {
 
     val slots = arrayOf(

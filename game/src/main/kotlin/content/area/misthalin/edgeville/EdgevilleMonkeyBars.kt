@@ -15,7 +15,6 @@ import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.sub.Option
 
-@Script
 class EdgevilleMonkeyBars {
 
     @Option("Swing across", "edgeville_monkey_bars")
@@ -43,4 +42,5 @@ class EdgevilleMonkeyBars {
         player.sound("monkeybars_off")
         player.exp(Skill.Agility, 20.0)
     }
+
 }

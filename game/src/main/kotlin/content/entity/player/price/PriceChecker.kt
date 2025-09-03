@@ -25,7 +25,6 @@ import world.gregs.voidps.engine.inv.transact.operation.MoveItemLimit.moveToLimi
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.*
 
-@Script
 class PriceChecker {
 
     /*

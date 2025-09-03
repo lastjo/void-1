@@ -10,6 +10,7 @@ import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.inventoryFull
 import world.gregs.voidps.engine.entity.item.Item
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.Inventory
 import world.gregs.voidps.engine.inv.inventory
@@ -122,7 +123,7 @@ class ShopBuy(
         when (player.inventory.transaction.error) {
             TransactionError.None -> {
                 if (added < actualAmount) player.inventoryFull()
-                player.emit(BoughtItem(Item(item.id, added), shop.id))
+                Publishers.all.publishPlayer(player, "bought", item.id)
             }
             is TransactionError.Full -> player.inventoryFull()
             TransactionError.Invalid -> logger.warn { "Error buying from shop ${shop.id} $item ${shop.transaction.error}" }

@@ -11,6 +11,7 @@ import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.objectOperate
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.timer.epochSeconds
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
@@ -39,7 +40,7 @@ class Doors {
         }
         if (openDoor(player, target, def)) {
             player.delay(0)
-            player.emit(DoorOpened)
+            Publishers.all.publishPlayer(player, "door_opened")
         }
     }
 

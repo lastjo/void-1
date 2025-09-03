@@ -10,42 +10,40 @@ import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.event.onEvent
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Subscribe
 
-@Script
-class DecisionMaking {
-
-    val players: Players by inject()
-    val tasks: TaskManager by inject()
+class DecisionMaking(
+    private val players: Players,
+    private val tasks: TaskManager,
+) {
 
     val scope = CoroutineScope(Contexts.Game)
     val logger = InlineLogger("Bot")
 
-    init {
-        onEvent<Player, StartBot> { bot ->
-            if (!bot.contains("task_bot") || bot.contains("task_started")) {
-                return@onEvent
-            }
-            val name: String = bot["task_bot"]!!
-            val task = tasks.get(name)
-            if (task == null) {
-                bot.clear("task_bot")
-            } else {
-                assign(bot, task)
-            }
+    @Subscribe("start_bot")
+    fun handle(player: Player) {
+        if (!player.contains("task_bot") || player.contains("task_started")) {
+            return
         }
+        val name: String = player["task_bot"]!!
+        val task = tasks.get(name)
+        if (task == null) {
+            player.clear("task_bot")
+        } else {
+            assign(player, task)
+        }
+    }
 
-        onEvent<World, AiTick> {
-            players.forEach { player ->
-                if (player.isBot) {
-                    val bot: Bot = player["bot"]!!
-                    if (!bot.contains("task_bot")) {
-                        val lastTask: String? = bot["last_task_bot"]
-                        assign(player, tasks.assign(bot, lastTask))
-                    }
-                    player.bot.resume("tick")
+    @Subscribe("ai_tick")
+    fun tick(world: World) {
+        players.forEach { player ->
+            if (player.isBot) {
+                val bot: Bot = player["bot"]!!
+                if (!bot.contains("task_bot")) {
+                    val lastTask: String? = bot["last_task_bot"]
+                    assign(player, tasks.assign(bot, lastTask))
                 }
+                player.bot.resume("tick")
             }
         }
     }

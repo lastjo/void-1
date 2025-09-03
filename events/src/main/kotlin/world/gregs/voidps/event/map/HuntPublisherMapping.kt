@@ -16,7 +16,11 @@ class HuntPublisherMapping(function: KFunction<*>) : PublisherMapping(function) 
             list.add(Equals("mode", mode))
         }
         if (npc != "*") {
-            list.add(Equals("target.id", npc))
+            if (name == "HuntPlayerPublisher") {
+                list.add(Equals("npc.id", npc))
+            } else {
+                list.add(Equals("target.id", npc))
+            }
         }
         if (id != "*") {
             list.add(Equals("npc.id", id))

@@ -215,7 +215,7 @@ open class Movement(
             val to = character.tile
             character.visuals.moved = true
             if (character is Player && character.networked) {
-                Publishers.all.publishPlayer(character, "region_reload")
+                Publishers.all.publishPlayer(character, "reload_region")
             }
             if (Settings["world.players.collision", false] && !character.contains("dead")) {
                 move(character, from, to)

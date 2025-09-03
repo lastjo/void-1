@@ -2,7 +2,6 @@ package world.gregs.voidps.type.sub
 
 /**
  * Continue dialogue subscriber
- *
  */
 @Repeatable
 @Target(AnnotationTarget.FUNCTION)

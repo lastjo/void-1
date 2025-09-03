@@ -36,7 +36,10 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
                 OptionPublisherMapping(Publishers::characterGameObjectOption, Publishers::hasCharacterGameObjectOption),
             ),
             Interface::class.qualifiedName!! to listOf(InterfacePublisherMapping(Publishers::interfaceOption)),
-            Continue::class.qualifiedName!! to listOf(InterfacePublisherMapping(Publishers::continueDialogue)),
+            Continue::class.qualifiedName!! to listOf(
+                InterfacePublisherMapping(Publishers::continueDialogueItem),
+                InterfacePublisherMapping(Publishers::continueDialogue),
+            ),
             Inventory::class.qualifiedName!! to listOf(InventoryPublisherMapping()),
             UseOn::class.qualifiedName!! to listOf(
                 InterfaceOnPublisherMapping(Publishers::interfaceOnPlayer),

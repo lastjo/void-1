@@ -24,6 +24,7 @@ import world.gregs.voidps.engine.data.definition.AmmoDefinitions
 import world.gregs.voidps.engine.data.definition.AreaDefinition
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.data.definition.InterfaceDefinitions
+import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Player
@@ -44,6 +45,10 @@ import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.Death
+import world.gregs.voidps.type.sub.LevelChange
+import world.gregs.voidps.type.sub.Spawn
+import world.gregs.voidps.type.sub.Variable
 
 suspend fun Bot.setAttackStyle(skill: Skill) {
     setAttackStyle(
@@ -65,57 +70,58 @@ suspend fun Bot.setAttackStyle(style: Int) {
     player.instructions.send(InteractInterface(interfaceId = 884, componentId = style + 11, itemId = -1, itemSlot = -1, option = 0))
 }
 
-@Script
-class CombatBot {
+class CombatBot(
+    private val areas: AreaDefinitions,
+    private val tasks: TaskManager,
+    private val floorItems: FloorItems,
+) {
 
-    val areas: AreaDefinitions by inject()
-    val tasks: TaskManager by inject()
-    val floorItems: FloorItems by inject()
-
-    init {
-        variableSet("in_combat", to = 1) { player ->
-            if (player.isBot) {
-                player.bot.resume("combat")
-            }
+    @Variable("in_combat", toInt = 1)
+    fun combat(player: Player) {
+        if (player.isBot) {
+            player.bot.resume("combat")
         }
+    }
 
-        levelChange(Skill.Constitution) { player ->
-            if (player.isBot && player.levels.getPercent(Skill.Constitution) < 50.0) {
-                val food = player.inventory.items.firstOrNull { it.def.contains("heals") } ?: return@levelChange
-                player.bot.inventoryOption(food.id, "Eat")
-            }
+    @LevelChange(Skill.CONSTITUTION)
+    fun level(player: Player) {
+        if (player.isBot && player.levels.getPercent(Skill.Constitution) < 50.0) {
+            val food = player.inventory.items.firstOrNull { it.def.contains("heals") } ?: return
+            player.bot.inventoryOption(food.id, "Eat")
         }
+    }
 
-        playerDeath { player ->
-            if (player.isBot) {
-                player.clear("area")
-                player.bot.cancel()
-            }
+    @Death
+    fun death(player: Player) {
+        if (player.isBot) {
+            player.clear("area")
+            player.bot.cancel()
         }
+    }
 
-        worldSpawn {
-            for (area in areas.getTagged("combat_training")) {
-                val spaces: Int = area["spaces", 1]
-                val types = area["npcs", emptyList<String>()].toSet()
-                val range = area["levels", "1-5"].toIntRange()
-                val skills = listOf(Skill.Attack, Skill.Strength, Skill.Defence, Skill.Ranged, Skill.Magic).shuffled().take(spaces)
-                for (skill in skills) {
-                    val task = Task(
-                        name = "train ${skill.name} killing ${types.joinToString(", ")} at ${area.name}".toLowerSpaceCase(),
-                        block = {
-                            while (levels.getMax(skill) < range.last + 1) {
-                                bot.fight(area, skill, types)
-                            }
-                        },
-                        area = area.area,
-                        spaces = 1,
-                        requirements = listOf(
-                            { levels.getMax(skill) in range },
-                            { bot.hasExactGear(skill) || bot.hasCoins(2000) },
-                        ),
-                    )
-                    tasks.register(task)
-                }
+    @Spawn
+    fun spawn(world: World) {
+        for (area in areas.getTagged("combat_training")) {
+            val spaces: Int = area["spaces", 1]
+            val types = area["npcs", emptyList<String>()].toSet()
+            val range = area["levels", "1-5"].toIntRange()
+            val skills = listOf(Skill.Attack, Skill.Strength, Skill.Defence, Skill.Ranged, Skill.Magic).shuffled().take(spaces)
+            for (skill in skills) {
+                val task = Task(
+                    name = "train ${skill.name} killing ${types.joinToString(", ")} at ${area.name}".toLowerSpaceCase(),
+                    block = {
+                        while (levels.getMax(skill) < range.last + 1) {
+                            bot.fight(area, skill, types)
+                        }
+                    },
+                    area = area.area,
+                    spaces = 1,
+                    requirements = listOf(
+                        { levels.getMax(skill) in range },
+                        { bot.hasExactGear(skill) || bot.hasCoins(2000) },
+                    ),
+                )
+                tasks.register(task)
             }
         }
     }

@@ -12,7 +12,6 @@ import world.gregs.voidps.type.sub.ItemAdded
 import world.gregs.voidps.type.sub.ItemRemoved
 import world.gregs.voidps.type.sub.Spawn
 
-@Script
 class GuthansSet {
 
     @Spawn

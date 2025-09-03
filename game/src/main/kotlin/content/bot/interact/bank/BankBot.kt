@@ -11,12 +11,14 @@ import content.entity.player.bank.bank
 import world.gregs.voidps.engine.client.ui.event.interfaceOpen
 import world.gregs.voidps.engine.client.ui.menu
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.inv.equipment
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.network.client.instruction.EnterInt
 import world.gregs.voidps.network.client.instruction.InteractInterface
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Open
 
 private fun getItemId(id: String): Int? = get<ItemDefinitions>().getOrNull(id)?.id
 
@@ -132,14 +134,13 @@ suspend fun Bot.withdrawCoins() {
     }
 }
 
-@Script
 class BankBot {
 
-    init {
-        interfaceOpen("bank") { player ->
-            if (player.isBot) {
-                player.bot.resume("bank")
-            }
+    @Open("bank")
+    fun open(player: Player) {
+        if (player.isBot) {
+            player.bot.resume("bank")
         }
     }
+
 }

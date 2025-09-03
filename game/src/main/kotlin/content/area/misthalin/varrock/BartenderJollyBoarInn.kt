@@ -22,7 +22,6 @@ import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 import world.gregs.voidps.type.sub.UseOn
 
-@Script
 class BartenderJollyBoarInn {
 
     @Option("Talk-to", "bartender_jolly_boar_inn")

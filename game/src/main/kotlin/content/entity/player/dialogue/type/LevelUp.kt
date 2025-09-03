@@ -6,6 +6,7 @@ import world.gregs.voidps.engine.client.ui.*
 import world.gregs.voidps.engine.client.ui.chat.an
 import world.gregs.voidps.engine.client.ui.close
 import world.gregs.voidps.engine.client.ui.open
+import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.Skill.*
@@ -17,7 +18,10 @@ import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.suspend.ContinueSuspension
 import world.gregs.voidps.engine.suspend.SuspendableContext
+import world.gregs.voidps.type.CombatStage
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Combat
+import world.gregs.voidps.type.sub.LevelChange
 
 private const val LEVEL_UP_INTERFACE_ID = "dialogue_level_up"
 
@@ -36,52 +40,53 @@ fun levelUp(player: Player, skill: Skill, text: String) {
     player["level_up_icon"] = skill.name
 }
 
-@Script
 class LevelUp {
 
-    init {
-        experience { player ->
-            val previousLevel = Experience.level(skill, from)
-            val currentLevel = Experience.level(skill, to)
-            if (currentLevel != previousLevel) {
-                player.levels.restore(skill, currentLevel - previousLevel)
-                Publishers.all.levelChangePlayer(player, skill, previousLevel, currentLevel, max = true)
-                Publishers.all.levelChangeCharacter(player, skill, previousLevel, currentLevel, max = true)
-                player.emit(MaxLevelChanged(skill, previousLevel, currentLevel))
-            }
+    @world.gregs.voidps.type.sub.Experience
+    fun exp(player: Player, skill: Skill, from: Double, to: Double) {
+        val previousLevel = Experience.level(skill, from)
+        val currentLevel = Experience.level(skill, to)
+        if (currentLevel != previousLevel) {
+            player.levels.restore(skill, currentLevel - previousLevel)
+            Publishers.all.levelChangePlayer(player, skill, previousLevel, currentLevel, max = true)
+            Publishers.all.levelChangeCharacter(player, skill, previousLevel, currentLevel, max = true)
+            player.emit(MaxLevelChanged(skill, previousLevel, currentLevel))
         }
+    }
 
-        maxLevelChange { player ->
-            if (from >= to) {
-                return@maxLevelChange
-            }
-            if (player["skip_level_up", false]) {
-                return@maxLevelChange
-            }
-            val unlock = when (skill) {
-                Agility -> false
-                Construction -> to.rem(10) == 0
-                Constitution, Strength -> to >= 50
-                Hunter -> to.rem(2) == 0
-                else -> true // TODO has unlocked something
-            }
-            player.jingle("level_up_${skill.name.lowercase()}${if (unlock) "_unlock" else ""}", 0.5)
-            player.addVarbit("skill_stat_flash", skill.name.lowercase())
-            val level = if (skill == Constitution) to / 10 else to
-            levelUp(
-                player,
-                skill,
-                """
+    @LevelChange(max = true)
+    fun level(player: Player, skill: Skill, from: Int, to: Int) {
+        if (from >= to) {
+            return
+        }
+        if (player["skip_level_up", false]) {
+            return
+        }
+        val unlock = when (skill) {
+            Agility -> false
+            Construction -> to.rem(10) == 0
+            Constitution, Strength -> to >= 50
+            Hunter -> to.rem(2) == 0
+            else -> true // TODO has unlocked something
+        }
+        player.jingle("level_up_${skill.name.lowercase()}${if (unlock) "_unlock" else ""}", 0.5)
+        player.addVarbit("skill_stat_flash", skill.name.lowercase())
+        val level = if (skill == Constitution) to / 10 else to
+        levelUp(
+            player,
+            skill,
+            """
                 Congratulations! You've just advanced${skill.name.an()} ${skill.name} level!
                 You have now reached level $level!
             """,
-            )
-        }
+        )
+    }
 
-        combatDamage { player ->
-            if (!(player.menu ?: player.dialogue).isNullOrBlank()) {
-                player.closeInterfaces()
-            }
+    @Combat(stage = CombatStage.DAMAGE)
+    fun combat(player: Player, source: Character) {
+        if (!(player.menu ?: player.dialogue).isNullOrBlank()) {
+            player.closeInterfaces()
         }
     }
+
 }

@@ -15,7 +15,6 @@ import world.gregs.voidps.type.sub.TimerStart
 import world.gregs.voidps.type.sub.TimerStop
 import world.gregs.voidps.type.sub.TimerTick
 
-@Script
 class Antifire {
 
     @Spawn

@@ -1,0 +1,5 @@
+[uncooked_cake]
+remove = ["fishbowl_water", "fishbowl_water"]
+add = ["fishbowl_seaweed"]
+ticks = 2
+message = "You carefully place the seaweed into the fishbowl."

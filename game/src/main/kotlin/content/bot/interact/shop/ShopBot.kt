@@ -15,10 +15,12 @@ import world.gregs.voidps.engine.data.definition.AreaDefinition
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCs
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.network.client.instruction.InteractInterface
 import world.gregs.voidps.network.client.instruction.InteractNPC
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Open
 
 suspend fun Bot.openShop(id: String): NPC = openShop(get<AreaDefinitions>().getOrNull(id)!!)
 
@@ -70,14 +72,13 @@ suspend fun Bot.buy(item: String, amount: Int = 1) {
     await("tick")
 }
 
-@Script
 class ShopBot {
 
-    init {
-        interfaceOpen("shop") { player ->
-            if (player.isBot) {
-                player.bot.resume("shop")
-            }
+    @Open("shop")
+    fun open(player: Player) {
+        if (player.isBot) {
+            player.bot.resume("shop")
         }
     }
+
 }

@@ -9,48 +9,50 @@ import content.entity.proj.shoot
 import content.quest.questCompleted
 import content.skill.runecrafting.EssenceMine
 import world.gregs.voidps.engine.client.message
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.entity.character.move.tele
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class WizardCromperty {
 
-    init {
-        npcOperate("Talk-to", "wizard_cromperty_*") {
-            npc<Talk>("Hello there. My name is Cromperty. I am a wizard, and an inventor.")
-            npc<Talk>("You must be ElderCadence. My good friend Sedridor has told me about you. As both wizard and inventor, he has aided me in my great invention!")
-            player<Talk>("Hello there.")
-            choice {
-                option<Talk>("Two jobs? That's got to be tough.") {
-                    npc<Happy>("Not when you combine them it isn't! I invent MAGIC things!")
-                    choice {
-                        whatHaveYouInvented()
-                        option<Uncertain>("Well, I shall leave you to your inventing.") {
-                            npc<Talk>("Thanks for dropping by! Stop again anytime!")
-                        }
+    @Option("Talk-to", "wizard_cromperty_*")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        npc<Talk>("Hello there. My name is Cromperty. I am a wizard, and an inventor.")
+        npc<Talk>("You must be ElderCadence. My good friend Sedridor has told me about you. As both wizard and inventor, he has aided me in my great invention!")
+        player<Talk>("Hello there.")
+        choice {
+            option<Talk>("Two jobs? That's got to be tough.") {
+                npc<Happy>("Not when you combine them it isn't! I invent MAGIC things!")
+                choice {
+                    whatHaveYouInvented()
+                    option<Uncertain>("Well, I shall leave you to your inventing.") {
+                        npc<Talk>("Thanks for dropping by! Stop again anytime!")
                     }
                 }
-                whatHaveYouInvented()
-                option<Quiz>("Can you teleport me to the Rune Essence Mine?", filter = { player.questCompleted("rune_mysteries") }) {
-                    EssenceMine.teleport(target, player)
-                }
             }
-        }
-
-        npcOperate("Teleport", "wizard_cromperty_*") {
-            if (player.questCompleted("rune_mysteries")) {
+            whatHaveYouInvented()
+            option<Quiz>("Can you teleport me to the Rune Essence Mine?", filter = { player.questCompleted("rune_mysteries") }) {
                 EssenceMine.teleport(target, player)
-            } else {
-                player.message("You need to have completed the Rune Mysteries Quest to use this feature.")
             }
         }
     }
 
-    fun ChoiceBuilder<NPCOption<Player>>.whatHaveYouInvented() {
+    @Option("Teleport", "wizard_cromperty_*")
+    suspend fun teleport(player: Player, npc: NPC) = player.talkWith(npc) {
+        if (player.questCompleted("rune_mysteries")) {
+            EssenceMine.teleport(target, player)
+        } else {
+            player.message("You need to have completed the Rune Mysteries Quest to use this feature.")
+        }
+    }
+
+    fun ChoiceBuilder<Dialogue>.whatHaveYouInvented() {
         option<Quiz>("So what have you invented?") {
             npc<Happy>("Ah! My latest invention is my patent pending teleportation block! It emits a low level magical signal, that will allow me to locate it anywhere in the world, and teleport anything")
             npc<Happy>("directly to it! I hope to revolutionise the entire teleportation system! Don't you think I'm great? Uh, I mean it's great?")
@@ -73,7 +75,7 @@ class WizardCromperty {
         }
     }
 
-    fun ChoiceBuilder<NPCOption<Player>>.teleportMe() {
+    fun ChoiceBuilder<Dialogue>.teleportMe() {
         option<Quiz>("Can I be teleported please?") {
             npc<Happy>("By all means! I'm afraid I can't give you any specifics as to where you will come out however. Presumably wherever the other block is located.")
             choice {

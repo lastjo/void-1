@@ -119,7 +119,8 @@ interface Publishers {
 
     suspend fun interfaceOption(player: Player, id: String = "", component: String = "", option: String = "", optionIndex: Int = -1, item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false
 
-    fun continueDialogue(player: Player, id: String = "", component: String = "", option: String = "", item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false
+    fun continueDialogue(player: Player, id: String = "", component: String = ""): Boolean = false
+    fun continueDialogueItem(player: Player, item: Item): Boolean = false
 
     suspend fun inventoryOption(player: Player, item: Item = Item.EMPTY, inventory: String = "", option: String = "", itemSlot: Int = -1): Boolean = false
 

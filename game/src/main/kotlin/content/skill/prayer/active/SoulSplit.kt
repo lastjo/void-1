@@ -14,7 +14,6 @@ import world.gregs.voidps.type.sub.Combat
 import world.gregs.voidps.type.sub.TimerStart
 import world.gregs.voidps.type.sub.TimerStop
 
-@Script
 class SoulSplit {
 
     @Combat

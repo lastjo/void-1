@@ -12,7 +12,6 @@ import world.gregs.voidps.type.sub.PrayerStart
 import world.gregs.voidps.type.sub.PrayerStop
 import world.gregs.voidps.type.sub.Spawn
 
-@Script
 class Prayers {
 
     @Spawn

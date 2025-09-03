@@ -17,10 +17,8 @@ import world.gregs.voidps.engine.inv.transact.operation.SetCharge.setCharge
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 
-@Script
-class ItemTake {
+class ItemTake(private val floorItems: FloorItems) {
 
-    val floorItems: FloorItems by inject()
     val logger = InlineLogger()
 
     @Option("Take")

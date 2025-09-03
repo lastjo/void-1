@@ -10,6 +10,7 @@ import world.gregs.voidps.engine.entity.character.player.renderEmote
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level
+import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.ObjectOption
 import world.gregs.voidps.engine.entity.obj.objectApproach
 import world.gregs.voidps.engine.entity.obj.objectOperate
@@ -18,35 +19,67 @@ import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.equals
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class BasaltRock {
 
-    init {
-        obstacle("Jump-to", "beach", Tile(2522, 3595), Direction.NORTH, exp = false)
+    private val data = mapOf(
+        "beach" to Triple(Tile(2522, 3595), Direction.NORTH, false),
+        "basalt_rock_start" to Triple(Tile(2522, 3597), Direction.SOUTH, false),
+        "basalt_rock_2" to Triple(Tile(2522, 3600), Direction.NORTH, true),
+        "basalt_rock_3" to Triple(Tile(2522, 3602), Direction.SOUTH, true),
+        "basalt_rock_4" to Triple(Tile(2518, 3611), Direction.WEST, true),
+        "basalt_rock_5" to Triple(Tile(2516, 3611), Direction.EAST, true),
+        "basalt_rock_6" to Triple(Tile(2514, 3613), Direction.NORTH, true),
+        "basalt_rock_7" to Triple(Tile(2514, 3615), Direction.SOUTH, true),
+        "basalt_rock_end" to Triple(Tile(2514, 3617), Direction.NORTH, false),
+        "rocky_shore" to Triple(Tile(2514, 3619), Direction.SOUTH, false),
+    )
 
-        obstacle("Jump-across", "basalt_rock_start", Tile(2522, 3597), Direction.SOUTH, exp = false)
-
-        obstacle("Jump-across", "basalt_rock_2", Tile(2522, 3600), Direction.NORTH, exp = true)
-
-        obstacle("Jump-across", "basalt_rock_3", Tile(2522, 3602), Direction.SOUTH, exp = true)
-
-        obstacle("Jump-across", "basalt_rock_4", Tile(2518, 3611), Direction.WEST, exp = true)
-
-        obstacle("Jump-across", "basalt_rock_5", Tile(2516, 3611), Direction.EAST, exp = true)
-
-        obstacle("Jump-across", "basalt_rock_6", Tile(2514, 3613), Direction.NORTH, exp = true)
-
-        obstacle("Jump-across", "basalt_rock_7", Tile(2514, 3615), Direction.SOUTH, exp = true)
-
-        obstacle("Jump-across", "basalt_rock_end", Tile(2514, 3617), Direction.NORTH, exp = false)
-
-        obstacle("Jump-to", "rocky_shore", Tile(2514, 3619), Direction.SOUTH, exp = false)
+    @Option("Jump-to", "beach")
+    @Option("Jump-across", "basalt_rock_start")
+    @Option("Jump-across", "basalt_rock_2")
+    @Option("Jump-across", "basalt_rock_3")
+    @Option("Jump-across", "basalt_rock_4")
+    @Option("Jump-across", "basalt_rock_5")
+    @Option("Jump-across", "basalt_rock_6")
+    @Option("Jump-across", "basalt_rock_7")
+    @Option("Jump-across", "basalt_rock_end")
+    @Option("Jump-to", "rocky_shore")
+    suspend fun jump(player: Player, target: GameObject) {
+        val (tile, direction, exp) = data[target.id] ?: return
+        jump(player, target, tile.add(direction).add(direction), direction, exp)
     }
 
-    suspend fun ObjectOption<Player>.jump(opposite: Tile, direction: Direction, exp: Boolean) {
+    @Option("Jump-to", "beach", approach = true)
+    @Option("Jump-across", "basalt_rock_start", approach = true)
+    @Option("Jump-across", "basalt_rock_2", approach = true)
+    @Option("Jump-across", "basalt_rock_3", approach = true)
+    @Option("Jump-across", "basalt_rock_4", approach = true)
+    @Option("Jump-across", "basalt_rock_5", approach = true)
+    @Option("Jump-across", "basalt_rock_6", approach = true)
+    @Option("Jump-across", "basalt_rock_7", approach = true)
+    @Option("Jump-across", "basalt_rock_end", approach = true)
+    @Option("Jump-to", "rocky_shore", approach = true)
+    suspend fun approach(player: Player, target: GameObject) {
+        val (tile, direction, exp) = data[target.id] ?: return
+        val sameSide = when (direction) {
+            Direction.NORTH -> player.tile.y <= target.tile.y
+            Direction.EAST -> player.tile.x <= target.tile.x
+            Direction.SOUTH -> player.tile.y >= target.tile.y
+            Direction.WEST -> player.tile.x >= target.tile.x
+            else -> false
+        }
+        if (sameSide) {
+            jump(player, target, tile.add(direction).add(direction), direction, exp)
+        } else {
+            jump(player, target, target.tile, direction.inverse(), exp)
+        }
+    }
+
+    suspend fun jump(player: Player, target: GameObject, opposite: Tile, direction: Direction, exp: Boolean) {
         player.walkToDelay(target.tile)
-        character.clear("face_entity")
+        player.clear("face_entity")
         // Fail on jump
         val fail = when {
             player.tile.equals(2522, 3600) -> Tile(2521, 3596)
@@ -75,27 +108,6 @@ class BasaltRock {
             player.damage(random.nextInt(100))
             if (exp) {
                 player.exp(Skill.Agility, 0.5)
-            }
-        }
-    }
-
-    fun obstacle(option: String, rock: String, tile: Tile, direction: Direction, exp: Boolean) {
-        objectOperate(option, rock) {
-            jump(tile.add(direction).add(direction), direction, exp)
-        }
-
-        objectApproach(option, rock) {
-            val sameSide = when (direction) {
-                Direction.NORTH -> player.tile.y <= target.tile.y
-                Direction.EAST -> player.tile.x <= target.tile.x
-                Direction.SOUTH -> player.tile.y >= target.tile.y
-                Direction.WEST -> player.tile.x >= target.tile.x
-                else -> false
-            }
-            if (sameSide) {
-                jump(tile.add(direction).add(direction), direction, exp)
-            } else {
-                jump(target.tile, direction.inverse(), exp)
             }
         }
     }

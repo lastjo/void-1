@@ -13,7 +13,6 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 
-@Script
 class GeneralStore {
 
     @Option("Trade", "shopkeeper*", "shop_assistant*")

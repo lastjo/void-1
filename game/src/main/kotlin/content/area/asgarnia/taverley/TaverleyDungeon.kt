@@ -22,11 +22,11 @@ import world.gregs.voidps.type.sub.Option
 import world.gregs.voidps.type.sub.UseOn
 import java.util.concurrent.TimeUnit
 
-@Script
-class TaverleyDungeon {
+class TaverleyDungeon(
+    private val npcs: NPCs,
+    private val objects: GameObjects,
+) {
 
-    val npcs: NPCs by inject()
-    val objects: GameObjects by inject()
 
     val leftSpawn = Tile(2887, 9832)
     val rightSpawn = Tile(2887, 9829)

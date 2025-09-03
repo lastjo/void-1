@@ -13,6 +13,8 @@ import world.gregs.voidps.engine.client.ui.chat.plural
 import world.gregs.voidps.engine.data.config.GearDefinition
 import world.gregs.voidps.engine.data.definition.AreaDefinition
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
+import world.gregs.voidps.engine.entity.World
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.obj.GameObject
@@ -23,39 +25,41 @@ import world.gregs.voidps.engine.timer.timerStop
 import world.gregs.voidps.network.client.instruction.InteractDialogue
 import world.gregs.voidps.network.client.instruction.InteractInterfaceObject
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Spawn
+import world.gregs.voidps.type.sub.TimerStop
 
-@Script
-class CookingBot {
+class CookingBot(
+    private val areas: AreaDefinitions,
+    private val tasks: TaskManager,
+) {
 
-    val areas: AreaDefinitions by inject()
-    val tasks: TaskManager by inject()
 
-    init {
-        timerStop("cooking") { player ->
-            if (player.isBot) {
-                player.bot.resume(timer)
-            }
+    @TimerStop("cooking")
+    fun stop(player: Player) {
+        if (player.isBot) {
+            player.bot.resume("cooking")
         }
+    }
 
-        worldSpawn {
-            for (area in areas.getTagged("cooking")) {
-                val spaces: Int = area["spaces", 1]
-                val type: String = area.getOrNull("type") ?: ""
-                val task = Task(
-                    name = "cook on ${type.plural(2)} at ${area.name}".toLowerSpaceCase(),
-                    block = {
-                        val gear = bot.getGear(Skill.Cooking) ?: return@Task
-                        val item = bot.getSuitableItem(gear.inventory.first())
-                        while (levels.getMax(Skill.Cooking) < gear.levels.last + 1) {
-                            bot.cook(area, item, gear)
-                        }
-                    },
-                    area = area.area,
-                    spaces = spaces,
-                    requirements = listOf { bot.hasExactGear(Skill.Cooking) },
-                )
-                tasks.register(task)
-            }
+    @Spawn
+    fun spawn(world: World) {
+        for (area in areas.getTagged("cooking")) {
+            val spaces: Int = area["spaces", 1]
+            val type: String = area.getOrNull("type") ?: ""
+            val task = Task(
+                name = "cook on ${type.plural(2)} at ${area.name}".toLowerSpaceCase(),
+                block = {
+                    val gear = bot.getGear(Skill.Cooking) ?: return@Task
+                    val item = bot.getSuitableItem(gear.inventory.first())
+                    while (levels.getMax(Skill.Cooking) < gear.levels.last + 1) {
+                        bot.cook(area, item, gear)
+                    }
+                },
+                area = area.area,
+                spaces = spaces,
+                requirements = listOf { bot.hasExactGear(Skill.Cooking) },
+            )
+            tasks.register(task)
         }
     }
 

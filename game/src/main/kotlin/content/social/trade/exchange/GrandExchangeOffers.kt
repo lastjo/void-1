@@ -8,9 +8,6 @@ import content.entity.player.modal.Tab
 import content.entity.player.modal.tab
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.sendScript
-import world.gregs.voidps.engine.client.ui.dialogue.continueItemDialogue
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.entity.World
@@ -18,10 +15,7 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.sendInventory
-import world.gregs.voidps.type.sub.Close
-import world.gregs.voidps.type.sub.Interface
-import world.gregs.voidps.type.sub.Open
-import world.gregs.voidps.type.sub.Spawn
+import world.gregs.voidps.type.sub.*
 import kotlin.math.ceil
 
 class GrandExchangeOffers(
@@ -91,18 +85,16 @@ class GrandExchangeOffers(
         openItemSearch(player)
     }
 
-    init {
-        continueItemDialogue { player ->
-            val def = itemDefinitions.getOrNull(item)
-            if (def == null || !def.exchangeable || def.noted || def.lent || def.dummyItem != 0) {
-                player.message("You can't trade that item on the Grand Exchange.")
-                return@continueItemDialogue
-            }
-            selectItem(player, item)
-            player["grand_exchange_price"] = player["grand_exchange_market_price", 0]
-            ItemInfo.showInfo(player, Item(item))
+    @Continue
+    fun offer(player: Player, item: Item) {
+        val def = itemDefinitions.getOrNull(item.id)
+        if (def == null || !def.exchangeable || def.noted || def.lent || def.dummyItem != 0) {
+            player.message("You can't trade that item on the Grand Exchange.")
+            return
         }
-
+        selectItem(player, item.id)
+        player["grand_exchange_price"] = player["grand_exchange_market_price", 0]
+        ItemInfo.showInfo(player, item)
     }
 
     @Interface("Make Sell Offer", "sell_offer_*", "grand_exchange")

@@ -35,6 +35,7 @@ examine = "A well dressed nobleman."
 
 [vanessa]
 id = 2305
+shop = "vanessas_farming_shop"
 categories = ["human"]
 wander_radius = 2
 collision = "indoors"

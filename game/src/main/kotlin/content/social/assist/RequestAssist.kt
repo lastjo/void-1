@@ -32,7 +32,6 @@ import world.gregs.voidps.type.sub.Option
 import java.util.concurrent.TimeUnit
 import kotlin.math.min
 
-@Script
 class RequestAssist {
 
     val skills = listOf(

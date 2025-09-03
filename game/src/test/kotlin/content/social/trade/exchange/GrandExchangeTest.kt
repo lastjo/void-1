@@ -8,13 +8,13 @@ import npcOption
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.koin.test.get
-import world.gregs.voidps.engine.client.ui.dialogue.ContinueItemDialogue
 import world.gregs.voidps.engine.data.Settings
 import world.gregs.voidps.engine.data.exchange.ExchangeOffer
 import world.gregs.voidps.engine.data.exchange.OfferState
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.suspend.IntSuspension
@@ -680,7 +680,7 @@ class GrandExchangeTest : WorldTest() {
         tick()
         player.interfaceOption("grand_exchange", "buy_offer_0", "Make Buy Offer")
         tick()
-        player.emit(ContinueItemDialogue(item))
+        Publishers.all.continueDialogueItem(player, Item(item))
     }
 
     private fun sell(player: Player, item: String) {

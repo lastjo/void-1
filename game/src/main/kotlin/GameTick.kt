@@ -24,6 +24,7 @@ import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.item.floor.FloorItemTracking
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
 import world.gregs.voidps.engine.entity.obj.GameObjects
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.network.client.ConnectionQueue
 import world.gregs.voidps.network.login.protocol.npcVisualEncoders
@@ -78,6 +79,6 @@ fun getTickStages(
 
 private class AiTick : Runnable {
     override fun run() {
-        World.emit(AiTick)
+        Publishers.all.publishWorld(World, "ai_tick")
     }
 }

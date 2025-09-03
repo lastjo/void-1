@@ -21,6 +21,7 @@ import world.gregs.voidps.engine.entity.character.player.sex
 import world.gregs.voidps.engine.entity.worldSpawn
 import world.gregs.voidps.engine.event.Event
 import world.gregs.voidps.engine.event.Events
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.add
@@ -121,7 +122,7 @@ class BotSpawns(
             if (content.isNotBlank()) {
                 player["task_bot"] = content
             }
-            bot.emit(StartBot)
+            Publishers.all.publishPlayer(player, "start_bot")
             player.message("Bot enabled.")
         }
     }
@@ -136,7 +137,7 @@ class BotSpawns(
             if (bot.inventory.isEmpty()) {
                 bot.inventory.add("coins", 10000)
             }
-            bot.emit(StartBot)
+            Publishers.all.publishPlayer(bot, "start_bot")
             bot.viewport?.loaded = true
             delay(3)
             bots.add(bot)

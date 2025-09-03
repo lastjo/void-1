@@ -15,34 +15,35 @@ import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.MoveItemLimit.moveToLimit
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.Open
 
-@Script
 class ShopSell {
 
     val logger = InlineLogger()
 
-    init {
-        interfaceOption("Value", "inventory", "shop_side") {
-            val inventory = player.shopInventory(false)
-            if (inventory.restricted(item.id)) {
-                player.message("You can't sell this item to this shop.")
-                return@interfaceOption
-            }
-            val price = item.sellPrice()
-            val currency = player.shopCurrency().plural(price)
-            player.message("${item.def.name}: shop will buy for $price $currency.")
+    @Interface("Value", "inventory", "shop_side")
+    fun value(player: Player, item: Item) {
+        val inventory = player.shopInventory(false)
+        if (inventory.restricted(item.id)) {
+            player.message("You can't sell this item to this shop.")
+            return
         }
+        val price = item.sellPrice()
+        val currency = player.shopCurrency().plural(price)
+        player.message("${item.def.name}: shop will buy for $price $currency.")
+    }
 
-        interfaceOption("Sell *", "inventory", "shop_side") {
-            val amount = when (option) {
-                "Sell 1" -> 1
-                "Sell 5" -> 5
-                "Sell 10" -> 10
-                "Sell 50" -> 50
-                else -> return@interfaceOption
-            }
-            sell(player, item, amount)
+    @Interface("Sell *", "inventory", "shop_side")
+    fun sell(player: Player, item: Item, option: String) {
+        val amount = when (option) {
+            "Sell 1" -> 1
+            "Sell 5" -> 5
+            "Sell 10" -> 10
+            "Sell 50" -> 50
+            else -> return
         }
+        sell(player, item, amount)
     }
 
     fun Item.sellPrice() = (def.cost * 0.4).toInt()

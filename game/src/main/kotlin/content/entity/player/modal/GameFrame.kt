@@ -16,7 +16,6 @@ import world.gregs.voidps.type.sub.Interface
 import world.gregs.voidps.type.sub.Open
 import world.gregs.voidps.type.sub.Refresh
 
-@Script
 class GameFrame {
 
     val list = listOf(

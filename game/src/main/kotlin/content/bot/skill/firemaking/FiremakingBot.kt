@@ -11,6 +11,7 @@ import content.bot.skill.combat.setupGear
 import net.pearx.kasechange.toLowerSpaceCase
 import world.gregs.voidps.engine.data.definition.AreaDefinition
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.obj.GameObjects
@@ -21,40 +22,41 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.timer.timerStop
 import world.gregs.voidps.network.client.instruction.InteractInterfaceItem
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Spawn
+import world.gregs.voidps.type.sub.TimerStop
 
-@Script
-class FiremakingBot {
+class FiremakingBot(
+    private val areas: AreaDefinitions,
+    private val tasks: TaskManager,
+    private val objects: GameObjects,
+) {
 
-    val areas: AreaDefinitions by inject()
-    val tasks: TaskManager by inject()
-    val objects: GameObjects by inject()
-
-    init {
-        timerStop("firemaking") { player ->
-            if (player.isBot) {
-                player.bot.resume(timer)
-            }
+    @TimerStop("firemaking")
+    fun stop(player: Player) {
+        if (player.isBot) {
+            player.bot.resume("firemaking")
         }
+    }
 
-        worldSpawn {
-            for (area in areas.getTagged("fire_making")) {
-                val spaces: Int = area["spaces", 1]
-                val task = Task(
-                    name = "make fires at ${area.name}".toLowerSpaceCase(),
-                    block = {
-                        val gear = bot.getGear(Skill.Firemaking) ?: return@Task
-                        val lighter = bot.getSuitableItem(gear.inventory.first())
-                        val logs = bot.getSuitableItem(gear.inventory.last())
-                        while (levels.getMax(Skill.Firemaking) < gear.levels.last + 1) {
-                            bot.light(area, lighter, logs)
-                        }
-                    },
-                    area = area.area,
-                    spaces = spaces,
-                    requirements = listOf { bot.hasExactGear(Skill.Firemaking) },
-                )
-                tasks.register(task)
-            }
+    @Spawn
+    fun spawn(player: Player) {
+        for (area in areas.getTagged("fire_making")) {
+            val spaces: Int = area["spaces", 1]
+            val task = Task(
+                name = "make fires at ${area.name}".toLowerSpaceCase(),
+                block = {
+                    val gear = bot.getGear(Skill.Firemaking) ?: return@Task
+                    val lighter = bot.getSuitableItem(gear.inventory.first())
+                    val logs = bot.getSuitableItem(gear.inventory.last())
+                    while (levels.getMax(Skill.Firemaking) < gear.levels.last + 1) {
+                        bot.light(area, lighter, logs)
+                    }
+                },
+                area = area.area,
+                spaces = spaces,
+                requirements = listOf { bot.hasExactGear(Skill.Firemaking) },
+            )
+            tasks.register(task)
         }
     }
 

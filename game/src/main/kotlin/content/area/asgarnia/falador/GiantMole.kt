@@ -34,12 +34,12 @@ import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.sub.*
 import kotlin.random.Random
 
-@Script
-class GiantMole {
+class GiantMole(
+    private val players: Players,
+    areas: AreaDefinitions,
+) {
 
     val logger = InlineLogger()
-    val areas: AreaDefinitions by inject()
-    val players: Players by inject()
 
     val acceptedTiles = listOf(
         Tile(3005, 3376, 0),

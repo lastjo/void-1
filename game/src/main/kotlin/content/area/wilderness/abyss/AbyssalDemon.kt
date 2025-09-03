@@ -10,7 +10,6 @@ import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
 import world.gregs.voidps.type.sub.Combat
 
-@Script
 class AbyssalDemon {
 
     @Combat(id = "abyssal_demon", stage = CombatStage.DAMAGE)

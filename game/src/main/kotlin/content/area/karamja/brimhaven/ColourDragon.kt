@@ -7,13 +7,19 @@ import content.entity.sound.sound
 import kotlinx.coroutines.delay
 import world.gregs.voidps.engine.entity.character.mode.move.target.CharacterTargetStrategy
 import world.gregs.voidps.engine.entity.character.npc.NPC
+import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.type.CombatStage
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.Combat
 
-@Script
 class ColourDragon {
 
-    val handler: suspend CombatSwing.(NPC) -> Unit = { npc ->
+    @Combat(id = "blue_dragon", stage = CombatStage.SWING)
+    @Combat(id = "black_dragon", stage = CombatStage.SWING)
+    @Combat(id = "green_dragon", stage = CombatStage.SWING)
+    @Combat(id = "red_dragon", stage = CombatStage.SWING)
+    suspend fun swing(npc: NPC, target: Player) {
         val withinMelee = CharacterTargetStrategy(npc).reached(target)
         if (!withinMelee) {
             delay(1)
@@ -31,13 +37,4 @@ class ColourDragon {
         }
     }
 
-    init {
-        npcCombatSwing("blue_dragon", handler = handler)
-
-        npcCombatSwing("black_dragon", handler = handler)
-
-        npcCombatSwing("green_dragon", handler = handler)
-
-        npcCombatSwing("red_dragon", handler = handler)
-    }
 }

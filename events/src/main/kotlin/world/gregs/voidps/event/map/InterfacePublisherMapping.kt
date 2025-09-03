@@ -16,7 +16,11 @@ class InterfacePublisherMapping(function: KFunction<*>) : PublisherMapping(funct
             list.add(Equals("option", option))
         }
         if (id != "*") {
-            list.add(Equals("id", id))
+            if (name == "ContinueDialogueItemPublisher") {
+                list.add(Equals("item.id", id))
+            } else {
+                list.add(Equals("id", id))
+            }
         }
         if (component != "*") {
             list.add(Equals("component", component))

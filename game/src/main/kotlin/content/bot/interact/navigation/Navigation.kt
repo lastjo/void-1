@@ -15,10 +15,14 @@ import world.gregs.voidps.engine.entity.character.mode.interact.Interact
 import world.gregs.voidps.engine.entity.character.mode.move.Movement
 import world.gregs.voidps.engine.entity.character.mode.move.move
 import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.event.Event
 import world.gregs.voidps.engine.event.onEvent
 import world.gregs.voidps.engine.timer.TICKS
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Move
+import world.gregs.voidps.type.sub.Subscribe
+import world.gregs.voidps.type.sub.Teleport
 import kotlin.collections.set
 import kotlin.coroutines.resume
 import kotlin.reflect.KClass
@@ -67,26 +71,28 @@ fun Bot.cancel(cause: Throwable? = null) {
     cont?.cancel(cause)
 }
 
-@Script
 class Navigation {
 
-    init {
-        move({ (player.mode is Movement && player.steps.size <= 1) || player.mode == EmptyMode }) { player ->
-            if (player.isBot) {
-                player.bot.resume("move")
-            }
+    @Move
+    fun move(player: Player) {
+        if (!player.isBot || (player.mode !is Movement || player.steps.size > 1) && player.mode != EmptyMode) {
+            return
         }
+        player.bot.resume("move")
+    }
 
-        onEvent<Player, DoorOpened> { player ->
-            if (player.isBot) {
-                player.bot.resume("move")
-            }
-        }
-
-        objTeleport {
-            if (player.isBot) {
-                player.bot.resume("move")
-            }
+    @Subscribe("door_opened")
+    fun door(player: Player) {
+        if (player.isBot) {
+            player.bot.resume("move")
         }
     }
+
+    @Teleport
+    fun tele(player: Player, target: GameObject) {
+        if (player.isBot) {
+            player.bot.resume("move")
+        }
+    }
+
 }

@@ -22,7 +22,6 @@ import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 
-@Script
 class Cook {
 
     @Option("Talk-to", "cook_lumbridge")

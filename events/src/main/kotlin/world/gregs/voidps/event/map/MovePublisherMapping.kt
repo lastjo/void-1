@@ -15,15 +15,15 @@ class MovePublisherMapping(function: KFunction<*>) : PublisherMapping(function, 
         val list = mutableListOf<Condition>()
         if (from.isNotEmpty()) {
             val tile = Tile(from[0], from[1], from.getOrNull(2) ?: 0)
-            list.add(Equals("from", tile.id))
+            list.add(Equals("from.id", tile.id))
         }
         if (to.isNotEmpty()) {
             val tile = Tile(to[0], to[1], to.getOrNull(2) ?: 0)
-            list.add(Equals("to", tile.id))
+            list.add(Equals("to.id", tile.id))
         }
         if (ids.isEmpty()) {
             return listOf(list)
         }
-        return ids.map { list + listOf(Equals("target.id", it)) }
+        return ids.map { list + listOf(Equals("${method.parameters.first().first}.id", it)) }
     }
 }

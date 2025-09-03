@@ -18,7 +18,6 @@ import world.gregs.voidps.type.sub.Spawn
 import world.gregs.voidps.type.sub.TimerStart
 import world.gregs.voidps.type.sub.TimerTick
 
-@Script
 class Imp {
 
     @Spawn("imp")

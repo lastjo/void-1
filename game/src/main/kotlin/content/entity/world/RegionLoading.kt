@@ -1,11 +1,13 @@
 package content.entity.world
 
 import content.bot.isBot
+import world.gregs.voidps.engine.client.instruction.InstructionHandlers
 import world.gregs.voidps.engine.client.instruction.instruction
 import world.gregs.voidps.engine.client.update.view.Viewport
 import world.gregs.voidps.engine.entity.MAX_PLAYERS
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
+import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.map.zone.DynamicZones
 import world.gregs.voidps.network.client.instruction.FinishRegionLoad
 import world.gregs.voidps.network.login.protocol.encode.dynamicMapRegion
@@ -15,14 +17,22 @@ import world.gregs.voidps.type.Region
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.Zone
 import world.gregs.voidps.type.sub.Despawn
+import world.gregs.voidps.type.sub.Instruction
 import world.gregs.voidps.type.sub.Move
 import world.gregs.voidps.type.sub.Subscribe
 
+
+/**
+ * Keeps track of when players enter and move between regions
+ * Loads maps when they are accessed
+ */
 class RegionLoading(
     private val players: Players,
     private val dynamicZones: DynamicZones,
 ) {
     val playerRegions = IntArray(MAX_PLAYERS - 1)
+
+    private val blankXtea = IntArray(4)
 
     init {
         instruction<FinishRegionLoad> { player ->
@@ -31,6 +41,11 @@ class RegionLoading(
             }
             player.viewport?.loaded = true
         }
+    }
+
+    @Instruction
+    fun regionLoad(player: Player, instruction: FinishRegionLoad) {
+
     }
 
     @Subscribe("region_load")
@@ -56,10 +71,18 @@ class RegionLoading(
         }
     }
 
+    /*
+        Player regions
+     */
+
     @Despawn
     fun despawn(player: Player) {
         playerRegions[player.index - 1] = 0
     }
+
+    /*
+        Region updating
+     */
 
     @Move
     fun move(player: Player, from: Tile, to: Tile) {
@@ -94,21 +117,6 @@ class RegionLoading(
             }
         }
     }
-
-    /**
-     * Keeps track of when players enter and move between regions
-     * Loads maps when they are accessed
-     */
-
-    private val blankXtea = IntArray(4)
-
-    /*
-        Player regions
-     */
-
-    /*
-        Region updating
-     */
 
     fun needsRegionChange(player: Player) = !inViewOfZone(player, player.viewport!!.lastLoadZone) || crossedDynamicBoarder(player)
 

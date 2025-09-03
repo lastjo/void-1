@@ -1,63 +1,58 @@
 package content.area.kandarin.catherby
 
-import content.entity.npc.shop.buy.itemBought
 import content.entity.npc.shop.openShop
 import content.entity.player.dialogue.Talk
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
+import world.gregs.voidps.type.sub.Subscribe
 
-@Script
 class Hickton {
 
-    init {
-        npcOperate("Trade", "hickton") {
-            openHicktonShop(player)
-        }
+    @Option("Talk-to", "hickton")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        npc<Talk>("Welcome to Hickton's Archery Store. Do you want to see my wares?")
+        choice {
+            option("Can you tell me about your cape?") {
+                player<Talk>("Can you tell me about your cape?")
+                npc<Talk>("Certainly! Skillcapes are a symbol of achievement. Only people who have mastered a skill and reached level 99 can get their hands on them and gain the benefits they carry.")
+                npc<Talk>("Is there anything else I can help you with?")
 
-        npcOperate("Talk-to", "hickton") {
-            npc<Talk>("Welcome to Hickton's Archery Store. Do you want to see my wares?")
-
-            choice {
-                option("Can you tell me about your cape?") {
-                    player<Talk>("Can you tell me about your cape?")
-                    npc<Talk>("Certainly! Skillcapes are a symbol of achievement. Only people who have mastered a skill and reached level 99 can get their hands on them and gain the benefits they carry.")
-                    npc<Talk>("Is there anything else I can help you with?")
-
-                    choice {
-                        option("I'd like to view your store, please.") {
-                            openHicktonShop(player)
-                        }
-                        option("No thank you.") {
-                            player<Talk>("No thank you.")
-                        }
+                choice {
+                    option("I'd like to view your store, please.") {
+                        openHicktonShop(player)
+                    }
+                    option("No thank you.") {
+                        player<Talk>("No thank you.")
                     }
                 }
+            }
 
-                option("Yes, please.") {
-                    openHicktonShop(player)
-                }
+            option("Yes, please.") {
+                openHicktonShop(player)
+            }
 
-                option("No, I prefer to bash things close up.") {
-                    player<Talk>("No, I prefer to bash things close up.")
-                }
+            option("No, I prefer to bash things close up.") {
+                player<Talk>("No, I prefer to bash things close up.")
             }
         }
+    }
 
-        itemBought("fletching_cape") { player ->
-            player.inventory.add("fletching_hood")
-        }
+    @Option("Trade", "hickton")
+    fun trade(player: Player, target: NPC) {
+        openHicktonShop(player)
+    }
 
-        itemBought("fletching_cape_(t)") { player ->
-            player.inventory.add("fletching_hood")
-        }
+    @Subscribe("bought", "fletching_cape", "fletching_cape_(t)")
+    fun hood(player: Player) {
+        player.inventory.add("fletching_hood")
     }
 
     // Helper function to open the appropriate shop based on player's skill levels

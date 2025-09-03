@@ -8,14 +8,19 @@ import content.entity.sound.sound
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.mode.move.target.CharacterTargetStrategy
 import world.gregs.voidps.engine.entity.character.npc.NPC
+import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.type.CombatStage
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.Combat
 
-@Script
 class MetalDragons {
 
-    val handler: suspend CombatSwing.(NPC) -> Unit = { npc ->
+    @Combat(id = "bronze_dragon", stage = CombatStage.SWING)
+    @Combat(id = "iron_dragon", stage = CombatStage.SWING)
+    @Combat(id = "steel_dragon", stage = CombatStage.SWING)
+    fun swing(npc: NPC, target: Player) {
         val withinMelee = CharacterTargetStrategy(npc).reached(target)
         if (withinMelee && random.nextBoolean()) {
             // Melee attack
@@ -35,14 +40,6 @@ class MetalDragons {
             nearestTile(npc, target).shoot("dragon_breath", target)
             npc.hit(target, offensiveType = "dragonfire")
         }
-    }
-
-    init {
-        npcCombatSwing("bronze_dragon", handler = handler)
-
-        npcCombatSwing("iron_dragon", handler = handler)
-
-        npcCombatSwing("steel_dragon", handler = handler)
     }
 
     /**
