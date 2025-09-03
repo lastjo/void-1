@@ -14,62 +14,65 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.Transaction
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.Open
 
-@Script
 class SlayerRewards {
 
-    init {
-        interfaceOption("Learn", "learn", "slayer_rewards") {
-            player.open("slayer_rewards_learn")
-        }
+    @Interface("Learn", "learn", "slayer_rewards")
+    fun learn(player: Player) {
+        player.open("slayer_rewards_learn")
+    }
 
-        interfaceOption("Assignments", "assignment", "slayer_rewards") {
-            player.open("slayer_rewards_assignment")
-        }
+    @Interface("Assignments", "assignment", "slayer_rewards")
+    fun assignments(player: Player) {
+        player.open("slayer_rewards_assignment")
+    }
 
-        interfaceOpen("slayer_rewards") { player ->
-            refreshText(player, id)
-        }
-
-        interfaceOption("Buy XP", "buy_xp_*", "slayer_rewards") {
-            if (player.slayerPoints < 400) {
-                player.message("Sorry. That would cost 400 and you only have ${player.slayerPoints} Slayer ${"Point".plural(player.slayerPoints)}.")
-            } else if (player.inventory.add("ring_of_slaying_8")) {
-                player.slayerPoints -= 400
-                player.exp(Skill.Slayer, 10_000.0)
-                // TODO message
-            }
-        }
-
-        interfaceOption("Buy Ring", "buy_ring_*", "slayer_rewards") {
-            buy(player, 75, "Here are your ring. Use it wisely.") {
-                // TODO proper message
-                add("ring_of_slaying_8")
-            }
-        }
-
-        interfaceOption("Buy Runes", "buy_runes_*", "slayer_rewards") {
-            buy(player, 35, "Here are your runes. Use them wisely.") {
-                add("death_rune", 250)
-                add("mind_rune", 1000)
-            }
-        }
-
-        interfaceOption("Buy Bolts", "buy_bolts_*", "slayer_rewards") {
-            buy(player, 35, "Here are your bolts. Use them wisely.") {
-                // TODO proper message
-                add("broad_tipped_bolts", 250)
-            }
-        }
-
-        interfaceOption("Buy Arrows", "buy_arrows_*", "slayer_rewards") {
-            buy(player, 35, "Here are your arrows. Use them wisely.") {
-                // TODO proper message
-                add("broad_arrow", 250)
-            }
+    @Interface("Buy XP", "buy_xp_*", "slayer_rewards")
+    fun exp(player: Player) {
+        if (player.slayerPoints < 400) {
+            player.message("Sorry. That would cost 400 and you only have ${player.slayerPoints} Slayer ${"Point".plural(player.slayerPoints)}.")
+        } else if (player.inventory.add("ring_of_slaying_8")) {
+            player.slayerPoints -= 400
+            player.exp(Skill.Slayer, 10_000.0)
+            // TODO message
         }
     }
 
+    @Interface("Buy Ring", "buy_ring_*", "slayer_rewards")
+    fun ring(player: Player) {
+        buy(player, 75, "Here are your ring. Use it wisely.") {
+            // TODO proper message
+            add("ring_of_slaying_8")
+        }
+    }
+
+    @Interface("Buy Runes", "buy_runes_*", "slayer_rewards")
+    fun runes(player: Player) {
+        buy(player, 35, "Here are your runes. Use them wisely.") {
+            add("death_rune", 250)
+            add("mind_rune", 1000)
+        }
+    }
+
+    @Interface("Buy Bolts", "buy_bolts_*", "slayer_rewards")
+    fun bolts(player: Player) {
+        buy(player, 35, "Here are your bolts. Use them wisely.") {
+            // TODO proper message
+            add("broad_tipped_bolts", 250)
+        }
+    }
+
+    @Interface("Buy Arrows", "buy_arrows_*", "slayer_rewards")
+    fun arrows(player: Player) {
+        buy(player, 35, "Here are your arrows. Use them wisely.") {
+            // TODO proper message
+            add("broad_arrow", 250)
+        }
+    }
+
+    @Open("slayer_rewards")
     fun refreshText(player: Player, id: String) {
         val points = player.slayerPoints
         player.interfaces.sendText(id, "current_points", points.toString())

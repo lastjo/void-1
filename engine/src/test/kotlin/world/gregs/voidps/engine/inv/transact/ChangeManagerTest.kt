@@ -44,7 +44,7 @@ internal class ChangeManagerTest {
     @Test
     fun `Clear tracked changes`() {
         val events = mockk<Player>(relaxed = true)
-        Publishers.set(object : Publishers() {
+        Publishers.set(object : Publishers {
             override fun itemAdded(player: Player, item: Item, itemSlot: Int, inventory: String): Boolean {
                 throw IllegalStateException()
             }
@@ -57,7 +57,7 @@ internal class ChangeManagerTest {
                 throw IllegalStateException()
             }
 
-            override fun inventoryChanged(player: Player, inventory: String, index: Int, item: Item, from: String, fromIndex: Int, fromItem: Item): Boolean {
+            override fun inventoryChanged(player: Player, inventory: String, index: Int, item: Item, from: String, fromSlot: Int, fromItem: Item): Boolean {
                 throw IllegalStateException()
             }
         })

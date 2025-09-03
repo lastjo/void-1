@@ -9,19 +9,13 @@ import world.gregs.voidps.engine.inv.itemRemoved
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.ItemAdded
+import world.gregs.voidps.type.sub.ItemRemoved
+import world.gregs.voidps.type.sub.Spawn
 
-@Script
 class VoidSet {
 
-    val slots = setOf(
-        EquipSlot.Hat.index,
-        EquipSlot.Chest.index,
-        EquipSlot.Legs.index,
-        EquipSlot.Hands.index,
-    )
-
-    @ItemAdded("void_*", inventory = "worn_equipment", slots = [EquipSlot.HAT, EquipSlot.CHEST, EquipSlot.LEGS, EquipSlot.HANDS])
-    fun equipVoid(player: Player) {
+    @Spawn
+    fun spawn(player: Player) {
         if (player.hasFullSet("")) {
             player["void_set_effect"] = true
         } else if (player.hasFullSet("elite_")) {
@@ -29,37 +23,21 @@ class VoidSet {
         }
     }
 
-    init {
-        playerSpawn { player ->
-            if (player.hasFullSet("")) {
-                player["void_set_effect"] = true
-            } else if (player.hasFullSet("elite_")) {
-                player["elite_void_set_effect"] = true
-            }
+    @ItemAdded("void_*", slots = [EquipSlot.HAT, EquipSlot.CHEST, EquipSlot.LEGS, EquipSlot.HANDS], inventory = "worn_equipment")
+    @ItemAdded("elite_void_*", slots = [EquipSlot.HAT, EquipSlot.CHEST, EquipSlot.LEGS, EquipSlot.HANDS], inventory = "worn_equipment")
+    fun equip(player: Player) {
+        if (player.hasFullSet("")) {
+            player["void_set_effect"] = true
+        } else if (player.hasFullSet("elite_")) {
+            player["elite_void_set_effect"] = true
         }
+    }
 
-        itemRemoved("void_*", slots, "worn_equipment") { player ->
-            player.clear("void_set_effect")
-            player.clear("elite_void_set_effect")
-        }
-
-        itemAdded("void_*", slots, "worn_equipment") { player ->
-            if (player.hasFullSet("")) {
-                player["void_set_effect"] = true
-            } else if (player.hasFullSet("elite_")) {
-                player["elite_void_set_effect"] = true
-            }
-        }
-
-        itemRemoved("elite_void_*", slots, "worn_equipment") { player ->
-            player.clear("elite_void_set_effect")
-        }
-
-        itemAdded("elite_void_*", slots, "worn_equipment") { player ->
-            if (player.hasFullSet("elite_")) {
-                player["elite_void_set_effect"] = true
-            }
-        }
+    @ItemRemoved("void_*", slots = [EquipSlot.HAT, EquipSlot.CHEST, EquipSlot.LEGS, EquipSlot.HANDS], inventory = "worn_equipment")
+    @ItemRemoved("elite_void_*", slots = [EquipSlot.HAT, EquipSlot.CHEST, EquipSlot.LEGS, EquipSlot.HANDS], inventory = "worn_equipment")
+    fun unequip(player: Player) {
+        player.clear("void_set_effect")
+        player.clear("elite_void_set_effect")
     }
 
     fun Player.hasFullSet(prefix: String): Boolean = equipped(EquipSlot.Chest).id.startsWith("${prefix}void_knight_top") &&

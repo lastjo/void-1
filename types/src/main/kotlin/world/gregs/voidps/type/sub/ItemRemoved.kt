@@ -12,6 +12,7 @@ package world.gregs.voidps.type.sub
  * fun removeTiara(player: Player, item: Item, slot: Int, inventory: String) {
  * }
  */
+@Repeatable
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.SOURCE)
 annotation class ItemRemoved(

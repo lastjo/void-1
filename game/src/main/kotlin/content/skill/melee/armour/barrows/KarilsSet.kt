@@ -1,41 +1,43 @@
 package content.skill.melee.armour.barrows
 
-import content.entity.combat.hit.characterCombatAttack
+import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.inv.itemAdded
-import world.gregs.voidps.engine.inv.itemRemoved
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.Combat
+import world.gregs.voidps.type.sub.ItemAdded
+import world.gregs.voidps.type.sub.ItemRemoved
+import world.gregs.voidps.type.sub.Spawn
 
-@Script
 class KarilsSet {
 
-    init {
-        playerSpawn { player ->
-            if (player.hasFullSet()) {
-                player["karils_set_effect"] = true
-            }
+    @Spawn
+    fun spawn(player: Player) {
+        if (player.hasFullSet()) {
+            player["karils_set_effect"] = true
         }
+    }
 
-        itemRemoved("karils_*", BarrowsArmour.slots, "worn_equipment") { player ->
-            player.clear("karils_set_effect")
+    @ItemAdded("karils_*", slots = [EquipSlot.HAT, EquipSlot.CHEST, EquipSlot.LEGS, EquipSlot.WEAPON], inventory = "worn_equipment")
+    fun added(player: Player) {
+        if (player.hasFullSet()) {
+            player["karils_set_effect"] = true
         }
+    }
 
-        itemAdded("karils_*", BarrowsArmour.slots, "worn_equipment") { player ->
-            if (player.hasFullSet()) {
-                player["karils_set_effect"] = true
-            }
+    @ItemRemoved("karils_*", slots = [EquipSlot.HAT, EquipSlot.CHEST, EquipSlot.LEGS, EquipSlot.WEAPON], inventory = "worn_equipment")
+    fun remove(player: Player) {
+        player.clear("karils_set_effect")
+    }
+
+    @Combat(weapon = "karils_crossbow*", type = "range")
+    fun combat(source: Character, target: Character, damage: Int) {
+        if (damage <= 0 || target !is Player || !source.contains("karils_set_effect") || random.nextInt(4) != 0) {
+            return
         }
-
-        characterCombatAttack("karils_crossbow*", "range") { character ->
-            if (damage <= 0 || target !is Player || !character.contains("karils_set_effect") || random.nextInt(4) != 0) {
-                return@characterCombatAttack
-            }
-            if (target.levels.drain(Skill.Agility, multiplier = 0.20) < 0) {
-                target.gfx("karils_effect")
-            }
+        if (target.levels.drain(Skill.Agility, multiplier = 0.20) < 0) {
+            target.gfx("karils_effect")
         }
     }
 

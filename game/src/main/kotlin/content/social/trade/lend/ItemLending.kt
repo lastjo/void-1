@@ -12,53 +12,60 @@ import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.timer.*
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.TimerState
+import world.gregs.voidps.type.sub.Despawn
+import world.gregs.voidps.type.sub.Spawn
+import world.gregs.voidps.type.sub.TimerStart
+import world.gregs.voidps.type.sub.TimerStop
+import world.gregs.voidps.type.sub.TimerTick
 import java.util.concurrent.TimeUnit
 
-@Script
-class ItemLending {
+class ItemLending(private val players: Players) {
 
-    val players: Players by inject()
+    @Spawn
+    fun spawn(player: Player) {
+        checkBorrowComplete(player)
+        checkLoanComplete(player)
+    }
 
-    init {
-        playerSpawn { player ->
-            checkBorrowComplete(player)
-            checkLoanComplete(player)
+    @Despawn
+    fun despawn(player: Player) {
+        checkBorrowUntilLogout(player)
+        checkLoanUntilLogout(player)
+    }
+
+    @TimerStart("loan_message")
+    fun start(player: Player): Int {
+        val remaining = player.remaining("lend_timeout", epochSeconds())
+        return TimeUnit.SECONDS.toTicks(remaining)
+    }
+
+    @TimerStop("loan_message")
+    fun stop(player: Player, logout: Boolean) {
+        if (!logout) {
+            stopLending(player)
         }
+    }
 
-        playerDespawn { player ->
-            checkBorrowUntilLogout(player)
-            checkLoanUntilLogout(player)
+    @TimerStart("borrow_message")
+    fun startBorrow(player: Player): Int = TimeUnit.MINUTES.toTicks(1)
+
+    @TimerTick("borrow_message")
+    fun tick(player: Player): Int {
+        val remaining = player.remaining("borrow_timeout", epochSeconds())
+        if (remaining <= 0) {
+            player.message("Your loan has expired; the item you borrowed will now be returned to its owner.")
+            return TimerState.CANCEL
+        } else if (remaining == 60) {
+            player.message("The item you borrowed will be returned to its owner in a minute.")
         }
+        return TimerState.CONTINUE
+    }
 
-        timerStart("loan_message") { player ->
-            val remaining = player.remaining("lend_timeout", epochSeconds())
-            interval = TimeUnit.SECONDS.toTicks(remaining)
-        }
-
-        timerStop("loan_message") { player ->
-            if (!logout) {
-                stopLending(player)
-            }
-        }
-
-        timerStart("borrow_message") {
-            interval = TimeUnit.MINUTES.toTicks(1)
-        }
-
-        timerTick("borrow_message") { player ->
-            val remaining = player.remaining("borrow_timeout", epochSeconds())
-            if (remaining <= 0) {
-                player.message("Your loan has expired; the item you borrowed will now be returned to its owner.")
-                cancel()
-            } else if (remaining == 60) {
-                player.message("The item you borrowed will be returned to its owner in a minute.")
-            }
-        }
-
-        timerStop("borrow_message") { player ->
-            if (!logout) {
-                returnLoan(player)
-            }
+    @TimerStop("borrow_message")
+    fun stopBorrow(player: Player, logout: Boolean) {
+        if (!logout) {
+            returnLoan(player)
         }
     }
 

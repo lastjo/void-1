@@ -4,7 +4,7 @@ import com.squareup.kotlinpoet.TypeName
 import world.gregs.voidps.event.*
 import kotlin.reflect.KFunction
 
-class InterfaceOnPublisherMapping(function: KFunction<*>, has: KFunction<*>) : PublisherMapping(function, has, notification = true) {
+class InterfaceOnPublisherMapping(function: KFunction<*>, has: KFunction<*>? = null) : PublisherMapping(function, has, notification = true) {
     override fun conditions(method: Subscriber): List<List<Condition>> {
         val item = method.annotationArgs["item"] as String
         val on = method.annotationArgs["on"] as String

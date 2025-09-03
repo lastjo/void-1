@@ -9,63 +9,63 @@ import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.Open
 
-@Script
 class SlayerAssignment {
 
-    init {
-        interfaceOption("Learn", "learn", "slayer_rewards_assignment") {
-            player.open("slayer_rewards_learn")
+    @Interface("Learn", "learn", "slayer_rewards_assignment")
+    fun learn(player: Player) {
+        player.open("slayer_rewards_learn")
+    }
+
+    @Interface("Buy", "buy", "slayer_rewards_assignment")
+    fun buy(player: Player) {
+        player.open("slayer_rewards")
+    }
+
+    @Interface("Reassign *", "reassign_*", "slayer_rewards_assignment")
+     fun reassign(player: Player) {
+        if (player.slayerPoints < 30) {
+            player.message("Sorry. That would cost 30 and you only have ${player.slayerPoints} Slayer ${"Point".plural(player.slayerPoints)}.")
+            return
+        }
+        if (player.slayerTask == "nothing") {
+            player.message("You need a task in order to skip it.") // TODO proper message
+            return
+        }
+        player.slayerPoints -= 30
+        player.slayerTask = "nothing"
+        //    npc<Happy>(player["slayer_npc", ""], "") TODO proper message and save npc id on interface open
+    }
+
+    @Interface("Permanently *", "block_*", "slayer_rewards_assignment")
+    fun block(player: Player) {
+        if (player.slayerPoints < 100) {
+            player.message("Sorry. That would cost 100 and you only have ${player.slayerPoints} Slayer ${"Point".plural(player.slayerPoints)}.")
+            return
+        }
+        if (player.slayerTask == "nothing") {
+            player.message("You need a task in order to block it.") // TODO proper message
+            return
+        }
+        var blocked = false
+        for (i in 0 until 5) {
+            if (!player.contains("blocked_task_$i")) {
+                player["blocked_task_$i"] = player.slayerTask
+                player.slayerTask = "nothing"
+                player.slayerPoints -= 100
+                blocked = true
+                break
+            }
         }
 
-        interfaceOption("Buy", "buy", "slayer_rewards_assignment") {
-            player.open("slayer_rewards")
-        }
-
-        interfaceOpen("slayer_rewards_assignment") { player ->
-            refresh(player, id)
-        }
-
-        interfaceOption("Reassign *", "reassign_*", "slayer_rewards_assignment") {
-            if (player.slayerPoints < 30) {
-                player.message("Sorry. That would cost 30 and you only have ${player.slayerPoints} Slayer ${"Point".plural(player.slayerPoints)}.")
-                return@interfaceOption
-            }
-            if (player.slayerTask == "nothing") {
-                player.message("You need a task in order to skip it.") // TODO proper message
-                return@interfaceOption
-            }
-            player.slayerPoints -= 30
-            player.slayerTask = "nothing"
-            //    npc<Happy>(player["slayer_npc", ""], "") TODO proper message and save npc id on interface open
-        }
-
-        interfaceOption("Permanently *", "block_*", "slayer_rewards_assignment") {
-            if (player.slayerPoints < 100) {
-                player.message("Sorry. That would cost 100 and you only have ${player.slayerPoints} Slayer ${"Point".plural(player.slayerPoints)}.")
-                return@interfaceOption
-            }
-            if (player.slayerTask == "nothing") {
-                player.message("You need a task in order to block it.") // TODO proper message
-                return@interfaceOption
-            }
-            var blocked = false
-            for (i in 0 until 5) {
-                if (!player.contains("blocked_task_$i")) {
-                    player["blocked_task_$i"] = player.slayerTask
-                    player.slayerTask = "nothing"
-                    player.slayerPoints -= 100
-                    blocked = true
-                    break
-                }
-            }
-
-            if (!blocked) {
-                player.message("You don't have any free block slots.") // TODO proper message
-            }
+        if (!blocked) {
+            player.message("You don't have any free block slots.") // TODO proper message
         }
     }
 
+    @Open("slayer_rewards_assignment")
     fun refresh(player: Player, id: String) {
         val points = player.slayerPoints
         player.interfaces.sendText(id, "current_points", points.toString())

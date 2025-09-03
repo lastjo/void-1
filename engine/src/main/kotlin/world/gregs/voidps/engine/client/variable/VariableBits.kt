@@ -1,7 +1,9 @@
 package world.gregs.voidps.engine.client.variable
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.event.EventDispatcher
+import world.gregs.voidps.engine.event.Publishers
 
 class VariableBits(
     private val variables: Variables,
@@ -19,7 +21,9 @@ class VariableBits(
             if (refresh) {
                 variables.send(key)
             }
-            events.emit(VariableBitAdded(key, value))
+            if (events is Player) {
+                Publishers.all.variableBits(events, key, value, added = true)
+            }
             return true
         }
         return false
@@ -31,7 +35,9 @@ class VariableBits(
             if (refresh) {
                 variables.send(key)
             }
-            events.emit(VariableBitRemoved(key, value))
+            if (events is Player) {
+                Publishers.all.variableBits(events, key, value, added = false)
+            }
             return true
         }
         return false
@@ -43,8 +49,10 @@ class VariableBits(
         if (refresh) {
             variables.send(key)
         }
-        for (value in values) {
-            events.emit(VariableBitRemoved(key, value))
+        if (events is Player) {
+            for (value in values) {
+                Publishers.all.variableBits(events, key, value, added = false)
+            }
         }
     }
 }

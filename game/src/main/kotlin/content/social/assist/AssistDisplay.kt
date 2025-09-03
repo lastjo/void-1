@@ -10,25 +10,23 @@ import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Interface
 
-@Script
 class AssistDisplay {
-
-    init {
-        interfaceOption(option = "Toggle Skill On / Off", id = "assist_xp") {
-            val skill = Skill.valueOf(component.toSentenceCase())
-            val assisted: Player? = player["assisted"]
-            if (assisted == null) {
-                player.closeMenu()
-            } else {
-                blockSkillExperience(player, assisted, skill)
-            }
-        }
-    }
 
     /**
      * Assistance system display interface
      */
+    @Interface("Toggle Skill On / Off", id = "assist_xp")
+    fun toggle(player: Player, component: String) {
+        val skill = Skill.valueOf(component.toSentenceCase())
+        val assisted: Player? = player["assisted"]
+        if (assisted == null) {
+            player.closeMenu()
+        } else {
+            blockSkillExperience(player, assisted, skill)
+        }
+    }
 
     fun blockSkillExperience(player: Player, assisted: Player, skill: Skill) {
         val key = "assist_toggle_${skill.name.lowercase()}"

@@ -1,50 +1,51 @@
 package content.area.misthalin.edgeville
 
 import content.area.wilderness.inWilderness
-import content.skill.prayer.prayerStart
-import content.skill.prayer.prayerStop
 import world.gregs.voidps.engine.client.ui.close
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
 import world.gregs.voidps.engine.client.ui.open
-import world.gregs.voidps.engine.client.variable.variableSet
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Open
+import world.gregs.voidps.type.sub.PrayerStart
+import world.gregs.voidps.type.sub.PrayerStop
+import world.gregs.voidps.type.sub.Variable
 
-@Script
 class WildernessIcons {
 
-    init {
-        variableSet("in_wilderness", to = true) { player ->
-            player.options.set(1, "Attack")
-            player.open("wilderness_skull")
-            //    player.setVar("no_pvp_zone", false)
+    @Variable("in_wilderness", toBool = "true")
+    fun set(player: Player) {
+        player.options.set(1, "Attack")
+        player.open("wilderness_skull")
+        //    player.setVar("no_pvp_zone", false)
+        resetIcons(player)
+        updateIcon(player)
+    }
+
+    @Variable("in_wilderness", toNull = true)
+    fun clear(player: Player) {
+        player.options.remove("Attack")
+        player.close("wilderness_skull")
+        //    player.setVar("no_pvp_zone", true)
+        resetIcons(player)
+    }
+
+    @Open("wilderness_skull")
+    fun open(player: Player, id: String) {
+        player.interfaces.sendSprite(id, "right_skull", 439)
+    }
+
+    @PrayerStart("protect_item")
+    fun pray(player: Player, id: String) {
+        if (player.inWilderness) {
             resetIcons(player)
             updateIcon(player)
         }
+    }
 
-        variableSet("in_wilderness", to = null) { player ->
-            player.options.remove("Attack")
-            player.close("wilderness_skull")
-            //    player.setVar("no_pvp_zone", true)
+    @PrayerStop("protect_item")
+    fun stop(player: Player, id: String) {
+        if (player.inWilderness) {
             resetIcons(player)
-        }
-
-        interfaceOpen("wilderness_skull") { player ->
-            player.interfaces.sendSprite(id, "right_skull", 439)
-        }
-
-        prayerStart("protect_item") { player ->
-            if (player.inWilderness) {
-                resetIcons(player)
-                updateIcon(player)
-            }
-        }
-
-        prayerStop("protect_item") { player ->
-            if (player.inWilderness) {
-                resetIcons(player)
-                updateIcon(player)
-            }
+            updateIcon(player)
         }
     }
 

@@ -1,17 +1,20 @@
 package world.gregs.voidps.event.map
 
-import world.gregs.voidps.event.Condition
-import world.gregs.voidps.event.Equals
-import world.gregs.voidps.event.PublisherMapping
-import world.gregs.voidps.event.Subscriber
+import world.gregs.voidps.event.*
 import kotlin.reflect.KFunction
 
 class SpecialAttackPublisherMapping(function: KFunction<*>) : PublisherMapping(function, notification = true, cancellable = true) {
     override fun conditions(method: Subscriber): List<List<Condition>> {
         val id = method.annotationArgs["id"] as String
-        val prepare = method.annotationArgs["prepare"] as Boolean
         val list = mutableListOf<Condition>()
-        list.add(Equals("prepare", prepare))
+        if (name != "SpecialAttackPreparePublisher") {
+            val damage = method.annotationArgs["damage"] as Boolean
+            if (damage) {
+                list.add(GreaterThan("damage", -2))
+            } else {
+                list.add(Equals("damage", -2))
+            }
+        }
         if (id != "*") {
             list.add(Equals("id", id))
         }

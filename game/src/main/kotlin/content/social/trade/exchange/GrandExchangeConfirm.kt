@@ -7,6 +7,7 @@ import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.data.Settings
 import world.gregs.voidps.engine.data.exchange.ExchangeOffer
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.notEnough
 import world.gregs.voidps.engine.entity.character.player.name
 import world.gregs.voidps.engine.entity.item.Item
@@ -16,95 +17,95 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItemLimit.removeToLimit
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Interface
 
-@Script
-class GrandExchangeConfirm {
-
-    val exchange: GrandExchange by inject()
+class GrandExchangeConfirm(private val exchange: GrandExchange) {
 
     val logger = InlineLogger()
 
-    init {
-        interfaceOption("Confirm Offer", "confirm", "grand_exchange") {
-            if (player["grand_exchange_item_id", -1] == -1) {
-                // https://youtu.be/wAtBnxSxgiA?si=jsurs070eip_6INS&t=191
-                player.message("You must choose an item first.")
-                return@interfaceOption
-            }
-            val slot: Int = player["grand_exchange_box"] ?: return@interfaceOption
-            val itemId: String = player["grand_exchange_item"] ?: return@interfaceOption
-            val amount: Int = player["grand_exchange_quantity"] ?: return@interfaceOption
-            val price: Int = player["grand_exchange_price"] ?: return@interfaceOption
-            val id = when (player["grand_exchange_page", "offers"]) {
-                "buy" -> {
-                    val total = price * amount
-                    var fromBank = false
-                    player.inventory.transaction {
-                        var removed = removeToLimit("coins", total)
-                        if (removed < total && Settings["grandExchange.useBankCoins", false]) {
-                            val txn = link(player.bank)
-                            removed += txn.removeToLimit("coins", total - removed)
-                            fromBank = true
-                        }
-                        if (removed < total) {
-                            error = TransactionError.Deficient(total - removed)
-                        }
+
+    @Interface("Confirm Offer", "confirm", "grand_exchange")
+    fun confirm(player: Player) {
+        if (player["grand_exchange_item_id", -1] == -1) {
+            // https://youtu.be/wAtBnxSxgiA?si=jsurs070eip_6INS&t=191
+            player.message("You must choose an item first.")
+            return
+        }
+        val slot: Int = player["grand_exchange_box"] ?: return
+        val itemId: String = player["grand_exchange_item"] ?: return
+        val amount: Int = player["grand_exchange_quantity"] ?: return
+        val price: Int = player["grand_exchange_price"] ?: return
+        when (player["grand_exchange_page", "offers"]) {
+            "buy" -> {
+                val total = price * amount
+                var fromBank = false
+                player.inventory.transaction {
+                    var removed = removeToLimit("coins", total)
+                    if (removed < total && Settings["grandExchange.useBankCoins", false]) {
+                        val txn = link(player.bank)
+                        removed += txn.removeToLimit("coins", total - removed)
+                        fromBank = true
                     }
-                    when (player.inventory.transaction.error) {
-                        TransactionError.None -> {
-                            if (fromBank) {
-                                player.message("Payment has been taken from your bank.")
-                            }
-                            player.offers[slot] = exchange.buy(player, Item(itemId, amount), price)
-                        }
-                        is TransactionError.Deficient -> {
-                            player.notEnough("coins")
-                            return@interfaceOption
-                        }
-                        else -> return@interfaceOption
+                    if (removed < total) {
+                        error = TransactionError.Deficient(total - removed)
                     }
                 }
-                "sell" -> {
-                    var removed = 0
-                    player.inventory.transaction {
-                        removed += removeToLimit(itemId, amount)
-                        if (removed < amount) {
-                            val noted = Item(itemId, amount).noted?.id ?: itemId
-                            removed += removeToLimit(noted, amount - removed)
+                when (player.inventory.transaction.error) {
+                    TransactionError.None -> {
+                        if (fromBank) {
+                            player.message("Payment has been taken from your bank.")
                         }
-
-                        if (removed < amount) {
-                            error = TransactionError.Deficient(amount - removed)
-                        }
+                        player.offers[slot] = exchange.buy(player, Item(itemId, amount), price)
                     }
-                    when (player.inventory.transaction.error) {
-                        TransactionError.None -> player.offers[slot] = exchange.sell(player, Item(itemId, amount), price)
-                        else -> {
-                            logger.warn { "Error removing GE items ${player.name} ${player.inventory.transaction.error} $slot $itemId $amount $price" }
-                            return@interfaceOption
-                        }
+                    is TransactionError.Deficient -> {
+                        player.notEnough("coins")
+                        return
+                    }
+                    else -> return
+                }
+            }
+            "sell" -> {
+                var removed = 0
+                player.inventory.transaction {
+                    removed += removeToLimit(itemId, amount)
+                    if (removed < amount) {
+                        val noted = Item(itemId, amount).noted?.id ?: itemId
+                        removed += removeToLimit(noted, amount - removed)
+                    }
+
+                    if (removed < amount) {
+                        error = TransactionError.Deficient(amount - removed)
                     }
                 }
-                else -> return@interfaceOption
+                when (player.inventory.transaction.error) {
+                    TransactionError.None -> player.offers[slot] = exchange.sell(player, Item(itemId, amount), price)
+                    else -> {
+                        logger.warn { "Error removing GE items ${player.name} ${player.inventory.transaction.error} $slot $itemId $amount $price" }
+                        return
+                    }
+                }
             }
-
-            player.inventories.inventory("collection_box_$slot").clear()
-            exchange.refresh(player, slot)
-            GrandExchange.clearSelection(player)
+            else -> return
         }
 
-        interfaceOption("Back", "back", "grand_exchange") {
-            val box: Int = player["grand_exchange_box", -1]
-            val collectionBox = player.inventories.inventory("collection_box_$box")
-            if (collectionBox.isEmpty()) {
-                val offer = player.offers.getOrNull(box)
-                if (offer != null && offer.state.cancelled) {
-                    player.offers[box] = ExchangeOffer.EMPTY
-                    exchange.offers.remove(offer)
-                    exchange.refresh(player, box)
-                }
-            }
-            GrandExchange.clearSelection(player)
-        }
+        player.inventories.inventory("collection_box_$slot").clear()
+        exchange.refresh(player, slot)
+        GrandExchange.clearSelection(player)
     }
+
+    @Interface("Back", "back", "grand_exchange")
+    fun back(player: Player) {
+        val box: Int = player["grand_exchange_box", -1]
+        val collectionBox = player.inventories.inventory("collection_box_$box")
+        if (collectionBox.isEmpty()) {
+            val offer = player.offers.getOrNull(box)
+            if (offer != null && offer.state.cancelled) {
+                player.offers[box] = ExchangeOffer.EMPTY
+                exchange.offers.remove(offer)
+                exchange.refresh(player, box)
+            }
+        }
+        GrandExchange.clearSelection(player)
+    }
+
 }

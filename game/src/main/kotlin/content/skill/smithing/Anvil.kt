@@ -11,6 +11,7 @@ import world.gregs.voidps.engine.client.sendScript
 import world.gregs.voidps.engine.client.ui.chat.Colours
 import world.gregs.voidps.engine.client.ui.chat.an
 import world.gregs.voidps.engine.client.ui.closeMenu
+import world.gregs.voidps.engine.client.ui.dialogue
 import world.gregs.voidps.engine.client.ui.event.interfaceClose
 import world.gregs.voidps.engine.client.ui.interact.itemOnObjectOperate
 import world.gregs.voidps.engine.client.ui.interfaceOption
@@ -22,6 +23,8 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
+import world.gregs.voidps.engine.entity.item.Item
+import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.TransactionError
@@ -30,9 +33,14 @@ import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.queue.weakQueue
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Close
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.UseOn
 
-@Script
-class Anvil {
+class Anvil(
+    private val itemDefinitions: ItemDefinitions,
+    private val interfaceDefinitions: InterfaceDefinitions,
+) {
 
     val types = listOf(
         "dagger",
@@ -68,69 +76,69 @@ class Anvil {
         "crossbow_limbs",
     )
 
-    val itemDefinitions: ItemDefinitions by inject()
-    val interfaceDefinitions: InterfaceDefinitions by inject()
     val logger = InlineLogger()
 
-    init {
-        interfaceOption(id = "smithing") {
-            val metal: String = player["smithing_metal"] ?: return@interfaceOption
-            val type = component.substringBeforeLast('_')
-            val amount = when {
-                component.endsWith("_1") -> 1
-                component.endsWith("_5") -> 5
-                component.endsWith("_x") -> intEntry("Enter amount:")
-                component.endsWith("_all") -> Int.MAX_VALUE
-                else -> return@interfaceOption
-            }
-            smith(player, metal, type, amount)
+    @Interface(id = "smithing")
+    suspend fun smith(player: Player, component: String) {
+        val metal: String = player["smithing_metal"] ?: return
+        val type = component.substringBeforeLast('_')
+        val amount = when {
+            component.endsWith("_1") -> 1
+            component.endsWith("_5") -> 5
+            component.endsWith("_x") -> player.intEntry("Enter amount:")
+            component.endsWith("_all") -> Int.MAX_VALUE
+            else -> return
         }
-
-        itemOnObjectOperate("*_bar", "anvil*") {
-            if (!player.inventory.contains("hammer")) {
-                statement("You need a hammer to work the metal with.")
-                return@itemOnObjectOperate
-            }
-            player.open("smithing")
-            val bars = player.inventory.count(item.id)
-            val metal = item.id.removeSuffix("_bar")
-            player["smithing_metal"] = metal
-            player.interfaces.sendText("smithing", "title", "${metal.toSentenceCase()} Smithing")
-            for (type in types) {
-                val componentDefinition = interfaceDefinitions.getComponent("smithing", type)
-                val itemDefinition = itemDefinitions.get("${metal}_$type")
-                val id = itemDefinition.id
-                if (id != -1) {
-                    val amount = componentDefinition?.getOrNull("amount") ?: 1
-                    player.interfaces.sendItem("smithing", type, id, amount)
-                    val smithing: Smithing = itemDefinition["smithing"]
-                    player.interfaces.sendColour("smithing", "${type}_name", if (player.has(Skill.Smithing, smithing.level)) Colours.WHITE else Colours.BLACK)
-                }
-                val required = componentDefinition?.getOrNull("bars") ?: 1
-                player.interfaces.sendColour("smithing", "${type}_bar", if (bars < required) Colours.ORANGE else Colours.GREEN)
-            }
-
-            player.interfaces.sendVisibility("smithing", "wire_bronze", metal == "bronze")
-            player.interfaces.sendVisibility("smithing", "spit_iron", metal == "iron")
-            player.interfaces.sendVisibility("smithing", "studs_steel", metal == "steel")
-            player.interfaces.sendVisibility("smithing", "bullseye_lantern", metal == "steel")
-            player.interfaces.sendItem("smithing", "lantern", itemDefinitions.get("bullseye_lantern_frame").id, 1)
-            player.interfaces.sendVisibility("smithing", "grapple", metal == "mithril")
-            player.interfaces.sendVisibility("smithing", "darts", player.quest("tourist_trap") == "completed")
-            player.interfaces.sendVisibility("smithing", "claw", player.quest("death_plateau") == "completed")
-            player.interfaces.sendVisibility("smithing", "pickaxes", player.quest("perils_of_ice_mountain") == "completed")
-        }
-
-        itemOnObjectOperate("hammer", "anvil*", arrive = false) {
-            player.message("To smith metal equipment, you must use the metal bar on the anvil.")
-        }
-
-        interfaceClose("smithing") { player ->
-            player.sendScript("clear_dialogues")
-        }
+        smith(player, metal, type, amount)
     }
 
-    suspend fun SuspendableContext<Player>.smith(player: Player, metal: String, type: String, amount: Int) {
+    @UseOn("*_bar", "anvil*")
+    suspend fun use(player: Player, target: GameObject, item: Item) {
+        if (!player.inventory.contains("hammer")) {
+            player.dialogue { statement("You need a hammer to work the metal with.") }
+            return
+        }
+        player.open("smithing")
+        val bars = player.inventory.count(item.id)
+        val metal = item.id.removeSuffix("_bar")
+        player["smithing_metal"] = metal
+        player.interfaces.sendText("smithing", "title", "${metal.toSentenceCase()} Smithing")
+        for (type in types) {
+            val componentDefinition = interfaceDefinitions.getComponent("smithing", type)
+            val itemDefinition = itemDefinitions.get("${metal}_$type")
+            val id = itemDefinition.id
+            if (id != -1) {
+                val amount = componentDefinition?.getOrNull("amount") ?: 1
+                player.interfaces.sendItem("smithing", type, id, amount)
+                val smithing: Smithing = itemDefinition["smithing"]
+                player.interfaces.sendColour("smithing", "${type}_name", if (player.has(Skill.Smithing, smithing.level)) Colours.WHITE else Colours.BLACK)
+            }
+            val required = componentDefinition?.getOrNull("bars") ?: 1
+            player.interfaces.sendColour("smithing", "${type}_bar", if (bars < required) Colours.ORANGE else Colours.GREEN)
+        }
+
+        player.interfaces.sendVisibility("smithing", "wire_bronze", metal == "bronze")
+        player.interfaces.sendVisibility("smithing", "spit_iron", metal == "iron")
+        player.interfaces.sendVisibility("smithing", "studs_steel", metal == "steel")
+        player.interfaces.sendVisibility("smithing", "bullseye_lantern", metal == "steel")
+        player.interfaces.sendItem("smithing", "lantern", itemDefinitions.get("bullseye_lantern_frame").id, 1)
+        player.interfaces.sendVisibility("smithing", "grapple", metal == "mithril")
+        player.interfaces.sendVisibility("smithing", "darts", player.quest("tourist_trap") == "completed")
+        player.interfaces.sendVisibility("smithing", "claw", player.quest("death_plateau") == "completed")
+        player.interfaces.sendVisibility("smithing", "pickaxes", player.quest("perils_of_ice_mountain") == "completed")
+    }
+
+    @UseOn("hammer", "anvil*") // arrive = false
+    fun hammer(player: Player, target: GameObject) {
+        player.message("To smith metal equipment, you must use the metal bar on the anvil.")
+    }
+
+    @Close("smithing")
+    fun close(player: Player) {
+        player.sendScript("clear_dialogues")
+    }
+
+    suspend fun smith(player: Player, metal: String, type: String, amount: Int) {
         val item = if (metal == "steel" && type == "lantern") {
             "bullseye_lantern_frame"
         } else if (metal == "mithril" && type == "grapple") {
@@ -148,14 +156,15 @@ class Anvil {
         player.closeMenu()
         player.softTimers.start("smithing")
         if (actualAmount <= 0) {
-            statement("You don't have enough $metal bars to make a $type.")
+            player.dialogue { statement("You don't have enough $metal bars to make a $type.") }
             player.softTimers.stop("smithing")
             return
         }
-        smith(smithing, metal, bars, quantity, type, item, actualAmount, true)
+        smith(player, smithing, metal, bars, quantity, type, item, actualAmount, true)
     }
 
-    suspend fun SuspendableContext<Player>.smith(
+    suspend fun smith(
+        player: Player,
         smithing: Smithing,
         metal: String,
         bars: Int,
@@ -177,7 +186,7 @@ class Anvil {
 
         if (!player.has(Skill.Smithing, smithing.level, message = false)) {
             val name = item.removeSuffix("_unf")
-            statement("You need a Smithing level of ${smithing.level} to make${name.an()} ${name.toTitleCase()}.")
+            player.dialogue { statement("You need a Smithing level of ${smithing.level} to make${name.an()} ${name.toTitleCase()}.") }
             player.softTimers.stop("smithing")
             return
         }
@@ -193,11 +202,11 @@ class Anvil {
                 is TransactionError.Deficient -> player.message("You do not have enough bars to smith this item.")
                 TransactionError.None -> {
                     player.exp(Skill.Smithing, smithing.xp)
-                    smith(smithing, metal, bars, quantity, type, item, count - 1, false)
+                    smith(player, smithing, metal, bars, quantity, type, item, count - 1, false)
                     val name = type.removeSuffix("_unf").replace("_", " ")
                     player.message("You hammer the $metal and make${name.an()} $name.")
                 }
-                else -> logger.warn { "Error smithing ${this@smith} $item ${player.inventory.transaction.error} ${player.inventory.items.contentToString()}" }
+                else -> logger.warn { "Error smithing $player $item ${player.inventory.transaction.error} ${player.inventory.items.contentToString()}" }
             }
         }
     }

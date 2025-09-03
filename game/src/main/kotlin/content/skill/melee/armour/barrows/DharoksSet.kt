@@ -4,27 +4,31 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.inv.itemAdded
 import world.gregs.voidps.engine.inv.itemRemoved
+import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.ItemAdded
+import world.gregs.voidps.type.sub.ItemRemoved
+import world.gregs.voidps.type.sub.Spawn
 
-@Script
 class DharoksSet {
 
-    init {
-        playerSpawn { player ->
-            if (player.hasFullSet()) {
-                player["dharoks_set_effect"] = true
-            }
+    @Spawn
+    fun spawn(player: Player) {
+        if (player.hasFullSet()) {
+            player["dharoks_set_effect"] = true
         }
+    }
 
-        itemRemoved("dharoks_*", BarrowsArmour.slots, "worn_equipment") { player ->
-            player.clear("dharoks_set_effect")
+    @ItemAdded("dharoks_*", slots = [EquipSlot.HAT, EquipSlot.CHEST, EquipSlot.LEGS, EquipSlot.WEAPON], inventory = "worn_equipment")
+    fun added(player: Player) {
+        if (player.hasFullSet()) {
+            player["dharoks_set_effect"] = true
         }
+    }
 
-        itemAdded("dharoks_*", BarrowsArmour.slots, "worn_equipment") { player ->
-            if (player.hasFullSet()) {
-                player["dharoks_set_effect"] = true
-            }
-        }
+    @ItemRemoved("dharoks_*", slots = [EquipSlot.HAT, EquipSlot.CHEST, EquipSlot.LEGS, EquipSlot.WEAPON], inventory = "worn_equipment")
+    fun remove(player: Player) {
+        player.clear("dharoks_set_effect")
     }
 
     fun Player.hasFullSet() = BarrowsArmour.hasSet(

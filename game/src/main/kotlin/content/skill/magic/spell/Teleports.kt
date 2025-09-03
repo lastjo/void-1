@@ -15,8 +15,10 @@ import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.data.definition.SpellDefinitions
 import world.gregs.voidps.engine.entity.character.move.tele
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
+import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
@@ -25,74 +27,75 @@ import world.gregs.voidps.engine.queue.queue
 import world.gregs.voidps.engine.queue.weakQueue
 import world.gregs.voidps.engine.timer.epochSeconds
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.Inventory
 import java.util.concurrent.TimeUnit
 
-@Script
-class Teleports {
+class Teleports(
+    private val areas: AreaDefinitions,
+    private val definitions: SpellDefinitions,
+) {
 
-    val areas: AreaDefinitions by inject()
-    val definitions: SpellDefinitions by inject()
-
-    init {
-        interfaceOption("Cast", "*_teleport", "*_spellbook") {
-            if (component != "lumbridge_home_teleport") {
-                cast()
-                return@interfaceOption
-            }
-            val seconds = player.remaining("home_teleport_timeout", epochSeconds())
-            if (seconds > 0) {
-                val remaining = TimeUnit.SECONDS.toMinutes(seconds.toLong())
-                player.message("You have to wait $remaining ${"minute".plural(remaining)} before trying this again.")
-                return@interfaceOption
-            }
-            if (player.hasClock("teleport_delay")) {
-                return@interfaceOption
-            }
-            player.weakQueue("home_teleport") {
-                if (!player.removeSpellItems(component)) {
-                    cancel()
-                    return@weakQueue
-                }
-                onCancel = {
-                    player.start("teleport_delay", 1)
-                }
-                player.start("teleport_delay", 17)
-                repeat(17) {
-                    player.gfx("home_tele_${it + 1}")
-                    val ticks = player.anim("home_tele_${it + 1}")
-                    pause(ticks)
-                }
-                withContext(NonCancellable) {
-                    player.tele(areas["lumbridge_teleport"].random())
-                    player["click_your_heels_three_times_task"] = true
-                    player.start("home_teleport_timeout", TimeUnit.MINUTES.toSeconds(30).toInt(), epochSeconds())
-                }
-            }
+    @Interface("Cast", "*_teleport", "*_spellbook")
+    fun cast(player: Player, id: String, component: String) {
+        if (component != "lumbridge_home_teleport") {
+            teleport(player, id, component)
+            return
         }
-
-        inventoryItem("*", "*_teleport") {
-            if (player.contains("delay") || player.queue.contains("teleport")) {
-                return@inventoryItem
+        val seconds = player.remaining("home_teleport_timeout", epochSeconds())
+        if (seconds > 0) {
+            val remaining = TimeUnit.SECONDS.toMinutes(seconds.toLong())
+            player.message("You have to wait $remaining ${"minute".plural(remaining)} before trying this again.")
+            return
+        }
+        if (player.hasClock("teleport_delay")) {
+            return
+        }
+        player.weakQueue("home_teleport") {
+            if (!player.removeSpellItems(component)) {
+                cancel()
+                return@weakQueue
             }
-            player.closeInterfaces()
-            val definition = areas.getOrNull(item.id) ?: return@inventoryItem
-            val scrolls = areas.getTagged("scroll")
-            val type = if (scrolls.contains(definition)) "scroll" else "tablet"
-            val map = definition.area
-            player.queue("teleport", onCancel = null) {
-                if (player.inventory.remove(item.id)) {
-                    player.sound("teleport_$type")
-                    player.gfx("teleport_$type")
-                    player.anim("teleport_$type")
-                    delay(3)
-                    player.tele(map.random(player)!!)
-                    player.animDelay("teleport_land")
-                }
+            onCancel = {
+                player.start("teleport_delay", 1)
+            }
+            player.start("teleport_delay", 17)
+            repeat(17) {
+                player.gfx("home_tele_${it + 1}")
+                val ticks = player.anim("home_tele_${it + 1}")
+                pause(ticks)
+            }
+            withContext(NonCancellable) {
+                player.tele(areas["lumbridge_teleport"].random())
+                player["click_your_heels_three_times_task"] = true
+                player.start("home_teleport_timeout", TimeUnit.MINUTES.toSeconds(30).toInt(), epochSeconds())
             }
         }
     }
 
-    fun InterfaceOption.cast() {
+    @Inventory(item = "*_teleport")
+    fun item(player: Player, item: Item) {
+        if (player.contains("delay") || player.queue.contains("teleport")) {
+            return
+        }
+        player.closeInterfaces()
+        val definition = areas.getOrNull(item.id) ?: return
+        val scrolls = areas.getTagged("scroll")
+        val type = if (scrolls.contains(definition)) "scroll" else "tablet"
+        val map = definition.area
+        player.queue("teleport", onCancel = null) {
+            if (player.inventory.remove(item.id)) {
+                player.sound("teleport_$type")
+                player.gfx("teleport_$type")
+                player.anim("teleport_$type")
+                delay(3)
+                player.tele(map.random(player)!!)
+                player.animDelay("teleport_land")
+            }
+        }
+    }
+
+    fun teleport(player: Player, id: String, component: String) {
         if (player.contains("delay") || player.queue.contains("teleport")) {
             return
         }

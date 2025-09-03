@@ -21,6 +21,8 @@ import world.gregs.voidps.network.client.instruction.ClanChatRank
 import world.gregs.voidps.network.login.protocol.encode.appendClanChat
 import world.gregs.voidps.network.login.protocol.encode.updateClanChat
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Despawn
+import world.gregs.voidps.type.sub.Spawn
 import java.util.concurrent.TimeUnit
 
 @Script
@@ -35,25 +37,27 @@ class ClanChat {
 
     val accountDefinitions: AccountDefinitions by inject()
 
+    @Spawn
+    fun spawn(player: Player) {
+        val current = player["clan_chat", ""]
+        if (current.isNotEmpty()) {
+            val account = accountDefinitions.getByAccount(current)
+            joinClan(player, account?.displayName ?: "")
+        }
+        val ownClan = accounts.clan(player.name.lowercase()) ?: return
+        player.ownClan = ownClan
+        ownClan.friends = player.friends
+        ownClan.ignores = player.ignores
+    }
+
+    @Despawn
+    fun despawn(player: Player) {
+        val clan = player.clan ?: return
+        clan.members.remove(player)
+        updateMembers(player, clan, ClanRank.Anyone)
+    }
+
     init {
-        playerSpawn { player ->
-            val current = player["clan_chat", ""]
-            if (current.isNotEmpty()) {
-                val account = accountDefinitions.getByAccount(current)
-                joinClan(player, account?.displayName ?: "")
-            }
-            val ownClan = accounts.clan(player.name.lowercase()) ?: return@playerSpawn
-            player.ownClan = ownClan
-            ownClan.friends = player.friends
-            ownClan.ignores = player.ignores
-        }
-
-        playerDespawn { player ->
-            val clan = player.clan ?: return@playerDespawn
-            clan.members.remove(player)
-            updateMembers(player, clan, ClanRank.Anyone)
-        }
-
         instruction<ClanChatKick> { player ->
             val clan = player.clan
             if (clan == null || !clan.hasRank(player, clan.kickRank)) {

@@ -6,45 +6,46 @@ import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.restrict.ItemRestrictionRule
 import world.gregs.voidps.engine.inv.transact.operation.SwapItem.swap
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.Spawn
 
-@Script
-class TradeLending {
+/**
+ * Offering an item to lend for a duration
+ */
+class TradeLending(private val definitions: ItemDefinitions) {
 
-    val definitions: ItemDefinitions by inject()
-
-    val lendRestriction = object : ItemRestrictionRule {
+    private val lendRestriction = object : ItemRestrictionRule {
         override fun restricted(id: String) = definitions.get(id).lendId == -1
     }
 
-    init {
-        playerSpawn { player ->
-            player.loan.itemRule = lendRestriction
-        }
-
-        interfaceOption("Specify", "loan_time", "trade_main") {
-            val hours = intEntry("Set the loan duration in hours: (1 - 72)<br>(Enter <col=7f0000>0</col> for 'Just until logout'.)").coerceIn(0, 72)
-            setLend(player, hours)
-        }
-
-        interfaceOption("‘Until Logout‘", "loan_time", "trade_main") {
-            setLend(player, 0)
-        }
-
-        interfaceOption("Lend", "offer", "trade_side") {
-            val partner = getPartner(player) ?: return@interfaceOption
-            lend(player, partner, item.id, itemSlot)
-        }
+    @Spawn
+    fun spawn(player: Player) {
+        player.loan.itemRule = lendRestriction
     }
 
-    /**
-     * Offering an item to lend for a duration
-     */
+    @Interface("Specify", "loan_time", "trade_main")
+    suspend fun specify(player: Player) {
+        val hours = player.intEntry("Set the loan duration in hours: (1 - 72)<br>(Enter <col=7f0000>0</col> for 'Just until logout'.)").coerceIn(0, 72)
+        setLend(player, hours)
+    }
+
+    @Interface("‘Until Logout‘", "loan_time", "trade_main")
+    fun untilLogout(player: Player) {
+        setLend(player, 0)
+    }
+
+    @Interface("Lend", "offer", "trade_side")
+    fun lend(player: Player, item: Item, itemSlot: Int) {
+        val partner = getPartner(player) ?: return
+        lend(player, partner, item.id, itemSlot)
+    }
 
     // Item must have a lent version
 

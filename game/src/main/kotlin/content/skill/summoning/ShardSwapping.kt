@@ -9,6 +9,7 @@ import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.definition.EnumDefinitions
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
@@ -17,63 +18,66 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.Option
 import kotlin.math.min
 
-@Script
-class ShardSwapping {
+class ShardSwapping(
+    private val enums: EnumDefinitions,
+    private val itemDefinitions: ItemDefinitions,
+) {
 
-    val enums: EnumDefinitions by inject()
-    val itemDefinitions: ItemDefinitions by inject()
+    @Option("Swap", "bogrog")
+    fun swap(player: Player, target: NPC) {
+        openTradeInInterface(player, true)
+    }
 
-    init {
-        npcOperate("Swap", "bogrog") {
-            openTradeInInterface(player, true)
+    @Option("Trade Scrolls", "summoning_trade_in")
+    fun scrolls(player: Player, target: NPC) {
+        openTradeInInterface(player, false)
+    }
+
+    @Option("Trade Pouches", "summoning_trade_in")
+    fun pouches(player: Player, target: NPC) {
+        openTradeInInterface(player, true)
+    }
+
+    @Interface("Value", "*_trade_in", "summoning_trade_in")
+    fun value(player: Player, item: Item, itemSlot: Int, component: String) {
+        val enumIndex = (itemSlot + 3) / 5
+        var actualItem = item
+        val itemType = component.removeSuffix("_trade_in")
+
+        if (item.id.endsWith("_u")) {
+            val actualItemId = enums.get("summoning_${itemType}_ids_1").getInt(enumIndex)
+            actualItem = Item(itemDefinitions.get(actualItemId).stringId)
         }
 
-        interfaceOption("Trade Scrolls", id = "summoning_trade_in") {
-            openTradeInInterface(player, false)
-        }
+        sendValueMessage(player, actualItem, itemType)
+    }
 
-        interfaceOption("Trade Pouches", id = "summoning_trade_in") {
-            openTradeInInterface(player, true)
-        }
+    @Interface("Trade*", "*_trade_in", "summoning_trade_in")
+    suspend fun trade(player: Player, item: Item, itemSlot: Int, component: String, option: String) {
+        val enumIndex = (itemSlot + 3) / 5
+        var actualItem = item
+        val itemType = component.removeSuffix("_trade_in")
 
-        interfaceOption("Value", "*_trade_in", "summoning_trade_in") {
-            val enumIndex = (itemSlot + 3) / 5
-            var actualItem = item
-            val itemType = component.removeSuffix("_trade_in")
-
-            if (item.id.endsWith("_u")) {
-                val actualItemId = enums.get("summoning_${itemType}_ids_1").getInt(enumIndex)
-                actualItem = Item(itemDefinitions.get(actualItemId).stringId)
-            }
-
+        if (item.id.endsWith("_u")) {
+            val actualItemId = enums.get("summoning_${itemType}_ids_1").getInt(enumIndex)
+            actualItem = Item(itemDefinitions.get(actualItemId).stringId)
             sendValueMessage(player, actualItem, itemType)
+            return
         }
 
-        interfaceOption("Trade*", "*_trade_in", "summoning_trade_in") {
-            val enumIndex = (itemSlot + 3) / 5
-            var actualItem = item
-            val itemType = component.removeSuffix("_trade_in")
-
-            if (item.id.endsWith("_u")) {
-                val actualItemId = enums.get("summoning_${itemType}_ids_1").getInt(enumIndex)
-                actualItem = Item(itemDefinitions.get(actualItemId).stringId)
-                sendValueMessage(player, actualItem, itemType)
-                return@interfaceOption
-            }
-
-            when (option) {
-                "Trade" -> swapForShards(player, actualItem, 1)
-                "Trade-5" -> swapForShards(player, actualItem, 5)
-                "Trade-10" -> swapForShards(player, actualItem, 10)
-                "Trade-X" -> {
-                    val total = intEntry("Enter amount:")
-                    swapForShards(player, actualItem, total)
-                }
-                "Trade-All" -> swapForShards(player, actualItem, Int.MAX_VALUE)
-            }
+        val amount = when (option) {
+            "Trade" -> 1
+            "Trade-5" -> 5
+            "Trade-10" -> 10
+            "Trade-X" -> player.intEntry("Enter amount:")
+            "Trade-All" -> Int.MAX_VALUE
+            else -> return
         }
+        swapForShards(player, actualItem, amount)
     }
 
     /**

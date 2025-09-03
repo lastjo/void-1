@@ -6,55 +6,55 @@ import world.gregs.voidps.engine.data.definition.InventoryDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.req.hasRequest
 import world.gregs.voidps.engine.entity.character.player.req.removeRequest
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.engine.inv.*
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.engine.entity.item.Item
+import world.gregs.voidps.engine.inv.Inventory
+import world.gregs.voidps.engine.inv.inventory
+import world.gregs.voidps.type.sub.InventorySlotChanged
 import world.gregs.voidps.type.sub.InventoryUpdated
 
-@Script
-class TradeSync {
+/**
+ * Persist updates on an offer to the other player
+ */
+class TradeSync(
+    private val interfaceDefinitions: InterfaceDefinitions,
+    private val inventoryDefinitions: InventoryDefinitions,
+) {
 
-    val interfaceDefinitions: InterfaceDefinitions by inject()
-    val inventoryDefinitions: InventoryDefinitions by inject()
-
-    init {
-        inventoryChanged("trade_offer") { player ->
-            val other: Player = Trade.getPartner(player) ?: return@inventoryChanged
-            applyUpdates(other.otherOffer, this)
-            val warn = player.hasRequest(other, "accept_trade") && removedAnyItems(this)
-            if (warn) {
-                highlightRemovedSlots(player, other, this)
-            }
-            modified(player, other, warn)
-            updateValue(player, other)
+    @InventorySlotChanged("trade_offer")
+    fun change(player: Player, itemSlot: Int, item: Item, from: String, fromSlot: Int, fromItem: Item) {
+        val other: Player = Trade.getPartner(player) ?: return
+        applyUpdates(other.otherOffer, itemSlot, item, from, fromSlot)
+        val warn = player.hasRequest(other, "accept_trade") && removedAnyItems(item, fromItem)
+        if (warn) {
+            highlightRemovedSlots(player, other, item, fromItem, itemSlot)
         }
-
-        inventoryChanged("item_loan") { player ->
-            val other: Player = Trade.getPartner(player) ?: return@inventoryChanged
-            applyUpdates(other.otherLoan, this)
-            val warn = player.hasRequest(other, "accept_trade") && removedAnyItems(this)
-            modified(player, other, warn)
-        }
+        modified(player, other, warn)
+        updateValue(player, other)
     }
 
-    @InventoryUpdated
+    @InventorySlotChanged("item_loan")
+    fun loanChange(player: Player, itemSlot: Int, item: Item, from: String, fromSlot: Int, fromItem: Item) {
+        val other: Player = Trade.getPartner(player) ?: return
+        applyUpdates(other.otherLoan, itemSlot, item, from, fromSlot)
+        val warn = player.hasRequest(other, "accept_trade") && removedAnyItems(item, fromItem)
+        modified(player, other, warn)
+    }
+
+    @InventoryUpdated("inventory")
     fun update(player: Player) {
         val other: Player = Trade.getPartner(player) ?: return
         updateInventorySpaces(other, player)
     }
 
-    /**
-     * Persist updates on an offer to the other player
-     */
 
     /*
         Offer
      */
 
-    fun highlightRemovedSlots(player: Player, other: Player, update: InventorySlotChanged) {
-        if (update.item.amount < update.fromItem.amount) {
-            player.warn("trade_main", "offer_warning", update.index)
-            other.warn("trade_main", "other_warning", update.index)
+    fun highlightRemovedSlots(player: Player, other: Player, item: Item, fromItem: Item, index: Int) {
+        if (item.amount < fromItem.amount) {
+            player.warn("trade_main", "offer_warning", index)
+            other.warn("trade_main", "other_warning", index)
         }
     }
 
@@ -74,11 +74,13 @@ class TradeSync {
         Loan
      */
 
-    fun applyUpdates(inventory: Inventory, update: InventorySlotChanged) {
-        inventory.transaction { set(update.index, update.item, update.from, update.fromIndex) }
+    fun applyUpdates(inventory: Inventory, index: Int, item: Item, from: String, fromIndex: Int) {
+        inventory.transaction {
+            set(index, item, from, fromIndex)
+        }
     }
 
-    fun removedAnyItems(change: InventorySlotChanged) = change.item.amount < change.fromItem.amount
+    fun removedAnyItems(item: Item, fromItem: Item) = item.amount < fromItem.amount
 
     fun modified(player: Player, other: Player, warned: Boolean) {
         if (warned) {

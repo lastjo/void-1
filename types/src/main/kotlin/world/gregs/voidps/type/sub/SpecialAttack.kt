@@ -2,11 +2,11 @@ package world.gregs.voidps.type.sub
 
 /**
  * Special attack subscriber
- * ```kotlin
+ * @param damage on hit
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.SOURCE)
 annotation class SpecialAttack(
     val id: String = "",
-    val prepare: Boolean = false
+    val damage: Boolean = false
 )

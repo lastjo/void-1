@@ -4,48 +4,30 @@ import content.entity.combat.hit.Damage
 import content.entity.combat.hit.combatAttack
 import content.entity.combat.hit.hit
 import content.skill.ranged.ammo
+import world.gregs.voidps.engine.entity.character.Character
+import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.timer.CLIENT_TICKS
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.Combat
 
-@Script
 class GodArrows {
 
-    init {
-        combatAttack(type = "range") { source ->
-            if (source.ammo != "saradomin_arrows") {
-                return@combatAttack
-            }
-            val chance = if (weapon.id == "saradomin_bow") 0.2 else 0.1
-            if (random.nextDouble() < chance) {
-                // water_strike
-                val damage = Damage.roll(source, target, type, weapon)
-                source.hit(target, weapon, "magic", CLIENT_TICKS.toTicks(delay), damage = damage)
-            }
+    @Combat(type = "range")
+    fun combat(player: Player, target: Character, weapon: Item, type: String, delay: Int) {
+        val bow = when(player.ammo) {
+            "saradomin_arrows" -> "saradomin_bow"
+            "guthix_arrows" -> "guthix_bow"
+            "zamorak_arrows" -> "zamorak_bow"
+            else -> return
         }
-
-        combatAttack(type = "range") { source ->
-            if (source.ammo != "guthix_arrows") {
-                return@combatAttack
-            }
-            val chance = if (weapon.id == "guthix_bow") 0.2 else 0.1
-            if (random.nextDouble() < chance) {
-                // earth_strike
-                val damage = Damage.roll(source, target, type, weapon)
-                source.hit(target, weapon, "magic", CLIENT_TICKS.toTicks(delay), damage = damage)
-            }
-        }
-
-        combatAttack(type = "range") { source ->
-            if (source.ammo != "zamorak_arrows") {
-                return@combatAttack
-            }
-            val chance = if (weapon.id == "zamorak_bow") 0.2 else 0.1
-            if (random.nextDouble() < chance) {
-                // fire_strike
-                val damage = Damage.roll(source, target, type, weapon)
-                source.hit(target, weapon, "magic", CLIENT_TICKS.toTicks(delay), damage = damage)
-            }
+        val chance = if (weapon.id == bow) 0.2 else 0.1
+        if (random.nextDouble() < chance) {
+            // water_strike
+            val damage = Damage.roll(player, target, type, weapon)
+            player.hit(target, weapon, "magic", CLIENT_TICKS.toTicks(delay), damage = damage)
         }
     }
+
 }

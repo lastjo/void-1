@@ -16,48 +16,48 @@ import world.gregs.voidps.engine.inv.sendInventory
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.MoveItem.moveAll
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.Open
 
-@Script
-class ItemReturning {
+class ItemReturning(private val players: Players) {
 
     val logger = InlineLogger()
-    val players: Players by inject()
 
-    init {
-        interfaceOpen("returned_items") { player ->
-            player.sendInventory(player.returnedItems)
-        }
+    @Open("returned_items")
+    fun open(player: Player) {
+        player.sendInventory(player.returnedItems)
+    }
 
-        interfaceOption("Reclaim", "item", "returned_items") {
-            if (!player.contains("lent_item_id")) {
-                returnItem(player)
-                return@interfaceOption
-            }
-            if (player.contains("lend_timeout")) {
-                player.message("Your item will be returned to you ${getExpiry(player, "lend_timeout")}.") // TODO real message
-                return@interfaceOption
-            }
-            if (!player.contains("lent_to")) {
-                logger.warn { "Invalid item lending state; can't force claim an item when target has already logged out." }
-                return@interfaceOption
-            }
-
-            player.message("Demanding return of item.")
-            val name: String? = player["lent_to"]
-            val borrower = if (name == null) null else players.get(name)
-            if (borrower == null) {
-                player.message("There was an issue returning your item.")
-                logger.warn { "Unable to find lent item borrower '$name'." }
-                return@interfaceOption
-            }
-
-            player.softTimers.clear("loan_message")
-            player.clear("lent_item_id")
-            player.clear("lent_item_amount")
-            returnLoan(borrower)
+    @Interface("Reclaim", "item", "returned_items")
+    fun reclaim(player: Player) {
+        if (!player.contains("lent_item_id")) {
             returnItem(player)
-            player.message("Your item has been returned.")
+            return
         }
+        if (player.contains("lend_timeout")) {
+            player.message("Your item will be returned to you ${getExpiry(player, "lend_timeout")}.") // TODO real message
+            return
+        }
+        if (!player.contains("lent_to")) {
+            logger.warn { "Invalid item lending state; can't force claim an item when target has already logged out." }
+            return
+        }
+
+        player.message("Demanding return of item.")
+        val name: String? = player["lent_to"]
+        val borrower = if (name == null) null else players.get(name)
+        if (borrower == null) {
+            player.message("There was an issue returning your item.")
+            logger.warn { "Unable to find lent item borrower '$name'." }
+            return
+        }
+
+        player.softTimers.clear("loan_message")
+        player.clear("lent_item_id")
+        player.clear("lent_item_amount")
+        returnLoan(borrower)
+        returnItem(player)
+        player.message("Your item has been returned.")
     }
 
     fun returnItem(player: Player) {

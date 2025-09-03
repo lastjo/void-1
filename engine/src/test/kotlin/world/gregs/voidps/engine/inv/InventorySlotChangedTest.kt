@@ -23,7 +23,7 @@ class InventorySlotChangedTest {
     @Test
     fun `Track changes`() {
         var changes = 0
-        Publishers.set(object : Publishers() {
+        Publishers.set(object : Publishers {
             override fun inventoryUpdated(player: Player, inventory: String): Boolean {
                 changes++
                 return super.inventoryUpdated(player, inventory)

@@ -1,7 +1,5 @@
 package content.skill.prayer.active
 
-import content.entity.combat.hit.characterCombatDamage
-import content.entity.combat.hit.combatDamage
 import content.entity.player.combat.special.MAX_SPECIAL_ATTACK
 import content.entity.player.combat.special.specialAttackEnergy
 import content.entity.player.effect.energy.MAX_RUN_ENERGY
@@ -10,18 +8,19 @@ import content.entity.proj.shoot
 import content.skill.prayer.*
 import net.pearx.kasechange.toTitleCase
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.variable.variableSet
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.queue.queue
-import world.gregs.voidps.engine.timer.timerStart
-import world.gregs.voidps.engine.timer.timerTick
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.CombatStage
+import world.gregs.voidps.type.TimerState
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.Combat
+import world.gregs.voidps.type.sub.TimerStart
+import world.gregs.voidps.type.sub.TimerTick
+import world.gregs.voidps.type.sub.Variable
 
-@Script
 class Leech {
 
     val map = mapOf(
@@ -34,148 +33,150 @@ class Leech {
         "leech_magic" to Skill.Magic,
     )
 
-    init {
-        timerStart("prayer_bonus_drain") {
-            interval = 50
-        }
+    @TimerStart("prayer_bonus_drain")
+    fun start(player: Player): Int = 50
 
-        timerTick("prayer_bonus_drain") { player ->
-            val attack = player.getLeech(Skill.Attack)
-            val strength = player.getLeech(Skill.Strength)
-            val defence = player.getLeech(Skill.Defence)
-            val ranged = player.getLeech(Skill.Ranged)
-            val magic = player.getLeech(Skill.Magic)
-            if (attack == 0 && strength == 0 && defence == 0 && ranged == 0 && magic == 0) {
-                cancel()
+    @TimerTick("prayer_bonus_drain")
+    fun tick(player: Player): Int {
+        val attack = player.getLeech(Skill.Attack)
+        val strength = player.getLeech(Skill.Strength)
+        val defence = player.getLeech(Skill.Defence)
+        val ranged = player.getLeech(Skill.Ranged)
+        val magic = player.getLeech(Skill.Magic)
+        if (attack == 0 && strength == 0 && defence == 0 && ranged == 0 && magic == 0) {
+            return TimerState.CANCEL
+        } else {
+            player.clear("stat_reduction_msg")
+            restore(player, Skill.Attack, attack)
+            restore(player, Skill.Strength, strength)
+            restore(player, Skill.Defence, defence)
+            restore(player, Skill.Ranged, ranged)
+            restore(player, Skill.Magic, magic)
+        }
+        return TimerState.CONTINUE
+    }
+
+    @Combat(stage = CombatStage.DAMAGE)
+    fun spirit(player: Player, target: Player) {
+        if (!target.praying("sap_spirit")) {
+            return
+        }
+        if (random.nextDouble() >= 0.25) {
+            return
+        }
+        val energy = player.specialAttackEnergy
+        if (energy <= 0) {
+            weakMessage(target, true, "spirit")
+            return
+        }
+        player.specialAttackEnergy = (energy - (MAX_SPECIAL_ATTACK / 10)).coerceAtLeast(0)
+        cast(target, player, true, "spirit")
+    }
+
+
+    @Combat(stage = CombatStage.DAMAGE)
+    fun specialAttack(player: Player, source: Character) {
+        if (source !is Player || !source.praying("special_attack")) {
+            return
+        }
+        if (random.nextDouble() >= 0.15) {
+            return
+        }
+        var energy = player.specialAttackEnergy
+        if (energy <= 0) {
+            weakMessage(source, true, "spirit")
+            return
+        }
+        val amount = MAX_SPECIAL_ATTACK / 10
+        player.specialAttackEnergy = (energy - amount).coerceAtLeast(0)
+        cast(source, player, false, "special_attack")
+
+        energy = source.specialAttackEnergy
+        if (energy == MAX_SPECIAL_ATTACK) {
+            drainMessage(source, "special_attack")
+            return
+        }
+        source.specialAttackEnergy = (energy + amount).coerceAtMost(MAX_SPECIAL_ATTACK)
+        boostMessage(source, "Special Attack")
+    }
+
+    @Combat(stage = CombatStage.DAMAGE)
+    fun energy(player: Player, source: Character) {
+        if (source !is Player || !source.praying("leech_energy")) {
+            return
+        }
+        if (random.nextDouble() >= 0.15) {
+            return
+        }
+        var energy = player.runEnergy
+        if (energy <= 0) {
+            weakMessage(source, false, "run_energy")
+            return
+        }
+        val amount = MAX_RUN_ENERGY / 10
+        player.runEnergy = energy - amount
+        cast(source, player, false, "energy")
+
+        energy = source.runEnergy
+        if (energy == MAX_RUN_ENERGY) {
+            drainMessage(source, "run_energy")
+            return
+        }
+        player.runEnergy = energy + amount
+        boostMessage(source, "Run Energy")
+    }
+
+    @Combat(stage = CombatStage.DAMAGE)
+    fun sap(target: Character, source: Character) {
+        for ((prayer, skill) in map) {
+            if (!source.praying(prayer)) {
+                continue
+            }
+            val sap = prayer.startsWith("sap")
+
+            if (random.nextDouble() >= if (sap) 0.25 else 0.15) {
+                continue
+            }
+            val name = skill.name.lowercase()
+            val drain = target.getDrain(skill) + 1
+            if (drain * 100.0 / getLevel(target, skill) > if (sap) 10 else 15) {
+                weakMessage(source, sap, name)
+                continue
+            }
+
+            cast(source, target, sap, name)
+
+            if (sap) {
+                source.message("Your curse drains ${skill.name} from the enemy, boosting your ${skill.name}.")
+            }
+            if (sap && skill == Skill.Attack) {
+                target.setDrain(Skill.Attack, drain, 10)
+                target.setDrain(Skill.Strength, drain, 10)
+                target.setDrain(Skill.Defence, drain, 10)
             } else {
-                player.clear("stat_reduction_msg")
-                restore(player, Skill.Attack, attack)
-                restore(player, Skill.Strength, strength)
-                restore(player, Skill.Defence, defence)
-                restore(player, Skill.Ranged, ranged)
-                restore(player, Skill.Magic, magic)
+                target.setDrain(skill, drain, 10)
             }
-        }
+            target.updateBonus(skill)
 
-        combatDamage { target ->
-            if (source !is Player || !source.praying("sap_spirit")) {
-                return@combatDamage
-            }
-            if (random.nextDouble() >= 0.25) {
-                return@combatDamage
-            }
-            val player = source
-            val energy = target.specialAttackEnergy
-            if (energy <= 0) {
-                weakMessage(player, true, "spirit")
-                return@combatDamage
-            }
-            target.specialAttackEnergy = (energy - (MAX_SPECIAL_ATTACK / 10)).coerceAtLeast(0)
-            cast(player, target, true, "spirit")
-        }
-
-        combatDamage { target ->
-            if (source !is Player || !source.praying("special_attack")) {
-                return@combatDamage
-            }
-            if (random.nextDouble() >= 0.15) {
-                return@combatDamage
-            }
-            val player = source
-            var energy = target.specialAttackEnergy
-            if (energy <= 0) {
-                weakMessage(player, true, "spirit")
-                return@combatDamage
-            }
-            val amount = MAX_SPECIAL_ATTACK / 10
-            target.specialAttackEnergy = (energy - amount).coerceAtLeast(0)
-            cast(player, target, false, "special_attack")
-
-            energy = player.specialAttackEnergy
-            if (energy == MAX_SPECIAL_ATTACK) {
-                drainMessage(player, "special_attack")
-                return@combatDamage
-            }
-            player.specialAttackEnergy = (energy + amount).coerceAtMost(MAX_SPECIAL_ATTACK)
-            boostMessage(player, "Special Attack")
-        }
-
-        combatDamage { target ->
-            if (source !is Player || !source.praying("leech_energy")) {
-                return@combatDamage
-            }
-            if (random.nextDouble() >= 0.15) {
-                return@combatDamage
-            }
-            val player = source
-            var energy = target.runEnergy
-            if (energy <= 0) {
-                weakMessage(player, false, "run_energy")
-                return@combatDamage
-            }
-            val amount = MAX_RUN_ENERGY / 10
-            target.runEnergy = energy - amount
-            cast(player, target, false, "energy")
-
-            energy = player.runEnergy
-            if (energy == MAX_RUN_ENERGY) {
-                drainMessage(player, "run_energy")
-                return@combatDamage
-            }
-            target.runEnergy = energy + amount
-            boostMessage(player, "Run Energy")
-        }
-
-        characterCombatDamage { target ->
-            for ((prayer, skill) in map) {
-                if (!source.praying(prayer)) {
+            if (!sap) {
+                val leech = source.getLeech(skill) + 1
+                if (leech * 100.0 / source.levels.getMax(skill) > 5) {
+                    drainMessage(source, name)
                     continue
                 }
-                val sap = prayer.startsWith("sap")
-
-                if (random.nextDouble() >= if (sap) 0.25 else 0.15) {
-                    continue
-                }
-                val name = skill.name.lowercase()
-                val drain = target.getDrain(skill) + 1
-                if (drain * 100.0 / getLevel(target, skill) > if (sap) 10 else 15) {
-                    weakMessage(source, sap, name)
-                    continue
-                }
-
-                cast(source, target, sap, name)
-
-                if (sap) {
-                    source.message("Your curse drains ${skill.name} from the enemy, boosting your ${skill.name}.")
-                }
-                if (sap && skill == Skill.Attack) {
-                    target.setDrain(Skill.Attack, drain, 10)
-                    target.setDrain(Skill.Strength, drain, 10)
-                    target.setDrain(Skill.Defence, drain, 10)
-                } else {
-                    target.setDrain(skill, drain, 10)
-                }
-                target.updateBonus(skill)
-
-                if (!sap) {
-                    val leech = source.getLeech(skill) + 1
-                    if (leech * 100.0 / source.levels.getMax(skill) > 5) {
-                        drainMessage(source, name)
-                        continue
-                    }
-                    boostMessage(source, skill.name)
-                    source.setLeech(skill, leech)
-                    source.updateBonus(skill)
-                    source.softTimers.startIfAbsent("prayer_bonus_drain")
-                }
+                boostMessage(source, skill.name)
+                source.setLeech(skill, leech)
+                source.updateBonus(skill)
+                source.softTimers.startIfAbsent("prayer_bonus_drain")
             }
         }
+    }
 
-        variableSet("in_combat", to = 0) { player ->
-            for ((_, skill) in map) {
-                player.clear("${skill.name.lowercase()}_drain_msg")
-                player.clear("${skill.name.lowercase()}_leech_msg")
-            }
+    @Variable("in_combat", toInt = 0)
+    fun set(player: Player) {
+        for ((_, skill) in map) {
+            player.clear("${skill.name.lowercase()}_drain_msg")
+            player.clear("${skill.name.lowercase()}_leech_msg")
         }
     }
 

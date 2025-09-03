@@ -8,39 +8,43 @@ import world.gregs.voidps.engine.entity.character.player.flagAppearance
 import world.gregs.voidps.engine.entity.character.player.headIcon
 import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.PrayerStart
+import world.gregs.voidps.type.sub.PrayerStop
+import world.gregs.voidps.type.sub.Spawn
 
 @Script
 class Prayers {
 
-    init {
-        playerSpawn { player ->
-            player.sendVariable("attack_bonus")
-            player.sendVariable("strength_bonus")
-            player.sendVariable("defence_bonus")
-            player.sendVariable("ranged_bonus")
-            player.sendVariable("magic_bonus")
-        }
+    @Spawn
+    fun spawn(player: Player) {
+        player.sendVariable("attack_bonus")
+        player.sendVariable("strength_bonus")
+        player.sendVariable("defence_bonus")
+        player.sendVariable("ranged_bonus")
+        player.sendVariable("magic_bonus")
+    }
 
-        prayerStart { player ->
-            if (!restart) {
-                val curses = player.isCurses()
-                if (curses) {
-                    player.anim("activate_$prayer")
-                    player.gfx("activate_$prayer")
-                } else {
-                    player.sound("activate_$prayer")
-                }
-                updateOverheadIcon(player, curses)
-            }
-            player.softTimers.startIfAbsent("prayer_drain")
-        }
-
-        prayerStop { player ->
-            player.sound("deactivate_prayer")
+    @PrayerStart
+    fun pray(player: Player, id: String, restart: Boolean) {
+        if (!restart) {
             val curses = player.isCurses()
-            stopPrayerDrain(player, curses)
+            if (curses) {
+                player.anim("activate_$id")
+                player.gfx("activate_$id")
+            } else {
+                player.sound("activate_$id")
+            }
             updateOverheadIcon(player, curses)
         }
+        player.softTimers.startIfAbsent("prayer_drain")
+    }
+
+    @PrayerStop
+    fun stop(player: Player) {
+        player.sound("deactivate_prayer")
+        val curses = player.isCurses()
+        stopPrayerDrain(player, curses)
+        updateOverheadIcon(player, curses)
     }
 
     fun stopPrayerDrain(player: Player, curses: Boolean) {

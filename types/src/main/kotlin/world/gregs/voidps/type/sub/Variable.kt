@@ -4,6 +4,7 @@ package world.gregs.voidps.type.sub
  * Variable set subscriber
  * ```kotlin
  */
+@Repeatable
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.SOURCE)
 annotation class Variable(

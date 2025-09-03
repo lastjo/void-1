@@ -17,62 +17,61 @@ import world.gregs.voidps.engine.inv.Inventory
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.operation.MoveItem.moveAll
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Interface
 
-@Script
+/**
+ * Both players accepting the request moves onto the confirmation screen.
+ * Both players accepting the confirmation exchanges items and finishes the trade.
+ */
 class TradeConfirm {
 
     val logger = InlineLogger()
 
-    init {
-        interfaceOption("Accept", "accept", "trade_main") {
-            val partner = getPartner(player) ?: return@interfaceOption
-            if (player.offer.count + player.loan.count > partner.inventory.spaces) {
-                player.message("Other player doesn't have enough inventory space to accept this trade.")
-                return@interfaceOption
-            }
-            if (partner.offer.count + partner.loan.count > player.inventory.spaces) {
-                player.message("You don't have enough inventory space to accept this trade.")
-                return@interfaceOption
-            }
-            player.interfaces.sendText("trade_main", "status", "Waiting for other player...")
-            partner.interfaces.sendText("trade_main", "status", "Other player has accepted.")
-            player.request(partner, "accept_trade") { requester, acceptor ->
-                confirm(requester)
-                confirm(acceptor)
-            }
+    @Interface("Accept", "accept", "trade_main")
+    fun acceptMain(player: Player) {
+        val partner = getPartner(player) ?: return
+        if (player.offer.count + player.loan.count > partner.inventory.spaces) {
+            player.message("Other player doesn't have enough inventory space to accept this trade.")
+            return
         }
-
-        interfaceOption("Accept", "accept", "trade_confirm") {
-            val partner = getPartner(player) ?: return@interfaceOption
-            player.interfaces.sendText("trade_confirm", "status", "Waiting for other player...")
-            partner.interfaces.sendText("trade_confirm", "status", "Other player has accepted.")
-            player.request(partner, "confirm_trade") { requester, acceptor ->
-                val requesterLoan = requester.loan[0]
-                val acceptorLoan = acceptor.loan[0]
-                val success = acceptor.offer.transaction {
-                    moveAll(requester.inventory)
-                    link(requester.offer).moveAll(acceptor.inventory)
-                    link(requester.loan).moveAll(requester.returnedItems)
-                    link(acceptor.loan).moveAll(acceptor.returnedItems)
-                }
-                if (!success) {
-                    logger.info { "Issue exchanging items $player ${player.offer} ${player.otherOffer} ${player.loan} ${player.otherLoan} ${player.inventory}" }
-                    requester.closeMenu()
-                    return@request
-                }
-                acceptor.message("Accepted trade.", ChatType.Trade)
-                requester.message("Accepted trade.", ChatType.Trade)
-                loanItem(requester, acceptorLoan, acceptor)
-                loanItem(acceptor, requesterLoan, requester)
-                requester.closeMenu()
-            }
+        if (partner.offer.count + partner.loan.count > player.inventory.spaces) {
+            player.message("You don't have enough inventory space to accept this trade.")
+            return
+        }
+        player.interfaces.sendText("trade_main", "status", "Waiting for other player...")
+        partner.interfaces.sendText("trade_main", "status", "Other player has accepted.")
+        player.request(partner, "accept_trade") { requester, acceptor ->
+            confirm(requester)
+            confirm(acceptor)
         }
     }
 
-    /**
-     * Both players accepting the request moves onto the confirmation screen.
-     * Both players accepting the confirmation exchanges items and finishes the trade.
-     */
+    @Interface("Accept", "accept", "trade_confirm")
+    fun acceptConfirm(player: Player) {
+        val partner = getPartner(player) ?: return
+        player.interfaces.sendText("trade_confirm", "status", "Waiting for other player...")
+        partner.interfaces.sendText("trade_confirm", "status", "Other player has accepted.")
+        player.request(partner, "confirm_trade") { requester, acceptor ->
+            val requesterLoan = requester.loan[0]
+            val acceptorLoan = acceptor.loan[0]
+            val success = acceptor.offer.transaction {
+                moveAll(requester.inventory)
+                link(requester.offer).moveAll(acceptor.inventory)
+                link(requester.loan).moveAll(requester.returnedItems)
+                link(acceptor.loan).moveAll(acceptor.returnedItems)
+            }
+            if (!success) {
+                logger.info { "Issue exchanging items $player ${player.offer} ${player.otherOffer} ${player.loan} ${player.otherLoan} ${player.inventory}" }
+                requester.closeMenu()
+                return@request
+            }
+            acceptor.message("Accepted trade.", ChatType.Trade)
+            requester.message("Accepted trade.", ChatType.Trade)
+            loanItem(requester, acceptorLoan, acceptor)
+            loanItem(acceptor, requesterLoan, requester)
+            requester.closeMenu()
+        }
+    }
 
     fun confirm(player: Player) {
         player.interfaces.apply {

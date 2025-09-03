@@ -1,7 +1,5 @@
 package content.skill.magic
 
-import content.entity.combat.characterCombatSwing
-import content.entity.combat.combatSwing
 import content.entity.combat.hit.hit
 import content.entity.proj.shoot
 import content.entity.sound.sound
@@ -16,26 +14,19 @@ import world.gregs.voidps.engine.data.definition.SpellDefinitions
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.CombatStage
+import world.gregs.voidps.type.sub.Combat
 
-@Script
-class Magic {
+class Magic(private val spellDefinitions: SpellDefinitions) {
 
-    val spellDefinitions: SpellDefinitions by inject()
+    @Combat(type = "blaze", stage = CombatStage.SWING)
+     fun combat(player: Player, target: Character): Boolean {
+        return !castSpell(player, target)
+    }
 
-    init {
-        combatSwing(style = "blaze") { player ->
-            if (!castSpell(player, target)) {
-                cancel()
-            }
-        }
-
-        characterCombatSwing(style = "magic") { source ->
-            if (!castSpell(source, target)) {
-                cancel()
-            }
-        }
+    @Combat(type = "magic", stage = CombatStage.SWING)
+    fun combat(source: Character, target: Character): Boolean {
+        return !castSpell(source, target)
     }
 
     fun castSpell(source: Character, target: Character): Boolean {

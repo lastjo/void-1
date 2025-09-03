@@ -23,7 +23,7 @@ class InterfaceOnInterfaceOptionHandler(
         player.queue.clearWeak()
         player.suspension = null
 
-        Publishers.all.interfaceOnItem(player, toItem, toSlot, fromItem, fromSlot, fromInventory, toInventory)
+        Publishers.all.interfaceOnItem(player, toItem, fromId, fromComponent, toSlot, fromItem, fromSlot, fromInventory, toInventory)
         val event = if (fromItem.isEmpty()) {
             InterfaceOnItem(
                 fromId,

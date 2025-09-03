@@ -13,6 +13,7 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.item.Item
+import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
@@ -20,13 +21,14 @@ import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.Option
 import kotlin.math.min
 
-@Script
-class SummoningCrafting {
-
-    val enums: EnumDefinitions by inject()
-    val itemDefinitions: ItemDefinitions by inject()
+class SummoningCrafting(
+    private val enums: EnumDefinitions,
+    private val itemDefinitions: ItemDefinitions,
+) {
 
     val pouchInterfaceId = 672
     val pouchComponentId = 16
@@ -43,61 +45,62 @@ class SummoningCrafting {
     val startingDungeoneeringIndex = 1100
     val endingDungeoneeringIndex = 1159
 
-    init {
-        objectOperate("Infuse-pouch") {
-            openPouchCraftingInterface(player)
-        }
+    @Option("Infuse-pouch")
+    fun pouch(player: Player, target: GameObject) {
+        openPouchCraftingInterface(player)
+    }
 
-        interfaceOption("Transform Scrolls", "scroll_creation_tab", "summoning_pouch_creation") {
-            openScrollCraftingInterface(player)
-        }
+    @Interface("Transform Scrolls", "scroll_creation_tab", "summoning_pouch_creation")
+    fun scrolls(player: Player) {
+        openScrollCraftingInterface(player)
+    }
 
-        interfaceOption("Infuse Pouches", "pouch_creation_tab", "summoning_scroll_creation") {
-            openPouchCraftingInterface(player)
-        }
+    @Interface("Infuse Pouches", "pouch_creation_tab", "summoning_scroll_creation")
+    fun pouch(player: Player) {
+        openScrollCraftingInterface(player)
+    }
+    @Interface("Infuse*", "pouches", "summoning_pouch_creation")
+    suspend fun infuse(player: Player, item: Item, itemSlot: Int, option: String) {
+        // TODO: When dungeoneering support is implemented, this will need to change
+        val enumIndex = (itemSlot + 3) / 5
 
-        interfaceOption("Infuse*", "pouches", "summoning_pouch_creation") {
-            // TODO: When dungeoneering support is implemented, this will need to change
-            val enumIndex = (itemSlot + 3) / 5
-
-            if (item.id.endsWith("_u")) {
-                sendIngredientMessage(player, enumIndex)
-                return@interfaceOption
-            }
-
-            when (option) {
-                "Infuse" -> infusePouches(player, enumIndex, 1)
-                "Infuse-5" -> infusePouches(player, enumIndex, 5)
-                "Infuse-10" -> infusePouches(player, enumIndex, 10)
-                "Infuse-X" -> {
-                    val total = intEntry("Enter amount:")
-                    infusePouches(player, enumIndex, total)
-                }
-                "Infuse-All" -> infusePouches(player, enumIndex, Int.MAX_VALUE)
-            }
-        }
-
-        interfaceOption("List", "pouches", "summoning_pouch_creation") {
-            // TODO: When dungeoneering support is implemented, this will need to change
-            val enumIndex = (itemSlot + 3) / 5
+        if (item.id.endsWith("_u")) {
             sendIngredientMessage(player, enumIndex)
+            return
         }
 
-        interfaceOption("Transform*", "scrolls", "summoning_scroll_creation") {
-            // TODO: When dungeoneering support is implemented, this will need to change
-            val enumIndex = (itemSlot + 3) / 5
-
-            when (option) {
-                "Transform" -> transformScrolls(player, enumIndex, 1)
-                "Transform-5" -> transformScrolls(player, enumIndex, 5)
-                "Transform-10" -> transformScrolls(player, enumIndex, 10)
-                "Transform-X" -> {
-                    val total = intEntry("Enter amount:")
-                    transformScrolls(player, enumIndex, total)
-                }
-                "Transform-All" -> transformScrolls(player, enumIndex, Int.MAX_VALUE)
-            }
+        val amount = when (option) {
+            "Infuse" -> 1
+            "Infuse-5" -> 5
+            "Infuse-10" -> 10
+            "Infuse-X" -> player.intEntry("Enter amount:")
+            "Infuse-All" -> Int.MAX_VALUE
+            else -> return
         }
+        infusePouches(player, enumIndex, amount)
+    }
+
+    @Interface("List", "pouches", "summoning_pouch_creation")
+    fun listPouches(player: Player, itemSlot: Int) {
+        // TODO: When dungeoneering support is implemented, this will need to change
+        val enumIndex = (itemSlot + 3) / 5
+        sendIngredientMessage(player, enumIndex)
+    }
+
+    @Interface("Transform*", "scrolls", "summoning_scroll_creation")
+    suspend fun transform(player: Player, itemSlot: Int, option: String) {
+        // TODO: When dungeoneering support is implemented, this will need to change
+        val enumIndex = (itemSlot + 3) / 5
+
+        val amount = when (option) {
+            "Transform" -> 1
+            "Transform-5" -> 5
+            "Transform-10" -> 10
+            "Transform-X" -> player.intEntry("Enter amount:")
+            "Transform-All" -> Int.MAX_VALUE
+            else -> return
+        }
+        transformScrolls(player, enumIndex, amount)
     }
 
     private val logger = InlineLogger()

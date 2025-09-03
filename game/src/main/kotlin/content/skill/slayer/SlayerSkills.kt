@@ -8,48 +8,30 @@ import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.Open
 
-@Script
 class SlayerSkills {
 
-    init {
-        interfaceOption("Assignment", "assignment", "slayer_rewards_learn") {
-            player.open("slayer_rewards_assignment")
-        }
+    @Interface("Assignment", "assignment", "slayer_rewards_learn")
+    fun assign(player: Player) {
+        player.open("slayer_rewards_assignment")
+    }
 
-        interfaceOption("Buy", "buy", "slayer_rewards_learn") {
-            player.open("slayer_rewards")
-        }
-
-        interfaceOpen("slayer_rewards_learn") { player ->
-            refreshText(player, id)
-        }
-
-        interfaceOption("Buy", "broader_fletching", "slayer_rewards_learn") {
-            purchase(player, component, 300, "The secret is yours. You can now flech broad bolts and arrows.")
-        }
-
-        interfaceOption("Buy", "aquanites", "slayer_rewards_learn") {
-            purchase(player, component, 50, "Kuradel will now assign Aquanites, provided you have the slayer level required.")
-        }
-
-        interfaceOption("Buy", "ring_bling", "slayer_rewards_learn") {
-            purchase(player, component, 300, "The secret is yours. You can now create rings of slayer by crafting together a gold bar and enchanted gem.")
-        }
-
-        interfaceOption("Buy", "killing_blow", "slayer_rewards_learn") {
-            purchase(player, component, 400, "The secret is yours. You can now finish off Gargoyles, Rockslugs, Desert Lizards and Zygomites more quickly.")
-        }
-
-        interfaceOption("Buy", "malevolent_masquerade", "slayer_rewards_learn") {
-            purchase(player, component, 400, "The secret is yours. You can now combine a black mask, face mask, spiny helm, nosepeg and earmuffs into one useful item.")
-        }
-
-        interfaceOption("Buy", "strike_wyrms", "slayer_rewards_learn") {
-            purchase(player, component, 2000, "The secret is yours. You have learned how kill Ice Strykewyrms in a different way, without the need for a fire cape.")
+    @Interface("Buy", id = "slayer_rewards_learn")
+    fun buy(player: Player, component: String) {
+        when (component) {
+            "buy" -> player.open("slayer_rewards")
+            "broader_fletching" -> purchase(player, component, 300, "The secret is yours. You can now flech broad bolts and arrows.")
+            "aquanites" -> purchase(player, component, 50, "Kuradel will now assign Aquanites, provided you have the slayer level required.")
+            "ring_bling" -> purchase(player, component, 300, "The secret is yours. You can now create rings of slayer by crafting together a gold bar and enchanted gem.")
+            "killing_blow" -> purchase(player, component, 400, "The secret is yours. You can now finish off Gargoyles, Rockslugs, Desert Lizards and Zygomites more quickly.")
+            "malevolent_masquerade" -> purchase(player, component, 400, "The secret is yours. You can now combine a black mask, face mask, spiny helm, nosepeg and earmuffs into one useful item.")
+            "strike_wyrms" -> purchase(player, component, 200, "The secret is yours. You have learned how kill Ice Strykewyrms in a different way, without the need for a fire cape.")
         }
     }
 
+    @Open("slayer_rewards_learn")
     fun refreshText(player: Player, id: String) {
         val points = player.slayerPoints
         player.interfaces.sendText(id, "current_points", points.toString())

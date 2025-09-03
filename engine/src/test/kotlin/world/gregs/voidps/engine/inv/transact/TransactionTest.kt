@@ -21,7 +21,7 @@ class TransactionTest : TransactionOperationTest() {
         val inventory = Inventory.debug(1)
         val events: Player = mockk(relaxed = true)
         val transaction = inventory.transaction
-        transaction.changes.bind(events, object : Publishers() {})
+        transaction.changes.bind(events, object : Publishers {})
         transaction.set(0, Item("item", 1))
         transaction.changes.send()
         verify { events.emit(any<InventorySlotChanged>()) }

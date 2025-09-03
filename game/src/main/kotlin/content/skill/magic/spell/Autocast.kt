@@ -5,31 +5,17 @@ import world.gregs.voidps.engine.client.ui.InterfaceOption
 import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.variable.variableSet
 import world.gregs.voidps.engine.data.definition.InterfaceDefinitions
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventoryChanged
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.*
 
-@Script
-class Autocast {
+class Autocast(private val interfaceDefinitions: InterfaceDefinitions) {
 
-    val interfaceDefinitions: InterfaceDefinitions by inject()
-
-    init {
-        interfaceOption("Autocast", id = "*_spellbook") {
-            toggle()
-        }
-
-        variableSet("autocast", to = null) { player ->
-            player.clear("autocast_spell")
-        }
-
-        inventoryChanged("worn_equipment", EquipSlot.Weapon) { player ->
-            player.clear("autocast")
-        }
-    }
-
-    fun InterfaceOption.toggle() {
+    @Interface("Autocast", id = "*_spellbook")
+    fun toggle(player: Player, id: String, component: String) {
         val value: Int? = interfaceDefinitions.getComponent(id, component)?.getOrNull("cast_id")
         if (value == null || player["autocast", 0] == value) {
             player.clear("autocast")
@@ -39,4 +25,15 @@ class Autocast {
             player["autocast"] = value
         }
     }
+
+    @Variable("autocast", toNull = true)
+    fun clear(player: Player) {
+        player.clear("autocast_spell")
+    }
+
+    @InventorySlotChanged("worn_equipment", slot = EquipSlot.WEAPON)
+    fun update(player: Player) {
+        player.clear("autocast")
+    }
+
 }

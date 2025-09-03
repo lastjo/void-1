@@ -7,6 +7,7 @@ import content.entity.sound.sound
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.charges
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
@@ -30,7 +31,7 @@ class ItemDropping(private val floorItems: FloorItems){
             } else {
                 floorItems.add(player.tile, item.id, item.amount, charges = item.charges(), revealTicks = FloorItems.NEVER, disappearTicks = 300, owner = player)
             }
-            player.emit(Dropped(item))
+            Publishers.all.publishPlayer(player, "dropped", item.id)
             player.sound("drop_item")
         } else {
             logger.info { "Error dropping item $item for $player" }

@@ -3,6 +3,7 @@ package content.skill.mining
 import content.activity.shooting_star.ShootingStarHandler
 import content.entity.player.bank.bank
 import net.pearx.kasechange.toLowerSpaceCase
+import world.gregs.voidps.cache.definition.data.ObjectDefinition
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.variable.remaining
 import world.gregs.voidps.engine.client.variable.start
@@ -30,111 +31,111 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.Option
 
-@Script
-class Mining {
+class Mining(
+    private val objects: GameObjects,
+    private val itemDefinitions: ItemDefinitions,
+) {
 
-    val objects: GameObjects by inject()
-    val itemDefinitions: ItemDefinitions by inject()
-
-    val gems = setOf(
+    private val gems = setOf(
         "uncut_sapphire",
         "uncut_emerald",
         "uncut_ruby",
         "uncut_diamond",
     )
 
-    init {
-        objectOperate("Mine") {
-            if (target.id.startsWith("depleted")) {
-                player.message("There is currently no ore available in this rock.")
-                return@objectOperate
-            }
-            player.softTimers.start("mining")
-            var first = true
-            while (true) {
-                if (!objects.contains(target)) {
-                    break
-                }
-
-                if (player.inventory.isFull()) {
-                    player.message("Your inventory is too full to hold any more ore.")
-                    break
-                }
-
-                val rock: Rock? = target.def.getOrNull("mining")
-                if (rock == null || !player.has(Skill.Mining, rock.level, true)) {
-                    break
-                }
-
-                val pickaxe = Pickaxe.best(player)
-                if (!hasRequirements(player, pickaxe, true) || pickaxe == null) {
-                    break
-                }
-
-                val delay = if (pickaxe.id == "dragon_pickaxe" && random.nextInt(6) == 0) 2 else pickaxe.def["mining_delay", 8]
-                if (first) {
-                    player.message("You swing your pickaxe at the rock.", ChatType.Filter)
-                    first = false
-                }
-                val remaining = player.remaining("action_delay")
-                if (remaining < 0) {
-                    player.face(target)
-                    player.anim("${pickaxe.id}_swing_low")
-                    player.start("action_delay", delay)
-                    pause(delay)
-                } else if (remaining > 0) {
-                    pause(delay)
-                }
-                if (!objects.contains(target)) {
-                    break
-                }
-                if (rock.gems) {
-                    val glory = player.equipped(EquipSlot.Amulet).id.startsWith("amulet_of_glory_")
-                    if (success(player.levels.get(Skill.Mining), if (glory) 3..3 else 1..1)) {
-                        addOre(player, gems.random())
-                        continue
-                    }
-                }
-                var ores = rock.ores
-                if (target.id == "rune_essence_rocks") {
-                    val name = if (World.members && player.has(Skill.Mining, 30)) "pure_essence" else "rune_essence"
-                    ores = rock.ores.filter { it == name }
-                }
-                for (item in ores) {
-                    val ore = itemDefinitions.get(item)["mining", Ore.EMPTY]
-                    if (success(player.levels.get(Skill.Mining), ore.chance)) {
-                        player.experience.add(Skill.Mining, ore.xp)
-                        ShootingStarHandler.extraOreHandler(player, item, ore.xp)
-                        if (!addOre(player, item) || deplete(rock, target)) {
-                            player.clearAnim()
-                            break
-                        }
-                    }
-                }
-                player.stop("action_delay")
-            }
-            player.softTimers.stop("mining")
+    @Option("Mine")
+    suspend fun mine(player: Player, target: GameObject) {
+        if (target.id.startsWith("depleted")) {
+            player.message("There is currently no ore available in this rock.")
+            return
         }
+        player.softTimers.start("mining")
+        var first = true
+        while (true) {
+            if (!objects.contains(target)) {
+                break
+            }
 
-        objectApproach("Prospect") {
-            approachRange(1)
-            arriveDelay()
-            if (target.id.startsWith("depleted")) {
-                player.message("There is currently no ore available in this rock.")
-                return@objectApproach
+            if (player.inventory.isFull()) {
+                player.message("Your inventory is too full to hold any more ore.")
+                break
             }
-            if (player.queue.contains("prospect")) {
-                return@objectApproach
+
+            val rock: Rock? = target.def.getOrNull("mining")
+            if (rock == null || !player.has(Skill.Mining, rock.level, true)) {
+                break
             }
-            player.message("You examine the rock for ores...")
-            delay(4)
-            val ore = def.getOrNull<Rock>("mining")?.ores?.firstOrNull()
-            if (ore == null) {
-                player.message("This rock contains no ore.")
-            } else {
-                player.message("This rock contains ${ore.toLowerSpaceCase()}.")
+
+            val pickaxe = Pickaxe.best(player)
+            if (!hasRequirements(player, pickaxe, true) || pickaxe == null) {
+                break
             }
+
+            val delay = if (pickaxe.id == "dragon_pickaxe" && random.nextInt(6) == 0) 2 else pickaxe.def["mining_delay", 8]
+            if (first) {
+                player.message("You swing your pickaxe at the rock.", ChatType.Filter)
+                first = false
+            }
+            val remaining = player.remaining("action_delay")
+            if (remaining < 0) {
+                player.face(target)
+                player.anim("${pickaxe.id}_swing_low")
+                player.start("action_delay", delay)
+                player.pause(delay)
+            } else if (remaining > 0) {
+                player.pause(delay)
+            }
+            if (!objects.contains(target)) {
+                break
+            }
+            if (rock.gems) {
+                val glory = player.equipped(EquipSlot.Amulet).id.startsWith("amulet_of_glory_")
+                if (success(player.levels.get(Skill.Mining), if (glory) 3..3 else 1..1)) {
+                    addOre(player, gems.random())
+                    continue
+                }
+            }
+            var ores = rock.ores
+            if (target.id == "rune_essence_rocks") {
+                val name = if (World.members && player.has(Skill.Mining, 30)) "pure_essence" else "rune_essence"
+                ores = rock.ores.filter { it == name }
+            }
+            for (item in ores) {
+                val ore = itemDefinitions.get(item)["mining", Ore.EMPTY]
+                if (success(player.levels.get(Skill.Mining), ore.chance)) {
+                    player.experience.add(Skill.Mining, ore.xp)
+                    ShootingStarHandler.extraOreHandler(player, item, ore.xp)
+                    if (!addOre(player, item) || deplete(rock, target)) {
+                        player.clearAnim()
+                        break
+                    }
+                }
+            }
+            player.stop("action_delay")
+        }
+        player.softTimers.stop("mining")
+    }
+
+    @Option("Prospect", approach = true)
+    suspend fun prospect(player: Player, target: GameObject, def: ObjectDefinition) {
+        player.approachRange(1)
+        player.arriveDelay()
+        if (target.id.startsWith("depleted")) {
+            player.message("There is currently no ore available in this rock.")
+            return
+        }
+        if (player.queue.contains("prospect")) {
+            return
+        }
+        player.message("You examine the rock for ores...")
+        player.delay(4)
+        val ore = def.getOrNull<Rock>("mining")?.ores?.firstOrNull()
+        if (ore == null) {
+            player.message("This rock contains no ore.")
+        } else {
+            player.message("This rock contains ${ore.toLowerSpaceCase()}.")
         }
     }
 

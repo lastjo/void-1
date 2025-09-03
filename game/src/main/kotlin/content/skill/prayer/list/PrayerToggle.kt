@@ -4,51 +4,44 @@ package content.skill.prayer.list
 
 import content.skill.prayer.PrayerConfigs.ACTIVE_CURSES
 import content.skill.prayer.PrayerConfigs.ACTIVE_PRAYERS
-import content.skill.prayer.PrayerStart
-import content.skill.prayer.PrayerStop
 import net.pearx.kasechange.toSnakeCase
 import world.gregs.voidps.engine.client.ui.closeInterfaces
-import world.gregs.voidps.engine.client.variable.variableBitAdd
-import world.gregs.voidps.engine.client.variable.variableBitRemove
-import world.gregs.voidps.engine.client.variable.variableSet
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.event.Publishers
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Variable
+import world.gregs.voidps.type.sub.VariableBits
 
-@Script
 class PrayerToggle {
 
-    init {
-        variableSet("activated_*") { player ->
-            player.closeInterfaces()
-            val from = (from as? List<String>)?.toSet() ?: emptySet()
-            val to = (to as? List<String>)?.toSet() ?: emptySet()
-            for (prayer in from.subtract(to)) {
-                Publishers.all.prayerStopPlayer(player, prayer)
-                Publishers.all.prayerStopCharacter(player, prayer)
-                player.emit(PrayerStop(prayer))
-            }
-            for (prayer in to.subtract(from)) {
-                Publishers.all.prayerStartPlayer(player, prayer)
-                Publishers.all.prayerStartCharacter(player, prayer)
-                player.emit(PrayerStart(prayer))
-            }
+    @Variable("activated_*")
+    fun set(player: Player, from: Any?, to: Any?) {
+        player.closeInterfaces()
+        val from = (from as? List<String>)?.toSet() ?: emptySet()
+        val to = (to as? List<String>)?.toSet() ?: emptySet()
+        for (prayer in from.subtract(to)) {
+            Publishers.all.prayerStopPlayer(player, prayer)
+            Publishers.all.prayerStopCharacter(player, prayer)
         }
-
-        variableBitAdd(ACTIVE_PRAYERS, ACTIVE_CURSES) { player ->
-            player.closeInterfaces()
-            val id = (value as String).toSnakeCase()
-            Publishers.all.prayerStartPlayer(player, id)
-            Publishers.all.prayerStartCharacter(player, id)
-            player.emit(PrayerStart(id))
-        }
-
-        variableBitRemove(ACTIVE_PRAYERS, ACTIVE_CURSES) { player ->
-            player.closeInterfaces()
-            val id = (value as String).toSnakeCase()
-            Publishers.all.prayerStopPlayer(player, id)
-            Publishers.all.prayerStopCharacter(player, id)
-            player.emit(PrayerStop(id))
+        for (prayer in to.subtract(from)) {
+            Publishers.all.prayerStartPlayer(player, prayer)
+            Publishers.all.prayerStartCharacter(player, prayer)
         }
     }
+
+    @VariableBits(ACTIVE_PRAYERS, ACTIVE_CURSES)
+    fun added(player: Player, value: Any?) {
+        player.closeInterfaces()
+        val id = (value as String).toSnakeCase()
+        Publishers.all.prayerStartPlayer(player, id)
+        Publishers.all.prayerStartCharacter(player, id)
+    }
+
+    @VariableBits(ACTIVE_PRAYERS, ACTIVE_CURSES, added = false)
+    fun removed(player: Player, value: Any?) {
+        player.closeInterfaces()
+        val id = (value as String).toSnakeCase()
+        Publishers.all.prayerStopPlayer(player, id)
+        Publishers.all.prayerStopCharacter(player, id)
+    }
+
 }

@@ -25,51 +25,51 @@ import world.gregs.voidps.engine.inv.transact.Transaction
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
-class Pickpocketing {
+class Pickpocketing(
+    private val animationDefinitions: AnimationDefinitions,
+    private val dropTables: DropTables,
+) {
 
-    val animationDefinitions: AnimationDefinitions by inject()
-    val dropTables: DropTables by inject()
     val logger = InlineLogger()
 
-    init {
-        npcApproach("Pickpocket") {
-            approachRange(2)
-            if (player.hasClock("food_delay") || player.hasClock("action_delay")) { // Should action_delay and food_delay be the same??
-                return@npcApproach
+    @Option("Pickpocket", approach = true)
+    suspend fun operate(player: Player, target: NPC) {
+        player.approachRange(2)
+        if (player.hasClock("food_delay") || player.hasClock("action_delay")) { // Should action_delay and food_delay be the same??
+            return
+        }
+        if (player.hasClock("in_combat")) {
+            player.message("You can't pickpocket during combat.")
+            return
+        }
+        val pocket: Pocket = target.def.getOrNull("pickpocket") ?: return
+        if (!player.has(Skill.Thieving, pocket.level)) {
+            return
+        }
+        val success = success(player.levels.get(Skill.Thieving), pocket.chance)
+        val drops = getLoot(target) ?: emptyList()
+        if (success && !canLoot(player, drops)) {
+            return
+        }
+        val name = target.def.name
+        player.message("You attempt to pick the $name's pocket.", ChatType.Filter)
+        player.anim("pick_pocket")
+        player.delay(2)
+        if (success) {
+            player.inventory.transaction {
+                addLoot(drops)
             }
-            if (player.hasClock("in_combat")) {
-                player.message("You can't pickpocket during combat.")
-                return@npcApproach
-            }
-            val pocket: Pocket = target.def.getOrNull("pickpocket") ?: return@npcApproach
-            if (!player.has(Skill.Thieving, pocket.level)) {
-                return@npcApproach
-            }
-            val success = success(player.levels.get(Skill.Thieving), pocket.chance)
-            val drops = getLoot(target) ?: emptyList()
-            if (success && !canLoot(player, drops)) {
-                return@npcApproach
-            }
-            val name = target.def.name
-            player.message("You attempt to pick the $name's pocket.", ChatType.Filter)
-            player.anim("pick_pocket")
-            delay(2)
-            if (success) {
-                player.inventory.transaction {
-                    addLoot(drops)
-                }
-                player.message("You pick the $name's pocket.", ChatType.Filter)
-                player.exp(Skill.Thieving, pocket.xp)
-            } else {
-                target.face(player)
-                target.say(pocket.caughtMessage)
-                target.anim(NPCAttack.anim(animationDefinitions, target, "defend"))
-                player.message("You fail to pick the $name's pocket.", ChatType.Filter)
-                target.stun(player, pocket.stunTicks, pocket.stunHit)
-                delay(2)
-            }
+            player.message("You pick the $name's pocket.", ChatType.Filter)
+            player.exp(Skill.Thieving, pocket.xp)
+        } else {
+            target.face(player)
+            target.say(pocket.caughtMessage)
+            target.anim(NPCAttack.anim(animationDefinitions, target, "defend"))
+            player.message("You fail to pick the $name's pocket.", ChatType.Filter)
+            target.stun(player, pocket.stunTicks, pocket.stunHit)
+            player.delay(2)
         }
     }
 

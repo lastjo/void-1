@@ -28,7 +28,7 @@ class PublisherProcessor(
         val start = System.currentTimeMillis()
         val annotations = schemas.keys
         val mainClass = TypeSpec.classBuilder("PublishersImpl")
-        mainClass.superclass(superclass)
+        mainClass.addSuperinterface(superclass)
         val allScripts = mutableMapOf<String, ClassName>()
         val allDependencies = TreeMap<TypeName, String>()
         allDependencies[Publishers::class.asTypeName()] = "this"

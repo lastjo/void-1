@@ -20,6 +20,8 @@ import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
+import world.gregs.voidps.engine.entity.item.Item
+import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.*
@@ -29,86 +31,87 @@ import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.Option
+import world.gregs.voidps.type.sub.UseOn
 import kotlin.math.min
 
-@Script
-class Runecrafting {
+class Runecrafting(private val itemDefinitions: ItemDefinitions) {
 
-    val itemDefinitions: ItemDefinitions by inject()
     val logger = InlineLogger()
 
-    init {
-        itemOnObjectOperate("*_essence", "*_altar") {
-            val id = target.id.replace("_altar", "_rune")
-            bindRunes(player, id, itemDefinitions.get(id))
-        }
+    @UseOn("*_essence", "*_altar")
+    fun essence(player: Player, target: GameObject) {
+        val id = target.id.replace("_altar", "_rune")
+        bindRunes(player, id, itemDefinitions.get(id))
+    }
 
-        objectOperate("Craft-rune", "*_altar") {
-            val id = target.id.replace("_altar", "_rune")
-            bindRunes(player, id, itemDefinitions.get(id))
-        }
+    @Option("Craft-rune", "*_altar")
+    fun craft(player: Player, target: GameObject) {
+        val id = target.id.replace("_altar", "_rune")
+        bindRunes(player, id, itemDefinitions.get(id))
+    }
 
-        itemOnObjectOperate("*_rune", "*_altar") {
-            val element = item.id.removeSuffix("_rune")
-            val objectElement = target.id.removeSuffix("_altar")
-            val rune: Rune? = item.def.getOrNull("runecrafting")
-            val list = rune?.combinations?.get(objectElement)
-            if (rune == null || list == null || !World.members) {
-                player.noInterest()
-                return@itemOnObjectOperate
+    @UseOn("*_rune", "*_altar")
+    fun runes(player: Player, target: GameObject, item: Item) {
+        val element = item.id.removeSuffix("_rune")
+        val objectElement = target.id.removeSuffix("_altar")
+        val rune: Rune? = item.def.getOrNull("runecrafting")
+        val list = rune?.combinations?.get(objectElement)
+        if (rune == null || list == null || !World.members) {
+            player.noInterest()
+            return
+        }
+        val combination = list[0] as String
+        val xp = list[1] as Double
+        if (!player.holdsItem("pure_essence")) {
+            player.message("You need pure essence to bind $combination runes.")
+            return
+        }
+        if (!player.holdsItem("${element}_talisman") && !player.hasClock("magic_imbue")) {
+            player.message("You need a $element talisman to bind $combination runes.")
+            return
+        }
+        val level = rune.levels.first()
+        if (!player.has(Skill.Runecrafting, level, message = false)) {
+            player.message("You need a Runecrafting level of $level to bind $combination runes.")
+            return
+        }
+        val count = min(player.inventory.count("pure_essence"), player.inventory.count(item.id))
+        val bindingNecklace = player.equipped(EquipSlot.Amulet).id == "binding_necklace" && player.equipment.charges(player, EquipSlot.Amulet.index) > 0
+        val successes = if (bindingNecklace) count else (0 until count).sumOf { random.nextBoolean().toInt() }
+        player.inventory.transaction {
+            if (!player.hasClock("magic_imbue")) {
+                remove("${element}_talisman")
             }
-            val combination = list[0] as String
-            val xp = list[1] as Double
-            if (!player.holdsItem("pure_essence")) {
+            remove("pure_essence", count)
+            remove("${element}_rune", count)
+            if (successes > 0) {
+                add("${combination}_rune", successes)
+            }
+        }
+        player.start("movement_delay", 3)
+        when (player.inventory.transaction.error) {
+            is TransactionError.Deficient, is TransactionError.Invalid -> {
                 player.message("You need pure essence to bind $combination runes.")
-                return@itemOnObjectOperate
             }
-            if (!player.holdsItem("${element}_talisman") && !player.hasClock("magic_imbue")) {
-                player.message("You need a $element talisman to bind $combination runes.")
-                return@itemOnObjectOperate
-            }
-            val level = rune.levels.first()
-            if (!player.has(Skill.Runecrafting, level, message = false)) {
-                player.message("You need a Runecrafting level of $level to bind $combination runes.")
-                return@itemOnObjectOperate
-            }
-            val count = min(player.inventory.count("pure_essence"), player.inventory.count(item.id))
-            val bindingNecklace = player.equipped(EquipSlot.Amulet).id == "binding_necklace" && player.equipment.charges(player, EquipSlot.Amulet.index) > 0
-            val successes = if (bindingNecklace) count else (0 until count).sumOf { random.nextBoolean().toInt() }
-            player.inventory.transaction {
-                if (!player.hasClock("magic_imbue")) {
-                    remove("${element}_talisman")
-                }
-                remove("pure_essence", count)
-                remove("${element}_rune", count)
-                if (successes > 0) {
-                    add("${combination}_rune", successes)
-                }
-            }
-            player.start("movement_delay", 3)
-            when (player.inventory.transaction.error) {
-                is TransactionError.Deficient, is TransactionError.Invalid -> {
-                    player.message("You need pure essence to bind $combination runes.")
-                }
-                TransactionError.None -> {
-                    player.exp(Skill.Runecrafting, xp * successes)
-                    if (bindingNecklace && player.equipment.discharge(player, EquipSlot.Amulet.index)) {
-                        val charge = player.equipment.charges(player, EquipSlot.Amulet.index)
-                        if (charge > 0) {
-                            player.message("You have $charge ${"charge".plural(charge)} left before your Binding necklace disintegrates.")
-                        }
-                    }
-                    player.anim("bind_runes")
-                    player.gfx("bind_runes")
-                    player.sound("bind_runes")
-                    if (successes != count) {
-                        player.message("You partially succeed to bind the temple's power into $combination runes.", ChatType.Filter)
-                    } else {
-                        player.message("You bind the temple's power into $combination runes.", ChatType.Filter)
+            TransactionError.None -> {
+                player.exp(Skill.Runecrafting, xp * successes)
+                if (bindingNecklace && player.equipment.discharge(player, EquipSlot.Amulet.index)) {
+                    val charge = player.equipment.charges(player, EquipSlot.Amulet.index)
+                    if (charge > 0) {
+                        player.message("You have $charge ${"charge".plural(charge)} left before your Binding necklace disintegrates.")
                     }
                 }
-                else -> logger.warn { "Error binding runes $player $rune ${player.levels.get(Skill.Runecrafting)}" }
+                player.anim("bind_runes")
+                player.gfx("bind_runes")
+                player.sound("bind_runes")
+                if (successes != count) {
+                    player.message("You partially succeed to bind the temple's power into $combination runes.", ChatType.Filter)
+                } else {
+                    player.message("You bind the temple's power into $combination runes.", ChatType.Filter)
+                }
             }
+            else -> logger.warn { "Error binding runes $player $rune ${player.levels.get(Skill.Runecrafting)}" }
         }
     }
 

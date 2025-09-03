@@ -14,41 +14,44 @@ import world.gregs.voidps.engine.timer.timerStart
 import world.gregs.voidps.engine.timer.timerStop
 import world.gregs.voidps.engine.timer.timerTick
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.TimerState
+import world.gregs.voidps.type.sub.TimerStart
+import world.gregs.voidps.type.sub.TimerStop
+import world.gregs.voidps.type.sub.TimerTick
 
-@Script
-class PrayerDrain {
+class PrayerDrain(
+    private val definitions: PrayerDefinitions,
+    private val variableDefinitions: VariableDefinitions,
+) {
 
-    val definitions: PrayerDefinitions by inject()
-    val variableDefinitions: VariableDefinitions by inject()
+    @TimerStart("prayer_drain")
+    fun start(player: Player): Int = 1
 
-    init {
-        timerStart("prayer_drain") {
-            interval = 1
-        }
+    @TimerTick("prayer_drain")
+    fun tick(player: Player): Int {
+        val equipmentBonus = player["prayer", 0]
+        var prayerDrainCounter = player["prayer_drain_counter", 0]
 
-        timerTick("prayer_drain") { player ->
-            val equipmentBonus = player["prayer", 0]
-            var prayerDrainCounter = player["prayer_drain_counter", 0]
-
-            prayerDrainCounter += getTotalDrainEffect(player)
-            val prayerDrainResistance = 60 + (equipmentBonus * 2)
-            while (prayerDrainCounter > prayerDrainResistance) {
-                player.levels.drain(Skill.Prayer, 1)
-                prayerDrainCounter -= prayerDrainResistance
-                if (player.levels.get(Skill.Prayer) == 0) {
-                    player.sound("prayer_drain")
-                    player.message("You have run out of Prayer points; you can recharge at an altar.")
-                    cancel()
-                    break
-                }
+        prayerDrainCounter += getTotalDrainEffect(player)
+        val prayerDrainResistance = 60 + (equipmentBonus * 2)
+        while (prayerDrainCounter > prayerDrainResistance) {
+            player.levels.drain(Skill.Prayer, 1)
+            prayerDrainCounter -= prayerDrainResistance
+            if (player.levels.get(Skill.Prayer) == 0) {
+                player.sound("prayer_drain")
+                player.message("You have run out of Prayer points; you can recharge at an altar.")
+                player["prayer_drain_counter"] = prayerDrainCounter
+                return TimerState.CANCEL
             }
-            player["prayer_drain_counter"] = prayerDrainCounter
         }
+        player["prayer_drain_counter"] = prayerDrainCounter
+        return TimerState.CONTINUE
+    }
 
-        timerStop("prayer_drain") { player ->
-            player.clear(player.getActivePrayerVarKey())
-            player[PrayerConfigs.USING_QUICK_PRAYERS] = false
-        }
+    @TimerStop("prayer_drain")
+    fun stop(player: Player) {
+        player.clear(player.getActivePrayerVarKey())
+        player[PrayerConfigs.USING_QUICK_PRAYERS] = false
     }
 
     fun getTotalDrainEffect(player: Player): Int {

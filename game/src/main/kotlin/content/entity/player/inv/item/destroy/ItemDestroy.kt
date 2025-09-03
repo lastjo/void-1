@@ -6,6 +6,7 @@ import content.entity.player.inv.inventoryOptions
 import content.entity.sound.sound
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.type.Script
@@ -35,9 +36,7 @@ class ItemDestroy {
         if (!destroy) {
             return@dialogue
         }
-        val event = Destructible(item)
-        player.emit(event)
-        if (event.cancelled) {
+        if (Publishers.all.publishPlayer(player, "can_destroy", item.id)) {
             return@dialogue
         }
         if (player.inventory.remove(itemSlot, item.id, item.amount)) {

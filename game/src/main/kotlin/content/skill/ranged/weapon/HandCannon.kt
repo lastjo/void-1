@@ -1,6 +1,5 @@
 package content.skill.ranged.weapon
 
-import content.entity.combat.combatSwing
 import content.entity.combat.hit.damage
 import content.entity.combat.hit.hit
 import content.entity.player.combat.special.specialAttack
@@ -9,6 +8,7 @@ import content.skill.melee.weapon.attackType
 import content.skill.melee.weapon.weapon
 import content.skill.ranged.ammo
 import world.gregs.voidps.engine.client.message
+import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.entity.item.Item
@@ -16,32 +16,31 @@ import world.gregs.voidps.engine.inv.equipment
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.queue.strongQueue
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.CombatStage
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.Combat
 import kotlin.random.nextInt
 
-@Script
 class HandCannon {
 
-    init {
-        combatSwing("hand_cannon", "range") { player ->
-            val ammo = player.equipped(EquipSlot.Ammo)
-            player.ammo = ammo.id
-            player.anim("hand_cannon_shoot")
-            player.gfx("hand_cannon_shoot")
-            val time = player.shoot(id = player.ammo, target = target)
-            player.hit(target, delay = time)
-            if (player.specialAttack) {
-                val rapid = player.attackType == "rapid"
-                player.strongQueue("hit", 2) {
-                    player.anim("hand_cannon_special")
-                    player.gfx("hand_cannon_special")
-                    player.shoot(id = player.ammo, target = target)
-                    player.hit(target, delay = if (rapid) 30 else 60)
-                }
+    @Combat("hand_cannon", "range", stage = CombatStage.SWING)
+    fun swing(player: Player, target: Character) {
+        val ammo = player.equipped(EquipSlot.Ammo)
+        player.ammo = ammo.id
+        player.anim("hand_cannon_shoot")
+        player.gfx("hand_cannon_shoot")
+        val time = player.shoot(id = player.ammo, target = target)
+        player.hit(target, delay = time)
+        if (player.specialAttack) {
+            val rapid = player.attackType == "rapid"
+            player.strongQueue("hit", 2) {
+                player.anim("hand_cannon_special")
+                player.gfx("hand_cannon_special")
+                player.shoot(id = player.ammo, target = target)
+                player.hit(target, delay = if (rapid) 30 else 60)
             }
-            explode(player, if (player.specialAttack) 0.05 else 0.005)
         }
+        explode(player, if (player.specialAttack) 0.05 else 0.005)
     }
 
     fun explode(player: Player, chance: Double) {

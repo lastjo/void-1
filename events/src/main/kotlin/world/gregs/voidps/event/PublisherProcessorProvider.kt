@@ -39,12 +39,12 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
             Continue::class.qualifiedName!! to listOf(InterfacePublisherMapping(Publishers::continueDialogue)),
             Inventory::class.qualifiedName!! to listOf(InventoryPublisherMapping()),
             UseOn::class.qualifiedName!! to listOf(
-                InterfaceOnPublisherMapping(Publishers::interfaceOnPlayer, Publishers::hasInterfaceOnPlayer),
-                InterfaceOnPublisherMapping(Publishers::interfaceOnNPC, Publishers::hasInterfaceOnNPC),
-                InterfaceOnPublisherMapping(Publishers::interfaceOnCharacter, Publishers::hasInterfaceOnCharacter),
-                InterfaceOnPublisherMapping(Publishers::interfaceOnGameObject, Publishers::hasInterfaceOnGameObject),
-                InterfaceOnPublisherMapping(Publishers::interfaceOnItem, Publishers::hasInterfaceOnItem),
-                InterfaceOnPublisherMapping(Publishers::interfaceOnFloorItem, Publishers::hasInterfaceOnFloorItem),
+                InterfaceOnPublisherMapping(Publishers::interfaceOnPlayer),
+                InterfaceOnPublisherMapping(Publishers::interfaceOnNPC),
+                InterfaceOnPublisherMapping(Publishers::interfaceOnCharacter),
+                InterfaceOnPublisherMapping(Publishers::interfaceOnGameObject),
+                InterfaceOnPublisherMapping(Publishers::interfaceOnItem),
+                InterfaceOnPublisherMapping(Publishers::interfaceOnFloorItem),
             ),
             Subscribe::class.qualifiedName!! to listOf(
                 SubscribePublisherMapping(Publishers::publishPlayer),
@@ -138,6 +138,11 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
                 VariableSetPublisherMapping(Publishers::variableSetNPC),
                 VariableSetPublisherMapping(Publishers::variableSetCharacter),
             ),
+            VariableBits::class.qualifiedName!! to listOf(
+                VariableBitsPublisherMapping(Publishers::variableBitsPlayer),
+                VariableBitsPublisherMapping(Publishers::variableBitsNPC),
+                VariableBitsPublisherMapping(Publishers::variableBitsCharacter),
+            ),
             Combat::class.qualifiedName!! to listOf(
                 CombatPublisherMapping(Publishers::playerCombatAttackPlayer),
                 CombatPublisherMapping(Publishers::playerCombatAttackNPC),
@@ -149,7 +154,10 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
                 CombatPublisherMapping(Publishers::characterCombatAttackNPC),
                 CombatPublisherMapping(Publishers::characterCombatAttackCharacter),
             ),
-            SpecialAttack::class.qualifiedName!! to listOf(SpecialAttackPublisherMapping(Publishers::specialAttack)),
+            SpecialAttack::class.qualifiedName!! to listOf(
+                SpecialAttackPublisherMapping(Publishers::specialAttack),
+                SpecialAttackPublisherMapping(Publishers::specialAttackPrepare),
+            ),
             PrayerStart::class.qualifiedName!! to listOf(
                 PrayerPublisherMapping(Publishers::prayerStartPlayer),
                 PrayerPublisherMapping(Publishers::prayerStartNPC),

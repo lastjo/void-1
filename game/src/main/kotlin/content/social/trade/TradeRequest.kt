@@ -8,6 +8,7 @@ import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.sendScript
 import world.gregs.voidps.engine.client.ui.closeType
 import world.gregs.voidps.engine.client.ui.event.interfaceClose
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.name
@@ -19,42 +20,42 @@ import world.gregs.voidps.engine.inv.clear
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.moveAll
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Close
+import world.gregs.voidps.type.sub.Option
 
-@Script
+/**
+ * Requesting to trade with another player, accepting the request and setting up the trade
+ * When an offer is updated the change is persisted to the other player
+ */
 class TradeRequest {
 
-    init {
-        playerOperate("Trade with") {
-            val filter = target["trade_filter", "on"]
-            if (filter == "off" || (filter == "friends" && !target.friend(player))) {
-                return@playerOperate
-            }
-            if (target.hasRequest(player, "trade")) {
-                player.message("Sending trade offer...", ChatType.Trade)
-            } else {
-                player.message("Sending trade offer...", ChatType.Trade)
-                target.message("wishes to trade with you.", ChatType.TradeRequest, name = player.name)
-            }
-            player.request(target, "trade") { requester, acceptor ->
-                startTrade(requester, acceptor)
-                startTrade(acceptor, requester)
-            }
+    @Option("Trade with")
+    fun tradeRequest(player: Player, target: Player) {
+        val filter = target["trade_filter", "on"]
+        if (filter == "off" || (filter == "friends" && !target.friend(player))) {
+            return
         }
-
-        interfaceClose("trade_main", "trade_confirm") { player ->
-            val other: Player = getPartner(player) ?: return@interfaceClose
-            if (player.hasRequest(other, "accept_trade")) {
-                return@interfaceClose
-            }
-            reset(player, other)
-            reset(other, player)
+        if (target.hasRequest(player, "trade")) {
+            player.message("Sending trade offer...", ChatType.Trade)
+        } else {
+            player.message("Sending trade offer...", ChatType.Trade)
+            target.message("wishes to trade with you.", ChatType.TradeRequest, name = player.name)
+        }
+        player.request(target, "trade") { requester, acceptor ->
+            startTrade(requester, acceptor)
+            startTrade(acceptor, requester)
         }
     }
 
-    /**
-     * Requesting to trade with another player, accepting the request and setting up the trade
-     * When an offer is updated the change is persisted to the other player
-     */
+    @Close("trade_main", "trade_confirm")
+    fun close(player: Player) {
+        val other: Player = getPartner(player) ?: return
+        if (player.hasRequest(other, "accept_trade")) {
+            return
+        }
+        reset(player, other)
+        reset(other, player)
+    }
 
     fun startTrade(player: Player, partner: Player) {
         reset(player, partner)

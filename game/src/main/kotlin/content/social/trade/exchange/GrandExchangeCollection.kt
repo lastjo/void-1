@@ -16,38 +16,39 @@ import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItemLimit.addToLimit
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Interface
 
-@Script
-class GrandExchangeCollection {
+class GrandExchangeCollection(private val exchange: GrandExchange) {
 
-    val exchange: GrandExchange by inject()
     val logger = InlineLogger()
 
-    init {
-        interfaceOption("Collect*", "collect_slot_*", "grand_exchange") {
-            val index = component.removePrefix("collect_slot_").toInt()
-            val box: Int = player["grand_exchange_box"] ?: return@interfaceOption
-            collect(player, option, box, index)
-        }
+    @Interface("Collect*", "collect_slot_*", "grand_exchange")
+    fun collectSlot(player: Player, component: String, option: String) {
+        val index = component.removePrefix("collect_slot_").toInt()
+        val box: Int = player["grand_exchange_box"] ?: return
+        collect(player, option, box, index)
+    }
 
-        interfaceOption("Collect*", "collection_box_*", "collection_box") {
-            val box = component.removePrefix("collection_box_").toInt()
-            val index = if (itemSlot == 2) 1 else 0
-            collect(player, option, box, index)
-        }
+    @Interface("Collect*", "collection_box_*", "grand_exchange")
+    fun collectBox(player: Player, component: String, option: String, itemSlot: Int) {
+        val box = component.removePrefix("collection_box_").toInt()
+        val index = if (itemSlot == 2) 1 else 0
+        collect(player, option, box, index)
+    }
 
-        interfaceOption("Abort Offer", "offer_abort", "grand_exchange") {
-            val slot: Int = player["grand_exchange_box"] ?: return@interfaceOption
-            abort(player, slot)
-        }
+    @Interface("Abort Offer", "offer_abort", "grand_exchange")
+    fun abortOffer(player: Player) {
+        val slot: Int = player["grand_exchange_box"] ?: return
+        abort(player, slot)
+    }
 
-        interfaceOption("Abort Offer", "view_offer_*", "grand_exchange") {
-            val slot = component.removePrefix("view_offer_").toInt()
-            if (slot > 1 && !World.members) {
-                return@interfaceOption
-            }
-            abort(player, slot)
+    @Interface("Abort Offer", "view_offer_*", "grand_exchange")
+    fun abortView(player: Player, component: String) {
+        val slot = component.removePrefix("view_offer_").toInt()
+        if (slot > 1 && !World.members) {
+            return
         }
+        abort(player, slot)
     }
 
     fun collect(player: Player, option: String, box: Int, index: Int) {

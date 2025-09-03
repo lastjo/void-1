@@ -10,34 +10,28 @@ import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.inv.inventoryChanged
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.InventorySlotChanged
+import world.gregs.voidps.type.sub.Spawn
+import world.gregs.voidps.type.sub.Variable
 
-@Script
 class Weapon {
 
-    init {
-        playerSpawn { player ->
-            updateWeapon(player, player.equipped(EquipSlot.Weapon))
-        }
+    @Spawn
+    fun spawn(player: Player) {
+        updateWeapon(player, player.equipped(EquipSlot.Weapon))
+    }
 
-        inventoryChanged("worn_equipment", EquipSlot.Weapon) { player ->
-            updateWeapon(player, item)
-        }
+    @InventorySlotChanged("worn_equipment", EquipSlot.WEAPON)
+    fun change(player: Player, item: Item) {
+        updateWeapon(player, item)
+    }
 
-        variableSet("autocast", to = null) { player ->
-            updateWeapon(player, player.weapon)
-        }
-
-        variableSet("spell", to = null) { player ->
-            updateWeapon(player, player.weapon)
-        }
-
-        variableSet("attack_style", to = "long_range") { player ->
-            updateWeapon(player, player.weapon, 2)
-        }
-
-        variableSet("attack_style", from = "long_range") { player ->
-            updateWeapon(player, player.weapon)
-        }
+    @Variable("autocast", toNull = true)
+    @Variable("spell", toNull = true)
+    @Variable("attack_style", to = "long_range")
+    @Variable("attack_style", from = "long_range")
+    fun update(player: Player) {
+        updateWeapon(player, player.weapon)
     }
 
     fun updateWeapon(player: Player, weapon: Item, range: Int = 0) {

@@ -13,43 +13,44 @@ import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.data.definition.SlayerTaskDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.name
+import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.queue.Action
 import world.gregs.voidps.engine.queue.strongQueue
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Inventory
+import world.gregs.voidps.type.sub.Spawn
 
-@Script
-class EnchantedGem {
+class EnchantedGem(private val slayerDefinitions: SlayerTaskDefinitions) {
 
-    val slayerDefinitions: SlayerTaskDefinitions by inject()
+    @Spawn
+    fun spawn(player: Player) {
+        player.sendVariable("slayer_count")
+        player.sendVariable("slayer_target")
+    }
 
-    init {
-        playerSpawn { player ->
-            player.sendVariable("slayer_count")
-            player.sendVariable("slayer_target")
-        }
-
-        inventoryItem("Activate", "enchanted_gem") {
-            player.strongQueue("enchanted_gem_activate") {
-                val master = player.slayerMaster
-                npc<Happy>(master, "Hello there ${player.name}, what can I help you with?")
-                choice {
-                    howAmIDoing()
-                    whoAreYou()
-                    whereAreYou()
-                    anyTips()
-                    option<Talk>("That's all thanks.")
-                }
+    @Inventory("Activate", "enchanted_gem")
+    fun activate(player: Player, item: Item) {
+        player.strongQueue("enchanted_gem_activate") {
+            val master = player.slayerMaster
+            npc<Happy>(master, "Hello there ${player.name}, what can I help you with?")
+            choice {
+                howAmIDoing()
+                whoAreYou()
+                whereAreYou()
+                anyTips()
+                option<Talk>("That's all thanks.")
             }
         }
+    }
 
-        inventoryItem("Kills-left", "enchanted_gem") {
-            if (player.slayerTask == "nothing") {
-                player.message("") // TODO
-            } else {
-                player.message("Your current assignment is: ${player.slayerTask.lowercase()}; only ${player.slayerTaskRemaining} more to go.")
-            }
+    @Inventory("Kills-left", "enchanted_gem")
+    fun check(player: Player, item: Item) {
+        if (player.slayerTask == "nothing") {
+            player.message("") // TODO
+        } else {
+            player.message("Your current assignment is: ${player.slayerTask.lowercase()}; only ${player.slayerTaskRemaining} more to go.")
         }
     }
 

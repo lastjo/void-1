@@ -6,33 +6,34 @@ import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.interact.ItemOnObject
 import world.gregs.voidps.engine.client.ui.interact.itemOnObjectOperate
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
+import world.gregs.voidps.engine.entity.item.Item
+import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
+import world.gregs.voidps.type.sub.UseOn
 
-@Script
 class BoneOffering {
 
-    init {
-        itemOnObjectOperate(obj = "altar*") {
-            if (!item.def.contains("prayer_xp")) {
-                return@itemOnObjectOperate
-            }
-            val tile = target.nearestTo(player.tile)
-            val count = player.inventory.count(item.id)
-            if (count > 1) {
-                val (_, amount) = player.makeAmount(listOf(item.id), "", count)
-                offer(amount, tile)
-            } else {
-                offer(1, tile)
-            }
+    @UseOn(on = "altar*")
+    suspend fun use(player: Player, target: GameObject, item: Item) {
+        if (!item.def.contains("prayer_xp")) {
+            return
+        }
+        val tile = target.nearestTo(player.tile)
+        val count = player.inventory.count(item.id)
+        if (count > 1) {
+            val (_, amount) = player.makeAmount(listOf(item.id), "", count)
+            offer(player, item, amount, tile)
+        } else {
+            offer(player, item, 1, tile)
         }
     }
 
-    suspend fun ItemOnObject.offer(amount: Int, tile: Tile) {
+    suspend fun offer(player: Player, item: Item, amount: Int, tile: Tile) {
         val xp = item.def["prayer_xp", 0.0]
         repeat(amount) {
             if (player.inventory.remove(item.id)) {
@@ -49,7 +50,7 @@ class BoneOffering {
                     } your offering.",
                     ChatType.Filter,
                 )
-                pause(2)
+                player.pause(2)
             } else {
                 player.mode = EmptyMode
             }

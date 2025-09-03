@@ -15,7 +15,7 @@ data class Equals(override val key: String, override val value: Any?, val simpli
                 value == "*" -> null
                 value.startsWith("*") -> Statement("$key.endsWith(%S)", arrayOf(value.removePrefix("*")))
                 value.endsWith("*") -> Statement("$key.startsWith(%S)", arrayOf(value.removeSuffix("*")))
-                value.contains("*") -> Statement("%T($key, %S)", arrayOf(ClassName("world.gregs.voidps.engine.event", "wildcardEquals"), value))
+                value.contains("*") || value.contains("#") -> Statement("%T($key, %S)", arrayOf(ClassName("world.gregs.voidps.engine.event", "wildcardEquals"), value))
                 else -> Statement("$key == %S", arrayOf(value))
             }
             is Boolean -> if (simplify) {
@@ -35,5 +35,11 @@ data class Contains(override val key: String, override val value: Any?) : Condit
         } else {
             Statement("$key.contains(%L)", arrayOf(value))
         }
+    }
+}
+
+data class GreaterThan(override val key: String, override val value: Number?) : Condition {
+    override fun statement(): Statement {
+        return Statement("$key > %L", arrayOf(value))
     }
 }

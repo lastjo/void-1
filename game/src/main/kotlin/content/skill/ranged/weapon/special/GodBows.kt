@@ -5,11 +5,17 @@ import content.entity.sound.sound
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
+import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.timer.*
+import world.gregs.voidps.type.CombatStage
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.TimerState
+import world.gregs.voidps.type.sub.Combat
+import world.gregs.voidps.type.sub.TimerStart
+import world.gregs.voidps.type.sub.TimerStop
+import world.gregs.voidps.type.sub.TimerTick
 import java.util.concurrent.TimeUnit
 
-@Script
 class GodBows {
 
     var Player.restoration: Int
@@ -18,63 +24,58 @@ class GodBows {
             this["restoration"] = value
         }
 
-    val specialHandler: suspend CombatAttack.(Player) -> Unit = combatAttack@{ source ->
+    @Combat("saradomin_bow")
+    @Combat("guthix_bow")
+    @Combat("zamorak_bow")
+    fun combat(player: Player, target: Character, weapon: Item, type: String, delay: Int, spell: String, special: Boolean, damage: Int) {
         if (!special) {
-            return@combatAttack
+            return
         }
         when (weapon.id) {
-            "zamorak_bow" -> target.hit(source, weapon, type, CLIENT_TICKS.toTicks(delay), spell, special, type, damage)
+            "zamorak_bow" -> target.hit(player, weapon, type, CLIENT_TICKS.toTicks(delay), spell, special, type, damage)
             "saradomin_bow" -> {
-                source.restoration += damage * 2
-                source["restoration_amount"] = source.restoration / 10
-                source.softTimers.start("restorative_shot")
+                player.restoration += damage * 2
+                player["restoration_amount"] = player.restoration / 10
+                player.softTimers.start("restorative_shot")
             }
             "guthix_bow" -> {
-                source.restoration += (damage * 1.5).toInt()
-                source["restoration_amount"] = source.restoration / 10
-                source.softTimers.start("balanced_shot")
+                player.restoration += (damage * 1.5).toInt()
+                player["restoration_amount"] = player.restoration / 10
+                player.softTimers.start("balanced_shot")
             }
         }
     }
-    val hitHandler: suspend CombatDamage.(Character) -> Unit = { character ->
+
+    @Combat("saradomin_bow", stage = CombatStage.DAMAGE)
+    @Combat("guthix_bow", stage = CombatStage.DAMAGE)
+    @Combat("zamorak_bow", stage = CombatStage.DAMAGE)
+    fun damage(player: Player, target: Character, weapon: Item, special: Boolean) {
         if (special) {
-            character.gfx("${weapon.id}_special_impact")
-            source.sound("god_bow_special_impact")
+            player.gfx("${weapon.id}_special_impact")
+            player.sound("god_bow_special_impact")
         }
     }
 
-    init {
-        combatAttack("saradomin_bow", handler = specialHandler)
+    @TimerStart("restorative_shot", "balanced_shot")
+    fun start(player: Player): Int  = TimeUnit.SECONDS.toTicks(6)
 
-        combatAttack("guthix_bow", handler = specialHandler)
-
-        combatAttack("zamorak_bow", handler = specialHandler)
-
-        combatDamage("saradomin_bow", handler = hitHandler)
-
-        combatDamage("guthix_bow", handler = hitHandler)
-
-        combatDamage("zamorak_bow", handler = hitHandler)
-
-        timerStart("restorative_shot", "balanced_shot") {
-            interval = TimeUnit.SECONDS.toTicks(6)
+    @TimerTick("restorative_shot", "balanced_shot")
+    fun tick(player: Player): Int {
+        val amount = player.restoration
+        if (amount <= 0) {
+            return TimerState.CANCEL
         }
-
-        timerTick("restorative_shot", "balanced_shot") { player ->
-            val amount = player.restoration
-            if (amount <= 0) {
-                cancel()
-                return@timerTick
-            }
-            val restore = player["restoration_amount", 0]
-            player.restoration -= restore
-            player.levels.restore(Skill.Constitution, restore)
-            player.gfx("saradomin_bow_restoration")
-        }
-
-        timerStop("restorative_shot", "balanced_shot") { player ->
-            player.clear("restoration")
-            player.clear("restoration_amount")
-        }
+        val restore = player["restoration_amount", 0]
+        player.restoration -= restore
+        player.levels.restore(Skill.Constitution, restore)
+        player.gfx("saradomin_bow_restoration")
+        return TimerState.CONTINUE
     }
+
+    @TimerStop("restorative_shot", "balanced_shot")
+    fun stop(player: Player) {
+        player.clear("restoration")
+        player.clear("restoration_amount")
+    }
+
 }

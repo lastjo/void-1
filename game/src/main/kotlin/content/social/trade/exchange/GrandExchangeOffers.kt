@@ -9,7 +9,6 @@ import content.entity.player.modal.tab
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.sendScript
 import world.gregs.voidps.engine.client.ui.dialogue.continueItemDialogue
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
 import world.gregs.voidps.engine.client.ui.event.interfaceOpen
 import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
@@ -17,65 +16,82 @@ import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.sendInventory
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Close
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.Open
+import world.gregs.voidps.type.sub.Spawn
 import kotlin.math.ceil
 
-@Script
-class GrandExchangeOffers {
+class GrandExchangeOffers(
+    private val exchange: GrandExchange,
+    private val itemDefinitions: ItemDefinitions,
+) {
 
-    val exchange: GrandExchange by inject()
-    val itemDefinitions: ItemDefinitions by inject()
     val logger = InlineLogger()
 
+    @Spawn
+    fun spawn(player: Player) {
+        exchange.login(player)
+    }
+
+    @Open("grand_exchange")
+    fun open(player: Player, id: String) {
+        player.sendVariable("grand_exchange_ranges")
+        player["grand_exchange_page"] = "offers"
+        player["grand_exchange_box"] = -1
+        player.interfaceOptions.unlockAll(id, "collect_slot_0")
+        player.interfaceOptions.unlockAll(id, "collect_slot_1")
+        for (i in 0 until 6) {
+            exchange.refresh(player, i)
+        }
+    }
+
+    @Close("grand_exchange")
+    fun close(player: Player) {
+        GrandExchange.clearSelection(player)
+    }
+
+    /*
+        Offers
+     */
+
+    @Interface("Make Offer", "view_offer_*", "grand_exchange")
+    fun offer(player: Player, component: String) {
+        val slot = component.removePrefix("view_offer_").toInt()
+        if (slot > 1 && !World.members) {
+            return
+        }
+        val offer = player.offers.getOrNull(slot) ?: return
+        player["grand_exchange_box"] = slot
+        selectItem(player, offer.item)
+    }
+
+    @Interface("Make Buy Offer", "buy_offer_*", "grand_exchange")
+    fun buyOffer(player: Player, component: String) {
+        val slot = component.removePrefix("buy_offer_").toInt()
+        if (slot > 1 && !World.members) {
+            return
+        }
+        player["grand_exchange_box"] = slot
+        player["grand_exchange_page"] = "buy"
+        player["grand_exchange_item_id"] = -1
+        openItemSearch(player)
+    }
+
+    fun chooseItem(player: Player, component: String) {
+        val slot = component.removePrefix("buy_offer_").toInt()
+        if (slot > 1 && !World.members) {
+            return
+        }
+        player["grand_exchange_box"] = slot
+        player["grand_exchange_page"] = "buy"
+        player["grand_exchange_item_id"] = -1
+        openItemSearch(player)
+    }
+
     init {
-        playerSpawn { player ->
-            exchange.login(player)
-        }
-
-        interfaceOpen("grand_exchange") { player ->
-            player.sendVariable("grand_exchange_ranges")
-            player["grand_exchange_page"] = "offers"
-            player["grand_exchange_box"] = -1
-            player.interfaceOptions.unlockAll(id, "collect_slot_0")
-            player.interfaceOptions.unlockAll(id, "collect_slot_1")
-            for (i in 0 until 6) {
-                exchange.refresh(player, i)
-            }
-        }
-
-        interfaceClose("grand_exchange") {
-            GrandExchange.clearSelection(it)
-        }
-
-        interfaceOption("Make Offer", "view_offer_*", "grand_exchange") {
-            val slot = component.removePrefix("view_offer_").toInt()
-            if (slot > 1 && !World.members) {
-                return@interfaceOption
-            }
-            val offer = player.offers.getOrNull(slot) ?: return@interfaceOption
-            player["grand_exchange_box"] = slot
-            selectItem(player, offer.item)
-        }
-
-        interfaceOption("Make Buy Offer", "buy_offer_*", "grand_exchange") {
-            val slot = component.removePrefix("buy_offer_").toInt()
-            if (slot > 1 && !World.members) {
-                return@interfaceOption
-            }
-            player["grand_exchange_box"] = slot
-            player["grand_exchange_page"] = "buy"
-            player["grand_exchange_item_id"] = -1
-            openItemSearch(player)
-        }
-
-        interfaceOption("Choose Item", "choose_item", "grand_exchange") {
-            openItemSearch(player)
-        }
-
         continueItemDialogue { player ->
             val def = itemDefinitions.getOrNull(item)
             if (def == null || !def.exchangeable || def.noted || def.lent || def.dummyItem != 0) {
@@ -87,50 +103,51 @@ class GrandExchangeOffers {
             ItemInfo.showInfo(player, Item(item))
         }
 
-        interfaceOption("Make Sell Offer", "sell_offer_*", "grand_exchange") {
-            val slot = component.removePrefix("sell_offer_").toInt()
-            if (slot > 1 && !World.members) {
-                return@interfaceOption
-            }
-            player["grand_exchange_box"] = slot
-            player["grand_exchange_page"] = "sell"
-            player.open("stock_side")
-            player["grand_exchange_item_id"] = -1
-        }
-
-        interfaceOpen("stock_side") { player ->
-            player.tab(Tab.Inventory)
-            player.interfaceOptions.send(id, "items")
-            player.interfaceOptions.unlockAll(id, "items", 0 until 28)
-            player.sendInventory(player.inventory)
-            player.sendScript("grand_exchange_hide_all")
-        }
-
-        interfaceOption("Offer", "items", "stock_side") {
-            val item = if (item.isNote) item.noted else item
-            if (item == null) {
-                logger.warn { "Issue selling noted item on GE: ${this.item}" }
-                return@interfaceOption
-            }
-            val def = item.def
-            if (!def.exchangeable || def.noted || def.lent || def.dummyItem != 0) {
-                player.message("You can't trade that item on the Grand Exchange.")
-                return@interfaceOption
-            }
-            selectItem(player, item.id)
-            player["grand_exchange_quantity"] = item.amount
-            player["grand_exchange_price"] = player["grand_exchange_market_price", 0]
-        }
     }
 
-    /*
-        Offers
-     */
+    @Interface("Make Sell Offer", "sell_offer_*", "grand_exchange")
+    fun sellOffer(player: Player, component: String) {
+        val slot = component.removePrefix("sell_offer_").toInt()
+        if (slot > 1 && !World.members) {
+            return
+        }
+        player["grand_exchange_box"] = slot
+        player["grand_exchange_page"] = "sell"
+        player.open("stock_side")
+        player["grand_exchange_item_id"] = -1
+    }
+
+    @Open("stock_side")
+    fun openSide(player: Player, id: String) {
+        player.tab(Tab.Inventory)
+        player.interfaceOptions.send(id, "items")
+        player.interfaceOptions.unlockAll(id, "items", 0 until 28)
+        player.sendInventory(player.inventory)
+        player.sendScript("grand_exchange_hide_all")
+    }
+
+    @Interface("Offer", "items", "stock_side")
+    fun offerItem(player: Player, item: Item) {
+        val resolved = if (item.isNote) item.noted else item
+        if (resolved == null) {
+            logger.warn { "Issue selling noted item on GE: $item" }
+            return
+        }
+        val def = resolved.def
+        if (!def.exchangeable || def.noted || def.lent || def.dummyItem != 0) {
+            player.message("You can't trade that item on the Grand Exchange.")
+            return
+        }
+        selectItem(player, resolved.id)
+        player["grand_exchange_quantity"] = resolved.amount
+        player["grand_exchange_price"] = player["grand_exchange_market_price", 0]
+    }
 
     /*
         Buy Offer
      */
 
+    @Interface("Choose Item", "choose_item", "grand_exchange")
     fun openItemSearch(player: Player) {
         player.open("grand_exchange_item_dialog")
         player.sendScript("item_dialogue_reset", "Grand Exchange Item Search")

@@ -13,6 +13,7 @@ import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
+import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.event.Context
@@ -26,9 +27,10 @@ import world.gregs.voidps.engine.queue.weakQueue
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.Option
+import world.gregs.voidps.type.sub.UseOn
 
-@Script
-class Furnace {
+class Furnace(private val itemDefinitions: ItemDefinitions) {
 
     val bars = listOf(
         "bronze_bar",
@@ -43,24 +45,23 @@ class Furnace {
     )
 
     val logger = InlineLogger()
-    val itemDefinitions: ItemDefinitions by inject()
 
-    init {
-        objectOperate("Smelt", "furnace*", arrive = false) {
-            smeltingOptions(player, target, bars)
-        }
-
-        itemOnObjectOperate("*_ore", "furnace*", arrive = false) {
-            val list = mutableListOf<String>()
-            list.add(oreToBar(item.id))
-            if (item.id == "iron_ore" && player.inventory.contains("coal")) {
-                list.add("steel_bar")
-            }
-            smeltingOptions(player, target, list)
-        }
+    @Option("Smelt", "furnace*") // arrive = false
+    suspend fun smelt(player: Player, target: GameObject) {
+        smeltingOptions(player, target, bars)
     }
 
-    suspend fun Context<Player>.smeltingOptions(
+    @UseOn("*_ore", "furnace*") // arrive = false
+    suspend fun use(player: Player, target: GameObject, item: Item) {
+        val list = mutableListOf<String>()
+        list.add(oreToBar(item.id))
+        if (item.id == "iron_ore" && player.inventory.contains("coal")) {
+            list.add("steel_bar")
+        }
+        smeltingOptions(player, target, list)
+    }
+
+    suspend fun smeltingOptions(
         player: Player,
         gameObject: GameObject,
         bars: List<String>,

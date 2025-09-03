@@ -111,6 +111,10 @@ fun gameModule(files: ConfigFiles) = module {
         val dynamicZones = get<DynamicZones>()
         val fontDefinitions = get<FontDefinitions>()
         val objectDefinitions = get<ObjectDefinitions>()
+        val weaponAnimationDefinitions = get<WeaponAnimationDefinitions>()
+        val ammoDefinitions = get<AmmoDefinitions>()
+        val prayerDefinitions = get<PrayerDefinitions>()
+        val slayerTaskDefinitions = get<SlayerTaskDefinitions>()
         val start = System.currentTimeMillis()
         val publishers = PublishersImpl(
             fairyRingCodes = fairyCodes,
@@ -150,6 +154,10 @@ fun gameModule(files: ConfigFiles) = module {
             dynamicZones = dynamicZones,
             fontDefinitions = fontDefinitions,
             objectDefinitions = objectDefinitions,
+            weaponAnimationDefinitions = weaponAnimationDefinitions,
+            ammoDefinitions = ammoDefinitions,
+            prayerDefinitions = prayerDefinitions,
+            slayerTaskDefinitions = slayerTaskDefinitions,
         )
         Publishers.set(publishers)
         logger.info { "Loaded ${publishers.subscriptions} publisher ${"subscriptions".plural(publishers.subscriptions)} in ${System.currentTimeMillis() - start} ms" }
