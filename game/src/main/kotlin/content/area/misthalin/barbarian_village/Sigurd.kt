@@ -5,45 +5,45 @@ import content.entity.player.dialogue.*
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class Sigurd {
 
-    init {
-        npcOperate("Talk-To", "sigurd") {
-            player<Neutral>("Hello there.")
-            npc<Drunk>("Ha Ha! Hello!")
-            choice {
-                option<Neutral>("Who are you?") {
-                    npc<Drunk>("I'm Sigurd the Great and Brainy.")
-                    player<Quiz>("Why do they call you the Great and Brainy?")
-                    npc<Drunk>("Because I invented the Log Canoe!")
-                    player<Quiz>("Log Canoe?")
-                    npc<Drunk>("Yeash! Me and my cousins were having a great party by the river when we decided to have a game of 'Smack The Tree'")
-                    player<Uncertain>("Smack the Tree?")
-                    npc<Drunk>("It's a game were you take it in turnsh shmacking a tree. First one to uproot the tree winsh!")
-                    npc<Drunk>("Anyway, I won the game with a flying tackle. The tree came loose and down the river bank I went, still holding the tree.")
-                    npc<Drunk>("I woke up a few hours later and found myself several miles down river. And thatsh how I invented the log canoe!")
-                    player<Chuckle>("So you invented the 'Log Canoe' by falling into a river hugging a tree?")
-                    npc<Frustrated>("Well I refined the design from the original you know!")
-                    npc<Drunk>("I cut all the branches off to make it more comfortable. I could tell you how to if you like?")
-                    choice {
-                        option("Yes") {
-                            canoeing()
-                        }
-                        option("No") {
-                            player<Neutral>("No thanks, not right now.")
-                        }
+    @Option("Talk-to", "sigurd")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        player<Neutral>("Hello there.")
+        npc<Drunk>("Ha Ha! Hello!")
+        choice {
+            option<Neutral>("Who are you?") {
+                npc<Drunk>("I'm Sigurd the Great and Brainy.")
+                player<Quiz>("Why do they call you the Great and Brainy?")
+                npc<Drunk>("Because I invented the Log Canoe!")
+                player<Quiz>("Log Canoe?")
+                npc<Drunk>("Yeash! Me and my cousins were having a great party by the river when we decided to have a game of 'Smack The Tree'")
+                player<Uncertain>("Smack the Tree?")
+                npc<Drunk>("It's a game were you take it in turnsh shmacking a tree. First one to uproot the tree winsh!")
+                npc<Drunk>("Anyway, I won the game with a flying tackle. The tree came loose and down the river bank I went, still holding the tree.")
+                npc<Drunk>("I woke up a few hours later and found myself several miles down river. And thatsh how I invented the log canoe!")
+                player<Chuckle>("So you invented the 'Log Canoe' by falling into a river hugging a tree?")
+                npc<Frustrated>("Well I refined the design from the original you know!")
+                npc<Drunk>("I cut all the branches off to make it more comfortable. I could tell you how to if you like?")
+                choice {
+                    option("Yes") {
+                        canoeing()
+                    }
+                    option("No") {
+                        player<Neutral>("No thanks, not right now.")
                     }
                 }
-                option("Can you teach me about Canoeing?") {
-                    canoeing()
-                }
+            }
+            option("Can you teach me about Canoeing?") {
+                canoeing()
             }
         }
     }

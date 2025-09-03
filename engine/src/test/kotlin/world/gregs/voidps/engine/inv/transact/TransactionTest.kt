@@ -18,13 +18,20 @@ class TransactionTest : TransactionOperationTest() {
 
     @Test
     fun `Set tracks changes`() {
+        var changes = 0
+        Publishers.set(object : Publishers {
+            override fun inventoryChanged(player: Player, inventory: String, itemSlot: Int, item: Item, from: String, fromSlot: Int, fromItem: Item): Boolean {
+                changes++
+                return super.inventoryChanged(player, inventory, itemSlot, item, from, fromSlot, fromItem)
+            }
+        })
         val inventory = Inventory.debug(1)
         val events: Player = mockk(relaxed = true)
         val transaction = inventory.transaction
-        transaction.changes.bind(events, object : Publishers {})
+        transaction.changes.bind(events)
         transaction.set(0, Item("item", 1))
         transaction.changes.send()
-        verify { events.emit(any<InventorySlotChanged>()) }
+        assertEquals(1, changes)
     }
 
     @Test

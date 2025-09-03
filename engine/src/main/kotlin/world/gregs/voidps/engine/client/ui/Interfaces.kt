@@ -49,10 +49,6 @@ class Interfaces(
     }
 
     fun close(id: String?): Boolean {
-        if (id != null && !getType(id).startsWith("dialogue_box")) {
-            Publishers.all.interfaceClosed(player, id)
-            player.emit(CloseInterface)
-        }
         if (id != null && remove(id)) {
             closeChildrenOf(id)
             return true
@@ -72,7 +68,6 @@ class Interfaces(
         if (interfaces.remove(getType(id), id)) {
             sendClose(id)
             Publishers.all.interfaceClosed(player, id)
-            player.emit(InterfaceClosed(id))
             player.queue.clearWeak()
             return true
         }
@@ -118,7 +113,6 @@ class Interfaces(
                 it.remove()
                 sendClose(id)
                 Publishers.all.interfaceClosed(player, id)
-                player.emit(InterfaceClosed(id))
                 player.queue.clearWeak()
                 children.add(id)
             }

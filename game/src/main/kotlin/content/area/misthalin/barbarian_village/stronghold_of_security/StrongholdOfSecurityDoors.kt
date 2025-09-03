@@ -6,59 +6,63 @@ import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import content.entity.sound.sound
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.data.Settings
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.ObjectOption
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class StrongholdOfSecurityDoors {
 
-    init {
-        objectOperate("Open", "gate_of_war*") {
-            if (target.tile.y == 5238 && player.tile.y > target.tile.y) {
-                npc<DoorHead>("gate_of_war", "Greetings Adventurer. This place is kept safe by the spirits within the doors. As you pass through you will be asked questions about security. Hopefully you will learn much from us.")
-                npc<DoorHead>("gate_of_war", "Please pass through and begin your adventure, beware of the various monsters that dwell within.")
-                player["stronghold_safe_space"] = false
-            }
-            openDoor("unlocked_emote_flap")
-            if (target.tile.y == 5238 && player.tile.y > target.tile.y) {
-                player<Surprised>("Oh my! I just got sucked through that door... what a weird feeling! Still, I guess I should expect it as these evidently aren't your average kind of doors.... they talk and look creepy!")
-            }
+    @Option("Open", "gate_of_war*")
+    suspend fun open(player: Player, target: GameObject) = player.dialogue {
+        if (target.tile.y == 5238 && player.tile.y > target.tile.y) {
+            npc<DoorHead>("gate_of_war", "Greetings Adventurer. This place is kept safe by the spirits within the doors. As you pass through you will be asked questions about security. Hopefully you will learn much from us.")
+            npc<DoorHead>("gate_of_war", "Please pass through and begin your adventure, beware of the various monsters that dwell within.")
+            player["stronghold_safe_space"] = false
         }
-
-        objectOperate("Open", "rickety_door*") {
-            openDoor("unlocked_emote_slap_head")
-        }
-
-        objectOperate("Open", "oozing_barrier*") {
-            openDoor("unlocked_emote_idea")
-        }
-
-        objectOperate("Open", "portal_of_death*") {
-            openDoor("unlocked_emote_stomp")
+        openDoor(player, target, "unlocked_emote_flap")
+        if (target.tile.y == 5238 && player.tile.y > target.tile.y) {
+            player<Surprised>("Oh my! I just got sucked through that door... what a weird feeling! Still, I guess I should expect it as these evidently aren't your average kind of doors.... they talk and look creepy!")
         }
     }
 
-    suspend fun ObjectOption<Player>.openDoor(variable: String) {
+    @Option("Open", "rickety_door*")
+    suspend fun openDoor(player: Player, target: GameObject) {
+        openDoor(player, target, "unlocked_emote_slap_head")
+    }
+
+    @Option("Open", "oozing_barrier*")
+    suspend fun openBarrier(player: Player, target: GameObject) {
+        openDoor(player, target, "unlocked_emote_idea")
+    }
+
+    @Option("Open", "portal_of_death*")
+    suspend fun openPortal(player: Player, target: GameObject) {
+        openDoor(player, target, "unlocked_emote_stomp")
+    }
+
+    suspend fun openDoor(player: Player, target: GameObject, variable: String) {
         // If player is in safe space and security questions are active
         if (player["stronghold_safe_space", false] && Settings["strongholdOfSecurity.quiz", false]) {
             // And they haven't completed the level (and questions on completion is active)
             if (Settings["strongholdOfSecurity.quiz.complete", false] || !player[variable, false]) {
-                randomQuestion(target.id.removeSuffix("_mirrored"))
+                randomQuestion(player, target, target.id.removeSuffix("_mirrored"))
                 return
             }
         }
-        enterDoor()
+        enterDoor(player, target)
     }
 
-    suspend fun ObjectOption<Player>.enterDoor() {
+    suspend fun enterDoor(player: Player, target: GameObject) {
         player.anim("stronghold_of_security_door")
         player.sound("stronghold_of_security_through_door")
-        delay()
+        player.delay()
         when (target.rotation) {
             0 -> if (player.tile.x >= target.tile.x) {
                 player.tele(target.tile.addX(-1))
@@ -85,7 +89,7 @@ class StrongholdOfSecurityDoors {
         player.anim("stronghold_of_security_door_appear")
     }
 
-    suspend fun ObjectOption<Player>.randomQuestion(door: String) {
+    suspend fun randomQuestion(player: Player, target: GameObject, door: String) = player.dialogue {
         when (random.nextInt(29)) {
             0 -> {
                 npc<DoorHead>(door, "To pass you must answer me this: What do you do if someone asks you for your password or bank PIN to make you a member for free?")
@@ -95,11 +99,11 @@ class StrongholdOfSecurityDoors {
                     }
                     option("Don't tell them anything and ignore them.") {
                         npc<DoorHead>(door, "Quite good. But we should try to stop scammers. So please report them using the 'Report Abuse' button.")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                     option("Don't tell them anything and click the 'Report Abuse' button.") {
                         npc<DoorHead>(door, "Correct! Press the 'Report Abuse' Button and fill in the offending player's name and correct category.")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                 }
             }
@@ -108,7 +112,7 @@ class StrongholdOfSecurityDoors {
                 choice {
                     option("Report the incident and do not click any links.") {
                         npc<DoorHead>(door, "Correct! This is an attempt to obtain your account details. If it happened in the game, report it via the Report Abuse option.")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                     option("Respond quickly so as not to miss the offer.") {
                         npc<DoorHead>(door, "Wrong! ${Settings["server.company"]} will NEVER make offers like this - it is an attempt to obtain your account details. If it happens in the game, report via the Report Abuse option.")
@@ -123,7 +127,7 @@ class StrongholdOfSecurityDoors {
                     }
                     option("Report the incident and do not click any links.") {
                         npc<DoorHead>(door, "Correct! This is an attempt to obtain your account details and should be reported to the relevant organisations via their own reporting systems.")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                 }
             }
@@ -138,7 +142,7 @@ class StrongholdOfSecurityDoors {
                     }
                     option("No, you should never allow anyone to use your account.") {
                         npc<DoorHead>(door, "Correct! Allowing someone else to use your account means they may steal it, or may get it banned by cheating on it.")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                 }
             }
@@ -147,7 +151,7 @@ class StrongholdOfSecurityDoors {
                 choice {
                     option("Set up two-factor authentication with my email provider.") {
                         npc<DoorHead>(door, "Correct! Enabling two-factor authentication on your email account wil help protect your email from hijackers.")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                     option("Have a complicated password set to my email.") {
                         npc<DoorHead>(door, "Wrong! Complicated passwords are always a good idea but they are not the very best security step you can take to keep your email secure.")
@@ -165,7 +169,7 @@ class StrongholdOfSecurityDoors {
                     }
                     option("Two-factor authentication on your account and your registered email.") {
                         npc<DoorHead>(door, "Correct! Using each of these features will maximise your account security.")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                 }
             }
@@ -174,7 +178,7 @@ class StrongholdOfSecurityDoors {
                 choice {
                     option("Talk to any banker.") {
                         npc<DoorHead>(door, "Correct! Simply talking to a banker will give you the option to set a bank PIN. Never use personal details for passwords or bank PINs!")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                     option("Use the account management section on the website.") {
                         npc<DoorHead>(door, "Wrong! Your password can be changed from the account management section, but you must talk to a banker to set a bank PIN. Never use personal details for passwords or bank PINs!")
@@ -192,7 +196,7 @@ class StrongholdOfSecurityDoors {
                     }
                     option("Delete it - it is fake!") {
                         npc<DoorHead>(door, "Correct! ${Settings["server.company"]} will NEVER email you unless you've used the website to change your account. Account details can only be verified through using account recovery systems on the ${Settings["server.name"]} website, NOT through responding to emails.")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                 }
             }
@@ -207,7 +211,7 @@ class StrongholdOfSecurityDoors {
                     }
                     option("Nobody.") {
                         npc<DoorHead>(door, "Correct! Your password should be kept secret from everyone. You should *never* give it out under any circumstances.")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                 }
             }
@@ -219,11 +223,11 @@ class StrongholdOfSecurityDoors {
                     }
                     option("Politely tell them no, and ignore them.") {
                         npc<DoorHead>(door, "Okay! Don't just tell them the details. But reporting the incident to ${Settings["server.company"]} would help. Use the Report Abuse button. Never use personal details for passwords or bank PINs!")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                     option("Politely tell them no, then use the 'Report Abuse' button.") {
                         npc<DoorHead>(door, "Correct! Report any attempt to gain your account details as it is a very serious breach of ${Settings["server.name"]}'s rules. Never use personal details for passwords or bank PINs!")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                 }
             }
@@ -232,7 +236,7 @@ class StrongholdOfSecurityDoors {
                 choice {
                     option("Decline the offer and report that player.") {
                         npc<DoorHead>(door, "Correct! Never share your login details with another player.")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                     option("Give the player access since they are a higher level.") {
                         npc<DoorHead>(door, "Incorrect! Never share your login details with another player.")
@@ -250,7 +254,7 @@ class StrongholdOfSecurityDoors {
                     }
                     option("Only on the ${Settings["server.name"]} website.") {
                         npc<DoorHead>(door, "Correct! Always make sure you are entering your password only on the ${Settings["server.name"]} website as other sites may try to steal it.")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                     option("On all websites I visit.") {
                         npc<DoorHead>(door, "Wrong! This is very insecure and will may lead to your account being stolen.")
@@ -262,7 +266,7 @@ class StrongholdOfSecurityDoors {
                 choice {
                     option("Me.") {
                         npc<DoorHead>(door, "Correct! Make sure to use the tools ${Settings["server.company"]} recommend, such as two-factor authentication options.")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                     option("${Settings["server.company"]}.") {
                         npc<DoorHead>(door, "Incorrect! ${Settings["server.company"]} can offer tools such as two-factor authentication options, but you muse make sure you use them correctly to keep your info safe!")
@@ -279,7 +283,7 @@ class StrongholdOfSecurityDoors {
                         println("Option 1")
                         npc<DoorHead>(door, "Correct! If it sounds too good to be true, it probably is! Be wary of these types of scams.")
                         println("Enter door")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                     option("I'm not sure... but giving a few coins to test it won't hurt.") {
                         npc<DoorHead>(door, "Incorrect! Do not trust players asking for gold offering to return a higher amount.")
@@ -300,7 +304,7 @@ class StrongholdOfSecurityDoors {
                     }
                     option("No, you should never buy an account.") {
                         npc<DoorHead>(door, "Correct! Buying accounts is against the rules. Also you could lose the account if the original owner takes it back.")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                 }
             }
@@ -312,7 +316,7 @@ class StrongholdOfSecurityDoors {
                     }
                     option("Don't give them my password.") {
                         npc<DoorHead>(door, "Correct! You can make it alone and the success will taste even better. Don't forget you can ask people for advice too!")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                     option("Let them do the quest, but in the same room the whole time.") {
                         npc<DoorHead>(door, "Wrong! Never let anyone use your account for any reason - they might try to keep it by changing the password! You'd be held responsible if they broke the rules on your account too.")
@@ -327,7 +331,7 @@ class StrongholdOfSecurityDoors {
                     }
                     option("Report the player for phishing.") {
                         npc<DoorHead>(door, "Correct! Always be wary of these links and double check you are on the official ${Settings["server.name"]} website before entering your login details!")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                     option("Tell your friends so they can get free gold too.") {
                         npc<DoorHead>(door, "Incorrect! Don't trust these types of link even if they look similar to the ${Settings["server.name"]} website.")
@@ -342,7 +346,7 @@ class StrongholdOfSecurityDoors {
                     }
                     option("Nope, you're tricking me into going somewhere dangerous.") {
                         npc<DoorHead>(door, "Correct! If it sounds too good to be true, it probably is! Be wary of these types of scams.")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                 }
             }
@@ -354,7 +358,7 @@ class StrongholdOfSecurityDoors {
                     }
                     option("It's never used on other websites or accounts.") {
                         npc<DoorHead>(door, "Correct! Make sure to use a unique password to keep your account secure.")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                     option("It's never changed over many months or years.") {
                         npc<DoorHead>(door, "Incorrect! You should change your password frequently.")
@@ -369,7 +373,7 @@ class StrongholdOfSecurityDoors {
                     }
                     option("Report the stream. Real ${Settings["server.company"]} streams have a 'varified' mark.") {
                         npc<DoorHead>(door, "Correct! This is a common phishing method and puts your account at risk!")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                     option("Ignore it.") {
                         npc<DoorHead>(door, "Incorrect! Well done for avoiding the phishing attempt but make sure to report these wherever possible to help other players.")
@@ -384,7 +388,7 @@ class StrongholdOfSecurityDoors {
                     }
                     option("No.") {
                         npc<DoorHead>(door, "Correct! ${Settings["server.company"]} will not block your PIN so don't type it! Anyone asking you to say your PIN is trying to trick you.")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                 }
             }
@@ -393,7 +397,7 @@ class StrongholdOfSecurityDoors {
                 choice {
                     option("Nothing, it's a fake.") {
                         npc<DoorHead>(door, "Correct! Remember that moderators are hand picked by ${Settings["server.company"]} and contact is made through the game inbox only.")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                     option("Give them my account info and password.") {
                         npc<DoorHead>(door, "Wrong! This will almost certainly lead to your account being hijacked. No website can make you a moderator as they are hand picked by ${Settings["server.company"]}.")
@@ -405,7 +409,7 @@ class StrongholdOfSecurityDoors {
                 choice {
                     option("Virus scan my device then change my password.") {
                         npc<DoorHead>(door, "Correct! Removing the keylogger must be the priority, otherwise anything you type can be given away. Remember to change your password and bank PIN afterwards.")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                     option("Change my password then virus scan my device.") {
                         npc<DoorHead>(door, "Wrong! If you change your password while you still have the keylogger, it will still be insecure. Remove the keylogger first. Never use personal details for passwords or bank PINs!")
@@ -426,7 +430,7 @@ class StrongholdOfSecurityDoors {
                     }
                     option("Do no visit the website and report the player who messaged you.") {
                         npc<DoorHead>(door, "Correct! Buying and selling items and gold is against the rules and results in a permanent ban!")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                 }
             }
@@ -435,11 +439,11 @@ class StrongholdOfSecurityDoors {
                 choice {
                     option("Don't give them the information and send an 'Abuse report'") {
                         npc<DoorHead>(door, "Correct! Press the 'Report Abuse' button and fill in the offending player's name and the correct category.")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                     option("Don't tell them anything and ignore them.") {
                         npc<DoorHead>(door, "Quite good. But we should try to stop scammers. So please report them using the 'Report Abuse' button.")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                     option("Give them the information they asked for.") {
                         npc<DoorHead>(door, "Wrong! ${Settings["server.company"]} never ask for your account information - especially to become a player moderator. Press the 'Report Abuse' button and fill in the offending player's name and the correct category.")
@@ -457,7 +461,7 @@ class StrongholdOfSecurityDoors {
                     }
                     option("The birthday of a famous person or event.") {
                         npc<DoorHead>(door, "Well done! Unless you tell someone, they are unlikely to guess who or what you have chosen, and you can always look it up. Never use personal details for passwords or bank PINs!")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                 }
             }
@@ -469,7 +473,7 @@ class StrongholdOfSecurityDoors {
                     }
                     option("Don't give out your password to anyone. Not even close friends.") {
                         npc<DoorHead>(door, "Correct! Doing so could result in losing your items and gold and puts your account at risk.")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                     option("Log in for your friend and let them play.") {
                         npc<DoorHead>(door, "Incorrect! Never allow anybody access to your account.")
@@ -484,7 +488,7 @@ class StrongholdOfSecurityDoors {
                     }
                     option("Don't share your information and report the player.") {
                         npc<DoorHead>(door, "Correct! These details could've been used within the account recovery system and possibly compromise your account.")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                     option("Answer questions and ask the player back for their details.") {
                         npc<DoorHead>(door, "Incorrect! These details can be used within the account recovery system and possibly compromise your account. If you're asking the player back, you're unknowingly commiting the same offence.")
@@ -502,7 +506,7 @@ class StrongholdOfSecurityDoors {
                     }
                     option("Use the Account Recovery system.") {
                         npc<DoorHead>(door, "Correct! Visiting ${Settings["server.website", "${Settings["server.name"]}'s website"]} and using the account recovery system will allow you to kick hijackers off your account by locking it as stolen.")
-                        enterDoor()
+                        enterDoor(player, target)
                     }
                 }
             }

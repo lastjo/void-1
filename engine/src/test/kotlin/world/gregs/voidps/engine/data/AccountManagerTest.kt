@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test
 import org.koin.dsl.module
 import org.koin.test.get
 import world.gregs.voidps.cache.config.data.InventoryDefinition
+import world.gregs.voidps.cache.definition.data.FontDefinition
 import world.gregs.voidps.engine.GameLoop
 import world.gregs.voidps.engine.client.ui.Interfaces
 import world.gregs.voidps.engine.data.config.AccountDefinition
@@ -38,6 +39,7 @@ class AccountManagerTest : KoinMock() {
 
     override val modules = listOf(
         module {
+            single { FontDefinitions(arrayOf(FontDefinition(glyphWidths = ByteArray(200)))).apply { ids = mapOf("p12_full" to 0) } }
             single { ItemDefinitions(emptyArray()) }
             single { InterfaceDefinitions(emptyArray()).apply { ids = emptyMap() } }
             single { AreaDefinitions(areas = mapOf(0 to setOf(AreaDefinition("area", Rectangle(Tile(0), 1, 1), emptySet())))) }

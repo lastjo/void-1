@@ -8,39 +8,41 @@ import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import content.quest.questCompleted
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.Settings
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class ReloboBlinyoLogs {
 
-    init {
-        npcOperate("Talk-to", "relobo_blinyo") {
-            if (Settings["grandExchange.tutorial.required", false] && !player.questCompleted("grand_exchange_tutorial")) {
-                player<Talk>("You look rather out of place...")
-                npc<Talk>("That I may do, but so do you! I suggest you speak with Brugsen Bursen or the Grand Exchange Tutor near the entrance for a lesson. Brugsen will give an interesting lesson on the Grand Exchange and the Tutor will give a smaller, plain lesson.")
-                return@npcOperate
-            }
-            player<Talk>("Hey there.")
-            npc<Talk>("Why, hell to you too, my friend.")
-            menu()
+    @Option("Talk-to", "relobo_blinyo")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        if (Settings["grandExchange.tutorial.required", false] && !player.questCompleted("grand_exchange_tutorial")) {
+            player<Talk>("You look rather out of place...")
+            npc<Talk>("That I may do, but so do you! I suggest you speak with Brugsen Bursen or the Grand Exchange Tutor near the entrance for a lesson. Brugsen will give an interesting lesson on the Grand Exchange and the Tutor will give a smaller, plain lesson.")
+            return@talkWith
         }
-
-        npcOperate("Info-logs", "relobo_blinyo") {
-            if (Settings["grandExchange.tutorial.required", false] && !player.questCompleted("grand_exchange_tutorial")) {
-                npc<Talk>("Not so fast! I suggest you speak with Brugsen Bursen or the Grand Exchange Tutor near the entrance for a lesson. Brugsen will give an interesting lesson on the Grand Exchange and the Tutor will give a smaller, plain lesson.")
-                return@npcOperate
-            }
-            player["common_item_costs"] = "logs"
-            player.open("common_item_costs")
-        }
+        player<Talk>("Hey there.")
+        npc<Talk>("Why, hell to you too, my friend.")
+        menu()
     }
 
-    suspend fun NPCOption<Player>.menu() {
+    @Option("Info-logs", "relobo_blinyo")
+    suspend fun info(player: Player, npc: NPC) = player.talkWith(npc) {
+        if (Settings["grandExchange.tutorial.required", false] && !player.questCompleted("grand_exchange_tutorial")) {
+            npc<Talk>("Not so fast! I suggest you speak with Brugsen Bursen or the Grand Exchange Tutor near the entrance for a lesson. Brugsen will give an interesting lesson on the Grand Exchange and the Tutor will give a smaller, plain lesson.")
+            return@talkWith
+        }
+        player["common_item_costs"] = "logs"
+        player.open("common_item_costs")
+    }
+
+    suspend fun Dialogue.menu() {
         choice {
             option<Talk>("You look like you've travelled a fair distance.") {
                 npc<Quiz>("What gave me away?")

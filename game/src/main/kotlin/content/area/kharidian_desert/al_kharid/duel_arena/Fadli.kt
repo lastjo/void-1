@@ -8,65 +8,69 @@ import content.entity.player.dialogue.type.player
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.World
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class Fadli {
 
-    init {
-        npcOperate("Talk-to", "fadli") {
-            player<Happy>("Hi.")
-            npc<RollEyes>("What?")
-            choice {
-                option<Neutral>("What do you do?") {
-                    npc<RollEyes>("You can store your stuff here if you want. You can dump anything you don't want to carry whilst you're fighting duels and then pick it up again on the way out.")
-                    npc<RollEyes>("To be honest I'm wasted here.")
-                    npc<Frustrated>("I should be winning duels in an arena! I'm the best warrior in Al Kharid!")
-                    player<Uncertain>("Easy, tiger!")
+    @Option("Talk-to", "fadli")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        player<Happy>("Hi.")
+        npc<RollEyes>("What?")
+        choice {
+            option<Neutral>("What do you do?") {
+                npc<RollEyes>("You can store your stuff here if you want. You can dump anything you don't want to carry whilst you're fighting duels and then pick it up again on the way out.")
+                npc<RollEyes>("To be honest I'm wasted here.")
+                npc<Frustrated>("I should be winning duels in an arena! I'm the best warrior in Al Kharid!")
+                player<Uncertain>("Easy, tiger!")
+            }
+            option<Uncertain>("What is this place?") {
+                npc<Frustrated>("Isn't it obvious?")
+                npc<Neutral>("This is the Duel Arena...duh!")
+            }
+            option<Neutral>("I'd like to access my bank, please.") {
+                npc<RollEyes>("Sure.")
+                player.open("bank")
+            }
+            option<Happy>("I'd like to collect items.") {
+                npc<RollEyes>("Yeah, okay.")
+                player.open("collection_box")
+            }
+            option<Neutral>("Do you watch any matches?") {
+                npc<Neutral>("When I can.")
+                npc<Happy>("Most aren't any good so I throw rotten fruit at them!")
+                player<Happy>("Heh. Can I buy some?")
+                if (World.members) {
+                    npc<Chuckle>("Sure.")
+                    player.openShop("shop_of_distaste")
+                    return@option
                 }
-                option<Uncertain>("What is this place?") {
-                    npc<Frustrated>("Isn't it obvious?")
-                    npc<Neutral>("This is the Duel Arena...duh!")
-                }
-                option<Neutral>("I'd like to access my bank, please.") {
-                    npc<RollEyes>("Sure.")
-                    player.open("bank")
-                }
-                option<Happy>("I'd like to collect items.") {
-                    npc<RollEyes>("Yeah, okay.")
-                    player.open("collection_box")
-                }
-                option<Neutral>("Do you watch any matches?") {
-                    npc<Neutral>("When I can.")
-                    npc<Happy>("Most aren't any good so I throw rotten fruit at them!")
-                    player<Happy>("Heh. Can I buy some?")
-                    if (World.members) {
-                        npc<Chuckle>("Sure.")
-                        player.openShop("shop_of_distaste")
-                        return@option
-                    }
-                    npc<RollEyes>("Nope.")
-                    player.message("You need to be on a members world to use this feature.")
-                }
+                npc<RollEyes>("Nope.")
+                player.message("You need to be on a members world to use this feature.")
             }
         }
+    }
 
-        npcOperate("Bank", "fadli") {
-            player.open("bank")
-        }
+    @Option("Bank", "fadli")
+    fun bank(player: Player, target: NPC) {
+        player.open("bank")
+    }
 
-        npcOperate("Collect", "fadli") {
-            player.open("collection_box")
-        }
+    @Option("Collect", "fadli")
+    fun collect(player: Player, target: NPC) {
+        player.open("collection_box")
+    }
 
-        npcOperate("Buy", "fadli") {
-            if (World.members) {
-                player.openShop("shop_of_distaste")
-                return@npcOperate
-            }
-            npc<RollEyes>("Sorry, I'm not interested.")
-            player.message("You need to be on a members world to use this feature.")
+    @Option("Buy", "fadli")
+    suspend fun buy(player: Player, target: NPC) = player.talkWith(target) {
+        if (World.members) {
+            player.openShop("shop_of_distaste")
+            return@talkWith
         }
+        npc<RollEyes>("Sorry, I'm not interested.")
+        player.message("You need to be on a members world to use this feature.")
     }
 }

@@ -4,8 +4,10 @@ import content.entity.player.dialogue.*
 import content.entity.player.dialogue.type.*
 import content.quest.quest
 import content.quest.refreshQuestJournal
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.Settings
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
@@ -14,45 +16,44 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.replace
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class FatherAereck {
 
-    init {
-        npcOperate("Talk-to", "father_aereck") {
-            when (player.quest("the_restless_ghost")) {
-                "unstarted" -> {
-                    npc<Happy>("Welcome to the church of holy Saradomin.")
-                    choice {
-                        whosSaradomin()
-                        nicePlace()
-                        option<Happy>("I'm looking for a quest.") {
-                            npc<Happy>("That's lucky, I need someone to do a quest for me.")
-                            if (startQuest("the_restless_ghost")) {
-                                player["the_restless_ghost"] = "started"
-                                player.refreshQuestJournal()
-                                player<Happy>("Okay, let me help then.")
-                                npc<Happy>("Thank you. The problem is, there is a ghost in the church graveyard. I would like you to get rid of it.")
-                                npc<Happy>("If you need any help, my friend Father Urhney is an expert on ghosts.")
-                                npc<Happy>("I believe he is currently living as a hermit in Lumbridge swamp. He has a little shack in the far west of the swamps.")
-                                npc<Neutral>("Exit the graveyard through the south gate to reach the swamp. I'm sure if you told him that I sent you he'd be willing to help.")
-                                npc<Happy>("My name is Father Aereck by the way. Pleased to meet you.")
-                                player<Happy>("Likewise.")
-                                npc<Neutral>("Take care travelling through the swamps, I have heard they can be quite dangerous.")
-                                player<Happy>("I will, thanks.")
-                            } else {
-                                player<Neutral>("Actually, I don't have time right now.")
-                                npc<Sad>("Oh well. If you do have some spare time on your hands, come back and talk to me.")
-                            }
+    @Option("Talk-to", "father_aereck")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        when (player.quest("the_restless_ghost")) {
+            "unstarted" -> {
+                npc<Happy>("Welcome to the church of holy Saradomin.")
+                choice {
+                    whosSaradomin()
+                    nicePlace()
+                    option<Happy>("I'm looking for a quest.") {
+                        npc<Happy>("That's lucky, I need someone to do a quest for me.")
+                        if (startQuest("the_restless_ghost")) {
+                            player["the_restless_ghost"] = "started"
+                            player.refreshQuestJournal()
+                            player<Happy>("Okay, let me help then.")
+                            npc<Happy>("Thank you. The problem is, there is a ghost in the church graveyard. I would like you to get rid of it.")
+                            npc<Happy>("If you need any help, my friend Father Urhney is an expert on ghosts.")
+                            npc<Happy>("I believe he is currently living as a hermit in Lumbridge swamp. He has a little shack in the far west of the swamps.")
+                            npc<Neutral>("Exit the graveyard through the south gate to reach the swamp. I'm sure if you told him that I sent you he'd be willing to help.")
+                            npc<Happy>("My name is Father Aereck by the way. Pleased to meet you.")
+                            player<Happy>("Likewise.")
+                            npc<Neutral>("Take care travelling through the swamps, I have heard they can be quite dangerous.")
+                            player<Happy>("I will, thanks.")
+                        } else {
+                            player<Neutral>("Actually, I don't have time right now.")
+                            npc<Sad>("Oh well. If you do have some spare time on your hands, come back and talk to me.")
                         }
                     }
                 }
-                "started" -> started()
-                "ghost" -> ghost()
-                "mining_spot" -> miningSpot()
-                "found_skull" -> foundSkull()
-                else -> completed()
             }
+            "started" -> started()
+            "ghost" -> ghost()
+            "mining_spot" -> miningSpot()
+            "found_skull" -> foundSkull()
+            else -> completed()
         }
     }
 
@@ -91,7 +92,7 @@ class FatherAereck {
         }
     }
 
-    suspend fun NPCOption<Player>.completed() {
+    suspend fun Dialogue.completed() {
         npc<Happy>("Thank you for getting rid of that awful ghost for me! May Saradomin always smile upon you!")
         choice {
             if (Settings["combat.gravestones", true]) {
@@ -116,7 +117,7 @@ class FatherAereck {
         }
     }
 
-    fun ChoiceBuilder<NPCOption<Player>>.whosSaradomin() {
+    fun ChoiceBuilder<Dialogue>.whosSaradomin() {
         option<Quiz>("Who's Saradomin?") {
             npc<Surprised>("Surely you have heard of the god, Saradomin?")
             npc<Neutral>("He who creates the forces of goodness and purity in this world? I cannot believe your ignorance!")
@@ -146,7 +147,7 @@ class FatherAereck {
         }
     }
 
-    fun ChoiceBuilder<NPCOption<Player>>.nicePlace() {
+    fun ChoiceBuilder<Dialogue>.nicePlace() {
         option<Happy>("Nice place you've got here.") {
             npc<Happy>("It is, isn't it? It was built over 230 years ago.")
         }

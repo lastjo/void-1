@@ -7,6 +7,8 @@ import content.quest.quest
 import content.quest.questComplete
 import content.quest.refreshQuestJournal
 import world.gregs.voidps.engine.client.message
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
@@ -18,34 +20,34 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
 @Script
 class Cook {
 
-    init {
-        npcOperate("Talk-to", "cook_lumbridge") {
-            when (player.quest("cooks_assistant")) {
-                "unstarted" -> {
-                    npc<Sad>("What am I to do?")
-                    choice {
-                        option("What's wrong?") {
-                            startQuest()
-                        }
-                        option<Happy>("Can you make me a cake?") {
-                            npc<Sad>("*sniff* Don't talk to me about cakes...")
-                            startQuest()
-                        }
-                        option<Neutral>("You don't look very happy.") {
-                            dontLookHappy()
-                        }
-                        option<Happy>("Nice hat!") {
-                            niceHat()
-                        }
+    @Option("Talk-to", "cook_lumbridge")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        when (player.quest("cooks_assistant")) {
+            "unstarted" -> {
+                npc<Sad>("What am I to do?")
+                choice {
+                    option("What's wrong?") {
+                        startQuest()
+                    }
+                    option<Happy>("Can you make me a cake?") {
+                        npc<Sad>("*sniff* Don't talk to me about cakes...")
+                        startQuest()
+                    }
+                    option<Neutral>("You don't look very happy.") {
+                        dontLookHappy()
+                    }
+                    option<Happy>("Nice hat!") {
+                        niceHat()
                     }
                 }
-                "started" -> started()
-                else -> completed()
             }
+            "started" -> started()
+            else -> completed()
         }
     }
 
@@ -200,7 +202,7 @@ class Cook {
         player<Talk>("Thanks!")
     }
 
-    suspend fun NPCOption<Player>.dontLookHappy() {
+    suspend fun Dialogue.dontLookHappy() {
         npc<Sad>("No, I'm not. The world is caving in around me - I am overcome by dark feelings of impending doom.")
         choice {
             option("What's wrong?") {

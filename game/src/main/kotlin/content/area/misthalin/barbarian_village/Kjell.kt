@@ -7,23 +7,23 @@ import content.entity.player.dialogue.Talk
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.quest.quest
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class Kjell {
 
-    init {
-        npcOperate("Talk-to", "kjell_*") {
-            when (player.quest("gunnars_ground")) {
-                "gunnars_ground", "completed" -> completed()
-                "started" -> {
-                }
-                else -> unstarted()
+    @Option("Talk-to", "kjell_*")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        when (player.quest("gunnars_ground")) {
+            "gunnars_ground", "completed" -> completed()
+            "started" -> {
             }
+            else -> unstarted()
         }
     }
 

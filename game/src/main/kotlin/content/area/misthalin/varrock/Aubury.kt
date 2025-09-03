@@ -15,43 +15,44 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
 @Script
 class Aubury {
 
-    init {
-        npcOperate("Talk-to", "aubury") {
-            if (player.quest("rune_mysteries") == "research_notes") {
-                checkNotes()
-                return@npcOperate
-            }
-            npc<Happy>("Do you want to buy some runes?")
-            choice {
-                skillcapes()
-                openShop()
-                packageForYou()
-                option<Quiz>(
-                    "Anything useful in that package I gave you?",
-                    { player.quest("rune_mysteries") == "package_delivered" },
-                ) {
-                    npc<Happy>("Well, let's have a look...")
-                    researchPackage()
-                }
-                noThanks()
-                teleport(target)
-            }
+    @Option("Talk-to", "aubury")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        if (player.quest("rune_mysteries") == "research_notes") {
+            checkNotes()
+            return@talkWith
         }
+        npc<Happy>("Do you want to buy some runes?")
+        choice {
+            skillcapes()
+            openShop()
+            packageForYou()
+            option<Quiz>(
+                "Anything useful in that package I gave you?",
+                { player.quest("rune_mysteries") == "package_delivered" },
+            ) {
+                npc<Happy>("Well, let's have a look...")
+                researchPackage()
+            }
+            noThanks()
+            teleport(target)
+        }
+    }
 
-        npcOperate("Teleport", "aubury") {
-            EssenceMine.teleport(target, player)
-        }
+    @Option("Teleport", "aubury")
+    fun teleport(player: Player, target: NPC) {
+        EssenceMine.teleport(target, player)
     }
 
     fun PlayerChoice.openShop(): Unit = option<Happy>("Yes please!") {
         player.emit(OpenShop("auburys_rune_shop"))
     }
 
-    suspend fun PlayerChoice.noThanks(message: String = "Oh, it's a rune shop. No thank you, then."): Unit = option<Neutral>(message) {
+    fun PlayerChoice.noThanks(message: String = "Oh, it's a rune shop. No thank you, then."): Unit = option<Neutral>(message) {
         npc<Happy>("Well, if you find someone who does want runes, please send them my way.")
     }
 
@@ -63,7 +64,7 @@ class Aubury {
         EssenceMine.teleport(npc, player)
     }
 
-    suspend fun PlayerChoice.packageForYou(): Unit = option<Neutral>(
+    fun PlayerChoice.packageForYou(): Unit = option<Neutral>(
         "I've been sent here with a package for you.",
         { player.quest("rune_mysteries") == "research_package" },
     ) {
@@ -125,7 +126,7 @@ class Aubury {
         }
     }
 
-    suspend fun PlayerChoice.skillcapes(): Unit = option("Can you tell me about your cape?") {
+    fun PlayerChoice.skillcapes(): Unit = option("Can you tell me about your cape?") {
         npc<Happy>("Certainly! Skillcapes are a symbol of achievement. Only people who have mastered a skill and reached level 99 can get their hands on them and gain the benefits they carry.")
         npc<Neutral>("The Cape of Runecrafting has been upgraded with each talisman, allowing you to access all Runecrafting altars. Is there anything else I can help you with?")
         choice {

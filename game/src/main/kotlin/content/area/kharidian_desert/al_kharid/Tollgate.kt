@@ -30,50 +30,47 @@ import world.gregs.voidps.type.Distance.nearestTo
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.area.Rectangle
+import world.gregs.voidps.type.sub.Option
 
-@Script
-class Tollgate {
+class Tollgate(private val objects: GameObjects) {
 
-    val objects: GameObjects by inject()
+    private val gates = Rectangle(Tile(3268, 3227), 1, 2)
 
-    val gates = Rectangle(Tile(3268, 3227), 1, 2)
-
-    init {
-        objectOperate("Pay-toll(10gp)", "toll_gate_al_kharid*") {
-            if (!player.inventory.remove("coins", 10)) {
-                player.notEnough("coins")
-                dialogue(player)
-                return@objectOperate
-            }
-            player.message("You pay the guard.")
-            enterDoor(target, delay = 2)
-        }
-
-        objectOperate("Open", "toll_gate_al_kharid*") {
-            if (player.questCompleted("prince_ali_rescue")) {
-                enterDoor(target, delay = 2)
-                return@objectOperate
-            }
+    @Option("Pay-toll(10gp)", "toll_gate_al_kharid*")
+    suspend fun pay(player: Player, target: GameObject) {
+        if (!player.inventory.remove("coins", 10)) {
+            player.notEnough("coins")
             dialogue(player)
-        }
-
-        npcOperate("Talk-to", "border_guard_al_kharid*") {
-            dialogue(player, target)
-        }
-    }
-
-    fun getGuard(player: Player) = get<NPCs>()[player.tile.regionLevel].firstOrNull { it.id.startsWith("border_guard_al_kharid") }
-
-    suspend fun SuspendableContext<Player>.dialogue(player: Player, npc: NPC? = getGuard(player)) {
-        if (npc == null) {
             return
         }
+        player.message("You pay the guard.")
+        player.enterDoor(target, delay = 2)
+    }
+
+    @Option("Open", "toll_gate_al_kharid*")
+    suspend fun open(player: Player, target: GameObject) {
+        if (player.questCompleted("prince_ali_rescue")) {
+            player.enterDoor(target, delay = 2)
+            return
+        }
+        dialogue(player)
+    }
+
+    @Option("Talk-to", "border_guard_al_kharid*")
+    suspend fun talk(player: Player, target: NPC) {
+        dialogue(player, target)
+
+    }
+
+    fun getGuard(player: Player) = get<NPCs>()[player.tile.regionLevel].first { it.id.startsWith("border_guard_al_kharid") }
+
+    suspend fun dialogue(player: Player, npc: NPC = getGuard(player)): Unit = player.talkWith(npc) {
         player.talkWith(npc)
         player<Quiz>("Can I come through this gate?")
         if (player.questCompleted("prince_ali_rescue")) {
             npc<Talk>("You may pass for free! You are a friend of Al Kharid.")
             pass(player)
-            return
+            return@talkWith
         }
         npc<Talk>("You must pay a toll of 10 gold coins to pass.")
         choice {

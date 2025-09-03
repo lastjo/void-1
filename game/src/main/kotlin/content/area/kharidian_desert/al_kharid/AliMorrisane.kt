@@ -7,23 +7,23 @@ import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import content.quest.questCompleted
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.name
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class AliMorrisane {
 
-    init {
-        npcOperate("Talk-to", "ali_morrisane") {
-            npc<Talk>("Hello, my friend. Have a look at my wares.")
-            choice {
-                option<Talk>("No, I'm really too busy.")
-                option("Okay.") {
-                    player.openShop("alis_discount_wares")
-                }
+    @Option("Talk-to", "ali_morrisane")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        npc<Talk>("Hello, my friend. Have a look at my wares.")
+        choice {
+            option<Talk>("No, I'm really too busy.")
+            option("Okay.") {
+                player.openShop("alis_discount_wares")
             }
         }
     }

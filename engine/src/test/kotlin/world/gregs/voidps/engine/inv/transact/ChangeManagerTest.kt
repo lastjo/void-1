@@ -1,7 +1,6 @@
 package world.gregs.voidps.engine.inv.transact
 
 import io.mockk.mockk
-import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -9,8 +8,7 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.Inventory
-import world.gregs.voidps.engine.inv.InventorySlotChanged
-import world.gregs.voidps.engine.inv.InventoryUpdate
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 internal class ChangeManagerTest {
@@ -31,14 +29,25 @@ internal class ChangeManagerTest {
 
     @Test
     fun `Track and send changes`() {
-        val events = mockk<Player>(relaxed = true)
-        change.bind(events)
+        val player = mockk<Player>(relaxed = true)
+        var changes = 0
+        var updates = 0
+        Publishers.set(object : Publishers {
+            override fun inventoryUpdated(player: Player, inventory: String): Boolean {
+                updates++
+                return super.inventoryUpdated(player, inventory)
+            }
+
+            override fun inventoryChanged(player: Player, inventory: String, itemSlot: Int, item: Item, from: String, fromSlot: Int, fromItem: Item): Boolean {
+                changes++
+                return super.inventoryChanged(player, inventory, itemSlot, item, from, fromSlot, fromItem)
+            }
+        })
+        change.bind(player)
         change.track(from = "inventory", index = 1, previous = Item.EMPTY, fromIndex = 1, item = Item("item", 1))
         change.send()
-        verify {
-            events.emit(any<InventorySlotChanged>())
-            events.emit(any<InventoryUpdate>())
-        }
+        assertEquals(1, changes)
+        assertEquals(1, updates)
     }
 
     @Test
@@ -53,7 +62,7 @@ internal class ChangeManagerTest {
                 throw IllegalStateException()
             }
 
-            override fun publishPlayer(player: Player, event: String, id: String): Boolean {
+            override fun publishPlayer(player: Player, event: String, id: Any): Boolean {
                 throw IllegalStateException()
             }
 

@@ -20,9 +20,7 @@ class ItemDropping(private val floorItems: FloorItems){
     @Inventory("Drop")
     fun drop(player: Player, item: Item, itemSlot: Int) {
         player.queue.clearWeak()
-        val event = Droppable(item, player.tile)
-        player.emit(event)
-        if (event.cancelled) {
+        if (Publishers.all.publishPlayer(player, "can_drop", item.id)) {
             return
         }
         if (player.inventory.remove(itemSlot, item.id, item.amount)) {

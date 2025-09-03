@@ -10,6 +10,7 @@ import world.gregs.voidps.engine.data.definition.InventoryDefinitions
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.inventoryFull
+import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.playerDespawn
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.add
@@ -18,46 +19,47 @@ import world.gregs.voidps.engine.inv.sendInventory
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.ClearItem.clear
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Close
+import world.gregs.voidps.type.sub.Despawn
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.Open
 
-@Script
-class DiangoItemRetrieval {
+class DiangoItemRetrieval(
+    private val inventoryDefinitions: InventoryDefinitions,
+    private val itemDefinitions: ItemDefinitions,
+) {
 
     val itemLimit = 48
     val container = InterfaceDefinition.pack(468, 2)
     val scrollbar = InterfaceDefinition.pack(468, 3)
 
-    val inventoryDefinitions: InventoryDefinitions by inject()
-    val itemDefinitions: ItemDefinitions by inject()
-
-    init {
-        interfaceOpen("diangos_item_retrieval") { player ->
-            refreshItems(player)
-        }
-
-        interfaceOption("Claim", "items", "diangos_item_retrieval") {
-            when (item.id) {
-                "more" -> {
-                    player["retrieve_more"] = true
-                    player.sendScript("scrollbar_resize", scrollbar, container, 0) // Scroll to top
-                }
-                "back" -> player.clear("retrieve_more")
-                else -> if (!player.inventory.add(item.id)) {
-                    player.inventoryFull()
-                }
+    @Interface("Claim", "items", "diangos_item_retrieval")
+    fun claim(player: Player, item: Item) {
+        when (item.id) {
+            "more" -> {
+                player["retrieve_more"] = true
+                player.sendScript("scrollbar_resize", scrollbar, container, 0) // Scroll to top
             }
-            refreshItems(player)
+            "back" -> player.clear("retrieve_more")
+            else -> if (!player.inventory.add(item.id)) {
+                player.inventoryFull()
+            }
         }
-
-        playerDespawn { player ->
-            // Don't want to store in account save
-            player.inventories.clear("diangos_item_retrieval")
-        }
-
-        interfaceClose("diangos_item_retrieval") { player ->
-            player.inventories.clear(id)
-        }
+        refreshItems(player)
     }
 
+    @Despawn
+    fun despawn(player: Player) {
+        // Don't want to store in account save
+        player.inventories.clear("diangos_item_retrieval")
+    }
+
+    @Close("diangos_item_retrieval")
+    fun close(player: Player, id: String) {
+        player.inventories.clear(id)
+    }
+
+    @Open("diangos_item_retrieval")
     fun refreshItems(player: Player) {
         val more: Boolean = player["retrieve_more", false]
         player.inventories.clear("diangos_item_retrieval")

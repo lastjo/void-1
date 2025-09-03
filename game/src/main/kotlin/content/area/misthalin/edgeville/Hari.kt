@@ -5,40 +5,40 @@ import content.entity.player.dialogue.*
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class Hari {
 
-    init {
-        npcOperate("Talk-To", "hari") {
-            player<Neutral>("Hello there.")
-            npc<Neutral>("Hello.")
-            choice {
-                option<Neutral>("Who are you?") {
-                    npc<Neutral>("My name is Hari.")
-                    player<Quiz>("And what are you doing here Hari?")
-                    npc<Neutral>("Like most people who come to Edgeville, I am here to seek adventure in the Wilderness.")
-                    npc<Neutral>("I found a secret underground river that will take me quite a long way north.")
-                    player<Quiz>("Underground river? Where does it come out?")
-                    npc<Neutral>("It comes out in a pond located deep in the Wilderness.")
-                    npc<Neutral>("I had to find a very special type of canoe to get me up the river though, would you like to know more?")
-                    choice {
-                        option("Yes") {
-                            canoeing()
-                        }
-                        option("No") {
-                            player<Neutral>("No thanks, not right now.")
-                        }
+    @Option("Talk-to", "hari")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        player<Neutral>("Hello there.")
+        npc<Neutral>("Hello.")
+        choice {
+            option<Neutral>("Who are you?") {
+                npc<Neutral>("My name is Hari.")
+                player<Quiz>("And what are you doing here Hari?")
+                npc<Neutral>("Like most people who come to Edgeville, I am here to seek adventure in the Wilderness.")
+                npc<Neutral>("I found a secret underground river that will take me quite a long way north.")
+                player<Quiz>("Underground river? Where does it come out?")
+                npc<Neutral>("It comes out in a pond located deep in the Wilderness.")
+                npc<Neutral>("I had to find a very special type of canoe to get me up the river though, would you like to know more?")
+                choice {
+                    option("Yes") {
+                        canoeing()
+                    }
+                    option("No") {
+                        player<Neutral>("No thanks, not right now.")
                     }
                 }
-                option("Can you teach me about Canoeing?") {
-                    canoeing()
-                }
+            }
+            option("Can you teach me about Canoeing?") {
+                canoeing()
             }
         }
     }

@@ -3,10 +3,7 @@ package content.area.misthalin.barbarian_village
 import content.entity.player.dialogue.*
 import content.entity.player.dialogue.type.*
 import content.entity.sound.jingle
-import content.quest.Cutscene
-import content.quest.quest
-import content.quest.questComplete
-import content.quest.startCutscene
+import content.quest.*
 import world.gregs.voidps.engine.client.clearCamera
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.moveCamera
@@ -14,6 +11,7 @@ import world.gregs.voidps.engine.client.turnCamera
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
 import world.gregs.voidps.engine.entity.character.move.tele
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
@@ -33,49 +31,47 @@ import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Region
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
+import world.gregs.voidps.type.sub.Option
 
-@Script
-class Gudrun {
+class Gudrun(
+    private val objects: GameObjects,
+    private val npcs: NPCs,
+) {
 
-    val objects: GameObjects by inject()
-
-    val npcs: NPCs by inject()
     val region = Region(12341)
 
-    init {
-        npcOperate("Talk-to", "gudrun*") {
-            when (player.quest("gunnars_ground")) {
-                "gunnars_ground" -> gunnarsGround()
-                "recital" -> recital()
-                "poem" -> poem()
-                "tell_dororan", "write_poem", "more_poem", "one_more_poem", "poem_done" -> {
-                    npc<Talk>("If there's anything you can do to make papa see sense, please do it.")
-                }
-                "tell_gudrun" -> whatHeSay()
-                "meet_chieftain" -> {
-                    npc<Talk>("If there's anything you can do to make papa see sense, please do it.")
-                    meetChieftain()
-                }
-                "show_gudrun" -> showGudrun()
-                else -> unstarted()
+    @Option("Talk-to", "gudrun*")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        when (player.quest("gunnars_ground")) {
+            "gunnars_ground" -> gunnarsGround()
+            "recital" -> recital()
+            "poem" -> poem()
+            "tell_dororan", "write_poem", "more_poem", "one_more_poem", "poem_done" -> {
+                npc<Talk>("If there's anything you can do to make papa see sense, please do it.")
             }
+            "tell_gudrun" -> whatHeSay()
+            "meet_chieftain" -> {
+                npc<Talk>("If there's anything you can do to make papa see sense, please do it.")
+                meetChieftain()
+            }
+            "show_gudrun" -> showGudrun()
+            else -> unstarted()
         }
+    }
 
-        npcOperate("Talk-to", "gudrun_after_quest") {
-            when (player.quest("gunnars_ground")) {
-                "completed" -> {
-                    npc<Happy>("Hello!")
-                    choice {
-                        option<Neutral>("I want to ask you something.") {
-                            npc<Quiz>("Of course, what is it?")
-                            menu()
-                        }
-                        option<Neutral>("Just passing through.") {
-                            npc<Happy>("Goodbye!")
-                        }
-                    }
-                }
-                else -> player.message("error")
+    @Option("Talk-to", "gudrun_after_quest")
+    suspend fun talkAfter(player: Player, npc: NPC) = player.talkWith(npc) {
+        if (!player.questCompleted("gunnars_ground")) {
+            return@talkWith
+        }
+        npc<Happy>("Hello!")
+        choice {
+            option<Neutral>("I want to ask you something.") {
+                npc<Quiz>("Of course, what is it?")
+                menu()
+            }
+            option<Neutral>("Just passing through.") {
+                npc<Happy>("Goodbye!")
             }
         }
     }

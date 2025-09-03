@@ -8,20 +8,20 @@ interface Condition {
     fun statement(): Statement?
 }
 
-data class Equals(override val key: String, override val value: Any?, val simplify: Boolean = true) : Condition {
+data class Equals(override val key: String, override val value: Any?, val explicit: Boolean = false) : Condition {
     override fun statement(): Statement? {
         return when (value) {
             is String -> when {
                 value == "*" -> null
-                value.startsWith("*") -> Statement("$key.endsWith(%S)", arrayOf(value.removePrefix("*")))
-                value.endsWith("*") -> Statement("$key.startsWith(%S)", arrayOf(value.removeSuffix("*")))
-                value.contains("*") || value.contains("#") -> Statement("%T($key, %S)", arrayOf(ClassName("world.gregs.voidps.engine.event", "wildcardEquals"), value))
+                value.startsWith("*") -> Statement("${if (explicit) "($key as String)" else key}.endsWith(%S)", arrayOf(value.removePrefix("*")))
+                value.endsWith("*") -> Statement("${if (explicit) "($key as String)" else key}.startsWith(%S)", arrayOf(value.removeSuffix("*")))
+                value.contains("*") || value.contains("#") -> Statement("%T(${if (explicit) "($key as String)" else key}, %S)", arrayOf(ClassName("world.gregs.voidps.engine.event", "wildcardEquals"), value))
                 else -> Statement("$key == %S", arrayOf(value))
             }
-            is Boolean -> if (simplify) {
-                Statement("${if (value) "" else "!"}$key", arrayOf(value))
-            } else {
+            is Boolean -> if (explicit) {
                 Statement("$key == %L", arrayOf(value))
+            } else {
+                Statement("${if (value) "" else "!"}$key", arrayOf(value))
             }
             else -> Statement("$key == %L", arrayOf(value))
         }

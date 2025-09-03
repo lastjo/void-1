@@ -6,8 +6,10 @@ import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import content.quest.questCompleted
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.Settings
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
@@ -16,8 +18,8 @@ import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.ClearItem.clear
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class BobBarterHerbs {
 
     val potions = setOf(
@@ -65,62 +67,63 @@ class BobBarterHerbs {
         "overload",
     )
 
-    init {
-        npcOperate("Talk-to", "bob_barter") {
-            if (Settings["grandExchange.tutorial.required", false] && !player.questCompleted("grand_exchange_tutorial")) {
-                player<Talk>("Hello.")
-                npc<Talk>("Mate, I haven't got time for you yet. I suggest you speak with Brugsen Bursen or the Grand Exchange Tutor near the entrance for a lesson. Brugsen will give an interesting lesson on the Grand Exchange and the Tutor will give a simpler, plain lesson.")
-                return@npcOperate
-            }
-            npc<Happy>("Hello, chum, fancy buyin' some designer jewellery? They've come all the way from Ardougne! Most pukka!")
-            player<Shifty>("Erm, no. I'm all set, thanks.")
-            npc<Happy>("Okay, chum, would you like to show you the very latest potion prices?")
-            choice {
-                option<Talk>("Who are you?") {
-                    npc<Happy>("Why, I'm Bob! Your friendly seller of smashin' goods!")
-                    player<Quiz>("So what do you have to sell?")
-                    npc<Talk>("Oh, not much at the moment. Cuz, ya know, business being so well and cushie.")
-                    player<Talk>("You don't really look like you're being so successful.")
-                    npc<Talk>("You plonka! It's all a show, innit! If I let people knows I'm in good business they'll want a share of the moolah!")
-                    player<Talk>("You conveniently have a response for everything.")
-                    npc<Chuckle>("That's the Ardougne way, my friend.")
-                    choice {
-                        showPrices()
-                        option<Shifty>("I'll leave you to it.")
-                    }
+    @Option("Talk-to", "bob_barter")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        if (Settings["grandExchange.tutorial.required", false] && !player.questCompleted("grand_exchange_tutorial")) {
+            player<Talk>("Hello.")
+            npc<Talk>("Mate, I haven't got time for you yet. I suggest you speak with Brugsen Bursen or the Grand Exchange Tutor near the entrance for a lesson. Brugsen will give an interesting lesson on the Grand Exchange and the Tutor will give a simpler, plain lesson.")
+            return@talkWith
+        }
+        npc<Happy>("Hello, chum, fancy buyin' some designer jewellery? They've come all the way from Ardougne! Most pukka!")
+        player<Shifty>("Erm, no. I'm all set, thanks.")
+        npc<Happy>("Okay, chum, would you like to show you the very latest potion prices?")
+        choice {
+            option<Talk>("Who are you?") {
+                npc<Happy>("Why, I'm Bob! Your friendly seller of smashin' goods!")
+                player<Quiz>("So what do you have to sell?")
+                npc<Talk>("Oh, not much at the moment. Cuz, ya know, business being so well and cushie.")
+                player<Talk>("You don't really look like you're being so successful.")
+                npc<Talk>("You plonka! It's all a show, innit! If I let people knows I'm in good business they'll want a share of the moolah!")
+                player<Talk>("You conveniently have a response for everything.")
+                npc<Chuckle>("That's the Ardougne way, my friend.")
+                choice {
+                    showPrices()
+                    option<Shifty>("I'll leave you to it.")
                 }
-                showPrices()
-                option<Talk>("I'll leave you too it")
             }
-        }
-
-        npcOperate("Info-herbs", "bob_barter") {
-            if (Settings["grandExchange.tutorial.required", false] && !player.questCompleted("grand_exchange_tutorial")) {
-                npc<Talk>("You'll need a tiny bit of training first, chum. I suggest you speak with Brugsen Bursen or the Grand Exchange Tutor near the entrance for a lesson. Brugsen will give an interesting lesson on the Grand Exchange and the Tutor will give a smaller, plain lesson.")
-                return@npcOperate
-            }
-            player["common_item_costs"] = "herbs"
-            player.open("common_item_costs")
-        }
-
-        npcOperate("Decant", "bob_barter") {
-            if (Settings["grandExchange.tutorial.required", false] && !player.questCompleted("grand_exchange_tutorial")) {
-                player<Talk>("Hello.")
-                npc<Talk>("Mate, I haven't got time for you yet. I suggest you speak with Brugsen Bursen or the Grand Exchange Tutor near the entrance for a lesson. Brugsen will give an interesting lesson on the Grand Exchange and the Tutor will give a simpler, plain lesson.")
-                return@npcOperate
-            }
-            decantPotions()
+            showPrices()
+            option<Talk>("I'll leave you too it")
         }
     }
 
-    fun ChoiceBuilder<NPCOption<Player>>.showPrices() {
+    @Option("Info-herbs", "bob_barter")
+    suspend fun info(player: Player, target: NPC) = player.talkWith(target) {
+        if (Settings["grandExchange.tutorial.required", false] && !player.questCompleted("grand_exchange_tutorial")) {
+            npc<Talk>("You'll need a tiny bit of training first, chum. I suggest you speak with Brugsen Bursen or the Grand Exchange Tutor near the entrance for a lesson. Brugsen will give an interesting lesson on the Grand Exchange and the Tutor will give a smaller, plain lesson.")
+            return@talkWith
+        }
+        player["common_item_costs"] = "herbs"
+        player.open("common_item_costs")
+    }
+
+    @Option("Decant", "bob_barter")
+    suspend fun decant(player: Player, target: NPC) = player.talkWith(target) {
+        if (Settings["grandExchange.tutorial.required", false] && !player.questCompleted("grand_exchange_tutorial")) {
+            player<Talk>("Hello.")
+            npc<Talk>("Mate, I haven't got time for you yet. I suggest you speak with Brugsen Bursen or the Grand Exchange Tutor near the entrance for a lesson. Brugsen will give an interesting lesson on the Grand Exchange and the Tutor will give a simpler, plain lesson.")
+            return@talkWith
+        }
+        decantPotions()
+    }
+
+    fun ChoiceBuilder<Dialogue>.showPrices() {
         option<Talk>("Can you show me the prices for herbs?") {
             player["common_item_costs"] = "herbs"
             player.open("common_item_costs")
         }
     }
 
-    suspend fun NPCOption<Player>.decantPotions() {
+    suspend fun Dialogue.decantPotions() {
         // Check if the player has any potions to decant
         player.inventory.transaction {
             val potionMap = mutableMapOf<String, Int>()

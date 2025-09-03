@@ -8,6 +8,7 @@ import content.entity.player.dialogue.Upset
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import world.gregs.voidps.engine.client.ui.interact.itemOnNPCOperate
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
@@ -17,45 +18,46 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.inv.transact.operation.ReplaceItem.replace
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
+import world.gregs.voidps.type.sub.UseOn
 
-@Script
 class Bob {
 
-    init {
-        npcOperate("Talk-to", "bob") {
-            choice {
-                option("Give me a quest!") {
-                    npc<Talk>("Sorry I don't have any quests for you at the moment.")
-                }
-                option<Quiz>("I'd like to trade.") {
-                    npc<Happy>("Great! I buy and sell pickaxes and hatchets. There are plenty to choose from, and I've some free samples too. Take your pick... or hatchet.")
-                    player.openShop("bobs_brilliant_axes")
-                }
-                option<Upset>("Can you repair my items for me?") {
-                    npc<Quiz>("Of course I can, though the material may cost you. Just hand me the item and I'll have a look.")
-                }
+    @Option("Talk-to", "bob")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        choice {
+            option("Give me a quest!") {
+                npc<Talk>("Sorry I don't have any quests for you at the moment.")
+            }
+            option<Quiz>("I'd like to trade.") {
+                npc<Happy>("Great! I buy and sell pickaxes and hatchets. There are plenty to choose from, and I've some free samples too. Take your pick... or hatchet.")
+                player.openShop("bobs_brilliant_axes")
+            }
+            option<Upset>("Can you repair my items for me?") {
+                npc<Quiz>("Of course I can, though the material may cost you. Just hand me the item and I'll have a look.")
             }
         }
+    }
 
-        itemOnNPCOperate("*", "bob") {
-            if (!repairable(item.id)) {
-                npc<Quiz>("Sorry friend, but I can't do anything with that.")
-                return@itemOnNPCOperate
-            }
-            val cost = repairCost(player, item)
-            npc<Talk>("That'll cost you $cost gold coins to fix, are you sure?")
-            choice {
-                option("Yes I'm sure!") {
-                    val repaired = player.inventory.transaction {
-                        remove("coins", cost)
-                        replace(item.id, repaired(item.id))
-                    }
-                    if (repaired) {
-                        npc<Happy>("There you go. It's a pleasure doing business with you!")
-                    }
+    @UseOn(on = "bob")
+    suspend fun use(player: Player, target: NPC, item: Item) = player.talkWith(target) {
+        if (!repairable(item.id)) {
+            npc<Quiz>("Sorry friend, but I can't do anything with that.")
+            return@talkWith
+        }
+        val cost = repairCost(player, item)
+        npc<Talk>("That'll cost you $cost gold coins to fix, are you sure?")
+        choice {
+            option("Yes I'm sure!") {
+                val repaired = player.inventory.transaction {
+                    remove("coins", cost)
+                    replace(item.id, repaired(item.id))
                 }
-                option("On second thoughts, no thanks.")
+                if (repaired) {
+                    npc<Happy>("There you go. It's a pleasure doing business with you!")
+                }
             }
+            option("On second thoughts, no thanks.")
         }
     }
 

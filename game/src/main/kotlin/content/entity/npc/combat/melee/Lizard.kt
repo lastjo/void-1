@@ -19,9 +19,9 @@ import world.gregs.voidps.type.sub.UseOn
 
 class Lizard {
 
-    @LevelChange(Skill.CONSTITUTION, "lizard")
-    @LevelChange(Skill.CONSTITUTION, "small_lizard*")
-    @LevelChange(Skill.CONSTITUTION, "desert_lizard*")
+    @LevelChange(Skill.CONSTITUTION, id = "lizard")
+    @LevelChange(Skill.CONSTITUTION, id = "small_lizard*")
+    @LevelChange(Skill.CONSTITUTION, id = "desert_lizard*")
     fun change(npc: NPC, to: Int) {
         if (to > 10) {
             return

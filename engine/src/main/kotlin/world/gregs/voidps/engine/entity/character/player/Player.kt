@@ -86,9 +86,9 @@ class Player(
     val area: AreaQueue = AreaQueue(this)
 
     inline fun debug(message: () -> Any?) {
-        if (this["debug", false]) {
+//        if (this["debug", false]) {
             logger.debug(message)
-        }
+//        }
     }
 
     inline fun warn(t: Throwable?, message: () -> Any?) {

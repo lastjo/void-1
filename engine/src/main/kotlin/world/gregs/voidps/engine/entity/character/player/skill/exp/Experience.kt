@@ -5,6 +5,7 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level
 import world.gregs.voidps.engine.event.EventDispatcher
+import world.gregs.voidps.engine.event.Publishers
 
 class Experience(
     val experience: DoubleArray = defaultExperience.clone(),
@@ -34,7 +35,8 @@ class Experience(
             return
         }
         if (blocked.contains(skill)) {
-            events.emit(BlockedExperience(skill, experience * Settings["world.experienceRate", DEFAULT_EXPERIENCE_RATE]))
+            val exp = experience * Settings["world.experienceRate", DEFAULT_EXPERIENCE_RATE]
+            Publishers.all.experience(events as Player, skill, to = exp, blocked = true)
         } else {
             val current = get(skill)
             set(skill, current + experience * Settings["world.experienceRate", DEFAULT_EXPERIENCE_RATE])

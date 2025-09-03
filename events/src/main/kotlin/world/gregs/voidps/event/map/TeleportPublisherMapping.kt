@@ -19,7 +19,7 @@ class TeleportPublisherMapping(function: KFunction<*>, notification: Boolean) : 
             }
         }
         if (ids.isEmpty()) {
-            return listOf(emptyList())
+            return listOf(list)
         }
         return ids.map { list + listOf(Equals("def.stringId", it)) }
     }

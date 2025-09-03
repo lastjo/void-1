@@ -153,7 +153,7 @@ data class TrieNode(
     private fun insertConditions(conditions: List<Condition>, idx: Int, method: Method, allowMultiple: Boolean) {
         if (idx >= conditions.size) {
             if (!allowMultiple && methods.size > 0) {
-                error("Method already exists for conditions: $method")
+                error("Method ${method.method()} already exists for conditions: ${method.conditions} - ${methods.map { it.method() }}")
             }
             methods += method
             return

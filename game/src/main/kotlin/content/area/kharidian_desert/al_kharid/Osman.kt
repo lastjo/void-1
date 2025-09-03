@@ -4,6 +4,8 @@ import content.entity.player.bank.ownsItem
 import content.entity.player.dialogue.*
 import content.entity.player.dialogue.type.*
 import content.quest.quest
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
@@ -13,89 +15,88 @@ import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class Osman {
 
-    init {
-        npcOperate("Talk-to", "osman_*") {
-            when (player.quest("prince_ali_rescue")) {
-                "unstarted" -> {
-                    npc<Shifty>("Hello. I am Osman. What can I assist you with?")
-                    choice {
-                        option<Talk>("You don't seem very tough. Who are you?") {
-                            npc<Shifty>("I work for Al Kharid's Emir. That is all you need to know.")
-                        }
-                        option<Shifty>("Nothing. I'm just being nosy.") {
-                            npc<Shifty>("That bothers me not. The secrets of Al Kharid protect themselves.")
-                        }
+    @Option("Talk-to", "osman_*")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        when (player.quest("prince_ali_rescue")) {
+            "unstarted" -> {
+                npc<Shifty>("Hello. I am Osman. What can I assist you with?")
+                choice {
+                    option<Talk>("You don't seem very tough. Who are you?") {
+                        npc<Shifty>("I work for Al Kharid's Emir. That is all you need to know.")
                     }
-                    return@npcOperate
-                }
-                "osman" -> {
-                    player<Talk>("The chancellor trusts me. I have come for instructions.")
-                    npc<Shifty>("Our prince is captive by the Lady Keli. We just need to make the rescue. There are two things we need you to do.")
-                    player["prince_ali_rescue"] = "leela"
-                    choice {
-                        firstThing()
-                        secondThing()
-                        findThings()
+                    option<Shifty>("Nothing. I'm just being nosy.") {
+                        npc<Shifty>("That bothers me not. The secrets of Al Kharid protect themselves.")
                     }
                 }
-                "leela" -> {
-                    if (player.inventory.contains("key_print")) {
-                        if (!player.inventory.contains("bronze_bar")) {
-                            player<Talk>("I have an imprint of the key.")
-                            npc<Shifty>("Good. Bring me a bronze bar, and I'll get a copy made.")
-                        } else {
-                            npc<Shifty>("Well done; we can make the key now.")
-                            player.inventory.remove("key_print", "bronze_bar")
-                            player["prince_ali_rescue_key_made"] = true
-                            statement("Osman takes the key imprint and the bronze bar.")
-                            npc<Shifty>("Pick the key up from Leela.")
-                        }
-                    } else if (player["prince_ali_rescue_key_given", false] && !player.ownsItem("bronze_key_prince_ali_rescue")) {
-                        player<Talk>("I'm afraid I lost that key you gave me.")
-                        npc<Uncertain>("Well that was foolish. I can sort you out with another, but it will cost you 15 coins.")
-                        if (player.inventory.contains("coins", 15)) {
-                            player<Talk>("Here, I have 15 coins.")
-                        } else {
-                            player<Sad>("I haven't got 15 coins with me.")
-                            npc<Talk>("Then come back to me when you do.")
-                            return@npcOperate
-                        }
-                        player.inventory.transaction {
-                            remove("coins", 15)
-                            add("bronze_key_prince_ali_rescue")
-                        }
-                        when (player.inventory.transaction.error) {
-                            TransactionError.None -> item("bronze_key_prince_ali_rescue", 400, "Osman gives you a key.")
-                            else -> statement("Osman tries to give you a key, but you don't have enough room for it.")
-                        }
+                return@talkWith
+            }
+            "osman" -> {
+                player<Talk>("The chancellor trusts me. I have come for instructions.")
+                npc<Shifty>("Our prince is captive by the Lady Keli. We just need to make the rescue. There are two things we need you to do.")
+                player["prince_ali_rescue"] = "leela"
+                choice {
+                    firstThing()
+                    secondThing()
+                    findThings()
+                }
+            }
+            "leela" -> {
+                if (player.inventory.contains("key_print")) {
+                    if (!player.inventory.contains("bronze_bar")) {
+                        player<Talk>("I have an imprint of the key.")
+                        npc<Shifty>("Good. Bring me a bronze bar, and I'll get a copy made.")
+                    } else {
+                        npc<Shifty>("Well done; we can make the key now.")
+                        player.inventory.remove("key_print", "bronze_bar")
+                        player["prince_ali_rescue_key_made"] = true
+                        statement("Osman takes the key imprint and the bronze bar.")
+                        npc<Shifty>("Pick the key up from Leela.")
                     }
-                    choice {
-                        option<Talk>("Thank you. I will try to find the other items.")
-                        option<Talk>("Can you tell me what I still need to get?") {
-                            remainingItems()
-                        }
+                } else if (player["prince_ali_rescue_key_given", false] && !player.ownsItem("bronze_key_prince_ali_rescue")) {
+                    player<Talk>("I'm afraid I lost that key you gave me.")
+                    npc<Uncertain>("Well that was foolish. I can sort you out with another, but it will cost you 15 coins.")
+                    if (player.inventory.contains("coins", 15)) {
+                        player<Talk>("Here, I have 15 coins.")
+                    } else {
+                        player<Sad>("I haven't got 15 coins with me.")
+                        npc<Talk>("Then come back to me when you do.")
+                        return@talkWith
+                    }
+                    player.inventory.transaction {
+                        remove("coins", 15)
+                        add("bronze_key_prince_ali_rescue")
+                    }
+                    when (player.inventory.transaction.error) {
+                        TransactionError.None -> item("bronze_key_prince_ali_rescue", 400, "Osman gives you a key.")
+                        else -> statement("Osman tries to give you a key, but you don't have enough room for it.")
                     }
                 }
-                "prince_ali_disguise" -> npc<Shifty>("The prince is safe and on his way home with Leela. You can pick up your payment from the chancellor.")
-                else -> {
-                    player<Quiz>("Can you tell me what I still need to get?")
-                    remainingItems()
+                choice {
+                    option<Talk>("Thank you. I will try to find the other items.")
+                    option<Talk>("Can you tell me what I still need to get?") {
+                        remainingItems()
+                    }
                 }
+            }
+            "prince_ali_disguise" -> npc<Shifty>("The prince is safe and on his way home with Leela. You can pick up your payment from the chancellor.")
+            else -> {
+                player<Quiz>("Can you tell me what I still need to get?")
+                remainingItems()
             }
         }
     }
 
-    fun ChoiceBuilder<NPCOption<Player>>.findThings() {
+    fun ChoiceBuilder<Dialogue>.findThings() {
         option<Talk>("Okay, I better go find some things.") {
             npc<Shifty>("May good luck travel with you. Don't forget to find Leela. It can't be done without her help.")
         }
     }
 
-    fun ChoiceBuilder<NPCOption<Player>>.firstThing() {
+    fun ChoiceBuilder<Dialogue>.firstThing() {
         option<Talk>("What is the first thing I must do?") {
             npc<Shifty>("The prince is guarded by some stupid guards and a clever woman. The woman is our only way to get the prince out. Only she can walk freely about the area.")
             npc<Shifty>("I think you will need to tie her up. One coil of rope should do for that. Then, disguise the prince as her to get him out without suspicion.")
@@ -112,7 +113,7 @@ class Osman {
         }
     }
 
-    fun ChoiceBuilder<NPCOption<Player>>.secondThing(text: String = "What is the second thing you need?") {
+    fun ChoiceBuilder<Dialogue>.secondThing(text: String = "What is the second thing you need?") {
         option<Quiz>(text) {
             npc<Shifty>("We need the key, or we need a copy made. If you can get some soft clay then you can copy the key...")
             npc<Shifty>("...If you can convince Lady Keli to show it to you for a moment. She is very boastful. I should not be too hard.")
@@ -125,7 +126,7 @@ class Osman {
         }
     }
 
-    suspend fun NPCOption<Player>.remainingItems() {
+    suspend fun Dialogue.remainingItems() {
         if (player.inventory.contains("bronze_key_prince_ali_rescue")) {
             npc<Shifty>("The key you already have. Good.")
         } else if (player["prince_ali_rescue_key_made", false] && !player["prince_ali_rescue_key_given", false]) {

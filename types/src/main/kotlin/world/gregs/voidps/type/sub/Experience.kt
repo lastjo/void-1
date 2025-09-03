@@ -9,4 +9,5 @@ package world.gregs.voidps.type.sub
 @Retention(AnnotationRetention.SOURCE)
 annotation class Experience(
     vararg val skills: String,
+    val blocked: Boolean = false,
 )

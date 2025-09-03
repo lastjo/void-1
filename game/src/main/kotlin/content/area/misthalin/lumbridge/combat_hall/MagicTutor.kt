@@ -11,6 +11,7 @@ import content.entity.player.modal.Tab
 import content.entity.player.modal.tab
 import world.gregs.voidps.engine.client.variable.remaining
 import world.gregs.voidps.engine.client.variable.start
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.inventoryFull
@@ -21,16 +22,15 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.engine.timer.epochSeconds
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 import java.util.concurrent.TimeUnit
 
-@Script
 class MagicTutor {
 
-    init {
-        npcOperate("Talk-to", "mikasi") {
-            npc<Quiz>("Hello there adventurer, I am the Magic combat tutor. Would you like to learn about magic combat, or perhaps how to make runes?")
-            menu()
-        }
+    @Option("Talk-to", "mikasi")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        npc<Quiz>("Hello there adventurer, I am the Magic combat tutor. Would you like to learn about magic combat, or perhaps how to make runes?")
+        menu()
     }
 
     suspend fun SuspendableContext<Player>.menu(followUp: String = "") {
@@ -45,7 +45,7 @@ class MagicTutor {
         }
     }
 
-    suspend fun PlayerChoice.magicCombat(): Unit = option<Neutral>("Tell me about magic combat please.") {
+    fun PlayerChoice.magicCombat(): Unit = option<Neutral>("Tell me about magic combat please.") {
         npc<Happy>("Of course ${player.name}! As a rule of thumb, if you cast the highest spell of which you're capable, you'll get the best experience possible.")
         npc<Happy>("Wearing metal armour and ranged armour can seriously impair your magical abilities. Make sure you wear some robes to maximise your capabilities.")
         npc<Happy>("Superheat Item and the Alchemy spells are good ways to level magic if you are not interested in the combat aspect of magic.")
@@ -54,7 +54,7 @@ class MagicTutor {
         menu("Is there anything else you would like to know?")
     }
 
-    suspend fun PlayerChoice.runeMaking(): Unit = option<Quiz>("How do I make runes?") {
+    fun PlayerChoice.runeMaking(): Unit = option<Quiz>("How do I make runes?") {
         npc<Happy>("There are a couple of things you will need to make runes, rune essence and a talisman to enter the temple ruins.")
         if (player.experience.get(Skill.Runecrafting) > 0.0) {
             npc<Amazed>("To get rune essence you will need to gather them in the essence mine. You can get to the mine by talking to Aubury who owns the runes shop in south east Varrock.")
@@ -73,7 +73,7 @@ class MagicTutor {
         menu("Is there anything else you would like to know?")
     }
 
-    suspend fun PlayerChoice.claimRunes(): Unit = option("I'd like some air and mind runes.") {
+    fun PlayerChoice.claimRunes(): Unit = option("I'd like some air and mind runes.") {
         if (player.remaining("claimed_tutor_consumables", epochSeconds()) > 0) {
             npc<Amazed>("I work with the Ranged Combat tutor to give out consumable items that you may need for combat such as arrows and runes. However we have had some cheeky people try to take both!")
             npc<Happy>("So, every half an hour, you may come back and claim either arrows OR runes, but not both. Come back in a while for runes, or simply make your own.")

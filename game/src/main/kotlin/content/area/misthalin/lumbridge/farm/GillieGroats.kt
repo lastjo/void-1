@@ -7,30 +7,30 @@ import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import content.quest.quest
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.inv.holdsItem
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class GillieGroats {
 
-    init {
-        npcOperate("Talk-to", "gillie_groats") {
-            npc<Happy>("Hello, I'm Gillie the Milkmaid. What can I do for you?")
-            choice {
-                option("I'm after some Top-quality milk.", { player.quest("cooks_assistant") == "started" && !player.holdsItem("top_quality_milk") }) {
-                    topQualityMilk()
-                }
-                option("Who are you?") {
-                    whoAreYou()
-                }
-                option("Can you tell me how to milk a cow?") {
-                    howToMilkCow()
-                }
-                option<Happy>("I'm fine, thanks.")
+    @Option("Talk-to", "gillie_groats")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        npc<Happy>("Hello, I'm Gillie the Milkmaid. What can I do for you?")
+        choice {
+            option("I'm after some Top-quality milk.", { player.quest("cooks_assistant") == "started" && !player.holdsItem("top_quality_milk") }) {
+                topQualityMilk()
             }
+            option("Who are you?") {
+                whoAreYou()
+            }
+            option("Can you tell me how to milk a cow?") {
+                howToMilkCow()
+            }
+            option<Happy>("I'm fine, thanks.")
         }
     }
 

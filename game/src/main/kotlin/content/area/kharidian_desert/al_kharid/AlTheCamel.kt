@@ -5,6 +5,7 @@ import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import world.gregs.voidps.engine.client.message
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.client.ui.interact.itemOnObjectOperate
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.character.npc.NPC
@@ -12,6 +13,8 @@ import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
+import world.gregs.voidps.engine.entity.item.Item
+import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.inject
@@ -23,57 +26,57 @@ import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.Option
+import world.gregs.voidps.type.sub.UseOn
 import java.util.concurrent.TimeUnit
 
-@Script
-class AlTheCamel {
+class AlTheCamel(private val objects: GameObjects) {
 
-    val objects: GameObjects by inject()
-
-    init {
-        npcOperate("Talk-to", "*camel") {
-            if (player.equipped(EquipSlot.Amulet).id == "camulet") {
-                choice("What would you like to do?") {
-                    option("Ask the camel about its dung.") {
-                        dung()
-                    }
-                    option("Say something unpleasant.") {
-                        insult()
-                        if (player["al_the_camel", false]) {
-                            listenTo()
-                        } else {
-                            talkingToMe()
-                        }
-                    }
-                    option("Neither - I'm a polite person.")
+    @Option("Talk-to", "*camel")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        if (player.equipped(EquipSlot.Amulet).id == "camulet") {
+            choice("What would you like to do?") {
+                option("Ask the camel about its dung.") {
+                    dung()
                 }
-            } else {
-                insult()
-                player.message(
-                    when (random.nextInt(3)) {
-                        0 -> "The camel turns its head and glares at you."
-                        1 -> "The camel spits at you, and you jump back hurriedly.."
-                        else -> "The camel tries to stamp on your foot, but you pull it back quickly."
-                    },
-                )
+                option("Say something unpleasant.") {
+                    insult()
+                    if (player["al_the_camel", false]) {
+                        listenTo()
+                    } else {
+                        talkingToMe()
+                    }
+                }
+                option("Neither - I'm a polite person.")
             }
+        } else {
+            insult()
+            player.message(
+                when (random.nextInt(3)) {
+                    0 -> "The camel turns its head and glares at you."
+                    1 -> "The camel spits at you, and you jump back hurriedly.."
+                    else -> "The camel tries to stamp on your foot, but you pull it back quickly."
+                },
+            )
         }
+    }
 
-        objectOperate("Pick-up", "dung") {
-            if (!player.inventory.contains("bucket")) {
-                player<Talk>("I'm not picking that up. I'll need a container...")
-                return@objectOperate
-            }
-            scoopPoop()
+    @Option("Pick-up", "dung")
+    suspend fun dung(player: Player, target: GameObject) = player.dialogue {
+        if (!player.inventory.contains("bucket")) {
+            player<Talk>("I'm not picking that up. I'll need a container...")
+            return@dialogue
         }
+        scoopPoop()
+    }
 
-        itemOnObjectOperate(obj = "dung") {
-            if (item.id != "bucket") {
-                player<Quiz>("Surely there's something better I could use to pick up the dung.")
-                return@itemOnObjectOperate
-            }
-            scoopPoop()
+    @UseOn(on = "dung")
+    suspend fun use(player: Player, target: GameObject, item: Item) = player.dialogue {
+        if (item.id != "bucket") {
+            player<Quiz>("Surely there's something better I could use to pick up the dung.")
+            return@dialogue
         }
+        scoopPoop()
     }
 
     suspend fun SuspendableContext<Player>.bestOfLuck() {
@@ -156,7 +159,7 @@ class AlTheCamel {
         }
     }
 
-    suspend fun NPCOption<Player>.dung() {
+    suspend fun Dialogue.dung() {
         player<Pleased>("I'm sorry to bother you, but could you spare me a little dung?")
         npc<Talk>("Are you serious?")
         player<Neutral>("Oh yes. If you'd be so kind...")
@@ -172,7 +175,7 @@ class AlTheCamel {
         player<Talk>("Ohhh yes. Lovely.")
     }
 
-    suspend fun NPCOption<Player>.listenTo() {
+    suspend fun Dialogue.listenTo() {
         npc<Neutral>("Oh, it's you again. Have you come back to listen to my poems?")
         choice {
             option<Pleased>("I'd love to!") {
@@ -184,7 +187,7 @@ class AlTheCamel {
         }
     }
 
-    suspend fun NPCOption<Player>.talkingToMe() {
+    suspend fun Dialogue.talkingToMe() {
         npc<Talk>("Sorry, were you saying something to me?")
         player<Talk>("No, er, nothing important.")
         npc<Sad>("Never mind, it is unimportant when I have such important matters weighing on my soul.")
@@ -196,7 +199,7 @@ class AlTheCamel {
         desertsDay(interrupt = true)
     }
 
-    suspend fun NPCOption<Player>.insult() {
+    suspend fun Dialogue.insult() {
         player<Talk>(
             when (random.nextInt(3)) {
                 0 -> "Mmm... looks like that camel would make a nice kebab."

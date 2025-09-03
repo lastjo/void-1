@@ -5,6 +5,7 @@ import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.item
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.inv.add
@@ -13,32 +14,31 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class Baraek {
 
-    init {
-        npcOperate("Talk-to", "baraek") {
-            if (player.holdsItem("bear_fur")) {
-                choice {
-                    option<Quiz>("Can you sell me some furs?") {
-                        sellFur()
-                    }
-                    option<Neutral>("Hello. I am in search of a quest.") {
-                        npc<Neutral>("Sorry kiddo, I'm a fur trader not a damsel in distress.")
-                    }
-                    option<Sad>("Would you like to buy my fur?") {
-                        buyFur()
-                    }
+    @Option("Talk-to", "baraek")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        if (player.holdsItem("bear_fur")) {
+            choice {
+                option<Quiz>("Can you sell me some furs?") {
+                    sellFur()
                 }
-            } else {
-                choice {
-                    option<Quiz>("Can you sell me some furs?") {
-                        sellFur()
-                    }
-                    option<Neutral>("Hello. I am in search of a quest.") {
-                        npc<Neutral>("Sorry kiddo, I'm a fur trader not a damsel in distress.")
-                    }
+                option<Neutral>("Hello. I am in search of a quest.") {
+                    npc<Neutral>("Sorry kiddo, I'm a fur trader not a damsel in distress.")
+                }
+                option<Sad>("Would you like to buy my fur?") {
+                    buyFur()
+                }
+            }
+        } else {
+            choice {
+                option<Quiz>("Can you sell me some furs?") {
+                    sellFur()
+                }
+                option<Neutral>("Hello. I am in search of a quest.") {
+                    npc<Neutral>("Sorry kiddo, I'm a fur trader not a damsel in distress.")
                 }
             }
         }

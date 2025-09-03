@@ -93,7 +93,7 @@ class AccountManager(
         Publishers.all.publishPlayer(player, "region_load")
         player.open(player.interfaces.gameFrame)
         Publishers.all.spawnPlayer(player)
-        player.message("Welcome to ${Settings["server.name"]}.", ChatType.Welcome)
+        player.message("Welcome to ${Settings["server.name", "game"]}.", ChatType.Welcome)
         player.emit(Spawn)
         for (def in areaDefinitions.get(player.tile.zone)) {
             if (player.tile in def.area) {

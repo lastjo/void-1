@@ -115,6 +115,7 @@ fun gameModule(files: ConfigFiles) = module {
         val ammoDefinitions = get<AmmoDefinitions>()
         val prayerDefinitions = get<PrayerDefinitions>()
         val slayerTaskDefinitions = get<SlayerTaskDefinitions>()
+        val diangoCodeDefinitions = get<DiangoCodeDefinitions>()
         val start = System.currentTimeMillis()
         val publishers = PublishersImpl(
             fairyRingCodes = fairyCodes,
@@ -158,6 +159,7 @@ fun gameModule(files: ConfigFiles) = module {
             ammoDefinitions = ammoDefinitions,
             prayerDefinitions = prayerDefinitions,
             slayerTaskDefinitions = slayerTaskDefinitions,
+            diangoCodeDefinitions = diangoCodeDefinitions,
         )
         Publishers.set(publishers)
         logger.info { "Loaded ${publishers.subscriptions} publisher ${"subscriptions".plural(publishers.subscriptions)} in ${System.currentTimeMillis() - start} ms" }

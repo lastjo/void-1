@@ -13,44 +13,45 @@ import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import content.quest.questCompleted
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.name
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class Donie {
 
-    init {
-        npcOperate("Talk-to", "donie") {
-            npc<Happy>("Hello there, can I help you?")
-            when (random.nextInt(0, 4)) {
-                0 -> choice {
-                    whereAmI()
-                    howToday()
-                    anyQuests()
-                    shoeLace()
-                }
-                1 -> choice {
-                    freeStuff()
-                    anyQuests()
-                    buyStick()
-                }
-                2 -> choice {
-                    whereAmI()
-                    howToday()
-                    anyQuests()
-                    hairCut()
-                }
-                3 -> choice {
-                    anyQuests()
-                    buyStick()
-                }
+    @Option("Talk-to", "donie")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        npc<Happy>("Hello there, can I help you?")
+        when (random.nextInt(0, 4)) {
+            0 -> choice {
+                whereAmI()
+                howToday()
+                anyQuests()
+                shoeLace()
+            }
+            1 -> choice {
+                freeStuff()
+                anyQuests()
+                buyStick()
+            }
+            2 -> choice {
+                whereAmI()
+                howToday()
+                anyQuests()
+                hairCut()
+            }
+            3 -> choice {
+                anyQuests()
+                buyStick()
             }
         }
     }
 
-    suspend fun PlayerChoice.whereAmI(): Unit = option<Quiz>("Where am I") {
+    fun PlayerChoice.whereAmI(): Unit = option<Quiz>("Where am I") {
         npc<Chuckle>("This is the town of Lumbridge my friend.")
         choice {
             howToday()
@@ -59,7 +60,7 @@ class Donie {
         }
     }
 
-    suspend fun PlayerChoice.howToday(): Unit = option<Quiz>("How are you today?") {
+    fun PlayerChoice.howToday(): Unit = option<Quiz>("How are you today?") {
         npc<Happy>("Aye, not too bad thank you. Lovely weather in Gielinor this fine day.")
         player<Chuckle>("Weather?")
         npc<Chuckle>("Yes weather, you know.")
@@ -68,7 +69,7 @@ class Donie {
         npc<Chuckle>("Not just a pretty face eh? Ha ha ha.")
     }
 
-    suspend fun PlayerChoice.anyQuests(): Unit = option<Quiz>("Are there any quests I can do here?") {
+    fun PlayerChoice.anyQuests(): Unit = option<Quiz>("Are there any quests I can do here?") {
         npc<Quiz>("What kind of quest are you looking for?")
         choice {
             option<Happy>("I fancy a bit of fight, anything dangerous?") {
@@ -224,13 +225,13 @@ class Donie {
         }
     }
 
-    suspend fun PlayerChoice.shoeLace(): Unit = option<Chuckle>("Your shoe lace is untied.") {
+    fun PlayerChoice.shoeLace(): Unit = option<Chuckle>("Your shoe lace is untied.") {
         npc<Angry>("No it's not!")
         player<Chuckle>("No you're right. I have nothing to back that up.")
         npc<Angry>("Fool! Leave me alone!")
     }
 
-    suspend fun PlayerChoice.buyStick(): Unit = option<Quiz>("Can i buy your stick?") {
+    fun PlayerChoice.buyStick(): Unit = option<Quiz>("Can i buy your stick?") {
         npc<Angry>("It's not a stick! I'll have you know it's a very powerful staff!")
         player<Quiz>("Really? Show me what it can do!")
         npc<Sad>("Um..It's a bit low on power at the moment..")
@@ -239,13 +240,13 @@ class Donie {
         player<Chuckle>("Well good luck with that.")
     }
 
-    suspend fun PlayerChoice.freeStuff(): Unit = option<Quiz>("Do you have anything of value which I can have?") {
+    fun PlayerChoice.freeStuff(): Unit = option<Quiz>("Do you have anything of value which I can have?") {
         npc<Quiz>("Are you asking for free stuff?")
         player<Quiz>("Well... er... yes.")
         npc<Angry>("No I do not have anything I can give you. If I did have anything of value I wouldn't want to give it away.")
     }
 
-    suspend fun PlayerChoice.hairCut(): Unit = option<Quiz>("Where can I get a haircut like yours?") {
+    fun PlayerChoice.hairCut(): Unit = option<Quiz>("Where can I get a haircut like yours?") {
         npc<Happy>("Yes, it does look like you need a hairdresser.")
         player<Angry>("Oh thanks!")
         npc<Chuckle>("No problem. The hairdresser in Falador will probably be able to sort you out.")

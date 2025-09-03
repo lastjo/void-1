@@ -7,27 +7,29 @@ import content.entity.player.dialogue.Uncertain
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class SurgeonGeneralTafani {
 
-    init {
-        npcOperate("Talk-to", "surgeon_general_tafani") {
-            player<Happy>("Hi!")
-            npc<Happy>("Hi. How can I help?")
-            menu()
-        }
-
-        npcOperate("Heal", "surgeon_general_tafani") {
-            heal()
-        }
+    @Option("Talk-to", "surgeon_general_tafani")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        player<Happy>("Hi!")
+        npc<Happy>("Hi. How can I help?")
+        menu()
     }
 
-    suspend fun NPCOption<Player>.menu() {
+    @Option("Heal", "surgeon_general_tafani")
+    suspend fun heal(player: Player, npc: NPC) = player.talkWith(npc) {
+        heal()
+    }
+
+    suspend fun Dialogue.menu() {
         choice {
             option<Uncertain>("Can you heal me?") {
                 heal()

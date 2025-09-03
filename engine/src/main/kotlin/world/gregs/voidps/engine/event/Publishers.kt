@@ -86,6 +86,10 @@ interface Publishers {
     fun hasCharacterFloorItemOption(character: Character, target: FloorItem, option: String = "", approach: Boolean = false): Boolean = false
 
     fun interfaceOpened(player: Player, id: String = ""): Boolean = false
+
+    /**
+     * An interface was open and has now been closed
+     */
     fun interfaceClosed(player: Player, id: String = ""): Boolean = false
     fun interfaceRefreshed(player: Player, id: String = ""): Boolean = false
 
@@ -227,7 +231,7 @@ interface Publishers {
     suspend fun moveNPC(npc: NPC, from: Tile = Tile.EMPTY, to: Tile = Tile.EMPTY): Boolean = false
     suspend fun moveCharacter(character: Character, from: Tile = Tile.EMPTY, to: Tile = Tile.EMPTY): Boolean = false
 
-    fun experience(player: Player, skill: Skill = Skill.Attack, from: Double, to: Double): Boolean = false
+    fun experience(player: Player, skill: Skill = Skill.Attack, from: Double = 0.0, to: Double = 0.0, blocked: Boolean = false): Boolean = false
     fun levelChangePlayer(player: Player, skill: Skill = Skill.Attack, from: Int = -1, to: Int = -1, max: Boolean = false): Boolean = false
     fun levelChangeNPC(npc: NPC, skill: Skill = Skill.Attack, from: Int = -1, to: Int = -1, max: Boolean = false): Boolean = false
     fun levelChangeCharacter(character: Character, skill: Skill = Skill.Attack, from: Int = -1, to: Int = -1, max: Boolean = false): Boolean = false

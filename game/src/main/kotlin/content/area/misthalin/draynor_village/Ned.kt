@@ -3,6 +3,8 @@ package content.area.misthalin.draynor_village
 import content.entity.player.dialogue.*
 import content.entity.player.dialogue.type.*
 import content.quest.quest
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
@@ -16,28 +18,25 @@ import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
-class Ned {
+class Ned(private val floorItems: FloorItems) {
 
-    val floorItems: FloorItems by inject()
-
-    init {
-        npcOperate("Talk-to", "ned") {
-            npc<Happy>("Why, hello there, ${if (player.male) "lad" else "lass"}. Me friends call me Ned. I was a man of the sea, but it's past me now. Could I be making or selling you some rope?")
-            choice {
-                otherThings(player)
-                rope()
-                option<Talk>("No thanks, Ned. I don't need any.") {
-                    npc<Talk>("Well, old Neddy is always here if you do. Tell your friends. I can always be using the business.")
-                }
+    @Option("Talk-to", "ned")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        npc<Happy>("Why, hello there, ${if (player.male) "lad" else "lass"}. Me friends call me Ned. I was a man of the sea, but it's past me now. Could I be making or selling you some rope?")
+        choice {
+            otherThings(player)
+            rope()
+            option<Talk>("No thanks, Ned. I don't need any.") {
+                npc<Talk>("Well, old Neddy is always here if you do. Tell your friends. I can always be using the business.")
             }
         }
     }
 
     // TODO add achievement dialogue
 
-    fun ChoiceBuilder<NPCOption<Player>>.wig() {
+    fun ChoiceBuilder<Dialogue>.wig() {
         option<Quiz>("How about some sort of wig?") {
             npc<Talk>("Well... that's an interesting thought. Yes, I think I could do something. Give me three balls of wool and I might be able to do it.")
             if (!player.holdsItem("ball_of_wool", 3)) {
@@ -62,7 +61,7 @@ class Ned {
         }
     }
 
-    fun ChoiceBuilder<NPCOption<Player>>.otherThings(player: Player) {
+    fun ChoiceBuilder<Dialogue>.otherThings(player: Player) {
         when (player.quest("prince_ali_rescue")) {
             "leela", "equipment", "joe_one_beer", "joe_two_beers", "joe_three_beers", "tie_up_lady_keli" -> {
                 option<Quiz>("Could you make other things apart from rope?") {
@@ -86,7 +85,7 @@ class Ned {
         }
     }
 
-    fun ChoiceBuilder<NPCOption<Player>>.rope() {
+    fun ChoiceBuilder<Dialogue>.rope() {
         option<Talk>("Yes, I would like some rope.") {
             npc<Happy>("Well, I can sell you some rope for 15 coins. Or I can be making you some if you gets me four balls of wool. I strands them together I does, makes em strong.")
             player<Quiz>("You make rope from wool?")
@@ -118,7 +117,7 @@ class Ned {
         }
     }
 
-    suspend fun NPCOption<Player>.buyRope() {
+    suspend fun Dialogue.buyRope() {
         if (player.inventory.contains("coins", 15)) {
             npc<Happy>("There you go, finest rope in Gielinor.")
             statement("You hand Ned 15 coins. Ned gives you a coil of rope.")

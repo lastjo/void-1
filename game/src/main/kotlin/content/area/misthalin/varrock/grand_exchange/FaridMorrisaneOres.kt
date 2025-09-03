@@ -8,56 +8,58 @@ import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import content.quest.questCompleted
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.Settings
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class FaridMorrisaneOres {
 
-    init {
-        npcOperate("Talk-to", "farid_morrisane") {
-            if (Settings["grandExchange.tutorial.required", false] && !player.questCompleted("grand_exchange_tutorial")) {
-                player<Talk>("Hello.")
-                npc<Talk>("Hmmm, a new trader. I suggest you speak with Brugsen Bursen or the Grand Exchange Tutor near the entrance for a lesson. Brugsen will give an interesting and complete lesson and the Tutor will give a smaller, plain lesson.")
-                return@npcOperate
-            }
-            player<Happy>("Hello, little boy.")
-            npc<Talk>("I would prefer it if you didn't speak to me in such a manner. I'll have you know I'm an accomplished merchant.")
-            choice {
-                calmDown()
-                oresAndBars()
-                bye()
-            }
+    @Option("Talk-to", "farid_morrisane")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        if (Settings["grandExchange.tutorial.required", false] && !player.questCompleted("grand_exchange_tutorial")) {
+            player<Talk>("Hello.")
+            npc<Talk>("Hmmm, a new trader. I suggest you speak with Brugsen Bursen or the Grand Exchange Tutor near the entrance for a lesson. Brugsen will give an interesting and complete lesson and the Tutor will give a smaller, plain lesson.")
+            return@talkWith
         }
-
-        npcOperate("Info-ores", "farid_morrisane") {
-            if (Settings["grandExchange.tutorial.required", false] && !player.questCompleted("grand_exchange_tutorial")) {
-                npc<Talk>("Hmmm, a new trader. I suggest you speak with Brugsen Bursen or the Grand Exchange Tutor near the entrance for a lesson. Brugsen will give an interesting and complete lesson and the Tutor will give a smaller, plain lesson.")
-                return@npcOperate
-            }
-            player["common_item_costs"] = "ores"
-            player.open("common_item_costs")
+        player<Happy>("Hello, little boy.")
+        npc<Talk>("I would prefer it if you didn't speak to me in such a manner. I'll have you know I'm an accomplished merchant.")
+        choice {
+            calmDown()
+            oresAndBars()
+            bye()
         }
     }
 
-    fun ChoiceBuilder<NPCOption<Player>>.oresAndBars() {
+    @Option("Info-ores", "farid_morrisane")
+    suspend fun operate(player: Player, target: NPC) = player.talkWith(target) {
+        if (Settings["grandExchange.tutorial.required", false] && !player.questCompleted("grand_exchange_tutorial")) {
+            npc<Talk>("Hmmm, a new trader. I suggest you speak with Brugsen Bursen or the Grand Exchange Tutor near the entrance for a lesson. Brugsen will give an interesting and complete lesson and the Tutor will give a smaller, plain lesson.")
+            return@talkWith
+        }
+        player["common_item_costs"] = "ores"
+        player.open("common_item_costs")
+    }
+
+    fun ChoiceBuilder<Dialogue>.oresAndBars() {
         option<Quiz>("Can you show me the prices of ores and bars?") {
             player["common_item_costs"] = "ores"
             player.open("common_item_costs")
         }
     }
 
-    fun ChoiceBuilder<NPCOption<Player>>.bye() {
+    fun ChoiceBuilder<Dialogue>.bye() {
         option<Talk>("I best go and speak with someone more my height.") {
             npc<Talk>("Then I shall not stop you. I've too much work to do.")
         }
     }
 
-    fun ChoiceBuilder<NPCOption<Player>>.calmDown() {
+    fun ChoiceBuilder<Dialogue>.calmDown() {
         option<Talk>("Calm down, junior.") {
             npc<Talk>("Don't tell me to calm down! And don't call me 'junior'.")
             npc<Talk>("I'll have you know I am Farid Morrisane, son of Ali Morrisane, the world's greatest merchant!")

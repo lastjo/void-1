@@ -153,6 +153,7 @@ abstract class PublisherMapping(
         if (player != null) {
             tryCatch.add("%L.debug { %P }\n", player, "${name.removeSuffix("Publisher")}[${parameters.joinToString(", ") { "\$${it.first}" }}]")
         }
+//        tryCatch.add("println(%P)\n", "${name.removeSuffix("Publisher")}[${parameters.joinToString(", ") { "\$${it.first}" }}]")
         builder.addCode(
             tryCatch
                 .add(trie.generate(this, callOnly = false))

@@ -5,44 +5,44 @@ import content.entity.player.dialogue.*
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class BarfyBill {
 
-    init {
-        npcOperate("Talk-To", "barfy_bill") {
-            player<Neutral>("Hello there.")
-            npc<Neutral>("Oh! Hello there.")
-            choice {
-                option<Neutral>("Who are you?") {
-                    npc<Neutral>("My name is Ex Sea Captain Barfy Bill.")
-                    player<Quiz>("Ex sea captain?")
-                    npc<Sad>("Yeah, I bought a lovely ship and was planning to make a fortune running her as a merchant vessel.")
-                    player<Quiz>("Why are you not still sailing?")
-                    npc<Sad>("Chronic sea sickness. My first, and only, voyage was spent dry heaving over the rails.")
-                    npc<Neutral>("If I had known about the sea sickness I could have saved myself a lot of money.")
-                    player<Uncertain>("What are you up to now then?")
-                    npc<Shifty>("Well my ship had a little fire related problem. Fortunately it was well insured.")
-                    npc<Neutral>("Anyway, I don't have to work anymore so I've taken to canoeing on the river.")
-                    npc<Happy>("I don't get river sick!")
-                    npc<Quiz>("Would you like to know how to make a canoe?")
-                    choice {
-                        option("Yes") {
-                            canoeing()
-                        }
-                        option("No") {
-                            player<Neutral>("No thanks, not right now.")
-                        }
+    @Option("Talk-to", "barfy_bill")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        player<Neutral>("Hello there.")
+        npc<Neutral>("Oh! Hello there.")
+        choice {
+            option<Neutral>("Who are you?") {
+                npc<Neutral>("My name is Ex Sea Captain Barfy Bill.")
+                player<Quiz>("Ex sea captain?")
+                npc<Sad>("Yeah, I bought a lovely ship and was planning to make a fortune running her as a merchant vessel.")
+                player<Quiz>("Why are you not still sailing?")
+                npc<Sad>("Chronic sea sickness. My first, and only, voyage was spent dry heaving over the rails.")
+                npc<Neutral>("If I had known about the sea sickness I could have saved myself a lot of money.")
+                player<Uncertain>("What are you up to now then?")
+                npc<Shifty>("Well my ship had a little fire related problem. Fortunately it was well insured.")
+                npc<Neutral>("Anyway, I don't have to work anymore so I've taken to canoeing on the river.")
+                npc<Happy>("I don't get river sick!")
+                npc<Quiz>("Would you like to know how to make a canoe?")
+                choice {
+                    option("Yes") {
+                        canoeing()
+                    }
+                    option("No") {
+                        player<Neutral>("No thanks, not right now.")
                     }
                 }
-                option("Can you teach me about Canoeing?") {
-                    canoeing()
-                }
+            }
+            option("Can you teach me about Canoeing?") {
+                canoeing()
             }
         }
     }

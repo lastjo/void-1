@@ -2,16 +2,18 @@ package content.area.misthalin.lumbridge.castle
 
 import content.entity.sound.areaSound
 import world.gregs.voidps.engine.client.message
+import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class LumbridgeWinch {
 
-    init {
-        objectOperate("Operate", "lumbridge_winch") {
-            player.message("It seems the winch is jammed. You can't move it.")
-            areaSound("lever", target.tile)
-        }
+    @Option("Operate", "lumbridge_winch")
+    suspend fun operate(player: Player, target: GameObject) {
+        player.message("It seems the winch is jammed. You can't move it.")
+        areaSound("lever", target.tile)
     }
+
 }

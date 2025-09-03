@@ -4,6 +4,8 @@ import content.entity.player.bank.ownsItem
 import content.entity.player.dialogue.*
 import content.entity.player.dialogue.type.*
 import content.quest.quest
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
@@ -15,69 +17,68 @@ import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class Leela {
 
-    val escapeKit = listOf(
+    private val escapeKit = listOf(
         Item("bronze_key_prince_ali_rescue"),
         Item("pink_skirt"),
         Item("wig_blonde"),
         Item("paste"),
     )
 
-    init {
-        npcOperate("Talk-to", "leela") {
-            when (player.quest("prince_ali_rescue")) {
-                "leela" -> {
-                    if (player["prince_ali_rescue_key_made", false] && !player["prince_ali_rescue_key_given", false]) {
-                        npc<Talk>("My father sent this key for you. Be careful not to lose it.")
-                        if (player.inventory.add("bronze_key_prince_ali_rescue")) {
-                            statement("Leela gives you a copy of the key to the prince's door.")
-                            player["prince_ali_rescue_key_given"] = true
-                        } else {
-                            statement("Leela tries to give you a key, but you don't have enough room for it.")
-                            return@npcOperate
-                        }
-                    } else if (player["prince_ali_rescue_key_given", false] && !player.ownsItem("bronze_key_prince_ali_rescue")) {
-                        npc<Quiz>("You're back. How are things going?")
-                        if (lostKey()) {
-                            return@npcOperate
-                        }
+    @Option("Talk-to", "leela")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        when (player.quest("prince_ali_rescue")) {
+            "leela" -> {
+                if (player["prince_ali_rescue_key_made", false] && !player["prince_ali_rescue_key_given", false]) {
+                    npc<Talk>("My father sent this key for you. Be careful not to lose it.")
+                    if (player.inventory.add("bronze_key_prince_ali_rescue")) {
+                        statement("Leela gives you a copy of the key to the prince's door.")
+                        player["prince_ali_rescue_key_given"] = true
+                    } else {
+                        statement("Leela tries to give you a key, but you don't have enough room for it.")
+                        return@talkWith
                     }
-                    if (player.inventory.contains(escapeKit)) {
-                        npc<Shifty>("Okay now, you have all the basic equipment. What are your plans to stop the guard interfering?")
-                        player["prince_ali_rescue"] = "guard"
-                        guard(unsure = true)
-                        return@npcOperate
-                    }
-                    intro()
-                }
-                "guard", "joe_beer" -> {
-                    npc<Quiz>("You're back. How are things going with that guard?")
+                } else if (player["prince_ali_rescue_key_given", false] && !player.ownsItem("bronze_key_prince_ali_rescue")) {
+                    npc<Quiz>("You're back. How are things going?")
                     if (lostKey()) {
-                        return@npcOperate
+                        return@talkWith
                     }
-                    guard(unsure = false)
                 }
-                "joe_beers" -> {
-                    npc<Quiz>("You're back. How are things going with that guard?")
-                    if (lostKey()) {
-                        return@npcOperate
-                    }
-                    player<Talk>("He's been dealt with.")
-                    npc<Happy>("Great! I think that means we're ready. Go in and use some rope to tie Keli up. Once she's dealt with, use the key to free the Prince. Don't forget to give him his disguise so the guards outside don't spot him.")
+                if (player.inventory.contains(escapeKit)) {
+                    npc<Shifty>("Okay now, you have all the basic equipment. What are your plans to stop the guard interfering?")
+                    player["prince_ali_rescue"] = "guard"
+                    guard(unsure = true)
+                    return@talkWith
                 }
-                "prince_ali_disguise", "completed" -> npc<Happy>("Thank you, Al-Kharid will forever owe you for your help. I think that if there is ever anything that needs to be done, you will be someone they can rely on.")
-                else -> {
-                    player<Happy>("What are you waiting here for?")
-                    npc<Talk>("That is no concern of yours, adventurer.")
+                intro()
+            }
+            "guard", "joe_beer" -> {
+                npc<Quiz>("You're back. How are things going with that guard?")
+                if (lostKey()) {
+                    return@talkWith
                 }
+                guard(unsure = false)
+            }
+            "joe_beers" -> {
+                npc<Quiz>("You're back. How are things going with that guard?")
+                if (lostKey()) {
+                    return@talkWith
+                }
+                player<Talk>("He's been dealt with.")
+                npc<Happy>("Great! I think that means we're ready. Go in and use some rope to tie Keli up. Once she's dealt with, use the key to free the Prince. Don't forget to give him his disguise so the guards outside don't spot him.")
+            }
+            "prince_ali_disguise", "completed" -> npc<Happy>("Thank you, Al-Kharid will forever owe you for your help. I think that if there is ever anything that needs to be done, you will be someone they can rely on.")
+            else -> {
+                player<Happy>("What are you waiting here for?")
+                npc<Talk>("That is no concern of yours, adventurer.")
             }
         }
     }
 
-    suspend fun NPCOption<Player>.intro() {
+    suspend fun Dialogue.intro() {
         player<Happy>("I am here to help you free the prince.")
         npc<Talk>("Your employment is known to me. Now, do you know all that we need to make the break?")
         player["prince_ali_rescue_leela"] = true
@@ -89,7 +90,7 @@ class Leela {
         }
     }
 
-    fun ChoiceBuilder<NPCOption<Player>>.key() {
+    fun ChoiceBuilder<Dialogue>.key() {
         option<Talk>("I need to get the key made.") {
             npc<Talk>("Yes, that is most important. There is no way you can get the real key. It is on a chain around Keli's neck. Almost impossible to steal.")
             npc<Talk>("Get some soft clay and get her to show you the key somehow. Then take the print, with bronze, to my father.")
@@ -101,7 +102,7 @@ class Leela {
         }
     }
 
-    fun ChoiceBuilder<NPCOption<Player>>.guards() {
+    fun ChoiceBuilder<Dialogue>.guards() {
         option<Talk>("What can I do with the guards?") {
             npc<Talk>("Most of the guards will be easy. The disguise will get past them. The only guard who will be a problem will be the one at the door.")
             npc<Talk>("We can discuss this more when you have the rest of the escape kit.")
@@ -113,13 +114,13 @@ class Leela {
         }
     }
 
-    fun ChoiceBuilder<NPCOption<Player>>.equipment() {
+    fun ChoiceBuilder<Dialogue>.equipment() {
         option<Talk>("I will go and get the rest of the escape equipment.") {
             npc<Shifty>("Good, I shall await your return with everything.")
         }
     }
 
-    fun ChoiceBuilder<NPCOption<Player>>.disguise() {
+    fun ChoiceBuilder<Dialogue>.disguise() {
         option<Quiz>("I must make a disguise. What do you suggest?") {
             npc<Talk>("Only the lady Keli can wander about outside the jail. The guards will shoot to kill if they see the prince out, so we need a disguise good enough to fool them at a distance.")
             if (player.inventory.contains("wig_blonde")) {
@@ -150,7 +151,7 @@ class Leela {
         }
     }
 
-    suspend fun NPCOption<Player>.guard(unsure: Boolean) {
+    suspend fun Dialogue.guard(unsure: Boolean) {
         choice {
             option<Talk>("I haven't spoken to him yet.") {
                 npc<Talk>("Well, speaking to him may find a weakness he has. See if there's something that could stop him bothering us.")
@@ -177,7 +178,7 @@ class Leela {
         }
     }
 
-    suspend fun NPCOption<Player>.lostKey(): Boolean {
+    suspend fun Dialogue.lostKey(): Boolean {
         if (player.ownsItem("bronze_key_prince_ali_rescue")) {
             return false
         }

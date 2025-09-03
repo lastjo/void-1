@@ -8,10 +8,12 @@ import content.quest.questCompleted
 import content.quest.refreshQuestJournal
 import world.gregs.voidps.engine.client.ui.interact.itemOnItem
 import world.gregs.voidps.engine.client.ui.open
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.noInterest
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
+import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.holdsItem
 import world.gregs.voidps.engine.inv.inventory
@@ -19,151 +21,154 @@ import world.gregs.voidps.engine.inv.replace
 import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
+import world.gregs.voidps.type.sub.UseOn
 
 @Script
 class Dororan {
 
-    init {
-        itemOnItem("chisel", "ring_from_jeffery") { player: Player ->
-            if (player.quest("gunnars_ground") == "jeffery_ring") {
-                player.noInterest()
-            } else {
-                player.softQueue("engraving") {
-                    item("dororans_engraved_ring", 400, "You engrave 'Gudrun the Fair, Gudrun the Fiery' onto the ring.")
-                    player.anim("engrave")
-                    player.experience.add(Skill.Crafting, 125.0)
-                    player.inventory.replace("ring_from_jeffery", "dororans_engraved_ring")
-                    player["gunnars_ground"] = "engraved_ring"
-                }
-            }
+    @UseOn("chisel", "ring_from_jeffery")
+    fun chisel(player: Player, fromItem: Item, toItem: Item) {
+        if (player.quest("gunnars_ground") == "jeffery_ring") {
+            player.noInterest()
+            return
         }
-
-        npcOperate("Talk-to", "dororan_*") {
-            when (player.quest("gunnars_ground")) {
-                "started" -> started()
-                "love_poem", "jeffery_ring" -> lovePoem()
-                "engrave" -> {
-                    npc<Neutral>("Is it done? Have you created a work of magnificent beauty?")
-                    engraveMenu()
-                }
-                "engraved_ring" -> engravedRing()
-                "show_gudrun" -> showGudrun()
-                "meet_chieftain", "tell_gudrun" -> meetChieftain()
-                "tell_dororan" -> aboutRing()
-                "write_poem" -> writePoem()
-                "more_poem" -> morePoem()
-                "one_more_poem" -> oneMore()
-                "poem_done" -> poemDone()
-                "poem", "recital" -> poem()
-                "completed" -> {
-                }
-                else -> unstarted()
-            }
+        player.softQueue("engraving") {
+            item("dororans_engraved_ring", 400, "You engrave 'Gudrun the Fair, Gudrun the Fiery' onto the ring.")
+            player.anim("engrave")
+            player.experience.add(Skill.Crafting, 125.0)
+            player.inventory.replace("ring_from_jeffery", "dororans_engraved_ring")
+            player["gunnars_ground"] = "engraved_ring"
         }
+    }
 
-        npcOperate("Talk-to", "dororan_after_quest") {
-            if (!player.questCompleted("gunnars_ground")) {
-                return@npcOperate
+    @Option("Talk-to", "dororan_*")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        when (player.quest("gunnars_ground")) {
+            "started" -> started()
+            "love_poem", "jeffery_ring" -> lovePoem()
+            "engrave" -> {
+                npc<Neutral>("Is it done? Have you created a work of magnificent beauty?")
+                engraveMenu()
             }
+            "engraved_ring" -> engravedRing()
+            "show_gudrun" -> showGudrun()
+            "meet_chieftain", "tell_gudrun" -> meetChieftain()
+            "tell_dororan" -> aboutRing()
+            "write_poem" -> writePoem()
+            "more_poem" -> morePoem()
+            "one_more_poem" -> oneMore()
+            "poem_done" -> poemDone()
+            "poem", "recital" -> poem()
+            "completed" -> {
+            }
+            else -> unstarted()
+        }
+    }
+
+    @Option("Talk-to", "dororan_after_quest")
+    suspend fun talkAfter(player: Player, npc: NPC) = player.talkWith(npc) {
+        if (!player.questCompleted("gunnars_ground")) {
+            return@talkWith
+        }
+        if (player["dororan_ruby_bracelet", 0] != 1) {
+            npc<Happy>("Come in, my friend, come in! There is another matter I could use your assistance with.")
+        } else if (player["dororan_dragonstone_necklace", 0] != 1) {
+            npc<Pleased>("I have another piece of jewellery to engrave.")
+        } else if (player["dororan_onyx_amulet", 0] != 1) {
+            npc<Pleased>("I have one last piece of jewellery to engrave.")
+        } else {
+            npc<Pleased>("Thanks so much for everything you've done for us!")
+            npc<Pleased>("What can I do for you?")
+        }
+        if (player["dororan_ruby_bracelet", 0] == 1 && player["dororan_dragonstone_necklace", 0] == 1 && player["dororan_onyx_amulet", 0] == 1) {
+            someThingElse()
+            return@talkWith
+        }
+        choice {
             if (player["dororan_ruby_bracelet", 0] != 1) {
-                npc<Happy>("Come in, my friend, come in! There is another matter I could use your assistance with.")
-            } else if (player["dororan_dragonstone_necklace", 0] != 1) {
-                npc<Pleased>("I have another piece of jewellery to engrave.")
-            } else if (player["dororan_onyx_amulet", 0] != 1) {
-                npc<Pleased>("I have one last piece of jewellery to engrave.")
-            } else {
-                npc<Pleased>("Thanks so much for everything you've done for us!")
-                npc<Pleased>("What can I do for you?")
-            }
-            if (player["dororan_ruby_bracelet", 0] != 1 || player["dororan_dragonstone_necklace", 0] != 1 || player["dororan_onyx_amulet", 0] != 1) {
-                choice {
-                    if (player["dororan_ruby_bracelet", 0] != 1) {
-                        option<Neutral>("What is it?") {
-                            npc<Pleased>("I have some more jewellery for Gudrun and I need your help to engrave them.")
+                option<Neutral>("What is it?") {
+                    npc<Pleased>("I have some more jewellery for Gudrun and I need your help to engrave them.")
+                    choice {
+                        option<Neutral>("What's the first piece?") {
+                            npc<Pleased>("A magnificent ruby bracelet.")
+                            npc<Happy>("'With beauty blessed.'")
                             choice {
-                                option<Neutral>("What's the first piece?") {
-                                    npc<Pleased>("A magnificent ruby bracelet.")
-                                    npc<Happy>("'With beauty blessed.'")
-                                    choice {
-                                        option("Engrave the bracelet.") {
-                                            if (player.levels.get(Skill.Crafting) < 72) {
-                                                item("ruby_bracelet", 400, "you need a Crafting level of at least 42 to engrave the ruby bracelet.")
-                                                npc<Sad>("That's a shame. Maybe you can try again another time.")
-                                                return@option
-                                            }
-                                            player.anim("engrave")
-                                            player.experience.add(Skill.Crafting, 2000.0)
-                                            player["dororan_ruby_bracelet"] = 1
-                                            items("chisel", "ruby_bracelet", "You carefully engrave 'With beauty blessed' onto the ruby bracelet.")
-                                            npc<Happy>("Magnificent! Outstanding! I will give this to her immediately. Please, come back when you have time")
-                                        }
-                                        option("Don't engrave the bracelet.") {
-                                            npc<Sad>("That's a shame. Maybe you can try again another time.")
-                                        }
-                                    }
-                                }
-                                option<Neutral>("I want to talk about something else.") {
-                                    npc<Pleased>("What can I do for you?")
-                                    someThingElse()
-                                }
-                                option<Neutral>("I don't have time right now.") {
-                                }
-                            }
-                        }
-                    } else if (player["dororan_dragonstone_necklace", 0] != 1) {
-                        option<Neutral>("What's this one?") {
-                            npc<Pleased>("A fine dragonstone necklace.")
-                            npc<Happy>("There's not much room...how about just 'Gudrun'?")
-                            choice {
-                                option("Engrave the necklace.") {
-                                    if (player.levels.get(Skill.Crafting) < 42) {
-                                        item("dragonstone_necklace", 400, "you need a Crafting level of at least 72 to engrave the dragonstone necklace.")
+                                option("Engrave the bracelet.") {
+                                    if (player.levels.get(Skill.Crafting) < 72) {
+                                        item("ruby_bracelet", 400, "you need a Crafting level of at least 42 to engrave the ruby bracelet.")
                                         npc<Sad>("That's a shame. Maybe you can try again another time.")
                                         return@option
                                     }
                                     player.anim("engrave")
-                                    player.experience.add(Skill.Crafting, 10000.0)
-                                    player["dororan_dragonstone_necklace"] = 1
-                                    items("chisel", "dragonstone_necklace", "You skillfully engrave 'Gudrun' onto the dragonstone necklace.")
-                                    npc<Happy>("Another astonishing piece of work! Please, come back later to see if I have other crafting tasks.")
+                                    player.experience.add(Skill.Crafting, 2000.0)
+                                    player["dororan_ruby_bracelet"] = 1
+                                    items("chisel", "ruby_bracelet", "You carefully engrave 'With beauty blessed' onto the ruby bracelet.")
+                                    npc<Happy>("Magnificent! Outstanding! I will give this to her immediately. Please, come back when you have time")
                                 }
-                                option("Don't engrave the necklace.") {
+                                option("Don't engrave the bracelet.") {
                                     npc<Sad>("That's a shame. Maybe you can try again another time.")
                                 }
                             }
                         }
-                    } else if (player["dororan_onyx_amulet", 0] != 1) {
-                        option<Neutral>("What is it?") {
-                            npc<Pleased>("An onyx amulet!")
-                            npc<Happy>("'The most beautiful girl in the room.'")
-                            choice {
-                                option("Engrave the amulet.") {
-                                    if (player.levels.get(Skill.Crafting) < 90) {
-                                        item("onyx_amulet", 400, "you need a Crafting level of at least 90 to engrave the onyx amulet.")
-                                        npc<Sad>("That's a shame. Maybe you can try again another time.")
-                                        return@option
-                                    }
-                                    player.anim("engrave")
-                                    player.experience.add(Skill.Crafting, 20000.0)
-                                    player["dororan_onyx_amulet"] = 1
-                                    items("chisel", "onyx_amulet", "You expertly engrave 'The most beautiful girl in the room' onto the onyx amulet.")
-                                    npc<Happy>("That's fantastic! Excellent work.")
-                                }
-                                option("Don't engrave the amulet.") {
-                                    npc<Sad>("That's a shame. Maybe you can try again another time.")
-                                }
-                            }
+                        option<Neutral>("I want to talk about something else.") {
+                            npc<Pleased>("What can I do for you?")
+                            someThingElse()
                         }
-                    }
-                    option<Neutral>("I want to talk about something else.") {
-                        npc<Pleased>("What can I do for you?")
-                        someThingElse()
-                    }
-                    option<Neutral>("I don't have time right now.") {
+                        option<Neutral>("I don't have time right now.") {
+                        }
                     }
                 }
-            } else {
+            } else if (player["dororan_dragonstone_necklace", 0] != 1) {
+                option<Neutral>("What's this one?") {
+                    npc<Pleased>("A fine dragonstone necklace.")
+                    npc<Happy>("There's not much room...how about just 'Gudrun'?")
+                    choice {
+                        option("Engrave the necklace.") {
+                            if (player.levels.get(Skill.Crafting) < 42) {
+                                item("dragonstone_necklace", 400, "you need a Crafting level of at least 72 to engrave the dragonstone necklace.")
+                                npc<Sad>("That's a shame. Maybe you can try again another time.")
+                                return@option
+                            }
+                            player.anim("engrave")
+                            player.experience.add(Skill.Crafting, 10000.0)
+                            player["dororan_dragonstone_necklace"] = 1
+                            items("chisel", "dragonstone_necklace", "You skillfully engrave 'Gudrun' onto the dragonstone necklace.")
+                            npc<Happy>("Another astonishing piece of work! Please, come back later to see if I have other crafting tasks.")
+                        }
+                        option("Don't engrave the necklace.") {
+                            npc<Sad>("That's a shame. Maybe you can try again another time.")
+                        }
+                    }
+                }
+            } else if (player["dororan_onyx_amulet", 0] != 1) {
+                option<Neutral>("What is it?") {
+                    npc<Pleased>("An onyx amulet!")
+                    npc<Happy>("'The most beautiful girl in the room.'")
+                    choice {
+                        option("Engrave the amulet.") {
+                            if (player.levels.get(Skill.Crafting) < 90) {
+                                item("onyx_amulet", 400, "you need a Crafting level of at least 90 to engrave the onyx amulet.")
+                                npc<Sad>("That's a shame. Maybe you can try again another time.")
+                                return@option
+                            }
+                            player.anim("engrave")
+                            player.experience.add(Skill.Crafting, 20000.0)
+                            player["dororan_onyx_amulet"] = 1
+                            items("chisel", "onyx_amulet", "You expertly engrave 'The most beautiful girl in the room' onto the onyx amulet.")
+                            npc<Happy>("That's fantastic! Excellent work.")
+                        }
+                        option("Don't engrave the amulet.") {
+                            npc<Sad>("That's a shame. Maybe you can try again another time.")
+                        }
+                    }
+                }
+            }
+            option<Neutral>("I want to talk about something else.") {
+                npc<Pleased>("What can I do for you?")
                 someThingElse()
+            }
+            option<Neutral>("I don't have time right now.") {
             }
         }
     }

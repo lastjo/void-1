@@ -12,22 +12,24 @@ import world.gregs.voidps.engine.entity.character.player.skill.level.CurrentLeve
 import world.gregs.voidps.engine.entity.character.player.skill.level.Levels
 import world.gregs.voidps.engine.entity.character.player.skill.level.MaxLevelChanged
 import world.gregs.voidps.engine.entity.character.player.skill.level.PlayerLevels
-import world.gregs.voidps.engine.event.EventDispatcher
 import world.gregs.voidps.engine.event.Publishers
 
 internal class LevelsTest {
 
     private lateinit var exp: Experience
     private lateinit var levels: Levels
-    private lateinit var events: Character
+    private lateinit var character: Character
+    private lateinit var publishers: Publishers
 
     @BeforeEach
     fun setup() {
         exp = Experience(maximum = 10000.0)
-        events = mockk(relaxed = true)
+        character = mockk(relaxed = true)
+        publishers = mockk(relaxed = true)
+        Publishers.set(publishers)
         levels = Levels()
-        exp.events = events
-        levels.link(events, PlayerLevels(exp))
+        exp.events = character
+        levels.link(character, PlayerLevels(exp))
     }
 
     @Test
@@ -121,8 +123,8 @@ internal class LevelsTest {
     @Test
     fun `Boosting with stack has arbitrary limit`() {
         exp = Experience()
-        exp.events = events
-        levels.link(events, PlayerLevels(exp))
+        exp.events = character
+        levels.link(character, PlayerLevels(exp))
 
         exp.set(Skill.Strength, 14000000.0)
         levels.set(Skill.Strength, 99)
@@ -291,7 +293,7 @@ internal class LevelsTest {
         levels.set(Skill.Magic, 9)
         levels.set(Skill.Magic, 12)
         verify {
-            events.emit(CurrentLevelChanged(Skill.Magic, 9, 12))
+            publishers.levelChangeCharacter(character, Skill.Magic, 9, 12)
         }
     }
 
@@ -299,7 +301,7 @@ internal class LevelsTest {
     fun `Listen to level up`() {
         exp.set(Skill.Magic, 1154.0)
         verifyOrder {
-            events.emit(any<MaxLevelChanged>()) // (Skill.Magic, 1, 10))
+            publishers.levelChangeCharacter(character, Skill.Magic, 1, 10, max = true)
         }
     }
 }

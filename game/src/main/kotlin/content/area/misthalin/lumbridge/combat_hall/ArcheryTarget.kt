@@ -23,16 +23,15 @@ import world.gregs.voidps.engine.queue.weakQueue
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class ArcheryTarget {
 
-    init {
-        objectOperate("Shoot-at", "archery_target") {
-            player.closeDialogue()
-            player.face(target)
-            swing(player, target, 0)
-        }
+    @Option("Shoot-at", "archery_target")
+    fun shoot(player: Player, target: GameObject) {
+        player.closeDialogue()
+        player.face(target)
+        swing(player, target, 0)
     }
 
     fun swing(player: Player, obj: GameObject, delay: Int) {

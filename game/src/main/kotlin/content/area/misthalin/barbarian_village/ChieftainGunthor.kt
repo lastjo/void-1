@@ -5,27 +5,27 @@ import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import content.quest.quest
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class ChieftainGunthor {
 
-    init {
-        npcOperate("Talk-to", "chieftain_gunthor_*") {
-            when (player.quest("gunnars_ground")) {
-                "completed" -> {
-                }
-                "tell_gudrun", "tell_dororan", "write_poem", "more_poem", "one_more_poem", "poem_done", "poem", "recital", "gunnars_ground" -> {
-                    npc<Frustrated>("Run back to Gudrun and tell her to remember her forefathers!")
-                    npc<Angry>("Tell her to think of Gunnar and what he would think of this insult! Now go before I have Haakon dismember you.")
-                    seeHimTry()
-                }
-                "meet_chieftain" -> meetChieftain()
-                else -> unstarted()
+    @Option("Talk-to", "chieftain_gunthor_*")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        when (player.quest("gunnars_ground")) {
+            "completed" -> {
             }
+            "tell_gudrun", "tell_dororan", "write_poem", "more_poem", "one_more_poem", "poem_done", "poem", "recital", "gunnars_ground" -> {
+                npc<Frustrated>("Run back to Gudrun and tell her to remember her forefathers!")
+                npc<Angry>("Tell her to think of Gunnar and what he would think of this insult! Now go before I have Haakon dismember you.")
+                seeHimTry()
+            }
+            "meet_chieftain" -> meetChieftain()
+            else -> unstarted()
         }
     }
 

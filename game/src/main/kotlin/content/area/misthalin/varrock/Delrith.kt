@@ -27,6 +27,7 @@ import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.client.variable.hasClock
 import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
+import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
 import world.gregs.voidps.engine.entity.character.mode.PauseMode
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
@@ -45,19 +46,16 @@ import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.engine.queue.strongQueue
 import world.gregs.voidps.engine.queue.weakQueue
 import world.gregs.voidps.engine.timer.toTicks
-import world.gregs.voidps.type.Direction
-import world.gregs.voidps.type.Region
-import world.gregs.voidps.type.Script
-import world.gregs.voidps.type.Tile
+import world.gregs.voidps.type.*
 import world.gregs.voidps.type.sub.*
 import java.util.concurrent.TimeUnit
 
-@Script
-class Delrith {
+class Delrith(
+    private val objects: GameObjects,
+    private val npcs: NPCs,
+    private val areas: AreaDefinitions,
+) {
 
-    val objects: GameObjects by inject()
-    val npcs: NPCs by inject()
-    val areas: AreaDefinitions by inject()
 
     val area = areas["demon_slayer_stone_circle"]
     val defaultTile = Tile(3220, 3367)
@@ -159,22 +157,19 @@ class Delrith {
         npc.mode = PauseMode
     }
 
-    init {
-        combatPrepare("melee") { player ->
-            if (target is NPC && target.id == "delrith" && target.transform == "delrith_weakened") {
-                cancel()
-                player.strongQueue("banish_delrith", 1) {
-                    player.mode = Interact(player, target, NPCOption(player, target, target.def, "Banish"))
-                }
+    @Combat(type = "melee", stage = CombatStage.PREPARE)
+    fun prepare(player: Player, target: Character): Boolean {
+        if (target is NPC && target.id == "delrith" && target.transform == "delrith_weakened") {
+            player.strongQueue("banish_delrith", 1) {
+                player.mode = Interact(player, target, NPCOption(player, target, target.def, "Banish"))
             }
+            return true
         }
-
-        npcCombatPrepare("delrith") {
-            if (it.levels.get(Skill.Constitution) <= 0) {
-                cancel()
-            }
-        }
+        return false
     }
+
+    @Combat(id = "delrith", stage = CombatStage.PREPARE)
+    fun combat(npc: NPC, target: Player) = npc.levels.get(Skill.Constitution) <= 0
 
     fun exitArea(player: Player, to: Tile): Boolean {
         val cutscene: Cutscene = player["demon_slayer_cutscene"] ?: return false

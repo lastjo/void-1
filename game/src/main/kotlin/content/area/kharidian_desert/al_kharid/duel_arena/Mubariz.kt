@@ -5,24 +5,24 @@ import content.entity.player.dialogue.type.PlayerChoice
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class Mubariz {
 
-    init {
-        npcOperate("Talk-to", "mubariz") {
-            npc<Happy>(
-                """
+    @Option("Talk-to", "mubariz")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        npc<Happy>(
+            """
                 Welcome to the Duel Arena!
                 What can I do for you?
             """,
-            )
-            menu()
-        }
+        )
+        menu()
     }
 
     suspend fun SuspendableContext<Player>.menu() {

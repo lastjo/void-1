@@ -14,14 +14,18 @@ import world.gregs.voidps.engine.entity.character.player.skill.exp.Experience
 import world.gregs.voidps.engine.entity.character.player.skill.exp.GrantExp
 import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.event.EventDispatcher
+import world.gregs.voidps.engine.event.Publishers
 
 internal class ExperienceTableTest {
 
     private lateinit var experience: Experience
-    private lateinit var events: EventDispatcher
+    private lateinit var events: Player
+    private lateinit var publishers: Publishers
 
     @BeforeEach
     fun setup() {
+        publishers = mockk(relaxed = true)
+        Publishers.set(publishers)
         events = mockk(relaxed = true)
         experience = Experience(maximum = 200.0)
         experience.events = events
@@ -91,7 +95,7 @@ internal class ExperienceTableTest {
         experience.addBlock(Skill.Defence)
         experience.add(Skill.Defence, 100.0)
         assertEquals(100.0, experience.get(Skill.Defence))
-        verify { events.emit(GrantExp(Skill.Defence, 0.0, 100.0)) }
+        verify { publishers.experience(events, Skill.Defence, 0.0, 100.0) }
     }
 
     @Test
@@ -106,7 +110,7 @@ internal class ExperienceTableTest {
     fun `Notified of change`() {
         experience.set(Skill.Attack, 100.0)
         experience.add(Skill.Attack, 10.0)
-        verify { events.emit(GrantExp(Skill.Attack, 100.0, 110.0)) }
+        verify { publishers.experience(events, Skill.Attack, 100.0, 110.0) }
     }
 
     @Test
@@ -114,7 +118,7 @@ internal class ExperienceTableTest {
         experience.set(Skill.Attack, 100.0)
         experience.addBlock(Skill.Attack)
         experience.add(Skill.Attack, 10.0)
-        verify { events.emit(BlockedExperience(Skill.Attack, 10.0)) }
+        verify { publishers.experience(events, Skill.Attack, 10.0, blocked = true) }
     }
 
     @Test

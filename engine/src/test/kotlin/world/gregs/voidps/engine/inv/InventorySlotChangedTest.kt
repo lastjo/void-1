@@ -12,8 +12,31 @@ class InventorySlotChangedTest {
 
     private lateinit var inventory: Inventory
 
+    private var additions = 0
+    private var removals = 0
+    private var changes = 0
+
     @BeforeEach
     fun setup() {
+        additions = 0
+        removals = 0
+        changes = 0
+        Publishers.set(object : Publishers {
+            override fun itemAdded(player: Player, item: Item, itemSlot: Int, inventory: String): Boolean {
+                additions++
+                return super.itemAdded(player, item, itemSlot, inventory)
+            }
+
+            override fun itemRemoved(player: Player, item: Item, itemSlot: Int, inventory: String): Boolean {
+                removals++
+                return super.itemRemoved(player, item, itemSlot, inventory)
+            }
+
+            override fun inventoryUpdated(player: Player, inventory: String): Boolean {
+                changes++
+                return super.inventoryUpdated(player, inventory)
+            }
+        })
         inventory = Inventory.debug(1, id = "inventory")
         val dispatcher = Player()
         inventory.transaction.changes.bind(dispatcher)
@@ -22,13 +45,6 @@ class InventorySlotChangedTest {
 
     @Test
     fun `Track changes`() {
-        var changes = 0
-        Publishers.set(object : Publishers {
-            override fun inventoryUpdated(player: Player, inventory: String): Boolean {
-                changes++
-                return super.inventoryUpdated(player, inventory)
-            }
-        })
         val manager = inventory.transaction.changes
         manager.track("inventory", 1, Item.EMPTY, 1, Item("item", 1))
         manager.send()
@@ -39,11 +55,6 @@ class InventorySlotChangedTest {
 
     @Test
     fun `Track additions`() {
-        var additions = 0
-        itemAdded("coins", inventory = "inventory") {
-            additions++
-        }
-
         val manager = inventory.transaction.changes
         manager.track("", 1, Item.EMPTY, 0, Item("coins", 1))
         manager.send()
@@ -54,11 +65,6 @@ class InventorySlotChangedTest {
 
     @Test
     fun `Track removals`() {
-        var removals = 0
-        itemRemoved("coins", inventory = "inventory") {
-            removals++
-        }
-
         val manager = inventory.transaction.changes
         manager.track("bank", 1, Item("coins", 1), 0, Item.EMPTY)
         manager.send()
@@ -67,17 +73,9 @@ class InventorySlotChangedTest {
         assertEquals(1, removals)
     }
 
+
     @Test
     fun `Replacing identical items counts as both additions and removals`() {
-        var additions = 0
-        var removals = 0
-        itemAdded("coins", inventory = "inventory") {
-            additions++
-        }
-        itemRemoved("coins", inventory = "inventory") {
-            removals++
-        }
-
         val manager = inventory.transaction.changes
         manager.track("inventory", 1, Item("coins", 1), 0, Item("coins", 1))
         manager.send()

@@ -1,26 +1,28 @@
 package content.area.misthalin.lumbridge.roddecks_house
 
 import world.gregs.voidps.engine.client.message
+import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class RoddecksBookcase {
 
-    init {
-        objectOperate("Search", "roddecks_bookcase") {
-            if (player.inventory.contains("roddecks_diary") && player.inventory.contains("manual_unstable_foundations")) {
-                player.message("There's nothing particularly interesting here.")
-            } else {
-                if (!player.inventory.contains("roddecks_diary")) {
-                    player.inventory.add("roddecks_diary")
-                }
-                if (!player.inventory.contains("manual_unstable_foundations")) {
-                    player.inventory.add("manual_unstable_foundations")
-                }
-            }
+    @Option("Search", "roddecks_bookcase")
+    suspend fun operate(player: Player, target: GameObject) {
+        if (player.inventory.contains("roddecks_diary") && player.inventory.contains("manual_unstable_foundations")) {
+            player.message("There's nothing particularly interesting here.")
+            return
+        }
+        if (!player.inventory.contains("roddecks_diary")) {
+            player.inventory.add("roddecks_diary")
+        }
+        if (!player.inventory.contains("manual_unstable_foundations")) {
+            player.inventory.add("manual_unstable_foundations")
         }
     }
+
 }

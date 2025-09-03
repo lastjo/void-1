@@ -14,11 +14,13 @@ import world.gregs.voidps.engine.client.sendScript
 import world.gregs.voidps.engine.client.ui.chat.Colours
 import world.gregs.voidps.engine.client.ui.chat.plural
 import world.gregs.voidps.engine.client.ui.chat.toTag
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.client.ui.event.interfaceClose
 import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.data.definition.data.Tanning
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
@@ -29,56 +31,57 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.inv.transact.operation.ReplaceItem.replace
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Close
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.Option
 
-@Script
-class Ellis {
+class Ellis(private val itemDefs: ItemDefinitions) {
 
-    val itemDefs: ItemDefinitions by inject()
-
-    init {
-        npcOperate("Talk-to", "ellis", "tanner") {
-            npc<Talk>("Greetings friend. I am a manufacturer of leather.")
-            if (player.inventory.items.none { it.id == "cowhide" || it.id.startsWith("snake_hide") || it.id.endsWith("dragonhide") }) {
-                leather()
-                return@npcOperate
-            }
-            npc<Talk>("I see you have bought me some hides. Would you like me to tan them for you?")
-            choice {
-                option("Yes please.") {
-                    player<Talk>("Yes please.")
-                    player.open("tanner")
-                }
-                option("No thanks.") {
-                    player<Sad>("No thanks.")
-                    npc<Talk>("Very well, ${if (player.male) "sir" else "madam"}, as you wish.")
-                }
-            }
+    @Option("Talk-to", "ellis", "tanner")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        npc<Talk>("Greetings friend. I am a manufacturer of leather.")
+        if (player.inventory.items.none { it.id == "cowhide" || it.id.startsWith("snake_hide") || it.id.endsWith("dragonhide") }) {
+            leather()
+            return@talkWith
         }
-
-        npcOperate("Trade", "ellis", "tanner") {
-            player.open("tanner")
-        }
-
-        interfaceOption(option = "Tan *", id = "tanner") {
-            val amount = when (option.lowercase()) {
-                "tan ${Colours.ORANGE.toTag()}1" -> 1
-                "tan ${Colours.ORANGE.toTag()}5" -> 5
-                "tan ${Colours.ORANGE.toTag()}10" -> 10
-                "tan ${Colours.ORANGE.toTag()}all" -> player.inventory.count(component.removeSuffix("_1"))
-                "tan ${Colours.ORANGE.toTag()}X" -> intEntry("Enter amount:").also {
-                    player["last_bank_amount"] = it
-                }
-                else -> return@interfaceOption
+        npc<Talk>("I see you have bought me some hides. Would you like me to tan them for you?")
+        choice {
+            option("Yes please.") {
+                player<Talk>("Yes please.")
+                player.open("tanner")
             }
-            tan(player, component, amount)
-        }
-
-        interfaceClose("tanner") { player ->
-            player.sendScript("clear_dialogues")
+            option("No thanks.") {
+                player<Sad>("No thanks.")
+                npc<Talk>("Very well, ${if (player.male) "sir" else "madam"}, as you wish.")
+            }
         }
     }
+    @Option("Trade", "ellis", "tanner")
+    fun trade(player: Player, target: NPC) {
+        player.open("tanner")
+    }
 
-    suspend fun NPCOption<Player>.leather() {
+    @Interface(option = "Tan *", id = "tanner")
+    suspend fun tan(player: Player, component: String, option: String) {
+        val amount = when (option.lowercase()) {
+            "tan ${Colours.ORANGE.toTag()}1" -> 1
+            "tan ${Colours.ORANGE.toTag()}5" -> 5
+            "tan ${Colours.ORANGE.toTag()}10" -> 10
+            "tan ${Colours.ORANGE.toTag()}all" -> player.inventory.count(component.removeSuffix("_1"))
+            "tan ${Colours.ORANGE.toTag()}X" -> player.intEntry("Enter amount:").also {
+                player["last_bank_amount"] = it
+            }
+            else -> return
+        }
+        tan(player, component, amount)
+    }
+
+    @Close("tanner")
+    fun close(player: Player) {
+        player.sendScript("clear_dialogues")
+    }
+
+    suspend fun Dialogue.leather() {
         choice("What would you like to say?") {
             option<Quiz>("Can I buy some leather then?") {
                 npc<Talk>("I make leather from animal hides. Bring me some cowhides and one gold coin per hide, and I'll tan them into soft leather for you.")

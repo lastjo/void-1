@@ -17,6 +17,6 @@ class SubscribePublisherMapping(function: KFunction<*>) : PublisherMapping(funct
         if (ids.isEmpty()) {
             return listOf(list)
         }
-        return ids.map { list + listOf(Equals("id", it)) }
+        return ids.map { list + listOf(Equals("id", it, explicit = true)) }
     }
 }

@@ -13,15 +13,12 @@ import content.social.friend.friend
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.chat.plural
 import world.gregs.voidps.engine.client.ui.close
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
 import world.gregs.voidps.engine.client.variable.hasClock
 import world.gregs.voidps.engine.client.variable.remaining
 import world.gregs.voidps.engine.client.variable.start
-import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.name
-import world.gregs.voidps.engine.entity.character.player.playerOperate
 import world.gregs.voidps.engine.entity.character.player.req.hasRequest
 import world.gregs.voidps.engine.entity.character.player.req.request
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
@@ -30,6 +27,7 @@ import world.gregs.voidps.engine.event.onEvent
 import world.gregs.voidps.engine.timer.TICKS
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Close
+import world.gregs.voidps.type.sub.Experience
 import world.gregs.voidps.type.sub.Option
 import java.util.concurrent.TimeUnit
 import kotlin.math.min
@@ -81,31 +79,28 @@ class RequestAssist {
         cancelAssist(player, assisted)
     }
 
-
-
-    init {
-        onEvent<Player, BlockedExperience> { assisted ->
-            val player: Player = assisted["assistant"] ?: return@onEvent
-            val active = player["assist_toggle_${skill.name.lowercase()}", false]
-            var gained = player["total_xp_earned", 0].toDouble()
-            if (active && !exceededMaximum(gained)) {
-                val exp = min(experience, (MAX_EXPERIENCE - gained) / 10)
-                gained += exp * 10.0
-                val maxed = exceededMaximum(gained)
-                player.experience.add(skill, exp)
-                player["total_xp_earned"] = gained.toInt()
-                if (maxed) {
-                    player.interfaces.sendText(
-                        "assist_xp",
-                        "description",
-                        """
+    @Experience(blocked = true)
+    fun blocked(player: Player, skill: Skill, to: Double) {
+        val assistant: Player = player["assistant"] ?: return
+        val active = assistant["assist_toggle_${skill.name.lowercase()}", false]
+        var gained = assistant["total_xp_earned", 0].toDouble()
+        if (active && !exceededMaximum(gained)) {
+            val exp = min(to, (MAX_EXPERIENCE - gained) / 10)
+            gained += exp * 10.0
+            val maxed = exceededMaximum(gained)
+            assistant.experience.add(skill, exp)
+            assistant["total_xp_earned"] = gained.toInt()
+            if (maxed) {
+                assistant.interfaces.sendText(
+                    "assist_xp",
+                    "description",
+                    """
                             You've earned the maximum XP from the Assist System with a 24-hour period.
                             You can assist again in 24 hours.
                         """,
-                    )
-                    player.start("assist_timeout", TimeUnit.HOURS.toSeconds(24).toInt())
-                    stopRedirectingAllExp(assisted)
-                }
+                )
+                assistant.start("assist_timeout", TimeUnit.HOURS.toSeconds(24).toInt())
+                stopRedirectingAllExp(player)
             }
         }
     }

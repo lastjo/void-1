@@ -41,7 +41,7 @@ class ItemDestroy {
         }
         if (player.inventory.remove(itemSlot, item.id, item.amount)) {
             player.sound("destroy_object")
-            player.emit(Destroyed(item))
+            Publishers.all.publishPlayer(player, "destroyed", item.id)
             logger.info { "$player destroyed item $item" }
         } else {
             logger.info { "Error destroying item $item for $player" }

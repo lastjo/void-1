@@ -37,10 +37,10 @@ class VariableSetPublisherMapping(function: KFunction<*>) : PublisherMapping(fun
             list.add(Equals("to", null))
         }
         if (fromBool != "*") {
-            list.add(Equals("from", from.toBoolean(), simplify = false))
+            list.add(Equals("from", from.toBoolean(), explicit = true))
         }
         if (toBool != "*") {
-            list.add(Equals("to", to.toBoolean(), simplify = false))
+            list.add(Equals("to", to.toBoolean(), explicit = true))
         }
         if (ids.isEmpty()) {
             return listOf(list)

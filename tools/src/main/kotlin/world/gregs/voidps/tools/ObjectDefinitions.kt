@@ -17,7 +17,8 @@ object ObjectDefinitions {
         val definitions = ObjectDefinitions(ObjectDecoder(member = true, lowDetail = false).load(cache))
             .load(configFiles().getValue(Settings["definitions.objects"]))
         for (def in definitions.definitions) {
-            println("${def.id} ${def.name}")
+            if(def.id in 5990-10..5990+10)
+            println("${def.id} ${def.name} ${def.transforms?.toList()}")
         }
     }
 

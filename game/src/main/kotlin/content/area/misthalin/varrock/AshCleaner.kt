@@ -1,20 +1,20 @@
 package content.area.misthalin.varrock
 
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.hunt.huntFloorItem
+import world.gregs.voidps.engine.entity.item.floor.FloorItem
 import world.gregs.voidps.engine.entity.item.floor.FloorItemOption
 import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Hunt
 
-@Script
 class AshCleaner {
 
-    init {
-        huntFloorItem("ash_cleaner", mode = "ash_finder") { npc ->
-            Publishers.launch {
-                Publishers.all.npcFloorItemOption(npc, target, "Take")
-            }
-            npc.mode = Interact(npc, target, FloorItemOption(npc, target, "Take"))
-        }
+    @Hunt("ash_finder", npc = "ash_cleaner")
+    fun hunt(npc: NPC, target: FloorItem) {
+        val block: suspend (Boolean) -> Unit = { Publishers.all.npcFloorItemOption(npc, target, "Take", it) }
+        val check: (Boolean) -> Boolean = { Publishers.all.hasNPCFloorItemOption(npc, target, "Take", it) }
+        npc.mode = Interact(npc, target, FloorItemOption(npc, target, "Take"), interact = block, has = check)
     }
 }

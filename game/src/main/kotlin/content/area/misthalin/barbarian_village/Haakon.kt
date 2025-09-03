@@ -4,25 +4,22 @@ import content.entity.player.dialogue.*
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.quest.quest
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.PlayerOption
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class Haakon {
 
-    val validStages = setOf("tell_gudrun", "write_poem", "more_poem", "one_more_poem", "poem_done", "poem", "recital", "gunnars_ground")
+    private val validStages = setOf("tell_gudrun", "write_poem", "more_poem", "one_more_poem", "poem_done", "poem", "recital", "gunnars_ground")
 
-    init {
-        npcOperate("Talk-to", "haakon_the_champion") {
-            menu()
-        }
-    }
-
-    suspend fun NPCOption<Player>.menu() {
+    @Option("Talk-to", "haakon_the_champion")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
         npc<Angry>("I am Haakon, champion of this village. Do you seek to challenge me?")
         choice {
             option<Neutral>("I challenge you!") {
@@ -52,7 +49,7 @@ class Haakon {
         }
     }
 
-    suspend fun NPCOption<Player>.attack() {
+    suspend fun Dialogue.attack() {
         npc<Mad>("Make peace with your god, outerlander!")
         target.mode = Interact(target, player, PlayerOption(target, player, "Attack"))
     }

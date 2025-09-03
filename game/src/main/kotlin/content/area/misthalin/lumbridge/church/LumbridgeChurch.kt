@@ -12,12 +12,14 @@ import world.gregs.voidps.engine.client.clearCamera
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.moveCamera
 import world.gregs.voidps.engine.client.turnCamera
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.client.ui.interact.itemOnObjectOperate
 import world.gregs.voidps.engine.entity.character.mode.interact.Interaction
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
+import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.entity.obj.replace
 import world.gregs.voidps.engine.entity.playerSpawn
@@ -31,87 +33,94 @@ import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Region
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
+import world.gregs.voidps.type.sub.Option
+import world.gregs.voidps.type.sub.Spawn
+import world.gregs.voidps.type.sub.UseOn
 import java.util.concurrent.TimeUnit
 
-@Script
-class LumbridgeChurch {
-
-    val npcs: NPCs by inject()
+class LumbridgeChurch(private val npcs: NPCs) {
 
     val ghostSpawn = Tile(3250, 3195)
 
-    init {
-        objectOperate("Play", "lumbridge_organ") {
-            player.anim("play_organ")
-            player.midi("church_organ")
-            player.jingle("ambient_church_happy")
-            player["tinkle_the_ivories_task"] = true
-        }
+    @Option("Play", "lumbridge_organ")
+    fun playOrgan(player: Player, target: GameObject) {
+        player.anim("play_organ")
+        player.midi("church_organ")
+        player.jingle("ambient_church_happy")
+        player["tinkle_the_ivories_task"] = true
+    }
 
-        objectOperate("Ring", "lumbridge_church_bell") {
-            delay(1)
-            player.anim("ring_bell")
-            delay(1)
-            player["ring_my_bell_task"] = true
-            target.replace("lumbridge_church_bell_ringing", ticks = 4)
-            player.message("You ring the church bell, confusing the citizens of Lumbridge.")
-        }
+    @Option("Ring", "lumbridge_church_bell")
+    suspend fun ringBell(player: Player, target: GameObject) {
+        player.delay(1)
+        player.anim("ring_bell")
+        player.delay(1)
+        player["ring_my_bell_task"] = true
+        target.replace("lumbridge_church_bell_ringing", ticks = 4)
+        player.message("You ring the church bell, confusing the citizens of Lumbridge.")
+    }
 
-        objectOperate("Close", "restless_ghost_coffin_headless", "restless_ghost_coffin") {
-            target.replace("restless_ghost_coffin_closed")
-            player.animDelay("close_chest")
-            player.message("You close the coffin.")
-            player.sound("coffin_close")
-        }
+    @Option("Close", "restless_ghost_coffin_headless", "restless_ghost_coffin")
+    suspend fun closeCoffin(player: Player, target: GameObject) {
+        target.replace("restless_ghost_coffin_closed")
+        player.animDelay("close_chest")
+        player.message("You close the coffin.")
+        player.sound("coffin_close")
+    }
 
-        objectOperate("Search", "restless_ghost_coffin_headless", "restless_ghost_coffin") {
-            if (player.quest("the_restless_ghost") == "completed") {
-                statement("There's a nice and complete skeleton in here!")
-                return@objectOperate
-            }
-            if (player.quest("the_restless_ghost") == "found_skull" && player.inventory.contains("muddy_skull")) {
-                returnSkull()
-            } else {
-                player.message("You search the coffin and find some human remains.")
-                spawnGhost()
-            }
+    @Option("Search", "restless_ghost_coffin_headless", "restless_ghost_coffin")
+    suspend fun searchCoffin(player: Player, target: GameObject) = player.dialogue {
+        if (player.quest("the_restless_ghost") == "completed") {
+            statement("There's a nice and complete skeleton in here!")
+            return@dialogue
         }
-
-        itemOnObjectOperate("muddy_skull", "coffin_restless_ghost_2") {
+        if (player.quest("the_restless_ghost") == "found_skull" && player.inventory.contains("muddy_skull")) {
             returnSkull()
-        }
-
-        itemOnObjectOperate("muddy_skull", "restless_ghost_coffin_closed") {
-            statement("Maybe I should open it first.")
-        }
-
-        objectOperate("Open", "restless_ghost_coffin_closed") {
-            player.message("You open the coffin.")
-            player.animDelay("open_chest")
-            player.sound("coffin_open")
-            target.replace("coffin_restless_ghost_2", ticks = TimeUnit.MINUTES.toTicks(3))
-            if (!player.questCompleted("the_restless_ghost")) {
-                spawnGhost()
-            }
-        }
-
-        objectOperate("Search", "restless_ghost_coffin_closed") {
-            player.message("You open the coffin.")
-            player.animDelay("open_chest")
-            player.sound("coffin_open")
-            target.replace("coffin_restless_ghost_2", ticks = TimeUnit.MINUTES.toTicks(3))
-            if (!player.questCompleted("the_restless_ghost")) {
-                spawnGhost()
-            }
-        }
-
-        playerSpawn { player ->
-            player.sendVariable("rocks_restless_ghost")
-            player.sendVariable("restless_ghost_coffin")
+        } else {
+            player.message("You search the coffin and find some human remains.")
+            spawnGhost(player)
         }
     }
 
-    suspend fun Interaction<Player>.returnSkull() {
+    @UseOn("muddy_skull", "coffin_restless_ghost_2")
+    suspend fun useSkull(player: Player, target: GameObject) = player.dialogue {
+        returnSkull()
+    }
+
+    @UseOn("muddy_skull", "restless_ghost_coffin_closed")
+    suspend fun closedCoffin(player: Player, target: GameObject) = player.dialogue {
+        statement("Maybe I should open it first.")
+    }
+
+    @Option("Open", "restless_ghost_coffin_closed")
+    suspend fun openCoffin(player: Player, target: GameObject) {
+        player.message("You open the coffin.")
+        player.animDelay("open_chest")
+        player.sound("coffin_open")
+        target.replace("coffin_restless_ghost_2", ticks = TimeUnit.MINUTES.toTicks(3))
+        if (!player.questCompleted("the_restless_ghost")) {
+            spawnGhost(player)
+        }
+    }
+
+    @Option("Search", "restless_ghost_coffin_closed")
+    suspend fun searchClosed(player: Player, target: GameObject) {
+        player.message("You open the coffin.")
+        player.animDelay("open_chest")
+        player.sound("coffin_open")
+        target.replace("coffin_restless_ghost_2", ticks = TimeUnit.MINUTES.toTicks(3))
+        if (!player.questCompleted("the_restless_ghost")) {
+            spawnGhost(player)
+        }
+    }
+
+    @Spawn
+    fun spawn(player: Player) {
+        player.sendVariable("rocks_restless_ghost")
+        player.sendVariable("restless_ghost_coffin")
+    }
+
+    suspend fun Dialogue.returnSkull() {
         player.message("You put the skull in the coffin.")
         val region = Region(12849)
         val cutscene = startCutscene("the_restless_ghost", region)
@@ -164,15 +173,15 @@ class LumbridgeChurch {
         }
     }
 
-    suspend fun Interaction<Player>.spawnGhost() {
+    suspend fun spawnGhost(player: Player) {
         val ghostExists = npcs[ghostSpawn.zone].any { it.id == "restless_ghost" }
         if (!ghostExists) {
             player.sound("coffin_open")
             player.sound("rg_ghost_approach")
             player.shoot("restless_ghost", ghostSpawn, height = 30, endHeight = 0, flightTime = 50)
-            delay(1)
+            player.delay(1)
             player.sound("bigghost_appear")
-            delay(1)
+            player.delay(1)
             val ghost = npcs.add("restless_ghost", ghostSpawn, Direction.SOUTH)
             ghost.animDelay("restless_ghost_awakens")
             ghost.softQueue("despawn", TimeUnit.SECONDS.toTicks(60)) {

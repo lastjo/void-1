@@ -9,38 +9,39 @@ import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import content.quest.quest
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class Reldo {
 
-    init {
-        npcOperate("Talk-to", "reldo*") {
-            npc<Neutral>("Hello stranger.")
-            choice {
-                anythingToTrade()
-                whatDoYouDo()
-                aboutImcandoDwarves()
-            }
+    @Option("Talk-to", "reldo*")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        npc<Neutral>("Hello stranger.")
+        choice {
+            anythingToTrade()
+            whatDoYouDo()
+            aboutImcandoDwarves()
         }
     }
 
-    suspend fun PlayerChoice.anythingToTrade() = option<Quiz>("Do you have anything to trade?") {
+    fun PlayerChoice.anythingToTrade() = option<Quiz>("Do you have anything to trade?") {
         npc<Neutral>("Only knowledge.")
         player<Quiz>("How much do you want for that then?")
         npc<Chuckle>("No, sorry, that was just my little joke. I'm not the trading type.")
         player<Neutral>("Ah well.")
     }
 
-    suspend fun PlayerChoice.whatDoYouDo() = option<Quiz>("What do you do?") {
+    fun PlayerChoice.whatDoYouDo() = option<Quiz>("What do you do?") {
         npc<Neutral>("I am the palace librarian.")
         player<Neutral>("Ah. That's why you're in the library then.")
         npc<Neutral>("Yes.")
         npc<Neutral>("Although I would probably be in here even if I didn't work here. I like reading. Someday I hope to catalogue all of the information stored in these books so all may read it.")
     }
 
-    suspend fun PlayerChoice.aboutImcandoDwarves() = option<Quiz>(
+    fun PlayerChoice.aboutImcandoDwarves() = option<Quiz>(
         "What do you know about the Imcando dwarves?",
         {
             val stage = player.quest("the_knights_sword")

@@ -4,38 +4,38 @@ import content.entity.player.dialogue.*
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Option
 
-@Script
 class Victoria {
 
-    init {
-        npcOperate("Talk-to", "victoria") {
-            player<Happy>("Good day.")
-            npc<Happy>("To you too, traveller. I am Victoria. Tell me, have you seen my brother, Lachtopher, around the town?")
-            choice("What would you like to say?") {
-                option<Neutral>("Yes, I've seen Lachtopher.") {
-                    npc<Sad>("Ah, he'll have asked you for money, no doubt. I hope you didn't give him any.")
-                    choice("What would you like to say?") {
-                        option<Happy>("No, I didn't give him a single coin.") {
-                            npc<Happy>("Oh, good! If you had, then you would never have got it back. My brother is such a waste of space. I've been lending him things for years and he never gives them back.")
-                            timesChange()
-                        }
-                        option<Happy>("Yes, I loaned him money, just like he asked.") {
-                            npc<Sad>("Oh dear. I'm sorry to tell you this, but that's the last you'll see of that money. My brother is such a waste of space. I've been lending him things for years and he never gives them back.")
-                            timesChange()
-                        }
+    @Option("Talk-to", "victoria")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        player<Happy>("Good day.")
+        npc<Happy>("To you too, traveller. I am Victoria. Tell me, have you seen my brother, Lachtopher, around the town?")
+        choice("What would you like to say?") {
+            option<Neutral>("Yes, I've seen Lachtopher.") {
+                npc<Sad>("Ah, he'll have asked you for money, no doubt. I hope you didn't give him any.")
+                choice("What would you like to say?") {
+                    option<Happy>("No, I didn't give him a single coin.") {
+                        npc<Happy>("Oh, good! If you had, then you would never have got it back. My brother is such a waste of space. I've been lending him things for years and he never gives them back.")
+                        timesChange()
+                    }
+                    option<Happy>("Yes, I loaned him money, just like he asked.") {
+                        npc<Sad>("Oh dear. I'm sorry to tell you this, but that's the last you'll see of that money. My brother is such a waste of space. I've been lending him things for years and he never gives them back.")
+                        timesChange()
                     }
                 }
-                option<Neutral>("No, I haven't seen him.") {
-                    npc<Happy>("Well, if you do meet him, he'll ask you for money, no doubt. Please don't give him any.")
-                    player<Quiz>("Why not?")
-                    npc<Sad>("Sorry to tell you this, but if you lend him money you'll never see it again. My brother is such a waste of space. I've been lending him things for years and he never gives them back.")
-                    timesChange()
-                }
+            }
+            option<Neutral>("No, I haven't seen him.") {
+                npc<Happy>("Well, if you do meet him, he'll ask you for money, no doubt. Please don't give him any.")
+                player<Quiz>("Why not?")
+                npc<Sad>("Sorry to tell you this, but if you lend him money you'll never see it again. My brother is such a waste of space. I've been lending him things for years and he never gives them back.")
+                timesChange()
             }
         }
     }

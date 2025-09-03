@@ -14,8 +14,6 @@ import world.gregs.voidps.engine.entity.character.player.Player
 
 internal class InterfaceExtensionsTest : InterfaceTest() {
 
-    private lateinit var player: Player
-
     val name = "interface_name"
 
     @BeforeEach

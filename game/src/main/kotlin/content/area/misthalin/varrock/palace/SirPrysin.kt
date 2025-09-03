@@ -5,8 +5,10 @@ import content.entity.player.dialogue.*
 import content.entity.player.dialogue.type.*
 import content.entity.sound.sound
 import content.quest.quest
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.entity.character.mode.PauseMode
 import world.gregs.voidps.engine.entity.character.move.tele
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
@@ -20,53 +22,51 @@ import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
+import world.gregs.voidps.type.sub.Option
 
-@Script
-class SirPrysin {
+class SirPrysin(private val objects: GameObjects) {
 
-    val objects: GameObjects by inject()
     val cupboardTile = Tile(3204, 3469)
 
-    init {
-        npcOperate("Talk-to", "sir_prysin_*") {
-            when (player.quest("demon_slayer")) {
-                "key_hunt" -> {
-                    if (!player["demon_slayer_silverlight", false]) {
-                        keyProgressCheck()
-                        return@npcOperate
-                    }
-                    npc<Talk>("Have you sorted that demon out yet?")
-                    if (player.ownsItem("silverlight")) {
-                        player<Upset>("No, not yet.")
-                        npc<Talk>("Well get on with it. He'll be pretty powerful when he gets to full strength.")
-                        return@npcOperate
-                    }
-                    player<Upset>("Not yet. And I, um, lost Silverlight.")
-                    if (player.inventory.add("silverlight")) {
-                        npc<Angry>("Yes, I know, someone returned it to me. Take better care of it this time.")
-                    } else {
-                        npc<Angry>("Yes, I know, someone returned it to me. I'll keep it until you have free inventory space.")
-                    }
+    @Option("Talk-to", "sir_prysin_*")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        when (player.quest("demon_slayer")) {
+            "key_hunt" -> {
+                if (!player["demon_slayer_silverlight", false]) {
+                    keyProgressCheck()
+                    return@talkWith
                 }
-                "completed" -> {
-                    npc<Neutral>("Hello. I've heard you stopped the demon, well done.")
-                    player<Neutral>("Yes, that's right.")
-                    npc<Neutral>("A good job well done then.")
-                    player<Neutral>("Thank you.")
+                npc<Talk>("Have you sorted that demon out yet?")
+                if (player.ownsItem("silverlight")) {
+                    player<Upset>("No, not yet.")
+                    npc<Talk>("Well get on with it. He'll be pretty powerful when he gets to full strength.")
+                    return@talkWith
                 }
-                else -> {
-                    npc<Talk>("Hello, who are you?")
-                    choice {
-                        mightyAdventurer()
-                        youTellMe()
-                        arisWantsToTalk()
-                    }
+                player<Upset>("Not yet. And I, um, lost Silverlight.")
+                if (player.inventory.add("silverlight")) {
+                    npc<Angry>("Yes, I know, someone returned it to me. Take better care of it this time.")
+                } else {
+                    npc<Angry>("Yes, I know, someone returned it to me. I'll keep it until you have free inventory space.")
+                }
+            }
+            "completed" -> {
+                npc<Neutral>("Hello. I've heard you stopped the demon, well done.")
+                player<Neutral>("Yes, that's right.")
+                npc<Neutral>("A good job well done then.")
+                player<Neutral>("Thank you.")
+            }
+            else -> {
+                npc<Talk>("Hello, who are you?")
+                choice {
+                    mightyAdventurer()
+                    youTellMe()
+                    arisWantsToTalk()
                 }
             }
         }
     }
 
-    suspend fun PlayerChoice.arisWantsToTalk(): Unit = option(
+    fun PlayerChoice.arisWantsToTalk(): Unit = option(
         "Aris said I should come and talk to you.",
         { player.quest("demon_slayer") == "sir_prysin" },
     ) {
@@ -133,7 +133,7 @@ class SirPrysin {
         }
     }
 
-    suspend fun PlayerChoice.wheresWizard(): Unit = option("Where does the wizard live?") {
+    fun PlayerChoice.wheresWizard(): Unit = option("Where does the wizard live?") {
         player<Talk>("Where does the wizard live?")
         npc<Talk>("He is one of the wizards who lives in the tower on the little island just off the south coast. I believe his quarters are on the first floor of the tower.")
         choice {
@@ -143,7 +143,7 @@ class SirPrysin {
         }
     }
 
-    suspend fun PlayerChoice.wheresCaptainRovin(): Unit = option("Where can I find Captain Rovin?") {
+    fun PlayerChoice.wheresCaptainRovin(): Unit = option("Where can I find Captain Rovin?") {
         player<Talk>("Where can I find Captain Rovin?")
         npc<Talk>("Captain Rovin lives at the top of the guards' quarters in the north-west wing of this palace.")
         choice {
@@ -153,7 +153,7 @@ class SirPrysin {
         }
     }
 
-    suspend fun NPCOption<Player>.keyProgressCheck() {
+    suspend fun Dialogue.keyProgressCheck() {
         npc<Talk>("So how are you doing with getting the keys?")
         val rovin = player.holdsItem("silverlight_key_captain_rovin")
         val prysin = player.holdsItem("silverlight_key_sir_prysin")
@@ -178,7 +178,7 @@ class SirPrysin {
         }
     }
 
-    suspend fun PlayerChoice.giveYourKey(): Unit = option("Can you give me your key?") {
+    fun PlayerChoice.giveYourKey(): Unit = option("Can you give me your key?") {
         player<Talk>("Can you give me your key?")
         npc<Upset>("Um.... ah....")
         npc<Upset>("Well there's a problem there as well.")
@@ -190,7 +190,7 @@ class SirPrysin {
         }
     }
 
-    suspend fun PlayerChoice.drain(): Unit = option("So what does the drain lead to?") {
+    fun PlayerChoice.drain(): Unit = option("So what does the drain lead to?") {
         player<Talk>("So what does the drain connect to?")
         npc<Talk>("It is the drain for the drainpipe running from the sink in the kitchen down to the palace sewers.")
         choice {
@@ -200,32 +200,32 @@ class SirPrysin {
         }
     }
 
-    suspend fun PlayerChoice.huntingTime(): Unit = option("Well I'd better go key hunting.") {
+    fun PlayerChoice.huntingTime(): Unit = option("Well I'd better go key hunting.") {
         player<Talk>("Well I'd better go key hunting.")
         npc<Talk>("Ok, goodbye.")
     }
 
-    suspend fun PlayerChoice.mightyAdventurer(): Unit = option("I am a mighty adventurer. Who are you?") {
+    fun PlayerChoice.mightyAdventurer(): Unit = option("I am a mighty adventurer. Who are you?") {
         player<Talk>("I am a mighty adventurer, who are you?")
         npc<Talk>("I am Sir Prysin. A bold and famous knight of the realm.")
     }
 
-    suspend fun PlayerChoice.youTellMe(): Unit = option("I'm not sure, I was hoping you could tell me.") {
+    fun PlayerChoice.youTellMe(): Unit = option("I'm not sure, I was hoping you could tell me.") {
         player<Uncertain>("I was hoping you could tell me.")
         npc<Talk>("Well I've never met you before.")
     }
 
-    suspend fun PlayerChoice.remindMe(): Unit = option("Can you remind me where all the keys were again?") {
+    fun PlayerChoice.remindMe(): Unit = option("Can you remind me where all the keys were again?") {
         player<Talk>("Can you remind me where all the keys were again?")
         theKeys()
     }
 
-    suspend fun PlayerChoice.stillLooking(): Unit = option("I'm still looking.") {
+    fun PlayerChoice.stillLooking(): Unit = option("I'm still looking.") {
         player<Talk>("I'm still looking.")
         npc<Talk>("Ok, tell me when you've got them all.")
     }
 
-    suspend fun NPCOption<Player>.giveSilverlight() {
+    suspend fun Dialogue.giveSilverlight() {
         player<Neutral>("I've got all three keys!")
         npc<Neutral>("Excellent! Now I can give you Silverlight.")
         player.inventory.remove("silverlight_key_wizard_traiborn", "silverlight_key_captain_rovin", "silverlight_key_sir_prysin")

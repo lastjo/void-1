@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 import world.gregs.voidps.engine.data.config.VariableDefinition
 import world.gregs.voidps.engine.data.definition.VariableDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.EventDispatcher
 import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.network.client.Client
 
@@ -18,7 +17,7 @@ internal class VariablesTest {
     private lateinit var variable: VariableDefinition
     private lateinit var player: Player
     private lateinit var client: Client
-    private lateinit var events: Player
+    private lateinit var publishers: Publishers
     private lateinit var map: MutableMap<String, Any>
 
     private val id = 0
@@ -35,9 +34,10 @@ internal class VariablesTest {
         every { variable.persistent } returns true
         every { variable.defaultValue } returns 0
         definitions = mockk(relaxed = true)
-        events = mockk(relaxed = true)
-        variables = spyk(PlayerVariables(events, map))
-        variables.bits = VariableBits(variables, events)
+        publishers = mockk(relaxed = true)
+        Publishers.set(publishers)
+        variables = spyk(PlayerVariables(player, map))
+        variables.bits = VariableBits(variables, player)
         player = mockk(relaxed = true)
         client = mockk(relaxed = true)
         every { player.variables } returns variables
@@ -57,7 +57,7 @@ internal class VariablesTest {
         assertEquals(42, map[KEY])
         verify {
             variables.send(any())
-            events.emit(VariableSet(KEY, 1, 42))
+            publishers.variableSetPlayer(player, KEY, 1, 42)
         }
     }
 
@@ -128,7 +128,7 @@ internal class VariablesTest {
         assertEquals(arrayListOf("First"), map[KEY])
         verify {
             variables.send(KEY)
-            events.emit(VariableBitAdded(KEY, "First"))
+            publishers.variableBitsPlayer(player, KEY, "First", true)
         }
     }
 
@@ -144,7 +144,7 @@ internal class VariablesTest {
         assertEquals(arrayListOf("First", "Second"), map[KEY])
         verify {
             variables.send(KEY)
-            events.emit(VariableBitAdded(KEY, "Second"))
+            publishers.variableBitsPlayer(player, KEY, "Second", true)
         }
     }
 
@@ -173,7 +173,6 @@ internal class VariablesTest {
         assertEquals(arrayListOf("First"), map[KEY])
         verify(exactly = 0) { variables.send(KEY) }
     }
-
     @Test
     fun `Remove bitwise`() {
         // Given
@@ -186,7 +185,7 @@ internal class VariablesTest {
         assertEquals(emptyList<Any>(), map[KEY])
         verify {
             variables.send(KEY)
-            events.emit(VariableBitRemoved(KEY, "First"))
+            publishers.variableBitsPlayer(player, KEY, "First", false)
         }
     }
 
@@ -228,7 +227,7 @@ internal class VariablesTest {
         assertNull(map[KEY])
         verifyOrder {
             variables.send(KEY)
-            events.emit(VariableSet(KEY, arrayListOf("Third"), null))
+            publishers.variableSetPlayer(player, KEY, arrayListOf("Third"), null)
         }
     }
 
