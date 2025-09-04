@@ -20,5 +20,4 @@ class DustyKey {
             player.message("The gate is locked.")
         }
     }
-
 }

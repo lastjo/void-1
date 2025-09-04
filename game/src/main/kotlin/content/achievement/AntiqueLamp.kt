@@ -19,5 +19,4 @@ class AntiqueLamp {
             statement("<blue>Your wish has been granted!<br><black>You have been awarded 500 ${skill.name} experience!")
         }
     }
-
 }

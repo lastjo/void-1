@@ -2,8 +2,8 @@ package world.gregs.voidps.event
 
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import kotlin.reflect.KClass
 
@@ -41,7 +41,8 @@ class TrieNodeTest {
               return 0
             }
             return 0
-        """.trimIndent(), code
+            """.trimIndent(),
+            code,
         )
     }
 
@@ -54,7 +55,8 @@ class TrieNodeTest {
         assertEquals(
             """
             return 0
-        """.trimIndent(), code
+            """.trimIndent(),
+            code,
         )
     }
 
@@ -67,7 +69,8 @@ class TrieNodeTest {
         assertEquals(
             """
             return false
-        """.trimIndent(), code
+            """.trimIndent(),
+            code,
         )
     }
 
@@ -83,7 +86,8 @@ class TrieNodeTest {
             """
             test.handleDefault()
             return
-        """.trimIndent(), code
+            """.trimIndent(),
+            code,
         )
     }
 
@@ -98,7 +102,8 @@ class TrieNodeTest {
         assertEquals(
             """
                 return test.handle()
-            """.trimIndent(), code
+            """.trimIndent(),
+            code,
         )
     }
 
@@ -113,7 +118,8 @@ class TrieNodeTest {
         assertEquals(
             """
                 return true
-            """.trimIndent(), code
+            """.trimIndent(),
+            code,
         )
     }
 
@@ -129,7 +135,8 @@ class TrieNodeTest {
             """
                 test.handle()
                 return 0
-            """.trimIndent(), code
+            """.trimIndent(),
+            code,
         )
     }
 
@@ -150,7 +157,8 @@ class TrieNodeTest {
               return
             }
             return
-        """.trimIndent(), code
+            """.trimIndent(),
+            code,
         )
     }
 
@@ -171,7 +179,8 @@ class TrieNodeTest {
               return false
             }
             return false
-        """.trimIndent(), code
+            """.trimIndent(),
+            code,
         )
     }
 
@@ -200,7 +209,8 @@ class TrieNodeTest {
               return value
             }
             return 0
-        """.trimIndent(), code
+            """.trimIndent(),
+            code,
         )
     }
 
@@ -221,7 +231,8 @@ class TrieNodeTest {
               return value
             }
             return false
-        """.trimIndent(), code
+            """.trimIndent(),
+            code,
         )
     }
 
@@ -243,7 +254,8 @@ class TrieNodeTest {
               return test.handleB()
             }
             return false
-        """.trimIndent(), code
+            """.trimIndent(),
+            code,
         )
     }
 
@@ -266,7 +278,8 @@ class TrieNodeTest {
               return -1
             }
             return -1
-        """.trimIndent(), code
+            """.trimIndent(),
+            code,
         )
     }
 
@@ -293,7 +306,8 @@ class TrieNodeTest {
               return -1
             }
             return -1
-        """.trimIndent(), code
+            """.trimIndent(),
+            code,
         )
     }
 
@@ -322,7 +336,8 @@ class TrieNodeTest {
               return -1
             }
             return -1
-        """.trimIndent(), code
+            """.trimIndent(),
+            code,
         )
     }
 
@@ -336,7 +351,7 @@ class TrieNodeTest {
             parameters = emptyList(),
             required = emptyList(),
             cancellable = false,
-            methodName = ""
+            methodName = "",
         ) {
             override fun conditions(method: Subscriber): List<List<Condition>> {
                 TODO("Not yet implemented")
@@ -347,13 +362,11 @@ class TrieNodeTest {
         return string
     }
 
-    private fun method(name: String, vararg conds: Condition, returnType: KClass<*> = Unit::class): Method {
-        return Method(
-            conditions = conds.toList(),
-            suspendable = false,
-            className = ClassName("", "test"),
-            methodName = name,
-            methodReturnType = returnType.qualifiedName!!,
-        )
-    }
+    private fun method(name: String, vararg conds: Condition, returnType: KClass<*> = Unit::class): Method = Method(
+        conditions = conds.toList(),
+        suspendable = false,
+        className = ClassName("", "test"),
+        methodName = name,
+        methodReturnType = returnType.qualifiedName!!,
+    )
 }

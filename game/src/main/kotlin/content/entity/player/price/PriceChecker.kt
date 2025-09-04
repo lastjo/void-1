@@ -10,9 +10,6 @@ import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.sendScript
 import world.gregs.voidps.engine.client.ui.close
 import world.gregs.voidps.engine.client.ui.dialogue
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.inventoryFull
@@ -22,7 +19,6 @@ import world.gregs.voidps.engine.inv.moveAll
 import world.gregs.voidps.engine.inv.sendInventory
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.MoveItemLimit.moveToLimit
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.*
 
 class PriceChecker {
@@ -115,5 +111,4 @@ class PriceChecker {
         }
         player["price_checker_total"] = total.toInt()
     }
-
 }

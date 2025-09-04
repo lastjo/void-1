@@ -5,12 +5,7 @@ import world.gregs.voidps.engine.client.variable.hasClock
 import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.entity.character.player.skill.level.levelChange
-import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.timer.timerStart
-import world.gregs.voidps.engine.timer.timerTick
 import world.gregs.voidps.engine.timer.toTicks
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.TimerState
 import world.gregs.voidps.type.sub.LevelChange
 import world.gregs.voidps.type.sub.Spawn
@@ -41,9 +36,7 @@ class LevelRestoration {
     }
 
     @TimerStart("restore_stats")
-    fun start(player: Player): Int {
-        return TimeUnit.SECONDS.toTicks(60)
-    }
+    fun start(player: Player): Int = TimeUnit.SECONDS.toTicks(60)
 
     @TimerTick("restore_stats")
     fun tick(player: Player): Int {
@@ -72,5 +65,4 @@ class LevelRestoration {
         }
         return TimerState.CONTINUE
     }
-
 }

@@ -18,12 +18,8 @@ import world.gregs.voidps.engine.entity.character.mode.interact.Interact
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.worldSpawn
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
-import world.gregs.voidps.engine.timer.timerStop
 import world.gregs.voidps.network.client.instruction.InteractDialogue
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Spawn
 import world.gregs.voidps.type.sub.TimerStop
 

@@ -28,5 +28,4 @@ class TravelLog(private val fairyRing: FairyRingCodes) {
             }
         }
     }
-
 }

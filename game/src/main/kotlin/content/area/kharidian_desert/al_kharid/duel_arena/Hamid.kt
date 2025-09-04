@@ -5,9 +5,7 @@ import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 
 class Hamid {
@@ -33,5 +31,4 @@ class Hamid {
             }
         }
     }
-
 }

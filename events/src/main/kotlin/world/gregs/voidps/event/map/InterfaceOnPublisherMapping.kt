@@ -41,21 +41,35 @@ class InterfaceOnPublisherMapping(function: KFunction<*>, has: KFunction<*>? = n
             count[type.asTypeName()] = count.getOrDefault(type.asTypeName(), 0) + 1
         }
         if (this.name == "InterfaceOnItemPublisher" && subscriber.annotationArgs["bidirectional"] as Boolean) {
-            val args = matchNames(subscriber.parameters.map {
-                when (it.first) {
-                    "fromItem" -> "toItem"
-                    "toItem" -> "fromItem"
-                    "fromSlot" -> "toSlot"
-                    "toSlot" -> "fromSlot"
-                    else -> it.first
-                } to it.second
-            }, count, subscriber)
-            val flipped = conditions.map { Equals(if (it.key == "toItem.id") "fromItem.id" else if (it.key == "fromItem.id") "toItem.id" else it.key, it.value) }
+            val args = matchNames(
+                subscriber.parameters.map {
+                    when (it.first) {
+                        "fromItem" -> "toItem"
+                        "toItem" -> "fromItem"
+                        "fromSlot" -> "toSlot"
+                        "toSlot" -> "fromSlot"
+                        else -> it.first
+                    } to it.second
+                },
+                count,
+                subscriber,
+            )
+            val flipped = conditions.map {
+                Equals(
+                    if (it.key == "toItem.id") {
+                        "fromItem.id"
+                    } else if (it.key == "fromItem.id") {
+                        "toItem.id"
+                    } else {
+                        it.key
+                    },
+                    it.value,
+                )
+            }
             methods.add(Method(flipped, suspendable, subscriber.className, subscriber.methodName, args, subscriber.returnType))
         }
         val args = matchNames(subscriber.parameters, count, subscriber)
         methods.add(Method(conditions, suspendable, subscriber.className, subscriber.methodName, args, subscriber.returnType))
         return methods
     }
-
 }

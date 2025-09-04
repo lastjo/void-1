@@ -1,22 +1,15 @@
 package content.entity.effect.toxin
 
-import content.entity.combat.hit.characterCombatAttack
 import content.entity.combat.hit.directHit
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.event.adminCommand
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
-import world.gregs.voidps.engine.entity.characterSpawn
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.timer.characterTimerStart
-import world.gregs.voidps.engine.timer.characterTimerStop
-import world.gregs.voidps.engine.timer.characterTimerTick
 import world.gregs.voidps.engine.timer.toTicks
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.PlayerRights
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
 import world.gregs.voidps.type.sub.*
 import java.util.concurrent.TimeUnit

@@ -1,6 +1,5 @@
 package content.skill.prayer.list
 
-import content.entity.death.playerDeath
 import content.entity.player.modal.Tab
 import content.entity.player.modal.tab
 import content.entity.sound.sound
@@ -12,16 +11,12 @@ import content.skill.prayer.PrayerConfigs.USING_QUICK_PRAYERS
 import content.skill.prayer.getActivePrayerVarKey
 import content.skill.prayer.isCurses
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.data.definition.EnumDefinitions
 import world.gregs.voidps.engine.data.definition.PrayerDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.hasMax
-import world.gregs.voidps.engine.entity.playerDespawn
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Death
 import world.gregs.voidps.type.sub.Despawn
 import world.gregs.voidps.type.sub.Interface

@@ -55,5 +55,4 @@ class Kebab {
             player.say(phrases.random())
         }
     }
-
 }

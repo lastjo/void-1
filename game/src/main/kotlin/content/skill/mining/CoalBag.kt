@@ -81,5 +81,4 @@ class CoalBag {
         }
         return false
     }
-
 }

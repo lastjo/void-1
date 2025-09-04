@@ -6,8 +6,6 @@ import content.skill.prayer.PrayerConfigs.ACTIVE_PRAYERS
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.flagAppearance
 import world.gregs.voidps.engine.entity.character.player.headIcon
-import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.PrayerStart
 import world.gregs.voidps.type.sub.PrayerStop
 import world.gregs.voidps.type.sub.Spawn

@@ -23,5 +23,4 @@ class Signposts {
         player.interfaces.sendText("signpost_directions", "south", location.getOrDefault("south_text", ""))
         player.interfaces.sendText("signpost_directions", "west", location.getOrDefault("west_text", ""))
     }
-
 }

@@ -9,7 +9,6 @@ import com.squareup.kotlinpoet.ksp.writeTo
 import world.gregs.voidps.engine.event.Publishers
 import java.util.*
 import kotlin.reflect.KClass
-import kotlin.reflect.full.createType
 
 /**
  * Takes [Subscriber]s marked with annotations and generates:
@@ -77,7 +76,7 @@ class PublisherProcessor(
         mainClass.primaryConstructor(constructor(allDependencies))
         // Statistics
         mainClass.addProperty(PropertySpec.builder("subscriptions", INT).initializer(total.toString()).build())
-        mainClass.addProperty(PropertySpec.builder("publishers", INT).initializer(count.toString()).build(),)
+        mainClass.addProperty(PropertySpec.builder("publishers", INT).initializer(count.toString()).build())
 
         // Save main file
         val fileSpec = FileSpec.builder("world.gregs.voidps.engine.script", "PublishersImpl")
@@ -131,7 +130,7 @@ class PublisherProcessor(
                     PropertySpec.builder(methodName, method.className)
                         .addModifiers(KModifier.PRIVATE)
                         .initializer("${method.className.simpleName}($classParams)")
-                        .build()
+                        .build(),
                 )
             }
         }
@@ -197,12 +196,12 @@ class PublisherProcessor(
             val returnType = fn.returnType!!.resolve().declaration.qualifiedName!!.asString()
             if (schema.notification) {
                 if (!schema.cancellable && returnType != "kotlin.Unit") {
-                    error("Method ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()} is not cancellable notification so cannot have a return type. (returns ${returnType})")
+                    error("Method ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()} is not cancellable notification so cannot have a return type. (returns $returnType)")
                 } else if (returnType != "kotlin.Unit" && returnType != "kotlin.Boolean") {
-                    error("Method ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()} is a cancellable notification so must return a Boolean or nothing. (returns ${returnType})")
+                    error("Method ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()} is a cancellable notification so must return a Boolean or nothing. (returns $returnType)")
                 }
             } else if (returnType != "kotlin.Unit" && returnType != schema.returnsDefault::class.qualifiedName) {
-                error("Method ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()} must return a ${schema.returnsDefault::class.simpleName}. (returns ${returnType})")
+                error("Method ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()} must return a ${schema.returnsDefault::class.simpleName}. (returns $returnType)")
             }
             val classParams: List<Pair<String, TypeName>> = parentClass.primaryConstructor?.parameters?.map { param ->
                 val name = param.name?.asString() ?: error("Unnamed class param in ${parentClass.qualifiedName?.asString()}")
@@ -216,8 +215,8 @@ class PublisherProcessor(
                     schema = schema,
                     annotationArgs = args,
                     classParams = classParams,
-                    returnType = returnType
-                )
+                    returnType = returnType,
+                ),
             )
         }
         return list

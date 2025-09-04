@@ -12,9 +12,6 @@ import world.gregs.voidps.engine.client.ui.chat.Colours
 import world.gregs.voidps.engine.client.ui.chat.an
 import world.gregs.voidps.engine.client.ui.closeMenu
 import world.gregs.voidps.engine.client.ui.dialogue
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
-import world.gregs.voidps.engine.client.ui.interact.itemOnObjectOperate
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.definition.InterfaceDefinitions
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
@@ -25,14 +22,11 @@ import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.queue.weakQueue
-import world.gregs.voidps.engine.suspend.SuspendableContext
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Close
 import world.gregs.voidps.type.sub.Interface
 import world.gregs.voidps.type.sub.UseOn

@@ -7,19 +7,15 @@ import content.social.trade.Trade.getPartner
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.sendScript
 import world.gregs.voidps.engine.client.ui.closeType
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
-import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.name
-import world.gregs.voidps.engine.entity.character.player.playerOperate
 import world.gregs.voidps.engine.entity.character.player.req.hasRequest
 import world.gregs.voidps.engine.entity.character.player.req.removeRequest
 import world.gregs.voidps.engine.entity.character.player.req.request
 import world.gregs.voidps.engine.inv.clear
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.moveAll
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Close
 import world.gregs.voidps.type.sub.Option
 

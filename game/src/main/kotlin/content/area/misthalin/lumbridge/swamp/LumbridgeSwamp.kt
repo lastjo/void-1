@@ -1,9 +1,7 @@
 package content.area.misthalin.lumbridge.swamp
 
-import content.entity.death.playerDeath
 import content.entity.player.bank.ownsItem
 import content.entity.player.dialogue.type.statement
-import content.entity.player.inv.item.destroy.destroyed
 import content.quest.quest
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.World
@@ -12,14 +10,11 @@ import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.PlayerOption
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.engine.timer.toTicks
 import world.gregs.voidps.type.Direction
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.sub.Death
 import world.gregs.voidps.type.sub.Option
@@ -83,5 +78,4 @@ class LumbridgeSwamp(private val npcs: NPCs) {
     fun destroy(player: Player) {
         player["rocks_restless_ghost"] = "skull"
     }
-
 }

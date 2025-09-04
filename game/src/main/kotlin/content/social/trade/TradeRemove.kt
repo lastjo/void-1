@@ -3,7 +3,6 @@ package content.social.trade
 import content.entity.player.dialogue.type.intEntry
 import content.social.trade.Trade.isTrading
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.item.Item
@@ -12,7 +11,6 @@ import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.AddItemLimit.addToLimit
 import world.gregs.voidps.engine.inv.transact.operation.ClearItem.clear
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItemLimit.removeToLimit
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Interface
 
 /**

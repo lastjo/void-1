@@ -36,8 +36,6 @@ import world.gregs.voidps.engine.client.clearCamera
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.chat.*
 import world.gregs.voidps.engine.client.ui.close
-import world.gregs.voidps.engine.client.ui.event.adminCommand
-import world.gregs.voidps.engine.client.ui.event.modCommand
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.client.ui.playTrack
 import world.gregs.voidps.engine.client.variable.start
@@ -63,9 +61,7 @@ import world.gregs.voidps.engine.entity.item.floor.ItemSpawns
 import world.gregs.voidps.engine.entity.item.floor.loadItemSpawns
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.loadObjectSpawns
-import world.gregs.voidps.engine.entity.worldSpawn
 import world.gregs.voidps.engine.get
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.*
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.charge
@@ -80,7 +76,6 @@ import world.gregs.voidps.network.login.protocol.encode.systemUpdate
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.PlayerRights
 import world.gregs.voidps.type.Region
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Command
 import world.gregs.voidps.type.sub.Spawn
 import java.util.concurrent.TimeUnit
@@ -98,7 +93,6 @@ class AdminCommands(
     private val accountLoader: PlayerAccountLoader,
 ) {
 
-
     val alternativeNames = Object2ObjectOpenHashMap<String, String>()
 
     val utf8Regex = "[^\\x20-\\x7e]".toRegex()
@@ -106,7 +100,6 @@ class AdminCommands(
     init {
         world.gregs.voidps.engine.client.ui.event.Command.adminCommands.add("${Colours.PURPLE.toTag()}====== Admin Commands ======</col>")
         world.gregs.voidps.engine.client.ui.event.Command.adminCommands.add("")
-
     }
 
     @Command("tele (x) (y) [level]", "tp", description = "teleport to given coordinates or area name", rights = PlayerRights.ADMIN)
@@ -171,7 +164,7 @@ class AdminCommands(
                   x: ${player.tile.x}
                   y: ${player.tile.y}
                   level: ${player.tile.level}
-                """.trimIndent(),
+            """.trimIndent(),
         )
         val npc = npcs.add(definition.stringId, player.tile, Direction.NORTH)
         npc.start("movement_delay", -1)

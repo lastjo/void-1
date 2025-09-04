@@ -1,10 +1,8 @@
 package content.quest.member.druidic_ritual
 
-import content.entity.player.modal.tab.questJournalOpen
 import content.quest.quest
 import content.quest.questJournal
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Subscribe
 
 class DruidicRitual {

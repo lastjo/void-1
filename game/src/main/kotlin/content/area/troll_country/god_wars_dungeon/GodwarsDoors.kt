@@ -5,9 +5,6 @@ import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 
 class GodwarsDoors(private val areas: AreaDefinitions) {
@@ -27,5 +24,4 @@ class GodwarsDoors(private val areas: AreaDefinitions) {
         player.dec("${god}_killcount", 40)
         player.enterDoor(target)
     }
-
 }

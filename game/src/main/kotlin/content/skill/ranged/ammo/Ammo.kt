@@ -1,7 +1,5 @@
 package content.skill.ranged.ammo
 
-import content.entity.combat.combatPrepare
-import content.entity.combat.combatSwing
 import content.entity.player.combat.special.specialAttack
 import content.entity.sound.sound
 import content.skill.melee.weapon.fightStyle
@@ -17,10 +15,8 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.hasUseLevel
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.CombatStage
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Combat
 
 class Ammo(

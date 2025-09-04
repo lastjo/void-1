@@ -15,22 +15,16 @@ import world.gregs.voidps.engine.client.ui.chat.Colours
 import world.gregs.voidps.engine.client.ui.chat.plural
 import world.gregs.voidps.engine.client.ui.chat.toTag
 import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.data.definition.data.Tanning
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.NPCOption
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.male
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.holdsItem
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.inv.transact.operation.ReplaceItem.replace
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Close
 import world.gregs.voidps.type.sub.Interface
 import world.gregs.voidps.type.sub.Option
@@ -56,6 +50,7 @@ class Ellis(private val itemDefs: ItemDefinitions) {
             }
         }
     }
+
     @Option("Trade", "ellis", "tanner")
     fun trade(player: Player, target: NPC) {
         player.open("tanner")

@@ -2,15 +2,12 @@ package content.entity.player.stat
 
 import net.pearx.kasechange.toSentenceCase
 import world.gregs.voidps.engine.client.ui.closeInterfaces
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.definition.InterfaceDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.Skill.*
 import world.gregs.voidps.engine.inject
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Interface
 import world.gregs.voidps.type.sub.Open
 
@@ -54,5 +51,4 @@ class Stats {
         val menuIndex = player["active_skill_guide", 1]
         player["skill_guide"] = menuIndex + index * 1024
     }
-
 }

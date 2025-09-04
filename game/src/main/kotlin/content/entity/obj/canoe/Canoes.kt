@@ -7,8 +7,6 @@ import content.skill.woodcutting.Hatchet
 import world.gregs.voidps.cache.definition.data.ObjectDefinition
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.closeMenu
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.definition.CanoeDefinitions
 import world.gregs.voidps.engine.entity.character.move.tele
@@ -20,13 +18,8 @@ import world.gregs.voidps.engine.entity.character.player.skill.level.Level
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.GameObjects
-import world.gregs.voidps.engine.entity.obj.ObjectOption
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.suspend.StringSuspension
 import world.gregs.voidps.type.Direction
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Interface
 import world.gregs.voidps.type.sub.Open
 import world.gregs.voidps.type.sub.Option
@@ -201,5 +194,4 @@ class Canoes(
         player.sound("canoe_sink")
         player.message(definition.message, type = ChatType.Filter)
     }
-
 }

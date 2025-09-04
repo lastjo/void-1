@@ -11,7 +11,6 @@ import world.gregs.voidps.engine.data.Settings
 import world.gregs.voidps.engine.data.definition.InventoryDefinitions
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.restrict.NoRestrictions

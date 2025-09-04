@@ -6,7 +6,6 @@ import content.entity.player.dialogue.Talk
 import content.entity.player.dialogue.type.ChoiceBuilder
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
-import content.entity.player.inv.inventoryItem
 import net.pearx.kasechange.toLowerSpaceCase
 import net.pearx.kasechange.toSentenceCase
 import world.gregs.voidps.engine.client.message
@@ -14,11 +13,8 @@ import world.gregs.voidps.engine.data.definition.SlayerTaskDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.name
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.queue.Action
 import world.gregs.voidps.engine.queue.strongQueue
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Inventory
 import world.gregs.voidps.type.sub.Spawn
 

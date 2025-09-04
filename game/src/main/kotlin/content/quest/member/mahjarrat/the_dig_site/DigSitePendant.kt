@@ -19,5 +19,4 @@ class DigSitePendant(areas: AreaDefinitions) {
         player.message("You rub the pendant...", ChatType.Filter)
         jewelleryTeleport(player, inventory, itemSlot, digSite)
     }
-
 }

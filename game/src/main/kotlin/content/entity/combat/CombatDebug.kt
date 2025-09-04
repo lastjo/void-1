@@ -3,17 +3,14 @@ package content.entity.combat
 import content.entity.combat.hit.Damage
 import content.entity.combat.hit.Hit
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.event.modCommand
 import world.gregs.voidps.engine.data.definition.NPCDefinitions
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCLevels
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.get
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.PlayerRights
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.sub.Command
 
@@ -43,5 +40,4 @@ class CombatDebug(private val npcDefinitions: NPCDefinitions) {
         player.message("Ranged: $rangeChance Melee: $meleeChance Magic: $magicChance")
         player["debug"] = debug
     }
-
 }

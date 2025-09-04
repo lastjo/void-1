@@ -4,19 +4,16 @@ import content.entity.obj.door.enterDoor
 import content.quest.quest
 import net.pearx.kasechange.toLowerSpaceCase
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interact.itemOnObjectOperate
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.noInterest
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.obj.*
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.replace
 import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.engine.timer.toTicks
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.sub.Option
 import world.gregs.voidps.type.sub.UseOn
@@ -26,7 +23,6 @@ class TaverleyDungeon(
     private val npcs: NPCs,
     private val objects: GameObjects,
 ) {
-
 
     val leftSpawn = Tile(2887, 9832)
     val rightSpawn = Tile(2887, 9829)
@@ -66,5 +62,4 @@ class TaverleyDungeon(
         }
         return true
     }
-
 }

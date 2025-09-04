@@ -11,12 +11,9 @@ import content.entity.player.dialogue.type.player
 import content.entity.sound.sound
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
-import world.gregs.voidps.engine.entity.character.mode.interact.TargetInteraction
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 
 internal suspend fun PlayerChoice.fighters(): Unit = option<Uncertain>("Do you see a lot of injured fighters?") {
@@ -62,5 +59,4 @@ class Nurses {
     suspend fun heal(player: Player, npc: NPC) = player.talkWith(npc) {
         heal()
     }
-
 }

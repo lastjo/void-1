@@ -6,10 +6,8 @@ import content.entity.player.dialogue.type.*
 import content.quest.quest
 import content.quest.questCompleted
 import content.quest.refreshQuestJournal
-import world.gregs.voidps.engine.client.ui.interact.itemOnItem
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.noInterest
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
@@ -20,7 +18,6 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.replace
 import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.engine.suspend.SuspendableContext
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 import world.gregs.voidps.type.sub.UseOn
 

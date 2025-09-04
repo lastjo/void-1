@@ -1,13 +1,10 @@
 package content.entity.player.command.admin
 
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.event.adminCommand
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.obj.GameObjects
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.type.PlayerRights
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Command
 
 class ObjectCommands(private val objects: GameObjects) {
@@ -18,5 +15,4 @@ class ObjectCommands(private val objects: GameObjects) {
             player.message(it.toString(), ChatType.Console)
         }
     }
-
 }

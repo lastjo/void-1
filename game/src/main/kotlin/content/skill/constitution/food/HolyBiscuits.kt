@@ -10,5 +10,4 @@ class HolyBiscuits {
     fun eat(player: Player) {
         player.levels.restore(Skill.Prayer, 10)
     }
-
 }

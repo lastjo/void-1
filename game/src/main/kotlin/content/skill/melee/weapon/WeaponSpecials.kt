@@ -357,5 +357,4 @@ class WeaponSpecials(
             }
         }
     }
-
 }

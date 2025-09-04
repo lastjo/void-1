@@ -33,5 +33,4 @@ class Pies {
         player.levels.boost(Skill.Slayer, 4)
         player.levels.boost(Skill.Ranged, 4)
     }
-
 }

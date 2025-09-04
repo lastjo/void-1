@@ -1,7 +1,5 @@
 package content.area.misthalin.varrock
 
-import content.entity.combat.combatPrepare
-import content.entity.combat.npcCombatPrepare
 import content.entity.death.Death
 import content.entity.effect.transform
 import content.entity.gfx.areaGfx
@@ -41,7 +39,6 @@ import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.ObjectShape
 import world.gregs.voidps.engine.event.Context
 import world.gregs.voidps.engine.event.Publishers
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.engine.queue.strongQueue
 import world.gregs.voidps.engine.queue.weakQueue
@@ -55,7 +52,6 @@ class Delrith(
     private val npcs: NPCs,
     private val areas: AreaDefinitions,
 ) {
-
 
     val area = areas["demon_slayer_stone_circle"]
     val defaultTile = Tile(3220, 3367)

@@ -1,19 +1,15 @@
 package content.quest.member.enakhras_lament
 
 import content.entity.player.dialogue.type.statement
-import content.entity.player.inv.inventoryItem
 import content.skill.magic.jewellery.jewelleryTeleport
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.chat.plural
-import world.gregs.voidps.engine.client.ui.interact.itemOnItem
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.charges
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.replace
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Inventory
 import world.gregs.voidps.type.sub.UseOn
 
@@ -39,17 +35,16 @@ class Camulet(private val areas: AreaDefinitions) {
         }
     }
 
-   @UseOn("ugthanki_dung", "camulet")
-   fun use(player: Player, fromItem: Item, toSlot: Int) {
-       val charges = player.inventory.charges(player, toSlot)
-       if (charges == 4) {
-           player.message("Your Camulet already has 4 charges.")
-           return
-       }
-       if (player.inventory.replace("ugthanki_dung", "bucket")) {
-           player.message("You recharge the Camulet using camel dung. Yuck!")
-           player["camulet_charges"] = 4
-       }
-   }
-
+    @UseOn("ugthanki_dung", "camulet")
+    fun use(player: Player, fromItem: Item, toSlot: Int) {
+        val charges = player.inventory.charges(player, toSlot)
+        if (charges == 4) {
+            player.message("Your Camulet already has 4 charges.")
+            return
+        }
+        if (player.inventory.replace("ugthanki_dung", "bucket")) {
+            player.message("You recharge the Camulet using camel dung. Yuck!")
+            player["camulet_charges"] = 4
+        }
+    }
 }

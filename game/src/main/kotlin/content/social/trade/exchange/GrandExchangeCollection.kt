@@ -3,19 +3,16 @@ package content.social.trade.exchange
 import com.github.michaelbull.logging.InlineLogger
 import content.entity.player.bank.noted
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.data.exchange.ExchangeHistory
 import world.gregs.voidps.engine.data.exchange.ExchangeOffer
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.inventoryFull
 import world.gregs.voidps.engine.entity.character.player.name
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItemLimit.addToLimit
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Interface
 
 class GrandExchangeCollection(private val exchange: GrandExchange) {

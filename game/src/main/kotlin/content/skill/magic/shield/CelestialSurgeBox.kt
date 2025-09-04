@@ -1,10 +1,8 @@
 package content.skill.magic.shield
 
 import content.entity.player.dialogue.type.choice
-import content.entity.player.inv.inventoryItem
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.chat.plural
-import world.gregs.voidps.engine.client.ui.interact.itemOnItem
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.inventoryFull
@@ -17,7 +15,6 @@ import world.gregs.voidps.engine.inv.transact.discharge
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.*
 import world.gregs.voidps.type.sub.Inventory
 import world.gregs.voidps.type.sub.ItemAdded

@@ -2,10 +2,8 @@ package content.skill.ranged.weapon.special
 
 import content.area.wilderness.inMultiCombat
 import content.entity.combat.Target
-import content.entity.combat.hit.characterCombatDamage
 import content.entity.combat.hit.hit
 import content.entity.player.combat.special.SpecialAttack
-import content.entity.player.combat.special.specialAttack
 import content.entity.proj.shoot
 import content.skill.ranged.ammo
 import org.rsmod.game.pathfinder.LineValidator
@@ -15,10 +13,8 @@ import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.map.spiral
 import world.gregs.voidps.type.CombatStage
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Combat
 
 class RuneThrowingAxe(
@@ -63,5 +59,4 @@ class RuneThrowingAxe(
             }
         }
     }
-
 }

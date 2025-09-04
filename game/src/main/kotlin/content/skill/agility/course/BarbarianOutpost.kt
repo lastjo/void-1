@@ -13,9 +13,7 @@ import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.type.Direction
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.equals
 import world.gregs.voidps.type.random
@@ -176,5 +174,4 @@ class BarbarianOutpost {
         player.exp(Skill.Agility, 13.7)
         player.delay()
     }
-
 }

@@ -9,22 +9,18 @@ import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import content.entity.player.dialogue.type.statement
-import content.entity.player.inv.inventoryItem
 import content.quest.messageScroll
 import content.quest.questCompleted
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.dialogue
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.inv.replace
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Inventory
 import world.gregs.voidps.type.sub.Option
 
@@ -88,7 +84,7 @@ class SirGerry {
     }
 
     @Inventory("Read", "knights_notes_opened")
-    fun readNotes(player: Player, item: Item)  {
+    fun readNotes(player: Player, item: Item) {
         open(player)
     }
 

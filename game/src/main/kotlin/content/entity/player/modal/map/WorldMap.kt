@@ -40,9 +40,7 @@ class WorldMap(private val definitions: InterfaceDefinitions) {
     }
 
     @TimerStart("world_map_check")
-    fun start(player: Player): Int {
-        return 5
-    }
+    fun start(player: Player): Int = 5
 
     @TimerTick("world_map_check")
     fun tick(player: Player): Int {

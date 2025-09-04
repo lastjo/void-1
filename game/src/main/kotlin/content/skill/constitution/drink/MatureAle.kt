@@ -86,5 +86,4 @@ class MatureAle {
             player.levels.drain(Skill.Strength, 1, 0.05)
         }
     }
-
 }

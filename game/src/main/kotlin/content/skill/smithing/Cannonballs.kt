@@ -6,8 +6,6 @@ import content.entity.player.dialogue.type.statement
 import content.entity.sound.sound
 import content.quest.quest
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interact.itemOnObjectOperate
-import world.gregs.voidps.engine.entity.character.mode.interact.Interaction
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.chat.noInterest
@@ -20,7 +18,6 @@ import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.queue.weakQueue
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.UseOn
 
 class Cannonballs {

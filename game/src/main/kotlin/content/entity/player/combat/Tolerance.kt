@@ -1,15 +1,11 @@
 package content.entity.player.combat
 
 import world.gregs.voidps.engine.client.variable.start
-import world.gregs.voidps.engine.entity.character.mode.move.move
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.timer.epochSeconds
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.sub.Move
 import world.gregs.voidps.type.sub.Spawn
-import world.gregs.voidps.type.sub.Variable
 import java.util.concurrent.TimeUnit
 
 class Tolerance {
@@ -35,5 +31,4 @@ class Tolerance {
         player["tolerance_area"] = player.tile.toCuboid(10)
         player.start("tolerance", toleranceTime.toInt(), epochSeconds())
     }
-
 }

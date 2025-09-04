@@ -7,14 +7,11 @@ import world.gregs.voidps.engine.entity.character.player.renderEmote
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.obj.*
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.type.Direction
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.sub.Option
 
 class TreeGnomeStronghold(private val objects: GameObjects) {
-
 
     @Option("Open", "tree_gnome_door_east_closed", "tree_gnome_door_west_closed")
     suspend fun open(player: Player, target: GameObject) {
@@ -71,5 +68,4 @@ class TreeGnomeStronghold(private val objects: GameObjects) {
         player.clearRenderEmote()
         player.walkToDelay(Tile(2486, 3515))
     }
-
 }

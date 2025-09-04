@@ -8,13 +8,10 @@ import world.gregs.voidps.engine.entity.character.mode.EmptyMode
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Players
-import world.gregs.voidps.engine.entity.npcSpawn
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.map.collision.Collisions
 import world.gregs.voidps.engine.timer.*
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
-import world.gregs.voidps.type.TimerState
 import world.gregs.voidps.type.random
 import world.gregs.voidps.type.sub.Spawn
 import world.gregs.voidps.type.sub.TimerStart

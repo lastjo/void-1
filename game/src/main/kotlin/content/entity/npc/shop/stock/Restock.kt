@@ -5,17 +5,11 @@ import content.entity.npc.shop.general.GeneralStores
 import world.gregs.voidps.cache.config.data.InventoryDefinition
 import world.gregs.voidps.engine.data.definition.InventoryDefinitions
 import world.gregs.voidps.engine.entity.World
-import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.playerDespawn
-import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.entity.worldSpawn
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.Inventory
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.timer.*
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Despawn
 import world.gregs.voidps.type.sub.Spawn
 import world.gregs.voidps.type.sub.TimerStart
@@ -38,9 +32,7 @@ class Restock(private val inventoryDefinitions: InventoryDefinitions) {
     }
 
     @TimerStart("shop_restock")
-    fun start(player: Player): Int {
-        return restockTimeTicks
-    }
+    fun start(player: Player): Int = restockTimeTicks
 
     @TimerTick("shop_restock")
     fun tick(player: Player) {
@@ -78,9 +70,7 @@ class Restock(private val inventoryDefinitions: InventoryDefinitions) {
     }
 
     @TimerStart("general_store_restock")
-    fun start(world: World): Int {
-        return restockTimeTicks
-    }
+    fun start(world: World): Int = restockTimeTicks
 
     @TimerTick("general_store_restock")
     fun tick(world: World) {

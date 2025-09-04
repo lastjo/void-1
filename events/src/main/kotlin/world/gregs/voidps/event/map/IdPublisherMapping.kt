@@ -9,7 +9,7 @@ import kotlin.reflect.KFunction
 open class IdPublisherMapping(
     function: KFunction<*>,
     private val field: String = "id",
-    notification: Boolean = false
+    notification: Boolean = false,
 ) : PublisherMapping(function, notification = notification) {
     override fun conditions(method: Subscriber): List<List<Condition>> {
         val ids = method.annotationArgs["ids"] as List<String>

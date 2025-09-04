@@ -22,5 +22,4 @@ class AberrantSpectre {
             target.levels.drain(Skill.Agility, multiplier = 0.6)
         }
     }
-
 }

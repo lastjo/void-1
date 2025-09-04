@@ -11,5 +11,4 @@ class SoftClay {
     fun use(player: Player) {
         player.message("You now have some soft, workable clay.", ChatType.Filter)
     }
-
 }

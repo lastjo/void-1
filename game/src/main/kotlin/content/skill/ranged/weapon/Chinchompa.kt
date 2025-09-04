@@ -1,7 +1,6 @@
 package content.skill.ranged.weapon
 
 import content.area.wilderness.inMultiCombat
-import content.entity.combat.hit.combatAttack
 import content.entity.combat.hit.directHit
 import content.entity.sound.sound
 import content.skill.melee.weapon.multiTargets

@@ -100,5 +100,4 @@ class GemBag {
         }
         return false
     }
-
 }

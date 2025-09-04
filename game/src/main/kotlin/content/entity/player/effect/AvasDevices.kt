@@ -88,9 +88,7 @@ class AvasDevices(private val floorItems: FloorItems) {
     }
 
     @TimerStart("junk_collection")
-    fun start(player: Player): Int {
-        return TimeUnit.SECONDS.toTicks(90)
-    }
+    fun start(player: Player): Int = TimeUnit.SECONDS.toTicks(90)
 
     @TimerTick("junk_collection")
     fun tick(player: Player) {

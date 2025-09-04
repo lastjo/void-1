@@ -4,9 +4,7 @@ import content.entity.player.dialogue.*
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 
 class MageOfZamorakOurania {
@@ -26,5 +24,4 @@ class MageOfZamorakOurania {
         npc<Afraid>("I don't think so. The mages don't like outsiders going in; they'll probably attack you. They only patrol the short path, though, so if you used the long path, through a tunnel near the entrance, you'd probably be safe.")
         player<Neutral>("Thanks.")
     }
-
 }

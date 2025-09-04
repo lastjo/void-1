@@ -4,15 +4,12 @@ import com.github.michaelbull.logging.InlineLogger
 import content.entity.player.inv.InventoryOption
 import world.gregs.voidps.cache.definition.data.ItemDefinition
 import world.gregs.voidps.engine.client.ui.closeInterfaces
-import world.gregs.voidps.engine.client.ui.event.interfaceRefresh
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.sendInventory
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Interface
 import world.gregs.voidps.type.sub.Refresh
 

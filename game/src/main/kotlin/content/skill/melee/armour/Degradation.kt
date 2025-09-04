@@ -9,7 +9,6 @@ import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.inv.*
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.CombatStage
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Combat
 import world.gregs.voidps.type.sub.InventorySlotChanged
 

@@ -43,5 +43,4 @@ class PrayerToggle {
         Publishers.all.prayerStopPlayer(player, id)
         Publishers.all.prayerStopCharacter(player, id)
     }
-
 }

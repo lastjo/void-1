@@ -9,7 +9,6 @@ import content.bot.interact.navigation.goToArea
 import content.bot.interact.navigation.resume
 import content.entity.combat.attackers
 import content.entity.combat.inCombat
-import content.entity.death.playerDeath
 import content.entity.death.weightedSample
 import content.skill.magic.spell.removeSpellItems
 import content.skill.magic.spell.spell
@@ -19,7 +18,6 @@ import net.pearx.kasechange.toLowerSpaceCase
 import net.pearx.kasechange.toSnakeCase
 import world.gregs.voidps.engine.client.ui.chat.toIntRange
 import world.gregs.voidps.engine.client.update.view.Viewport
-import world.gregs.voidps.engine.client.variable.variableSet
 import world.gregs.voidps.engine.data.definition.AmmoDefinitions
 import world.gregs.voidps.engine.data.definition.AreaDefinition
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
@@ -33,16 +31,12 @@ import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.entity.character.player.equip.has
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.hasRequirements
-import world.gregs.voidps.engine.entity.character.player.skill.level.levelChange
 import world.gregs.voidps.engine.entity.distanceTo
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
-import world.gregs.voidps.engine.entity.worldSpawn
 import world.gregs.voidps.engine.get
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.network.client.instruction.InteractInterface
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.random
 import world.gregs.voidps.type.sub.Death

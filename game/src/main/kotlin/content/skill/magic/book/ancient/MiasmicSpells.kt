@@ -16,5 +16,4 @@ class MiasmicSpells(private val definitions: SpellDefinitions) {
         val seconds: Int = definitions.get(spell)["effect_seconds"]
         target.start("miasmic", seconds, epochSeconds())
     }
-
 }

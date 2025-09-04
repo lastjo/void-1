@@ -5,8 +5,6 @@ import content.quest.questCompleted
 import world.gregs.voidps.engine.client.sendScript
 import world.gregs.voidps.engine.client.ui.chat.plural
 import world.gregs.voidps.engine.client.ui.close
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.definition.QuestDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
@@ -15,7 +13,6 @@ import world.gregs.voidps.engine.entity.character.player.skill.level.Level.hasMa
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.suspend.StringSuspension
 import world.gregs.voidps.engine.suspend.SuspendableContext
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Close
 import world.gregs.voidps.type.sub.Interface
 
@@ -128,5 +125,4 @@ class QuestStart {
     fun close(player: Player) {
         (player.dialogueSuspension as? StringSuspension)?.resume("no")
     }
-
 }

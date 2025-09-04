@@ -1,7 +1,5 @@
 package content.skill.magic.book.modern
 
-import content.entity.combat.hit.CombatAttack
-import content.entity.combat.hit.characterCombatAttack
 import content.entity.effect.freeze
 import world.gregs.voidps.engine.data.definition.SpellDefinitions
 import world.gregs.voidps.engine.entity.character.Character
@@ -17,5 +15,4 @@ class BindSpells(private val definitions: SpellDefinitions) {
             source.freeze(target, definitions.get(spell)["freeze_ticks"])
         }
     }
-
 }

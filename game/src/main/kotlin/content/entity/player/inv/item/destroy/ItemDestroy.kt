@@ -2,16 +2,13 @@ package content.entity.player.inv.item.destroy
 
 import com.github.michaelbull.logging.InlineLogger
 import content.entity.player.dialogue.type.destroy
-import content.entity.player.inv.inventoryOptions
 import content.entity.sound.sound
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Inventory
-import world.gregs.voidps.type.sub.Option
 
 class ItemDestroy {
 
@@ -47,5 +44,4 @@ class ItemDestroy {
             logger.info { "Error destroying item $item for $player" }
         }
     }
-
 }

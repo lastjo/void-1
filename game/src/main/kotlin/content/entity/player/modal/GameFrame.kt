@@ -150,5 +150,4 @@ class GameFrame {
             player.interfaces.sendVisibility(player.interfaces.gameFrame, "wilderness_level", false)
         }
     }
-
 }

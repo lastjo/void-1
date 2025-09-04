@@ -43,5 +43,4 @@ class PrayerBonus(private val definitions: PrayerDefinitions) {
             }
         }
     }
-
 }

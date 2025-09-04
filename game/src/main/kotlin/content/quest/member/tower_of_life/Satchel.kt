@@ -1,10 +1,8 @@
 package content.quest.member.tower_of_life
 
 import content.entity.player.dialogue.type.item
-import content.entity.player.inv.inventoryItem
 import net.pearx.kasechange.toLowerSpaceCase
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interact.itemOnItem
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.inv.charges

@@ -9,7 +9,8 @@ import world.gregs.voidps.engine.suspend.Suspension
 class Dialogue(
     override val character: Player,
     override val target: NPC,
-) : TargetContext<Player, NPC>, SuspendableContext<Player> {
+) : TargetContext<Player, NPC>,
+    SuspendableContext<Player> {
     override suspend fun pause(ticks: Int) {
         Suspension.start(character, ticks)
     }

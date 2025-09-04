@@ -3,17 +3,9 @@ package content.entity.player.modal.tab
 import com.github.michaelbull.logging.InlineLogger
 import content.quest.refreshQuestJournal
 import world.gregs.voidps.engine.client.clearCamera
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.interfaceOption
-import world.gregs.voidps.engine.client.variable.variableSet
 import world.gregs.voidps.engine.data.definition.QuestDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.event.Publishers
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.engine.timer.timerStart
-import world.gregs.voidps.engine.timer.timerStop
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.*
 
 class QuestJournals(private val questDefinitions: QuestDefinitions) {
@@ -50,9 +42,7 @@ class QuestJournals(private val questDefinitions: QuestDefinitions) {
     }
 
     @TimerStart("refresh_quest_journal")
-    fun start(player: Player): Int {
-        return 1
-    }
+    fun start(player: Player): Int = 1
 
     @TimerStop("refresh_quest_journal")
     fun stop(player: Player) {
@@ -63,5 +53,4 @@ class QuestJournals(private val questDefinitions: QuestDefinitions) {
     fun spawn(player: Player) {
         player.clearCamera()
     }
-
 }

@@ -197,16 +197,19 @@ fun Player.itemOnItem(
 ) {
     val one = inventories.inventory(firstInventory)
     val two = inventories.inventory(secondInventory)
-    get<InstructionHandlers>().interactInterfaceItem.validate(this, InteractInterfaceItem(
-        fromItem = one[firstSlot].def.id,
-        toItem = two[secondSlot].def.id,
-        fromSlot = firstSlot,
-        toSlot = secondSlot,
-        fromInterfaceId = 149,
-        fromComponentId = 0,
-        toInterfaceId = 149,
-        toComponentId = 0
-    ))
+    get<InstructionHandlers>().interactInterfaceItem.validate(
+        this,
+        InteractInterfaceItem(
+            fromItem = one[firstSlot].def.id,
+            toItem = two[secondSlot].def.id,
+            fromSlot = firstSlot,
+            toSlot = secondSlot,
+            fromInterfaceId = 149,
+            fromComponentId = 0,
+            toInterfaceId = 149,
+            toComponentId = 0,
+        ),
+    )
 }
 
 fun Player.npcOption(npc: NPC, option: String) {
@@ -223,7 +226,7 @@ fun Player.npcOption(npc: NPC, option: Int) = runTest {
     instructions.send(InteractNPC(npc.index, option + 1))
 }
 
-fun Player.inventoryOption(player: Player, inventory: String, item: Item, slot: Int, option: String,) = runTest {
+fun Player.inventoryOption(player: Player, inventory: String, item: Item, slot: Int, option: String) = runTest {
     Publishers.all.inventoryOption(player, item, inventory, option, slot)
     player.emit(InventoryOption(player, inventory, item, slot, option))
 }

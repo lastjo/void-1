@@ -2,14 +2,10 @@ package content.skill.melee
 
 import content.skill.melee.weapon.attackRange
 import content.skill.melee.weapon.weapon
-import world.gregs.voidps.engine.client.variable.variableSet
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.inv.inventoryChanged
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.InventorySlotChanged
 import world.gregs.voidps.type.sub.Spawn
 import world.gregs.voidps.type.sub.Variable

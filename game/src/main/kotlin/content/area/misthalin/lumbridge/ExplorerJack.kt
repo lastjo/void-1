@@ -19,19 +19,14 @@ import world.gregs.voidps.engine.client.variable.BitwiseValues
 import world.gregs.voidps.engine.data.Settings
 import world.gregs.voidps.engine.data.definition.VariableDefinitions
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.NPCs
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.inventoryFull
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 
 class ExplorerJack(
@@ -99,7 +94,7 @@ class ExplorerJack(
     }
 
     @Option("Open", "explorer_jack_trapdoor")
-    suspend fun open(player: Player, target: GameObject){
+    suspend fun open(player: Player, target: GameObject) {
         val explorerJack = npcs[player.tile.regionLevel].first { it.id.startsWith("explorer_jack") }
         player.talkWith(explorerJack) {
             npc<Uncertain>("I say, there's nothing interesting in my cellar! Better go exploring elsewhere, eh?")

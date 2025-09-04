@@ -28,7 +28,7 @@ import world.gregs.voidps.type.sub.Open
 import world.gregs.voidps.type.sub.Option
 
 class Thessalia(
-    private val enums: EnumDefinitions
+    private val enums: EnumDefinitions,
 ) {
 
     @Option("Talk-to", "thessalia")
@@ -104,6 +104,7 @@ class Thessalia(
         }
         player["makeover_$part"] = value
     }
+
     @Interface(component = "colours", id = "thessalias_makeovers")
     fun colours(player: Player, itemSlot: Int) {
         val part = player["makeover_body_part", "top"]
@@ -127,7 +128,6 @@ class Thessalia(
         player.closeMenu()
         npc<Happy>("thessalia", "A marvellous choice. You look splendid!")
     }
-
 
     fun PlayerChoice.openShop(): Unit = option("I'd just like to buy some clothes.") {
         player.openShop("thessalias_fine_clothes")

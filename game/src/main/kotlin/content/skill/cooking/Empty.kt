@@ -1,13 +1,11 @@
 package content.skill.cooking
 
-import content.entity.player.inv.inventoryOption
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.replace
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Inventory
 
 class Empty {
@@ -24,5 +22,4 @@ class Empty {
         player.inventory.replace(itemSlot, item.id, "pie_dish")
         player.message("You remove the burnt pie from the pie dish.", ChatType.Filter)
     }
-
 }

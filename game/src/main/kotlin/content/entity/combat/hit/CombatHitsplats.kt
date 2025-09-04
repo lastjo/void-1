@@ -15,7 +15,7 @@ import kotlin.collections.set
 import kotlin.math.floor
 
 class CombatHitsplats(
-    private val definitions: SpellDefinitions
+    private val definitions: SpellDefinitions,
 ) {
 
     @Combat(stage = CombatStage.DAMAGE)

@@ -16,5 +16,4 @@ class Minimap {
     fun summoning(player: Player) {
         player.sendVariable("show_summoning_orb")
     }
-
 }

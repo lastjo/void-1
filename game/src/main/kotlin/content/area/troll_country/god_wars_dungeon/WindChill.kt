@@ -6,16 +6,9 @@ import content.entity.sound.sound
 import world.gregs.voidps.engine.client.ui.close
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
-import world.gregs.voidps.engine.entity.character.mode.move.enterArea
-import world.gregs.voidps.engine.entity.character.mode.move.exitArea
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
-import world.gregs.voidps.engine.timer.timerStart
-import world.gregs.voidps.engine.timer.timerStop
-import world.gregs.voidps.engine.timer.timerTick
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.*
 
 class WindChill(private val areas: AreaDefinitions) {
@@ -63,5 +56,4 @@ class WindChill(private val areas: AreaDefinitions) {
     fun stop(player: Player) {
         player.close("snow_flakes")
     }
-
 }

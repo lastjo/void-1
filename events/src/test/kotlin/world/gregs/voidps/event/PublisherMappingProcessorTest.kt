@@ -21,7 +21,7 @@ class PublisherMappingProcessorTest {
         returnsDefault = true,
         notification = true,
         methodName = "",
-        required = listOf(STRING)
+        required = listOf(STRING),
     ) {
         override fun conditions(
             method: Subscriber,

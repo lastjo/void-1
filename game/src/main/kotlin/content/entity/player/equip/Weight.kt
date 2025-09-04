@@ -27,5 +27,4 @@ class Weight {
     }
 
     fun Inventory.weight(): Double = items.sumOf { it.def["weight", 0.0] * it.amount }
-
 }

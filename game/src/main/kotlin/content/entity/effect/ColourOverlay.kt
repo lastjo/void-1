@@ -1,10 +1,6 @@
 package content.entity.effect
 
 import world.gregs.voidps.engine.entity.character.Character
-import world.gregs.voidps.engine.timer.characterTimerStart
-import world.gregs.voidps.engine.timer.characterTimerStop
-import world.gregs.voidps.engine.timer.characterTimerTick
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.TimerStart
 import world.gregs.voidps.type.sub.TimerStop
 import world.gregs.voidps.type.sub.TimerTick
@@ -18,13 +14,10 @@ class ColourOverlay {
     }
 
     @TimerTick("colour_overlay")
-    fun tick(character: Character): Int {
-        return 0
-    }
+    fun tick(character: Character): Int = 0
 
     @TimerStop("colour_overlay")
     fun stop(character: Character) {
         character.visuals.colourOverlay.reset()
     }
-
 }

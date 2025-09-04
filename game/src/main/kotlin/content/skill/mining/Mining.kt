@@ -23,13 +23,9 @@ import world.gregs.voidps.engine.entity.character.player.skill.level.Level.succe
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.GameObjects
-import world.gregs.voidps.engine.entity.obj.objectApproach
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
 import world.gregs.voidps.type.sub.Option
 

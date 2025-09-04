@@ -6,9 +6,7 @@ import content.entity.player.dialogue.Uncertain
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
-import world.gregs.voidps.engine.client.ui.interact.itemOnNPCOperate
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.TransactionError
@@ -16,7 +14,6 @@ import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItemLimit.removeToLimit
 import world.gregs.voidps.engine.suspend.SuspendableContext
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 import world.gregs.voidps.type.sub.UseOn
 

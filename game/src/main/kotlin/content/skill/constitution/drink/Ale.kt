@@ -2,7 +2,6 @@ package content.skill.constitution.drink
 
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Consume
 
 class Ale {

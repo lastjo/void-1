@@ -9,33 +9,23 @@ import content.quest.miniquest.alfred_grimhands_barcrawl.barCrawlDrink
 import content.quest.miniquest.alfred_grimhands_barcrawl.barCrawlFilter
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
-import world.gregs.voidps.engine.client.ui.interact.ItemOnNPC
-import world.gregs.voidps.engine.client.ui.interact.itemOnNPCApproach
-import world.gregs.voidps.engine.client.ui.interact.itemOnNPCOperate
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
-import world.gregs.voidps.engine.entity.character.mode.interact.Interact
-import world.gregs.voidps.engine.entity.character.mode.interact.TargetInteraction
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.NPCOption
-import world.gregs.voidps.engine.entity.character.npc.npcApproach
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.inventoryFull
 import world.gregs.voidps.engine.entity.character.player.chat.noInterest
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItemLimit.removeToLimit
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 import world.gregs.voidps.type.sub.UseOn
 
 class BarmaidsRisingSunInn(
-    private val itemDefinitions: ItemDefinitions
+    private val itemDefinitions: ItemDefinitions,
 ) {
 
     // Dialogue

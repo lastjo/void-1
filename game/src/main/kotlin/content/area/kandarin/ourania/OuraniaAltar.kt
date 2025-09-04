@@ -3,7 +3,6 @@ package content.area.kandarin.ourania
 import com.github.michaelbull.logging.InlineLogger
 import content.entity.sound.sound
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interact.itemOnObjectOperate
 import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.data.definition.data.Rune
 import world.gregs.voidps.engine.entity.character.player.Player
@@ -13,13 +12,10 @@ import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.item.drop.DropTables
 import world.gregs.voidps.engine.entity.item.drop.ItemDrop
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItemLimit.removeToLimit
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
 import world.gregs.voidps.type.sub.Option
 import world.gregs.voidps.type.sub.UseOn
@@ -76,5 +72,4 @@ class OuraniaAltar(private val drops: DropTables) {
     fun use(player: Player, target: GameObject) {
         player.message("Your talisman has no effect on the altar.")
     }
-
 }

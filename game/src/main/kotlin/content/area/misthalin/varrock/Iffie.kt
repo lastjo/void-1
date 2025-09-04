@@ -33,5 +33,4 @@ class Iffie {
     fun operate(player: Player, npc: NPC) {
         player.openShop("iffies_random_costume_shop")
     }
-
 }

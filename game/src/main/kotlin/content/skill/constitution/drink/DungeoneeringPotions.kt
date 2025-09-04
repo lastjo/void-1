@@ -229,5 +229,4 @@ class DungeoneeringPotions {
         player.levels.boost(Skill.Thieving, 6, 0.06)
         player.levels.boost(Skill.Slayer, 6, 0.06)
     }
-
 }

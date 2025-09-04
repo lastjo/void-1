@@ -54,27 +54,18 @@ internal class ChangeManagerTest {
     fun `Clear tracked changes`() {
         val events = mockk<Player>(relaxed = true)
         Publishers.set(object : Publishers {
-            override fun itemAdded(player: Player, item: Item, itemSlot: Int, inventory: String): Boolean {
-                throw IllegalStateException()
-            }
+            override fun itemAdded(player: Player, item: Item, itemSlot: Int, inventory: String): Boolean = throw IllegalStateException()
 
-            override fun itemRemoved(player: Player, item: Item, itemSlot: Int, inventory: String): Boolean {
-                throw IllegalStateException()
-            }
+            override fun itemRemoved(player: Player, item: Item, itemSlot: Int, inventory: String): Boolean = throw IllegalStateException()
 
-            override fun publishPlayer(player: Player, event: String, id: Any): Boolean {
-                throw IllegalStateException()
-            }
+            override fun publishPlayer(player: Player, event: String, id: Any): Boolean = throw IllegalStateException()
 
-            override fun inventoryChanged(player: Player, inventory: String, index: Int, item: Item, from: String, fromSlot: Int, fromItem: Item): Boolean {
-                throw IllegalStateException()
-            }
+            override fun inventoryChanged(player: Player, inventory: String, index: Int, item: Item, from: String, fromSlot: Int, fromItem: Item): Boolean = throw IllegalStateException()
         })
         change.bind(events)
         change.track("inventory", 1, Item.EMPTY, 1, Item("item", 1))
         change.clear()
         change.send()
         assertTrue(change.changes.isEmpty())
-
     }
 }

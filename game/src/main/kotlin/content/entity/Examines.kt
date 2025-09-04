@@ -25,7 +25,6 @@ class Examines(
     private val objectDefinitions: ObjectDefinitions,
 ) {
 
-
     @Instruction(ExamineItem::class)
     fun item(player: Player, instruction: ExamineItem) {
         val definition = itemDefinitions.get(instruction.itemId)
@@ -69,5 +68,4 @@ class Examines(
     fun operate(player: Player, target: NPC, def: NPCDefinition) {
         player.message(def.getOrNull("examine") ?: return, ChatType.NPCExamine)
     }
-
 }

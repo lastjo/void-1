@@ -2,7 +2,6 @@ package content.area.asgarnia.falador
 
 import com.github.michaelbull.logging.InlineLogger
 import content.entity.combat.attackers
-import content.entity.combat.hit.npcCombatDamage
 import content.entity.gfx.areaGfx
 import content.entity.player.dialogue.type.warning
 import content.entity.sound.areaSound
@@ -16,20 +15,15 @@ import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
-import world.gregs.voidps.engine.entity.character.mode.move.enterArea
-import world.gregs.voidps.engine.entity.character.mode.move.exitArea
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.map.collision.random
 import world.gregs.voidps.engine.queue.queue
 import world.gregs.voidps.type.Direction
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.sub.*
 import kotlin.random.Random

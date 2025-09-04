@@ -1,14 +1,11 @@
 package content.skill.ranged
 
-import content.entity.player.inv.InventoryOption
 import content.skill.melee.CombatFormulaTest
 import content.skill.prayer.PrayerConfigs
 import inventoryOption
-import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.equipment
 import world.gregs.voidps.engine.inv.inventory

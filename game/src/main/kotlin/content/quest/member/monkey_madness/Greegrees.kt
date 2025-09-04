@@ -8,7 +8,6 @@ import world.gregs.voidps.engine.client.ui.closeType
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.entity.World
-import world.gregs.voidps.engine.entity.character.mode.move.exitArea
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.entity.item.Item

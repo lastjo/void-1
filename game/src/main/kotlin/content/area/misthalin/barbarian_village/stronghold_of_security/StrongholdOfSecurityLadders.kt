@@ -1,8 +1,6 @@
 package content.area.misthalin.barbarian_village.stronghold_of_security
 
 import content.entity.obj.ObjectTeleports
-import content.entity.obj.objTeleportLand
-import content.entity.obj.objTeleportTakeOff
 import content.entity.player.dialogue.Shifty
 import content.entity.player.dialogue.type.player
 import content.entity.player.dialogue.type.statement
@@ -10,9 +8,7 @@ import content.entity.player.dialogue.type.warning
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.queue.queue
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.equals
 import world.gregs.voidps.type.sub.Teleport
 import world.gregs.voidps.type.sub.TeleportLand
@@ -69,5 +65,4 @@ class StrongholdOfSecurityLadders(private val teleports: ObjectTeleports) {
     fun ladderUp(player: Player, target: GameObject) {
         player.message("You climb up the ladder to the level above.")
     }
-
 }

@@ -3,21 +3,16 @@ package content.entity.player
 import content.bot.isBot
 import content.entity.player.bank.bank
 import content.entity.player.dialogue.type.statement
-import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.client.variable.stop
 import world.gregs.voidps.engine.data.Settings
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.flagAppearance
 import world.gregs.voidps.engine.entity.character.player.name
-import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.queue.queue
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Close
 import world.gregs.voidps.type.sub.Spawn
 

@@ -1,12 +1,10 @@
 package content.quest.free.cooks_assistant
 
 import content.entity.player.bank.bank
-import content.entity.player.modal.tab.questJournalOpen
 import content.quest.quest
 import content.quest.questJournal
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.inv.holdsItem
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Subscribe
 
 class CooksAssistant {

@@ -7,30 +7,23 @@ import world.gregs.voidps.engine.client.ui.closeDialogue
 import world.gregs.voidps.engine.client.ui.closeMenu
 import world.gregs.voidps.engine.client.ui.dialogue
 import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.data.definition.EnumDefinitions
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.NPCOption
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.entity.character.player.flagAppearance
 import world.gregs.voidps.engine.entity.character.player.male
 import world.gregs.voidps.engine.entity.character.player.sex
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.network.login.protocol.visual.update.player.BodyColour
 import world.gregs.voidps.network.login.protocol.visual.update.player.BodyPart
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Close
 import world.gregs.voidps.type.sub.Interface
 import world.gregs.voidps.type.sub.Open
 import world.gregs.voidps.type.sub.Option
 
 class Hairdresser(
-    private val enums: EnumDefinitions
+    private val enums: EnumDefinitions,
 ) {
 
     @Option("Talk-to", "hairdresser")

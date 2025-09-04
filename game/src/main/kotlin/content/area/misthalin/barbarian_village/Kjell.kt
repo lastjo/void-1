@@ -8,10 +8,8 @@ import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.quest.quest
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.suspend.SuspendableContext
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
 import world.gregs.voidps.type.sub.Option
 

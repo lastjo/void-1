@@ -6,10 +6,6 @@ import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.client.variable.stop
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.timer.characterTimerStart
-import world.gregs.voidps.engine.timer.characterTimerStop
-import world.gregs.voidps.engine.timer.characterTimerTick
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.TimerStart
 import world.gregs.voidps.type.sub.TimerStop
 import world.gregs.voidps.type.sub.TimerTick
@@ -77,5 +73,4 @@ class Freeze {
     fun stop(character: Character) {
         character.stop("movement_delay")
     }
-
 }

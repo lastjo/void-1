@@ -1,17 +1,13 @@
 package content.skill.agility.course
 
-import content.entity.obj.objTeleportLand
-import content.entity.obj.objTeleportTakeOff
 import content.entity.sound.sound
 import content.quest.questCompleted
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.Direction
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 import world.gregs.voidps.type.sub.Teleport
 import world.gregs.voidps.type.sub.TeleportLand
@@ -56,5 +52,4 @@ class ApeAtollDungeon {
     fun climb(player: Player, target: GameObject) {
         player.message("You climb back out of the cavern.")
     }
-
 }

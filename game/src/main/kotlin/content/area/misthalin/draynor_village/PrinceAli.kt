@@ -8,10 +8,7 @@ import content.entity.player.dialogue.type.player
 import content.entity.player.dialogue.type.statement
 import content.quest.quest
 import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
-import world.gregs.voidps.engine.client.ui.interact.itemOnNPCOperate
-import world.gregs.voidps.engine.entity.character.mode.interact.TargetInteraction
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.inv.contains
@@ -19,7 +16,6 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.engine.timer.toTicks
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 import world.gregs.voidps.type.sub.UseOn
 import java.util.concurrent.TimeUnit
@@ -40,7 +36,6 @@ class PrinceAli {
             "prince_ali_disguise" -> leave()
         }
     }
-
 
     @UseOn("wig_blonde", "prince_ali")
     @UseOn("pink_skirt", "prince_ali")
@@ -70,5 +65,4 @@ class PrinceAli {
         }
         statement("The prince has escaped, well done! You are now a friend of Al-Kharid and may pass through the Al-Kharid toll gate for free.")
     }
-
 }

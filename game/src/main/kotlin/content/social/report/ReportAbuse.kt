@@ -2,10 +2,8 @@ package content.social.report
 
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.hasMenuOpen
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Interface
 
 class ReportAbuse {
@@ -18,5 +16,4 @@ class ReportAbuse {
         }
         player.open("report_abuse_select")
     }
-
 }

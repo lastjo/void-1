@@ -1,8 +1,6 @@
 package content.area.troll_country.god_wars_dungeon.bandos
 
 import content.entity.combat.hit.hit
-import content.entity.combat.hit.npcCombatAttack
-import content.entity.combat.npcCombatSwing
 import content.entity.gfx.areaGfx
 import content.entity.proj.shoot
 import content.entity.sound.areaSound
@@ -12,11 +10,7 @@ import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
-import world.gregs.voidps.engine.entity.npcDespawn
-import world.gregs.voidps.engine.entity.npcSpawn
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.type.CombatStage
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.random
 import world.gregs.voidps.type.sub.Combat
@@ -94,5 +88,4 @@ class GeneralGraardor(
             target.sound("sergeant_steelwill_impact")
         }
     }
-
 }

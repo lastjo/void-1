@@ -14,7 +14,6 @@ import world.gregs.voidps.engine.data.definition.data.Catch
 import world.gregs.voidps.engine.data.definition.data.Spot
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.chat.inventoryFull
@@ -22,13 +21,11 @@ import world.gregs.voidps.engine.entity.character.player.name
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.success
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.holdsItem
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.inv.transact.TransactionError
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
 import world.gregs.voidps.type.sub.Option
 

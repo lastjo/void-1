@@ -14,5 +14,4 @@ class MonkOfZamorak {
     fun prepare(npc: NPC, target: Player) {
         npc.spell = if (random.nextBoolean() && Spell.canDrain(target, "confuse")) "confuse" else ""
     }
-
 }

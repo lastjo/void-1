@@ -30,5 +30,4 @@ class ThrowerTroll {
         //      TODO Combat vs attack style
         target.sound("troll_rock_defend")
     }
-
 }

@@ -2,18 +2,14 @@ package content.entity.player.command.debug
 
 import content.entity.effect.transform
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.event.adminCommand
-import world.gregs.voidps.engine.client.ui.event.modCommand
 import world.gregs.voidps.engine.entity.character.*
 import world.gregs.voidps.engine.entity.character.move.running
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.network.login.protocol.visual.update.HitSplat
 import world.gregs.voidps.type.Delta
 import world.gregs.voidps.type.PlayerRights
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Command
 
 class NPCUpdatingCommands(val npcs: NPCs) {

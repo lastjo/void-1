@@ -10,5 +10,4 @@ class SkeletonWarlock {
     fun despawn(npc: NPC) {
         npc.killer?.clear("restless_ghost_warlock")
     }
-
 }

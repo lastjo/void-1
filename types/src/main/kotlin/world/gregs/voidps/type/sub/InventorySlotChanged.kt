@@ -10,5 +10,5 @@ package world.gregs.voidps.type.sub
 @Retention(AnnotationRetention.SOURCE)
 annotation class InventorySlotChanged(
     val inventory: String = "inventory",
-    val slot: Int = -1
+    val slot: Int = -1,
 )

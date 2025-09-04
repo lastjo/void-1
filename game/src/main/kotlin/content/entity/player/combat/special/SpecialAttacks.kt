@@ -3,12 +3,9 @@ package content.entity.player.combat.special
 import content.entity.combat.hit.hit
 import content.entity.sound.sound
 import content.skill.melee.weapon.weapon
-import world.gregs.voidps.engine.client.variable.variableSet
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.event.Publishers
-import world.gregs.voidps.type.Script
-import world.gregs.voidps.type.sub.Subscribe
 import world.gregs.voidps.type.sub.Variable
 
 class SpecialAttacks {
@@ -25,9 +22,7 @@ class SpecialAttacks {
     }
 
     @world.gregs.voidps.type.sub.SpecialAttack
-    fun cancel(player: Player): Boolean {
-        return !SpecialAttack.hasEnergy(player)
-    }
+    fun cancel(player: Player): Boolean = !SpecialAttack.hasEnergy(player)
 
     @world.gregs.voidps.type.sub.SpecialAttack(damage = true)
     fun attack(player: Player, target: Character, id: String) {
@@ -40,5 +35,4 @@ class SpecialAttacks {
         }
         Publishers.all.specialAttack(player, target, id, damage)
     }
-
 }

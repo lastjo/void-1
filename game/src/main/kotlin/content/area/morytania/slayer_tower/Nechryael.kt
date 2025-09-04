@@ -41,5 +41,4 @@ class Nechryael(
             target.inc("death_spawns")
         }
     }
-
 }

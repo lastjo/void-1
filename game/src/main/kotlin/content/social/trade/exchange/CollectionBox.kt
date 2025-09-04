@@ -1,10 +1,7 @@
 package content.social.trade.exchange
 
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.sendInventory
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Open
 
 class CollectionBox(private val exchange: GrandExchange) {
@@ -17,5 +14,4 @@ class CollectionBox(private val exchange: GrandExchange) {
             player.sendInventory("collection_box_$slot")
         }
     }
-
 }

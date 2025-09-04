@@ -8,9 +8,6 @@ import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 
 class BarbarianOutpostGate(private val npcs: NPCs) {
@@ -26,5 +23,4 @@ class BarbarianOutpostGate(private val npcs: NPCs) {
         player.walkToDelay(player.tile.copy(y = player.tile.y.coerceIn(2569, 3570)))
         player.enterDoor(target, delay = 2)
     }
-
 }

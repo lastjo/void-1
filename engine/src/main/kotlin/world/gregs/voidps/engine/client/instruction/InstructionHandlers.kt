@@ -1,6 +1,5 @@
 package world.gregs.voidps.engine.client.instruction
 
-import com.github.michaelbull.logging.InlineLogger
 import world.gregs.voidps.engine.client.instruction.handle.*
 import world.gregs.voidps.engine.data.definition.InterfaceDefinitions
 import world.gregs.voidps.engine.data.definition.ItemDefinitions

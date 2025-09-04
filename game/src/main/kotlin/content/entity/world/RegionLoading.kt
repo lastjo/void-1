@@ -18,7 +18,6 @@ import world.gregs.voidps.type.sub.Instruction
 import world.gregs.voidps.type.sub.Move
 import world.gregs.voidps.type.sub.Subscribe
 
-
 /**
  * Keeps track of when players enter and move between regions
  * Loads maps when they are accessed

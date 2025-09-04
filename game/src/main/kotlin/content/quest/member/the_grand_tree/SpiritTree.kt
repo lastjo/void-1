@@ -10,15 +10,10 @@ import content.quest.questCompleted
 import content.skill.magic.spell.Teleport
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.dialogue
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.definition.EnumDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.sub.Interface
 import world.gregs.voidps.type.sub.Open
@@ -67,7 +62,6 @@ class SpiritTree(private val enums: EnumDefinitions) {
     fun open(player: Player) {
         player.interfaceOptions.unlockAll("spirit_tree", "text", 0 until 9)
     }
-
 
     @Interface(component = "text", id = "spirit_tree")
     fun select(player: Player, itemSlot: Int) {

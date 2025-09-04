@@ -9,7 +9,6 @@ import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.client.variable.stop
 import world.gregs.voidps.engine.data.definition.SpellDefinitions
 import world.gregs.voidps.engine.entity.character.Character
-import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.timer.epochSeconds
@@ -79,5 +78,4 @@ class Vengeance(private val definitions: SpellDefinitions) {
         player.hit(target = player, offensiveType = "damage", delay = 0, damage = (damage * 0.75).toInt())
         player.stop("vengeance")
     }
-
 }

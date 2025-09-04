@@ -40,5 +40,4 @@ class RingOfRecoil {
             source.directHit(deflect, "deflect", source = player)
         }
     }
-
 }

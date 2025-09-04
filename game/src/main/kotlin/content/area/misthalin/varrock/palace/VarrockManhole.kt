@@ -4,9 +4,7 @@ import content.entity.sound.sound
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.entity.obj.replace
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 
 class VarrockManhole {
@@ -23,5 +21,4 @@ class VarrockManhole {
         target.replace("varrock_manhole")
         player.message("You place the cover back over the manhole.")
     }
-
 }

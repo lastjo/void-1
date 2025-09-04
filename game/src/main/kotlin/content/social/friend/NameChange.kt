@@ -4,7 +4,6 @@ import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.nameEntry
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.chat.plural
-import world.gregs.voidps.engine.client.ui.event.modCommand
 import world.gregs.voidps.engine.client.variable.remaining
 import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.data.Settings
@@ -12,11 +11,9 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.character.player.isAdmin
 import world.gregs.voidps.engine.entity.character.player.name
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.timer.epochSeconds
 import world.gregs.voidps.network.login.protocol.encode.Friend
 import world.gregs.voidps.type.PlayerRights
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Command
 import java.util.concurrent.TimeUnit
 
@@ -53,5 +50,4 @@ class NameChange(private val players: Players) {
             option("No, I like my current name")
         }
     }
-
 }

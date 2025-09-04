@@ -1,11 +1,9 @@
 package content.quest.free.the_restless_ghost
 
 import content.entity.player.bank.ownsItem
-import content.entity.player.modal.tab.questJournalOpen
 import content.quest.quest
 import content.quest.questJournal
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Subscribe
 
 class TheRestlessGhost {

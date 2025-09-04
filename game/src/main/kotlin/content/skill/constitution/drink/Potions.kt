@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit
 class Potions {
 
     @Consume("*_4", "*_3", "*_2", "*_1")
-    fun potion(player: Player, item: Item, itemSlot: Int){
+    fun potion(player: Player, item: Item, itemSlot: Int) {
         val doses = item.id.last().digitToInt()
         if (doses != 1) {
             player.message("You have ${doses - 1} ${"dose".plural(doses - 1)} of the potion left.")

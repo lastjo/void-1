@@ -4,7 +4,6 @@ import content.entity.sound.sound
 import content.skill.magic.spell.removeSpellItems
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.chat.plural
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.variable.hasClock
 import world.gregs.voidps.engine.client.variable.remaining
 import world.gregs.voidps.engine.client.variable.start
@@ -34,5 +33,4 @@ class Charge(private val definitions: SpellDefinitions) {
         player.start("charge", definition["effect_ticks"])
         player.start("charge_delay", definition["delay_ticks"])
     }
-
 }

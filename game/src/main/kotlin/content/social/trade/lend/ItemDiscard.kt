@@ -3,17 +3,14 @@ package content.social.trade.lend
 import com.github.michaelbull.logging.InlineLogger
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.item
-import content.entity.player.inv.inventoryOption
 import content.social.trade.lend.Loan.getExpiry
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Inventory
 
 class ItemDiscard(

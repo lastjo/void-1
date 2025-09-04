@@ -6,8 +6,6 @@ import content.entity.player.modal.tab
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.sendScript
 import world.gregs.voidps.engine.client.ui.close
-import world.gregs.voidps.engine.client.ui.interact.itemOnNPCApproach
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.definition.EnumDefinitions
 import world.gregs.voidps.engine.entity.character.npc.NPC

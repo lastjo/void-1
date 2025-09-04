@@ -1,19 +1,16 @@
 package content.area.karamja.brimhaven
 
-import content.entity.obj.objTeleportTakeOff
 import content.entity.player.dialogue.*
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import content.entity.player.dialogue.type.statement
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.queue.queue
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 import world.gregs.voidps.type.sub.Teleport
 
@@ -99,5 +96,4 @@ class Saniboch {
         player["can_enter_brimhaven_dungeon"] = false
         return 0
     }
-
 }

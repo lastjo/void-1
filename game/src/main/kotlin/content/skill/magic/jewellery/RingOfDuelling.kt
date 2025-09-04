@@ -1,12 +1,9 @@
 package content.skill.magic.jewellery
 
 import content.entity.player.dialogue.type.choice
-import content.entity.player.inv.inventoryItem
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Inventory
 
 class RingOfDuelling(areas: AreaDefinitions) {
@@ -52,5 +49,4 @@ class RingOfDuelling(areas: AreaDefinitions) {
         }
         jewelleryTeleport(player, inventory, itemSlot, area)
     }
-
 }

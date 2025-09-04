@@ -9,7 +9,6 @@ import content.bot.interact.navigation.goToNearest
 import content.bot.interact.navigation.resume
 import content.bot.isBot
 import content.entity.npc.shop.shopInventory
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
 import world.gregs.voidps.engine.client.update.view.Viewport
 import world.gregs.voidps.engine.data.definition.AreaDefinition
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
@@ -19,7 +18,6 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.network.client.instruction.InteractInterface
 import world.gregs.voidps.network.client.instruction.InteractNPC
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Open
 
 suspend fun Bot.openShop(id: String): NPC = openShop(get<AreaDefinitions>().getOrNull(id)!!)
@@ -80,5 +78,4 @@ class ShopBot {
             player.bot.resume("shop")
         }
     }
-
 }

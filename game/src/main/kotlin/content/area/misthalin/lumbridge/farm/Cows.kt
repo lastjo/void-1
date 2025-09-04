@@ -1,15 +1,9 @@
 package content.area.misthalin.lumbridge.farm
 
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interact.itemOnNPCOperate
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.npcSpawn
-import world.gregs.voidps.engine.timer.npcTimerStart
-import world.gregs.voidps.engine.timer.npcTimerTick
-import world.gregs.voidps.type.Script
-import world.gregs.voidps.type.TimerState
 import world.gregs.voidps.type.random
 import world.gregs.voidps.type.sub.Spawn
 import world.gregs.voidps.type.sub.TimerStart
@@ -41,5 +35,4 @@ class Cows {
     fun use(player: Player, target: NPC) {
         player.message("The cow doesn't want that.")
     }
-
 }

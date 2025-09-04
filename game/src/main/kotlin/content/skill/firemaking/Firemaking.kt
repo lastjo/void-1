@@ -16,7 +16,6 @@ import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.item.floor.FloorItem
 import world.gregs.voidps.engine.entity.item.floor.FloorItemOption
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
-import world.gregs.voidps.engine.entity.item.floor.floorItemOperate
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.ObjectLayer
 import world.gregs.voidps.engine.entity.obj.ObjectShape

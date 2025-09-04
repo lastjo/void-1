@@ -7,21 +7,19 @@ import content.entity.player.dialogue.type.PlayerChoice
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 
 class LumbridgeSage {
 
     @Option("Talk-to", "lumbridge_sage")
     suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
-            npc<Happy>("Greetings, adventurer. How may I help you?")
-            choice {
-                whoSage()
-                castleLum()
-                option<Neutral>("I'm fine for now, thanks.")
-            }
+        npc<Happy>("Greetings, adventurer. How may I help you?")
+        choice {
+            whoSage()
+            castleLum()
+            option<Neutral>("I'm fine for now, thanks.")
+        }
     }
 
     fun PlayerChoice.whoSage(): Unit = option<Quiz> ("Who are you?") {

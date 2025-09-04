@@ -1,15 +1,9 @@
 package content.skill.melee.armour
 
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
-import world.gregs.voidps.engine.entity.character.mode.move.enterArea
-import world.gregs.voidps.engine.entity.character.mode.move.exitArea
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.engine.inv.itemAdded
-import world.gregs.voidps.engine.inv.itemRemoved
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Enter
 import world.gregs.voidps.type.sub.Exit
 import world.gregs.voidps.type.sub.ItemAdded
@@ -47,5 +41,4 @@ class CastleWarsBrace(areas: AreaDefinitions) {
             player.clear("castle_wars_brace")
         }
     }
-
 }

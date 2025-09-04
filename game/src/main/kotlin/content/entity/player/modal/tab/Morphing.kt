@@ -3,14 +3,11 @@ package content.entity.player.modal.tab
 import content.entity.effect.clearTransform
 import content.entity.effect.movementDelay
 import content.entity.effect.transform
-import content.entity.player.inv.inventoryOptions
 import world.gregs.voidps.engine.client.ui.close
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.queue.queue
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Interface
 import world.gregs.voidps.type.sub.Inventory
 import kotlin.random.Random

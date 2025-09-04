@@ -29,11 +29,14 @@ class ExecuteCommandHandler : InstructionHandler<ExecuteCommand>() {
         Publishers.launch {
             try {
                 Publishers.all.command(
-                    player, instruction.content, instruction.prefix, when (player.rights) {
+                    player,
+                    instruction.content,
+                    instruction.prefix,
+                    when (player.rights) {
                         PlayerRights.None -> PlayerRights.NONE
                         PlayerRights.Mod -> PlayerRights.MOD
                         PlayerRights.Admin -> PlayerRights.ADMIN
-                    }
+                    },
                 )
             } catch (exception: Exception) {
                 logger.warn(exception) { "An error occurred while executing command." }

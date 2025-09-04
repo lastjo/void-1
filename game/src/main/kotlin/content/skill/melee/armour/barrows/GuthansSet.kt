@@ -1,11 +1,9 @@
 package content.skill.melee.armour.barrows
 
-import content.entity.combat.hit.characterCombatAttack
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
 import world.gregs.voidps.type.sub.Combat
 import world.gregs.voidps.type.sub.ItemAdded

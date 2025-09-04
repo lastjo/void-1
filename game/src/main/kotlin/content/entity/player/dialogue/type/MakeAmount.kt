@@ -1,14 +1,11 @@
 package content.entity.player.dialogue.type
 
 import world.gregs.voidps.engine.client.ui.close
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Context
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.suspend.IntSuspension
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Interface
 
 private const val INTERFACE_ID = "dialogue_skill_creation"
@@ -120,5 +117,4 @@ class MakeAmount {
         }
         player["skill_creation_amount"] = current
     }
-
 }

@@ -77,7 +77,6 @@ class Combat {
         source.target = null
     }
 
-
     init {
         onEvent<CombatInteraction<*>> {
             combat(character, target)

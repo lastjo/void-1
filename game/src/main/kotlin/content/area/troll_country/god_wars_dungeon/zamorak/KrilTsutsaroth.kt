@@ -93,5 +93,4 @@ class KrilTsutsaroth(private val npcs: NPCs) {
     fun gritch(npc: NPC) {
         gritch = null
     }
-
 }

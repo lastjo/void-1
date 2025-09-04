@@ -178,7 +178,6 @@ class ApeAtoll {
         }
     }
 
-
     @Option("Climb-up", "ape_atoll_skull_slope")
     suspend fun climbSlope(player: Player, target: GameObject) {
         player.face(target)

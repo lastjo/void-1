@@ -13,12 +13,10 @@ import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.holdsItem
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.replace
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 
 class StrongholdOfSecurityRewards {
@@ -135,5 +133,4 @@ class StrongholdOfSecurityRewards {
         statement("You rummage around in the dead explorer's bag.....")
         statement("You find a book of hand written notes.")
     }
-
 }

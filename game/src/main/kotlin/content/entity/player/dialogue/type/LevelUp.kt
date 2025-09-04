@@ -1,6 +1,5 @@
 package content.entity.player.dialogue.type
 
-import content.entity.combat.hit.combatDamage
 import content.entity.sound.jingle
 import world.gregs.voidps.engine.client.ui.*
 import world.gregs.voidps.engine.client.ui.chat.an
@@ -11,15 +10,11 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.Skill.*
 import world.gregs.voidps.engine.entity.character.player.skill.exp.Experience
-import world.gregs.voidps.engine.entity.character.player.skill.exp.experience
 import world.gregs.voidps.engine.entity.character.player.skill.level.MaxLevelChanged
-import world.gregs.voidps.engine.entity.character.player.skill.level.maxLevelChange
 import world.gregs.voidps.engine.event.Publishers
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.suspend.ContinueSuspension
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.CombatStage
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Combat
 import world.gregs.voidps.type.sub.LevelChange
 
@@ -88,5 +83,4 @@ class LevelUp {
             player.closeInterfaces()
         }
     }
-
 }

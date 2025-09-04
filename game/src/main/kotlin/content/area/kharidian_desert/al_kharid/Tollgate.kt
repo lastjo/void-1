@@ -14,20 +14,15 @@ import world.gregs.voidps.engine.client.ui.dialogue.talkWith
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCs
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.notEnough
 import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.ObjectOption
-import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.get
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
-import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Distance.nearestTo
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.area.Rectangle
 import world.gregs.voidps.type.sub.Option
@@ -59,7 +54,6 @@ class Tollgate(private val objects: GameObjects) {
     @Option("Talk-to", "border_guard_al_kharid*")
     suspend fun talk(player: Player, target: NPC) {
         dialogue(player, target)
-
     }
 
     fun getGuard(player: Player) = get<NPCs>()[player.tile.regionLevel].first { it.id.startsWith("border_guard_al_kharid") }

@@ -15,5 +15,4 @@ class SpicyStew {
             player.levels.drain(Skill.Cooking, 6)
         }
     }
-
 }

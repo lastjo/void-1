@@ -12,13 +12,9 @@ import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.NPCOption
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
-import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.equipment
 import world.gregs.voidps.engine.inv.inventory
@@ -26,7 +22,6 @@ import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.map.collision.random
 import world.gregs.voidps.engine.queue.ActionPriority
 import world.gregs.voidps.engine.queue.queue
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
 import world.gregs.voidps.type.sub.Option
 import world.gregs.voidps.type.sub.Spawn

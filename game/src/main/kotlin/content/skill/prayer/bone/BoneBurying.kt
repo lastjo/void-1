@@ -1,7 +1,6 @@
 package content.skill.prayer.bone
 
 import com.github.michaelbull.logging.InlineLogger
-import content.entity.player.inv.inventoryOption
 import content.entity.sound.sound
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.variable.hasClock
@@ -14,7 +13,6 @@ import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.queue.weakQueue
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Inventory
 
 class BoneBurying {
@@ -47,5 +45,4 @@ class BoneBurying {
             player.message("You bury the ${item.def.name.lowercase()}.", ChatType.Filter)
         }
     }
-
 }

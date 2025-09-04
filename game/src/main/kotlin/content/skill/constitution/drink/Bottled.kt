@@ -35,5 +35,4 @@ class Bottled {
         player.levels.drain(Skill.Agility, multiplier = 0.05)
         player.levels.drain(Skill.Herblore, multiplier = 0.05)
     }
-
 }

@@ -15,5 +15,4 @@ class ExperienceLamp {
     fun confirm(player: Player) {
         (player.dialogueSuspension as? StringSuspension)?.resume(player["stat_advance_selected_skill", "none"])
     }
-
 }

@@ -14,9 +14,7 @@ import world.gregs.voidps.engine.entity.character.player.renderEmote
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.obj.*
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.type.Direction
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.sub.Option
 
@@ -143,7 +141,6 @@ class Grapple(
         player.anim("jump_land")
         player.tele(3005, 3393, 0)
     }
-
 
     @Option("Grapple", "catherby_crossbow_tree", approach = true)
     suspend fun grappleTree(player: Player, target: GameObject) {

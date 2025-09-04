@@ -1,15 +1,11 @@
 package content.area.misthalin.lumbridge.church
 
 import content.quest.questCompleted
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.data.definition.EnumDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.notEnough
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Interface
 import world.gregs.voidps.type.sub.Open
 
@@ -60,5 +56,4 @@ class GravestoneShop(private val enums: EnumDefinitions) {
         }
         player["gravestone_current"] = id
     }
-
 }

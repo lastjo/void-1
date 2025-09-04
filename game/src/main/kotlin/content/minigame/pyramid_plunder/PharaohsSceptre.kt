@@ -1,15 +1,13 @@
 package content.minigame.pyramid_plunder
 
 import content.entity.player.dialogue.type.choice
-import content.entity.player.inv.inventoryItem
 import content.skill.magic.jewellery.itemTeleport
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.type.sub.Inventory
 
 class PharaohsSceptre(
-    areas: AreaDefinitions
+    areas: AreaDefinitions,
 ) {
 
     val jalsavrah = areas["jalsavrah_teleport"]

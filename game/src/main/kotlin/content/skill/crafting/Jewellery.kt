@@ -6,11 +6,6 @@ import net.pearx.kasechange.toLowerSpaceCase
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.sendScript
 import world.gregs.voidps.engine.client.ui.closeMenu
-import world.gregs.voidps.engine.client.ui.event.InterfaceRefreshed
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
-import world.gregs.voidps.engine.client.ui.event.interfaceRefresh
-import world.gregs.voidps.engine.client.ui.interact.itemOnObjectOperate
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.definition.data.Jewellery
 import world.gregs.voidps.engine.entity.World
@@ -27,7 +22,6 @@ import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.inv.transact.operation.ReplaceItem.replace
 import world.gregs.voidps.engine.queue.weakQueue
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Close
 import world.gregs.voidps.type.sub.Interface
 import world.gregs.voidps.type.sub.Refresh

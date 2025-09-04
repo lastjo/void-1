@@ -6,8 +6,6 @@ import content.entity.player.dialogue.type.*
 import content.quest.quest
 import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.NPCOption
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.inv.add
@@ -16,7 +14,6 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 
 class Leela {

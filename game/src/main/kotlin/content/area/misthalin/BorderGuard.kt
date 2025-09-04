@@ -2,17 +2,13 @@ package content.area.misthalin
 
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.entity.World
-import world.gregs.voidps.engine.entity.character.mode.move.enterArea
-import world.gregs.voidps.engine.entity.character.mode.move.exitArea
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.ObjectLayer
-import world.gregs.voidps.engine.entity.worldSpawn
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.type.Area
 import world.gregs.voidps.type.Distance.nearestTo
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.area.Rectangle
 import world.gregs.voidps.type.sub.Enter
 import world.gregs.voidps.type.sub.Exit

@@ -9,12 +9,10 @@ import world.gregs.voidps.engine.entity.character.player.chat.inventoryFull
 import world.gregs.voidps.engine.entity.item.floor.FloorItem
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
 import world.gregs.voidps.engine.event.Publishers
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.SetCharge.setCharge
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 
 class ItemTake(private val floorItems: FloorItems) {
@@ -71,5 +69,4 @@ class ItemTake(private val floorItems: FloorItems) {
             npc.clearAnim()
         }
     }
-
 }

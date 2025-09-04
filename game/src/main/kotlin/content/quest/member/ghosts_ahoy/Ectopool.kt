@@ -47,5 +47,4 @@ class Ectopool(private val teleports: ObjectTeleports) {
         }
         return -1
     }
-
 }

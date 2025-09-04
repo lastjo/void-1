@@ -1,7 +1,6 @@
 package content.entity.npc.combat
 
 import content.entity.combat.hit.hit
-import content.entity.combat.npcCombatSwing
 import content.entity.sound.sound
 import content.skill.slayer.categories
 import world.gregs.voidps.engine.data.definition.AnimationDefinitions
@@ -11,9 +10,7 @@ import world.gregs.voidps.engine.entity.character.mode.Retreat
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.distanceTo
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.type.CombatStage
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Combat
 
 class Attack(

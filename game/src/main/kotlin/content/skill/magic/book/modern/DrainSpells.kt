@@ -14,5 +14,4 @@ class DrainSpells(private val spellDefinitions: SpellDefinitions) {
         val definition = spellDefinitions.get(source.spell)
         return definition.contains("drain_skill") && !Spell.canDrain(target, definition)
     }
-
 }

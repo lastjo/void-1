@@ -10,19 +10,13 @@ import world.gregs.voidps.type.sub.Teleport
 class StrongholdOfSecurityPortals {
 
     @Teleport("Enter", "stronghold_war_portal")
-    fun war(player: Player, target: GameObject): Int {
-        return check(player, "unlocked_emote_flap", 25)
-    }
+    fun war(player: Player, target: GameObject): Int = check(player, "unlocked_emote_flap", 25)
 
     @Teleport("Enter", "stronghold_famine_portal")
-    fun famine(player: Player, target: GameObject): Int {
-        return check(player, "unlocked_emote_slap_head", 50)
-    }
+    fun famine(player: Player, target: GameObject): Int = check(player, "unlocked_emote_slap_head", 50)
 
     @Teleport("Enter", "stronghold_pestilence_portal")
-    fun pestilence(player: Player, target: GameObject): Int {
-        return check(player, "unlocked_emote_idea", 75)
-    }
+    fun pestilence(player: Player, target: GameObject): Int = check(player, "unlocked_emote_idea", 75)
 
     @Teleport("Enter", "stronghold_death_portal")
     fun death(player: Player, target: GameObject): Int {

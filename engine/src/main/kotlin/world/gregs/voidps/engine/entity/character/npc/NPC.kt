@@ -12,7 +12,6 @@ import world.gregs.voidps.engine.entity.character.mode.Mode
 import world.gregs.voidps.engine.entity.character.mode.move.Steps
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.level.Levels
-import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.queue.ActionQueue
 import world.gregs.voidps.engine.suspend.Suspension
@@ -44,9 +43,7 @@ data class NPC(
         }
     }
 
-    fun def(player: Player, definitions: NPCDefinitions = get()): NPCDefinition {
-        return ObjectOptionHandler.getDefinition(player, definitions, def, def)
-    }
+    fun def(player: Player, definitions: NPCDefinitions = get()): NPCDefinition = ObjectOptionHandler.getDefinition(player, definitions, def, def)
 
     override val size = def.size
     override var mode: Mode = EmptyMode

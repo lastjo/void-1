@@ -59,7 +59,6 @@ class Music(
         player.addToPlaylist(itemSlot)
     }
 
-
     @Interface("Remove from playlist", id = "music_player")
     fun remove(player: Player, itemSlot: Int, component: String) {
         player.removeSongFromPlaylist(itemSlot, component == "tracks")

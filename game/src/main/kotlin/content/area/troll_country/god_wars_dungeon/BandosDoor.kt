@@ -6,10 +6,8 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.entity.obj.remove
 import world.gregs.voidps.engine.inv.inventory
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 
 class BandosDoor {
@@ -30,5 +28,4 @@ class BandosDoor {
         target.remove(ticks = 2, collision = false)
         player.walkOverDelay(doorTarget(player, target) ?: return)
     }
-
 }

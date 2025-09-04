@@ -53,5 +53,4 @@ class SpellBookFilter {
     fun toggle(player: Player, component: String) {
         player.toggle(component)
     }
-
 }

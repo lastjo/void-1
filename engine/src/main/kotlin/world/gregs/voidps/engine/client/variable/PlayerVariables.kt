@@ -3,8 +3,6 @@ package world.gregs.voidps.engine.client.variable
 import world.gregs.voidps.engine.data.config.VariableDefinition.Companion.persist
 import world.gregs.voidps.engine.data.definition.VariableDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.EventDispatcher
-import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.network.client.Client
 
 class PlayerVariables(

@@ -17,5 +17,4 @@ class CanoeStationMap {
         val destination = component.removePrefix("travel_")
         (player.dialogueSuspension as? StringSuspension)?.resume(destination)
     }
-
 }

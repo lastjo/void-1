@@ -18,5 +18,4 @@ class SmokeSpells(private val definitions: SpellDefinitions) {
             source.poison(target, poison)
         }
     }
-
 }

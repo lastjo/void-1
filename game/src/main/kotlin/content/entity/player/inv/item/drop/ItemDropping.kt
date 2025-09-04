@@ -1,7 +1,6 @@
 package content.entity.player.inv.item.drop
 
 import com.github.michaelbull.logging.InlineLogger
-import content.entity.player.inv.inventoryOption
 import content.entity.player.inv.item.tradeable
 import content.entity.sound.sound
 import world.gregs.voidps.engine.entity.character.player.Player
@@ -13,7 +12,7 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.type.sub.Inventory
 
-class ItemDropping(private val floorItems: FloorItems){
+class ItemDropping(private val floorItems: FloorItems) {
 
     val logger = InlineLogger()
 
@@ -35,5 +34,4 @@ class ItemDropping(private val floorItems: FloorItems){
             logger.info { "Error dropping item $item for $player" }
         }
     }
-
 }

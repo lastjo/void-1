@@ -1,18 +1,11 @@
 package content.skill.melee
 
 import world.gregs.voidps.engine.client.ui.closeInterfaces
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.event.interfaceRefresh
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.data.definition.WeaponStyleDefinitions
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
-import world.gregs.voidps.engine.entity.npcSpawn
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.engine.inv.inventoryChanged
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.*
 
 class CombatStyles(private val styles: WeaponStyleDefinitions) {

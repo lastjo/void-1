@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import world.gregs.voidps.engine.GameLoop
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Publishers
 
 internal class ClocksTest {
 

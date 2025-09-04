@@ -5,9 +5,7 @@ import content.entity.player.dialogue.Talk
 import content.entity.player.dialogue.type.*
 import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 
 class Ellena {
@@ -61,5 +59,4 @@ class Ellena {
             }
         }
     }
-
 }

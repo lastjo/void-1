@@ -49,5 +49,4 @@ class Grotto {
             player.exp(Skill.Agility, 2.0)
         }
     }
-
 }

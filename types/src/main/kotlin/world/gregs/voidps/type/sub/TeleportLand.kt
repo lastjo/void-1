@@ -13,5 +13,5 @@ package world.gregs.voidps.type.sub
 @Retention(AnnotationRetention.SOURCE)
 annotation class TeleportLand(
     val type: String = "",
-    vararg val ids: String
+    vararg val ids: String,
 )

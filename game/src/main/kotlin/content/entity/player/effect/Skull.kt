@@ -3,19 +3,11 @@ package content.entity.player.effect
 import content.area.wilderness.inWilderness
 import content.entity.combat.attackers
 import world.gregs.voidps.engine.client.ui.open
-import world.gregs.voidps.engine.entity.character.Character
-import world.gregs.voidps.engine.entity.character.mode.combat.combatStart
-import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.appearance
 import world.gregs.voidps.engine.entity.character.player.flagAppearance
-import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.timer.timerStart
-import world.gregs.voidps.engine.timer.timerStop
-import world.gregs.voidps.engine.timer.timerTick
 import world.gregs.voidps.engine.timer.toTicks
 import world.gregs.voidps.type.CombatStage
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.TimerState
 import world.gregs.voidps.type.sub.*
 import java.util.concurrent.TimeUnit
@@ -82,5 +74,4 @@ class Skull {
             player.open("items_kept_on_death", close = true)
         }
     }
-
 }

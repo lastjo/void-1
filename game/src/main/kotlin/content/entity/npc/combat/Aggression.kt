@@ -7,18 +7,12 @@ import world.gregs.voidps.engine.entity.character.mode.combat.CombatMovement
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCOption
-import world.gregs.voidps.engine.entity.character.npc.hunt.HuntNPC
-import world.gregs.voidps.engine.entity.character.npc.hunt.HuntPlayer
-import world.gregs.voidps.engine.entity.character.npc.hunt.huntNPC
-import world.gregs.voidps.engine.entity.character.npc.hunt.huntPlayer
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.PlayerOption
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Hunt
 
 class Aggression(
-    private val areas: AreaDefinitions
+    private val areas: AreaDefinitions,
 ) {
 
     @Hunt("aggressive")

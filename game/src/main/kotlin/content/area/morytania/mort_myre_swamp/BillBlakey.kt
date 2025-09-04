@@ -25,5 +25,4 @@ class BillBlakey {
         npc<Neutral>("With sweet Myre dews my wings were wet, And Phoebus' kiss did slowly fade; She'd caught me in her silken net, And trap'd me as this silver shade.")
         npc<Neutral>("She loves to sit and hear me sing, Then laughing, sports and plays with me; Then stretches out her silver wing, And mocks my loss of liberty.")
     }
-
 }

@@ -5,17 +5,11 @@ import content.entity.player.modal.Tab
 import content.entity.player.modal.tab
 import world.gregs.voidps.engine.client.sendScript
 import world.gregs.voidps.engine.client.ui.close
-import world.gregs.voidps.engine.client.ui.event.adminCommand
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.inv.sendInventory
 import world.gregs.voidps.type.PlayerRights
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.*
 
 class BankOpen {
@@ -75,5 +69,4 @@ class BankOpen {
             player.open("bank")
         }
     }
-
 }

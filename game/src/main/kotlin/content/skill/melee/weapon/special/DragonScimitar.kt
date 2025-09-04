@@ -50,5 +50,4 @@ class DragonScimitar {
         val key = player.getActivePrayerVarKey()
         player.removeVarbit(key, id.removePrefix("prayer_").toTitleCase())
     }
-
 }

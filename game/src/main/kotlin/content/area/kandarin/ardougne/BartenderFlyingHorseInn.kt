@@ -47,7 +47,6 @@ class BartenderFlyingHorseInn {
             return
         }
         player.talkWith(npc) {
-
             barCrawl()
         }
     }

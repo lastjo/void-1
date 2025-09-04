@@ -12,7 +12,6 @@ import org.koin.dsl.module
 import world.gregs.voidps.cache.definition.data.ItemDefinition
 import world.gregs.voidps.engine.client.update.batch.ZoneBatchUpdates
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
-import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.network.login.protocol.encode.zone.FloorItemAddition
 import world.gregs.voidps.network.login.protocol.encode.zone.FloorItemRemoval
 import world.gregs.voidps.network.login.protocol.encode.zone.FloorItemUpdate

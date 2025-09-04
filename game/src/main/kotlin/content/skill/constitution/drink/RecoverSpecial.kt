@@ -25,9 +25,7 @@ class RecoverSpecial {
     }
 
     @TimerStart("recover_special")
-    fun start(player: Player): Int {
-        return 10
-    }
+    fun start(player: Player): Int = 10
 
     @TimerTick("recover_special")
     fun tick(player: Player): Int {
@@ -41,5 +39,4 @@ class RecoverSpecial {
     fun stop(player: Player) {
         player.clear("recover_special_delay")
     }
-
 }

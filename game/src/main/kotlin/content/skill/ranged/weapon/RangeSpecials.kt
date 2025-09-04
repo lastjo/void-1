@@ -15,7 +15,6 @@ import world.gregs.voidps.type.sub.SpecialAttack
 
 class RangeSpecials {
 
-
     @SpecialAttack("snipe")
     fun dorgeshuunCrossbow(player: Player, target: Character, id: String) {
         player.anim("crossbow_accurate")
@@ -75,5 +74,4 @@ class RangeSpecials {
             target.start("hamstring", 100)
         }
     }
-
 }

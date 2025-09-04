@@ -37,5 +37,4 @@ class CaveLizard {
         npc["hunt_mode"] = if (random.nextBoolean()) "aggressive" else "aggressive_npcs"
         return TimerState.CONTINUE
     }
-
 }

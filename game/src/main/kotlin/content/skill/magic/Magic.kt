@@ -20,14 +20,10 @@ import world.gregs.voidps.type.sub.Combat
 class Magic(private val spellDefinitions: SpellDefinitions) {
 
     @Combat(type = "blaze", stage = CombatStage.SWING)
-     fun combat(player: Player, target: Character): Boolean {
-        return !castSpell(player, target)
-    }
+    fun combat(player: Player, target: Character): Boolean = !castSpell(player, target)
 
     @Combat(type = "magic", stage = CombatStage.SWING)
-    fun combat(source: Character, target: Character): Boolean {
-        return !castSpell(source, target)
-    }
+    fun combat(source: Character, target: Character): Boolean = !castSpell(source, target)
 
     fun castSpell(source: Character, target: Character): Boolean {
         if (source.spell.isNotBlank() && source is Player && !source.removeSpellItems(source.spell)) {

@@ -14,5 +14,4 @@ class Rocktail {
         player.levels.boost(Skill.Constitution, amount, maximum = 100)
         return true
     }
-
 }

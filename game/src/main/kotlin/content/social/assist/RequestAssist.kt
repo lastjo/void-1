@@ -22,10 +22,7 @@ import world.gregs.voidps.engine.entity.character.player.name
 import world.gregs.voidps.engine.entity.character.player.req.hasRequest
 import world.gregs.voidps.engine.entity.character.player.req.request
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.entity.character.player.skill.exp.BlockedExperience
-import world.gregs.voidps.engine.event.onEvent
 import world.gregs.voidps.engine.timer.TICKS
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Close
 import world.gregs.voidps.type.sub.Experience
 import world.gregs.voidps.type.sub.Option

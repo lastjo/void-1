@@ -1,15 +1,11 @@
 package content.area.karamja.brimhaven
 
-import content.entity.combat.CombatSwing
 import content.entity.combat.hit.hit
-import content.entity.combat.npcCombatSwing
 import content.entity.sound.sound
-import kotlinx.coroutines.delay
 import world.gregs.voidps.engine.entity.character.mode.move.target.CharacterTargetStrategy
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.type.CombatStage
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
 import world.gregs.voidps.type.sub.Combat
 
@@ -36,5 +32,4 @@ class ColourDragon {
             target.sound("dragon_attack")
         }
     }
-
 }

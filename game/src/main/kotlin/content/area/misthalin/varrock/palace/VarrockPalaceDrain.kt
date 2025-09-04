@@ -10,16 +10,12 @@ import content.entity.player.dialogue.type.player
 import content.entity.sound.sound
 import content.quest.quest
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interact.itemOnObjectOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.replace
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 import world.gregs.voidps.type.sub.Spawn
 import world.gregs.voidps.type.sub.UseOn
@@ -83,5 +79,4 @@ class VarrockPalaceDrain {
             item("silverlight_key_sir_prysin", 400, "You pick up an old rusty key.")
         }
     }
-
 }

@@ -14,5 +14,4 @@ class ChaosDruid {
     fun combat(npc: NPC, target: Player) {
         npc.spell = if (random.nextBoolean() && Spell.canDrain(target, "confuse")) "confuse" else ""
     }
-
 }

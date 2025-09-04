@@ -89,5 +89,4 @@ class CraftingGuild {
         player<Neutral>("I suppose not.")
         npc<Happy>("Right on!")
     }
-
 }

@@ -1,7 +1,6 @@
 package content.skill.fletching
 
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interact.itemOnItem
 import world.gregs.voidps.engine.data.definition.data.FletchBolts
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
@@ -48,5 +47,4 @@ class Bolts {
         player.experience.add(Skill.Fletching, totalExperience)
         player.message("You fletch $actualAmount bolts.", ChatType.Game)
     }
-
 }

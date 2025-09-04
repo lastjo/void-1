@@ -3,17 +3,13 @@ package content.social.trade.exchange
 import content.entity.player.bank.noted
 import content.entity.player.dialogue.type.intEntry
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.InterfaceOption
 import world.gregs.voidps.engine.client.ui.closeDialogue
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.variable.hasClock
 import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.data.Settings
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.inv.inventory
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Interface
 import world.gregs.voidps.type.sub.Open
 import kotlin.math.ceil
@@ -26,7 +22,7 @@ class GrandExchangeControls {
            This is a hacky way of converting between original and newer ui (limited price range vs unlimited with +/-5%)
            It doesn't account for hover and tooltip changes or location of buttons and isn't the most responsive as
            it's limited by the speed variables change by the existing (old) cs2.
-        */
+         */
         val limit = Settings["grandExchange.priceLimit", true]
         player.interfaces.sendVisibility("grand_exchange", "price_range_min", limit)
         player.interfaces.sendVisibility("grand_exchange", "price_range_max", limit)

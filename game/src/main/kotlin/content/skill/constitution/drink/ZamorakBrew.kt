@@ -17,5 +17,4 @@ class ZamorakBrew {
         }
         return false
     }
-
 }

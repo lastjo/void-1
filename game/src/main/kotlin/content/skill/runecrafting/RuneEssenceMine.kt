@@ -6,10 +6,7 @@ import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.queue.softQueue
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 
 class RuneEssenceMine(private val areas: AreaDefinitions) {
@@ -26,5 +23,4 @@ class RuneEssenceMine(private val areas: AreaDefinitions) {
             player.tele(tile)
         }
     }
-
 }

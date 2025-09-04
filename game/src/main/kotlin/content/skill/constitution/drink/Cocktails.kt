@@ -35,5 +35,4 @@ class Cocktails {
         player.levels.boost(Skill.Strength, 6)
         player.levels.drain(Skill.Attack, 4)
     }
-
 }

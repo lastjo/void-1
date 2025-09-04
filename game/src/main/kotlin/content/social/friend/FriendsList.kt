@@ -113,6 +113,7 @@ class FriendsList(
             }
         }
     }
+
     @Instruction(FriendDelete::class)
     fun delete(player: Player, instruction: FriendDelete) {
         val friendsName = instruction.friendsName

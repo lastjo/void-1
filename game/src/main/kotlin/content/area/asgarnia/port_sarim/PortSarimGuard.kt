@@ -15,7 +15,7 @@ import world.gregs.voidps.type.sub.Option
 import world.gregs.voidps.type.sub.Spawn
 
 class PortSarimGuard(
-    private val patrols: PatrolDefinitions
+    private val patrols: PatrolDefinitions,
 ) {
 
     @Option("Talk-to", "port_sarim_guard_sleeping")
@@ -65,5 +65,4 @@ class PortSarimGuard(
         val patrol = patrols.get("port_sarim_guard")
         npc.mode = Patrol(npc, patrol.waypoints)
     }
-
 }

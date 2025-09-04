@@ -42,5 +42,4 @@ class Seercull {
             character.clear("soulshot")
         }
     }
-
 }

@@ -79,5 +79,4 @@ class Cure(
         target.sound("cure_other_impact")
         target.message("You have been cured by ${player.name}.")
     }
-
 }

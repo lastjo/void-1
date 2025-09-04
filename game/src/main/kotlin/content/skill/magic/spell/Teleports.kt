@@ -1,14 +1,11 @@
 package content.skill.magic.spell
 
-import content.entity.player.inv.inventoryItem
 import content.entity.sound.sound
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.InterfaceOption
 import world.gregs.voidps.engine.client.ui.chat.plural
 import world.gregs.voidps.engine.client.ui.closeInterfaces
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.variable.hasClock
 import world.gregs.voidps.engine.client.variable.remaining
 import world.gregs.voidps.engine.client.variable.start
@@ -19,14 +16,12 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.map.collision.random
 import world.gregs.voidps.engine.queue.queue
 import world.gregs.voidps.engine.queue.weakQueue
 import world.gregs.voidps.engine.timer.epochSeconds
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Interface
 import world.gregs.voidps.type.sub.Inventory
 import java.util.concurrent.TimeUnit

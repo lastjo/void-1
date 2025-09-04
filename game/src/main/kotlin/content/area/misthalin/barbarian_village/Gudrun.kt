@@ -5,7 +5,6 @@ import content.entity.player.dialogue.type.*
 import content.entity.sound.jingle
 import content.quest.*
 import world.gregs.voidps.engine.client.clearCamera
-import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.moveCamera
 import world.gregs.voidps.engine.client.turnCamera
 import world.gregs.voidps.engine.client.ui.open
@@ -14,13 +13,11 @@ import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.NPCs
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.ObjectShape
 import world.gregs.voidps.engine.event.Context
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.holdsItem
 import world.gregs.voidps.engine.inv.inventory
@@ -29,7 +26,6 @@ import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Region
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.sub.Option
 

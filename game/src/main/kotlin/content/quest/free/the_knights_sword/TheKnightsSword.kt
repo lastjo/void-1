@@ -1,12 +1,10 @@
 package content.quest.free.the_knights_sword
 
 import content.entity.player.bank.ownsItem
-import content.entity.player.modal.tab.questJournalOpen
 import content.quest.quest
 import content.quest.questJournal
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.inv.holdsItem
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Subscribe
 
 class TheKnightsSword {
@@ -81,7 +79,7 @@ class TheKnightsSword {
                     "<str>Thurgo needed a picture of the sword before he could",
                     "<str>start work on a replacement. I took him a portrait of it.",
 
-                    )
+                )
                 if (player.holdsItem("blurite_sword") || player.ownsItem("blurite_sword")) {
                     list.add("<str>Thurgo has now smithed me a replica of Sir Vyvin's sword.")
                     list.add("")

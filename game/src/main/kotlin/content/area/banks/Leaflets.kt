@@ -3,10 +3,8 @@ package content.area.banks
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 
 class Leaflets {
@@ -19,5 +17,4 @@ class Leaflets {
             player.inventory.add("leaflet")
         }
     }
-
 }

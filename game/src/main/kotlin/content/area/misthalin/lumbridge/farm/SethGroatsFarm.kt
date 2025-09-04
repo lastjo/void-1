@@ -1,18 +1,15 @@
 package content.area.misthalin.lumbridge.farm
 
 import content.entity.player.bank.ownsItem
-import content.entity.player.inv.item.take.canTake
 import content.quest.questCompleted
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.inventoryFull
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.entity.obj.replace
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.timer.toTicks
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 import world.gregs.voidps.type.sub.Take
 import java.util.concurrent.TimeUnit
@@ -39,5 +36,4 @@ class SethGroatsFarm {
         }
         return ""
     }
-
 }

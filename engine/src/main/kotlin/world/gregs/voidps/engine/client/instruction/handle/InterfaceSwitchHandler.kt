@@ -22,7 +22,7 @@ class InterfaceSwitchHandler(
         val (fromId, fromComponent, fromItem, fromInventory) = handler.getInterfaceItem(player, fromInterfaceId, fromComponentId, fromItemId, fromSlot) ?: return
         val (toId, toComponent, toItem, toInventory) = handler.getInterfaceItem(player, toInterfaceId, toComponentId, toItemId, toSlot) ?: return
 
-        Publishers.all.inventorySwap(player, id = fromId, component = fromComponent, fromItem = fromItem, fromSlot = fromSlot, fromInventory = fromInventory, toId = toId, toComponent = toComponent, toItem = toItem, toSlot = toSlot, toInventory = toInventory,)
+        Publishers.all.inventorySwap(player, id = fromId, component = fromComponent, fromItem = fromItem, fromSlot = fromSlot, fromInventory = fromInventory, toId = toId, toComponent = toComponent, toItem = toItem, toSlot = toSlot, toInventory = toInventory)
         player.emit(
             InterfaceSwitch(
                 id = fromId,

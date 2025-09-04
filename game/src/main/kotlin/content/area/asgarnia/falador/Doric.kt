@@ -21,7 +21,7 @@ import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.sub.Option
 
 class Doric(
-    val floorItems: FloorItems
+    val floorItems: FloorItems,
 ) {
 
     val ores = listOf(

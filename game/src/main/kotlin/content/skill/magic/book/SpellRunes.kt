@@ -1,13 +1,10 @@
 package content.skill.magic.book
 
-import content.entity.combat.combatPrepare
 import content.skill.magic.spell.hasSpellItems
 import content.skill.magic.spell.spell
 import world.gregs.voidps.engine.entity.character.Character
-import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.type.CombatStage
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Combat
 
 class SpellRunes {
@@ -20,5 +17,4 @@ class SpellRunes {
         }
         return false
     }
-
 }

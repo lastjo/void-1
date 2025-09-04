@@ -33,5 +33,4 @@ class Banshee {
         }
         npc.hit(target, offensiveType = "melee", defensiveType = "magic")
     }
-
 }

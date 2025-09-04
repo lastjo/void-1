@@ -3,16 +3,13 @@ package content.entity.player.inv.item.drop
 import content.entity.player.inv.item.tradeable
 import content.entity.sound.sound
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interact.itemOnObjectOperate
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.UseOn
 
 class ItemPlace(private val floorItems: FloorItems) {
@@ -34,5 +31,4 @@ class ItemPlace(private val floorItems: FloorItems) {
             floorItems.add(tile, item.id, item.amount, revealTicks = 100, disappearTicks = 1000, owner = player)
         }
     }
-
 }

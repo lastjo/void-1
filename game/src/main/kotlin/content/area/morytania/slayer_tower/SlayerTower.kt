@@ -2,10 +2,7 @@ package content.area.morytania.slayer_tower
 
 import content.entity.combat.hit.hit
 import content.entity.obj.door.enterDoor
-import content.entity.obj.objTeleportLand
-import content.entity.obj.objTeleportTakeOff
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
@@ -15,15 +12,10 @@ import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.GameObjects
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.entity.objectDespawn
-import world.gregs.voidps.engine.entity.objectSpawn
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.*
 
 class SlayerTower(
-    private val objects: GameObjects
+    private val objects: GameObjects,
 ) {
 
     @Spawn("slayer_tower_entrance_door_*_opened")
@@ -61,7 +53,7 @@ class SlayerTower(
         }
         return 0
     }
-    
+
     @TeleportLand("Climb-*", "slayer_tower_chain*")
     fun land(player: Player, target: GameObject) {
         player.exp(Skill.Agility, if (player["slayer_chain_success", true]) 3.0 else 6.0)
@@ -71,5 +63,4 @@ class SlayerTower(
     suspend fun operate(player: Player, target: GameObject) {
         player.enterDoor(target)
     }
-
 }

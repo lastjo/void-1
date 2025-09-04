@@ -42,5 +42,4 @@ class AbyssalRift {
         player.message("You have not yet unlocked this rift.")
         return true
     }
-
 }

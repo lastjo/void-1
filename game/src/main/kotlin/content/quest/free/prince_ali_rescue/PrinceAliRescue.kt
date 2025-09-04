@@ -2,7 +2,6 @@ package content.quest.free.prince_ali_rescue
 
 import content.entity.obj.door.enterDoor
 import content.entity.player.dialogue.type.statement
-import content.entity.player.modal.tab.questJournalOpen
 import content.entity.sound.sound
 import content.quest.quest
 import content.quest.questJournal
@@ -11,11 +10,8 @@ import world.gregs.voidps.engine.data.definition.FontDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.contains
 import world.gregs.voidps.engine.inv.inventory
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 import world.gregs.voidps.type.sub.Subscribe
 

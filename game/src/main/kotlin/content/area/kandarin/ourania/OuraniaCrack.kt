@@ -4,8 +4,6 @@ import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 
 class OuraniaCrack {

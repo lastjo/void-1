@@ -1,11 +1,7 @@
 package content.skill.melee.armour.barrows
 
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.inv.itemAdded
-import world.gregs.voidps.engine.inv.itemRemoved
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.ItemAdded
 import world.gregs.voidps.type.sub.ItemRemoved
 import world.gregs.voidps.type.sub.Spawn

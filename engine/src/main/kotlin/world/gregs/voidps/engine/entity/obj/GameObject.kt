@@ -64,9 +64,7 @@ value class GameObject(internal val packed: Long) :
         "GameObject(id=$id, intId=$intId, tile=$tile, shape=$shape, rotation=$rotation)"
     }
 
-    fun def(player: Player, definitions: ObjectDefinitions = get()): ObjectDefinition {
-        return ObjectOptionHandler.getDefinition(player, definitions, def, def)
-    }
+    fun def(player: Player, definitions: ObjectDefinitions = get()): ObjectDefinition = ObjectOptionHandler.getDefinition(player, definitions, def, def)
 
     companion object {
         operator fun invoke(id: Int, tile: Tile, shape: Int, rotation: Int): GameObject = GameObject(id, tile.x, tile.y, tile.level, shape, rotation)

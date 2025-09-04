@@ -10,7 +10,6 @@ import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.map.collision.random
 import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.type.CombatStage
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.random
 import world.gregs.voidps.type.sub.Combat
@@ -26,9 +25,7 @@ class Imp {
     }
 
     @TimerStart("teleport_timer")
-    fun start(npc: NPC): Int {
-        return random.nextInt(50, 200)
-    }
+    fun start(npc: NPC): Int = random.nextInt(50, 200)
 
     @TimerTick("teleport_timer")
     fun tick(npc: NPC) {

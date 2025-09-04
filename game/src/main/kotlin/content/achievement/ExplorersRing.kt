@@ -31,5 +31,4 @@ class ExplorersRing {
         player["explorers_ring_last_use"] = TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis())
         player.message("You feel refreshed as the ring revitalises you and a charge is used up.")
     }
-
 }

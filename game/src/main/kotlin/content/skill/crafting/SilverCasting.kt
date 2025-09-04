@@ -6,10 +6,6 @@ import net.pearx.kasechange.toTitleCase
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.sendScript
 import world.gregs.voidps.engine.client.ui.closeMenu
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.interact.itemOnObjectOperate
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.data.definition.data.Silver
@@ -19,10 +15,8 @@ import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.*
 import world.gregs.voidps.engine.queue.weakQueue
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Close
 import world.gregs.voidps.type.sub.Interface
 import world.gregs.voidps.type.sub.Open
@@ -45,7 +39,6 @@ class SilverCasting(private val itemDefinitions: ItemDefinitions) {
 
     val Item.silver: Silver?
         get() = def.getOrNull("silver_jewellery")
-
 
     @Open("silver_mould")
     fun open(player: Player, id: String) {
@@ -74,7 +67,7 @@ class SilverCasting(private val itemDefinitions: ItemDefinitions) {
         player.open("silver_mould")
     }
 
-    @UseOn(on ="furnace*") // arrive = false
+    @UseOn(on = "furnace*") // arrive = false
     fun use(player: Player, target: GameObject, item: Item) {
         if (!item.def.contains("silver_jewellery")) {
             return

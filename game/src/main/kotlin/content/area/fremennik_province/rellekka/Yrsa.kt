@@ -23,7 +23,7 @@ import world.gregs.voidps.type.sub.Open
 import world.gregs.voidps.type.sub.Option
 
 class Yrsa(
-    private val enums: EnumDefinitions
+    private val enums: EnumDefinitions,
 ) {
 
     @Option("Talk-to", "yrsa")

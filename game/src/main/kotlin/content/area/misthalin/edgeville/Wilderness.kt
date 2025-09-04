@@ -1,11 +1,7 @@
 package content.area.misthalin.edgeville
 
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
-import world.gregs.voidps.engine.entity.character.mode.move.move
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.sub.Move
 import world.gregs.voidps.type.sub.Spawn
@@ -21,6 +17,7 @@ class Wilderness(areas: AreaDefinitions) {
             player["in_wilderness"] = true
         }
     }
+
     @Move
     fun move(player: Player, from: Tile, to: Tile) {
         val wasIn = inWilderness(from)

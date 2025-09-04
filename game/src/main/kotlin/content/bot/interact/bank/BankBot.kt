@@ -8,7 +8,6 @@ import content.bot.interact.navigation.goToNearest
 import content.bot.interact.navigation.resume
 import content.bot.isBot
 import content.entity.player.bank.bank
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
 import world.gregs.voidps.engine.client.ui.menu
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
@@ -17,7 +16,6 @@ import world.gregs.voidps.engine.inv.equipment
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.network.client.instruction.EnterInt
 import world.gregs.voidps.network.client.instruction.InteractInterface
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Open
 
 private fun getItemId(id: String): Int? = get<ItemDefinitions>().getOrNull(id)?.id
@@ -142,5 +140,4 @@ class BankBot {
             player.bot.resume("bank")
         }
     }
-
 }

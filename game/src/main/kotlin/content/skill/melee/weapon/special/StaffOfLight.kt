@@ -1,20 +1,12 @@
 package content.skill.melee.weapon.special
 
-import content.entity.combat.hit.combatDamage
 import content.entity.player.combat.special.SpecialAttack
-import content.entity.player.combat.special.specialAttackPrepare
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.inv.itemRemoved
-import world.gregs.voidps.engine.timer.timerStart
-import world.gregs.voidps.engine.timer.timerStop
-import world.gregs.voidps.engine.timer.timerTick
 import world.gregs.voidps.engine.timer.toTicks
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.CombatStage
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.TimerState
 import world.gregs.voidps.type.sub.*
 import java.util.concurrent.TimeUnit
@@ -53,9 +45,7 @@ class StaffOfLight {
     }
 
     @TimerStart("power_of_light")
-    fun start(player: Player): Int {
-        return 1
-    }
+    fun start(player: Player): Int = 1
 
     @TimerTick("power_of_light")
     fun tick(player: Player): Int {
@@ -70,5 +60,4 @@ class StaffOfLight {
         player.message("<red>The power of the light fades. Your resistance to melee attacks returns to normal.")
         player.clear("power_of_light")
     }
-
 }

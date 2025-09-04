@@ -9,38 +9,42 @@ import java.util.TreeSet
  */
 data class TrieNode(
     val condition: Condition? = null,
-    val children: MutableSet<TrieNode> = TreeSet(Comparator<TrieNode> { a, b ->
-        when {
-            a.condition != null && b.condition == null -> -1 // a comes first (has condition)
-            a.condition == null && b.condition != null -> 1  // b comes first (has condition)
-            else -> {
-                // Both have conditions, sort by depth of branches (more conditions = higher priority)
-                val maxDepthA = a.maxDepth()
-                val maxDepthB = b.maxDepth()
-                val depthCompare = maxDepthB.compareTo(maxDepthA) // deeper first
-                if (depthCompare != 0) {
-                    depthCompare
-                } else {
-                    // Same depth, sort alphabetically for consistency
-                    (a.condition?.key ?: "").compareTo(b.condition?.key ?: "")
+    val children: MutableSet<TrieNode> = TreeSet(
+        Comparator<TrieNode> { a, b ->
+            when {
+                a.condition != null && b.condition == null -> -1 // a comes first (has condition)
+                a.condition == null && b.condition != null -> 1 // b comes first (has condition)
+                else -> {
+                    // Both have conditions, sort by depth of branches (more conditions = higher priority)
+                    val maxDepthA = a.maxDepth()
+                    val maxDepthB = b.maxDepth()
+                    val depthCompare = maxDepthB.compareTo(maxDepthA) // deeper first
+                    if (depthCompare != 0) {
+                        depthCompare
+                    } else {
+                        // Same depth, sort alphabetically for consistency
+                        (a.condition?.key ?: "").compareTo(b.condition?.key ?: "")
+                    }
                 }
             }
-        }
-    }),
-    val methods: MutableSet<Method> = TreeSet(Comparator<Method> { a, b ->
-        val specA = a.conditions.size
-        val specB = b.conditions.size
-        if (specA != specB) {
-            specB - specA
-        } else {
-            val expected = a.conditions.joinToString { it.statement().toString() }.compareTo(b.conditions.joinToString { it.statement().toString() })
-            if (expected == 0) {
-                a.method().compareTo(b.methodName)
+        },
+    ),
+    val methods: MutableSet<Method> = TreeSet(
+        Comparator<Method> { a, b ->
+            val specA = a.conditions.size
+            val specB = b.conditions.size
+            if (specA != specB) {
+                specB - specA
             } else {
-                expected
+                val expected = a.conditions.joinToString { it.statement().toString() }.compareTo(b.conditions.joinToString { it.statement().toString() })
+                if (expected == 0) {
+                    a.method().compareTo(b.methodName)
+                } else {
+                    expected
+                }
             }
-        }
-    }),
+        },
+    ),
 ) {
     private fun maxDepth(): Int {
         if (methods.isNotEmpty()) {
@@ -59,7 +63,7 @@ data class TrieNode(
         val block = CodeBlock.builder()
         if (condition != null) {
             val (string, args) = condition.statement()!!
-            block.beginControlFlow("${if (skipElse) "" else "else "}if (${string})", *args)
+            block.beginControlFlow("${if (skipElse) "" else "else "}if ($string)", *args)
         }
         var first = true
         for (child in children) {
@@ -163,5 +167,4 @@ data class TrieNode(
             ?: TrieNode(cond).also { children += it }
         child.insertConditions(conditions, idx + 1, method, allowMultiple)
     }
-
 }

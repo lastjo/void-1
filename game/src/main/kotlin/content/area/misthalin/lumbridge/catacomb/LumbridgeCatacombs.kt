@@ -1,20 +1,16 @@
 package content.area.misthalin.lumbridge.catacomb
 
 import content.entity.combat.killer
-import content.entity.death.npcDeath
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.statement
-import content.entity.player.inv.item.destroy.destroyed
 import world.gregs.voidps.cache.definition.data.ObjectDefinition
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.inventoryFull
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Death
 import world.gregs.voidps.type.sub.Option
 import world.gregs.voidps.type.sub.Subscribe
@@ -65,5 +61,4 @@ class LumbridgeCatacombs {
     fun destroy(player: Player, id: String) {
         player[id] = "take"
     }
-
 }

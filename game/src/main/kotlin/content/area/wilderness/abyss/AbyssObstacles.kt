@@ -15,10 +15,8 @@ import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.type.Direction
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.sub.Option
 
@@ -83,7 +81,6 @@ class AbyssObstacles {
         player.clearCamera()
         player.exp(Skill.Mining, 25.0)
     }
-
 
     @Option("Chop", "abyss_tendrils")
     suspend fun chop(player: Player, target: GameObject) {

@@ -7,8 +7,6 @@ import org.junit.jupiter.api.Test
 import world.gregs.voidps.cache.definition.data.ObjectDefinition
 import world.gregs.voidps.engine.client.update.batch.ZoneBatchUpdates
 import world.gregs.voidps.engine.data.definition.ObjectDefinitions
-import world.gregs.voidps.engine.entity.Despawn
-import world.gregs.voidps.engine.entity.Spawn
 import world.gregs.voidps.engine.event.Events
 import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.network.login.protocol.encode.zone.ObjectAddition

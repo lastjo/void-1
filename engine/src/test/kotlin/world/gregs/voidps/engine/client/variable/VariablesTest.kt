@@ -173,6 +173,7 @@ internal class VariablesTest {
         assertEquals(arrayListOf("First"), map[KEY])
         verify(exactly = 0) { variables.send(KEY) }
     }
+
     @Test
     fun `Remove bitwise`() {
         // Given

@@ -28,5 +28,4 @@ class Gorak {
             target.message("Your protective prayer doesn't seem to work!")
         }
     }
-
 }

@@ -10,5 +10,4 @@ class PoisonKarambwan {
     fun eat(player: Player) {
         player.directHit(50, "poison")
     }
-
 }

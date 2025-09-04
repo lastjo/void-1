@@ -17,5 +17,4 @@ class PortSarim {
         player.message("You take an apron. It feels freshly starched and smells of laundry.")
         return "white_apron"
     }
-
 }

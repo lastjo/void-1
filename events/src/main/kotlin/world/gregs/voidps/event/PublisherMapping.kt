@@ -8,7 +8,6 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
-import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.isSupertypeOf
 
 /**
@@ -99,8 +98,7 @@ abstract class PublisherMapping(
         val typeName = type.asTypeName()
         val nullable = type.createType(nullable = true).asTypeName()
 
-
-        parameters.firstOrNull { it.first == name && it.second == type.createType(nullable = it.second.isMarkedNullable)  }?.first
+        parameters.firstOrNull { it.first == name && it.second == type.createType(nullable = it.second.isMarkedNullable) }?.first
             ?: parameters.firstOrNull { it.second == type.createType(nullable = it.second.isMarkedNullable) }?.first
             ?: parameters.firstOrNull { it.second.isSupertypeOf(type.createType(nullable = it.second.isMarkedNullable)) }?.first ?: error("Expected parameter [${parameters.filter { it.second.asTypeName() == typeName }.joinToString(", ") { it.first }}] for ${method.methodName}($name: ${type.toString().substringAfter(".")}) in ${method.className}.")
 //        if (counts.getOrDefault(typename, 0) > 1) {
@@ -174,7 +172,7 @@ abstract class PublisherMapping(
                 .addStatement(if (player != null) "$player.warn(e) { \"Failed to publish ${name.removeSuffix("Publisher")}\" }" else "e.printStackTrace()")
                 .addStatement("return ${if (returnsDefault is String) "%S" else "%L"}", returnsDefault)
                 .endControlFlow()
-                .build()
+                .build(),
         )
         builder.returns(returnsDefault::class)
         return builder.build()

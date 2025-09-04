@@ -1,6 +1,5 @@
 package content.area.kandarin.tree_gnome_stronghold
 
-import content.entity.obj.objTeleportTakeOff
 import content.entity.player.dialogue.Happy
 import content.entity.player.dialogue.Quiz
 import content.entity.player.dialogue.Talk
@@ -11,10 +10,8 @@ import content.quest.questCompleted
 import content.skill.runecrafting.EssenceMine
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 import world.gregs.voidps.type.sub.Teleport
 
@@ -63,5 +60,4 @@ class Brimstail {
     fun exit(player: Player, target: GameObject) {
         player.message("You crouch your way through a cramped tunnel.")
     }
-
 }

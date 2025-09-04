@@ -8,7 +8,6 @@ import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.timer.*
 import world.gregs.voidps.type.CombatStage
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.TimerState
 import world.gregs.voidps.type.sub.Combat
 import world.gregs.voidps.type.sub.TimerStart
@@ -57,7 +56,7 @@ class GodBows {
     }
 
     @TimerStart("restorative_shot", "balanced_shot")
-    fun start(player: Player): Int  = TimeUnit.SECONDS.toTicks(6)
+    fun start(player: Player): Int = TimeUnit.SECONDS.toTicks(6)
 
     @TimerTick("restorative_shot", "balanced_shot")
     fun tick(player: Player): Int {
@@ -77,5 +76,4 @@ class GodBows {
         player.clear("restoration")
         player.clear("restoration_amount")
     }
-
 }

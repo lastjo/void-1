@@ -17,5 +17,4 @@ class Firelighters {
             replace(toItem.id, "${colour}_logs")
         }
     }
-
 }

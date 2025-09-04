@@ -3,8 +3,6 @@ package content.bot.interact.navigation
 import content.bot.Bot
 import content.bot.bot
 import content.bot.isBot
-import content.entity.obj.door.DoorOpened
-import content.entity.obj.objTeleport
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
@@ -13,16 +11,11 @@ import world.gregs.voidps.engine.entity.Entity
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
 import world.gregs.voidps.engine.entity.character.mode.move.Movement
-import world.gregs.voidps.engine.entity.character.mode.move.move
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.event.Event
-import world.gregs.voidps.engine.event.onEvent
 import world.gregs.voidps.engine.timer.TICKS
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Move
 import world.gregs.voidps.type.sub.Subscribe
-import world.gregs.voidps.type.sub.Teleport
 import kotlin.collections.set
 import kotlin.coroutines.resume
 import kotlin.reflect.KClass
@@ -87,5 +80,4 @@ class Navigation {
             player.bot.resume("move")
         }
     }
-
 }

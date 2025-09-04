@@ -13,5 +13,5 @@ annotation class LevelChange(
     val from: Int = -1,
     val to: Int = -1,
     val max: Boolean = false,
-    val id: String = "*"
+    val id: String = "*",
 )

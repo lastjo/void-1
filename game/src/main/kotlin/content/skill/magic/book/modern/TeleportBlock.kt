@@ -1,6 +1,5 @@
 package content.skill.magic.book.modern
 
-import content.entity.combat.combatPrepare
 import content.skill.magic.spell.spell
 import content.skill.prayer.protectMagic
 import world.gregs.voidps.engine.client.message
@@ -8,10 +7,7 @@ import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
-import world.gregs.voidps.engine.timer.timerStart
-import world.gregs.voidps.engine.timer.timerTick
 import world.gregs.voidps.type.CombatStage
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.TimerState
 import world.gregs.voidps.type.sub.Combat
 import world.gregs.voidps.type.sub.TimerStart
@@ -87,5 +83,4 @@ class TeleportBlock {
         }
         return TimerState.CONTINUE
     }
-
 }

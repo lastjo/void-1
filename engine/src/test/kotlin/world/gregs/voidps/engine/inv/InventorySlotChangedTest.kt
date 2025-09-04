@@ -73,7 +73,6 @@ class InventorySlotChangedTest {
         assertEquals(1, removals)
     }
 
-
     @Test
     fun `Replacing identical items counts as both additions and removals`() {
         val manager = inventory.transaction.changes

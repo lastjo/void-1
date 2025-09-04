@@ -11,5 +11,5 @@ annotation class Swap(
     val fromId: String = "*",
     val fromComponent: String = "*",
     val toId: String = "*",
-    val toComponent: String = "*"
+    val toComponent: String = "*",
 )

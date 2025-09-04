@@ -15,5 +15,5 @@ data class Subscriber(
     val schema: PublisherMapping,
     val annotationArgs: Map<String, Any>,
     val classParams: List<Pair<String, TypeName>>,
-    val returnType: String
+    val returnType: String,
 )

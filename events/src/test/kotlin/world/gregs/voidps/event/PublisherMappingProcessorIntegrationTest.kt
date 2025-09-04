@@ -88,7 +88,7 @@ class PublisherMappingProcessorIntegrationTest {
         interaction = interaction,
         required = required,
         checkMethodName = if (interaction) "hasOnEvent" else null,
-        cancellable = cancellable
+        cancellable = cancellable,
     ) {
         override fun conditions(method: Subscriber): List<List<Condition>> {
             // Supports optional multiple annotation values
@@ -107,7 +107,11 @@ class PublisherMappingProcessorIntegrationTest {
     }
 
     private class OnMagicEventPublisherMapping(
-        function: KFunction<*>, hasFunction: KFunction<*>? = null, notification: Boolean = false, cancellable: Boolean = false, returnsDefault: Any? = null
+        function: KFunction<*>,
+        hasFunction: KFunction<*>? = null,
+        notification: Boolean = false,
+        cancellable: Boolean = false,
+        returnsDefault: Any? = null,
     ) : PublisherMapping(function, hasFunction, notification, cancellable, returnsDefault) {
         override fun conditions(method: Subscriber): List<List<Condition>> {
             // Supports optional multiple annotation values
@@ -138,7 +142,11 @@ class PublisherMappingProcessorIntegrationTest {
     }
 
     private class TestMagicProcessorProvider(
-        val function: KFunction<*>, val hasFunction: KFunction<*>? = null, val notification: Boolean = false, val cancellable: Boolean = false, val returnsDefault: Any? = null
+        val function: KFunction<*>,
+        val hasFunction: KFunction<*>? = null,
+        val notification: Boolean = false,
+        val cancellable: Boolean = false,
+        val returnsDefault: Any? = null,
     ) : SymbolProcessorProvider {
         override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor = PublisherProcessor(
             codeGenerator = environment.codeGenerator,

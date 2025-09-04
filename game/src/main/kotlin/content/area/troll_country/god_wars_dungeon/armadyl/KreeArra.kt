@@ -100,5 +100,4 @@ class KreeArra(
     fun geerin(npc: NPC) {
         geerin = null
     }
-
 }

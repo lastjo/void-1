@@ -35,5 +35,4 @@ class MultiCombat(private val areaDefinitions: AreaDefinitions) {
     fun set(player: Player, to: Any?) {
         player.interfaces.sendVisibility("area_status_icon", "multi_combat", to as? Boolean ?: false)
     }
-
 }

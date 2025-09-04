@@ -10,5 +10,4 @@ class JugOfWine {
     fun drink(player: Player) {
         player.levels.drain(Skill.Attack, 2)
     }
-
 }

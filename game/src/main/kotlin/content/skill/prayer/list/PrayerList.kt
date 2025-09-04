@@ -3,10 +3,7 @@ package content.skill.prayer.list
 import content.skill.prayer.PrayerConfigs.PRAYERS
 import content.skill.prayer.PrayerConfigs.SELECTING_QUICK_PRAYERS
 import content.skill.prayer.PrayerConfigs.USING_QUICK_PRAYERS
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.event.interfaceRefresh
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Open
 import world.gregs.voidps.type.sub.Refresh
 
@@ -32,5 +29,4 @@ class PrayerList {
             player.interfaceOptions.unlockAll(id, "regular_prayers", 0..29)
         }
     }
-
 }

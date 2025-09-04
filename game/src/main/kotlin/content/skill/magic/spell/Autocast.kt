@@ -1,15 +1,9 @@
 package content.skill.magic.spell
 
 import content.skill.melee.weapon.attackRange
-import world.gregs.voidps.engine.client.ui.InterfaceOption
-import world.gregs.voidps.engine.client.ui.interfaceOption
-import world.gregs.voidps.engine.client.variable.variableSet
 import world.gregs.voidps.engine.data.definition.InterfaceDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.engine.inv.inventoryChanged
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.*
 
 class Autocast(private val interfaceDefinitions: InterfaceDefinitions) {
@@ -35,5 +29,4 @@ class Autocast(private val interfaceDefinitions: InterfaceDefinitions) {
     fun update(player: Player) {
         player.clear("autocast")
     }
-
 }

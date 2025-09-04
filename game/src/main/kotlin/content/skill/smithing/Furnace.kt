@@ -4,7 +4,6 @@ import com.github.michaelbull.logging.InlineLogger
 import content.entity.player.dialogue.type.makeAmount
 import content.entity.sound.sound
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interact.itemOnObjectOperate
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.data.definition.data.Smelting
 import world.gregs.voidps.engine.entity.character.player.Player
@@ -15,9 +14,6 @@ import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.event.Context
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.contains
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.TransactionError
@@ -25,7 +21,6 @@ import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.remove
 import world.gregs.voidps.engine.queue.weakQueue
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
 import world.gregs.voidps.type.sub.Option
 import world.gregs.voidps.type.sub.UseOn

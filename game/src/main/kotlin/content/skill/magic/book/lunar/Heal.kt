@@ -47,7 +47,6 @@ class Heal(
         }
     }
 
-
     @UseOn(id = "lunar_spellbook", component = "heal_other", approach = true)
     suspend fun other(player: Player, target: Player, component: String) {
         player.approachRange(2)
@@ -78,5 +77,4 @@ class Heal(
         target.message("You have been healed by ${player.name}.")
         player.damage(restored, delay = 2)
     }
-
 }

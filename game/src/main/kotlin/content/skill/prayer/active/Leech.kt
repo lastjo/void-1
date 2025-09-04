@@ -73,7 +73,6 @@ class Leech {
         cast(target, player, true, "spirit")
     }
 
-
     @Combat(stage = CombatStage.DAMAGE)
     fun specialAttack(player: Player, source: Character) {
         if (source !is Player || !source.praying("special_attack")) {

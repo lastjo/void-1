@@ -3,7 +3,6 @@ package content.skill.smithing
 import content.entity.sound.sound
 import content.skill.magic.spell.SpellRunes.removeItems
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interact.interfaceOnItem
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.data.definition.SpellDefinitions
 import world.gregs.voidps.engine.data.definition.data.Smelting
@@ -11,12 +10,10 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.remove
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.UseOn
 
 class SuperheatItem(
@@ -57,5 +54,4 @@ class SuperheatItem(
             player.sound("superheat_fail")
         }
     }
-
 }

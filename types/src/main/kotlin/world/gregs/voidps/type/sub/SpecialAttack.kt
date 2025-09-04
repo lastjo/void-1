@@ -8,5 +8,5 @@ package world.gregs.voidps.type.sub
 @Retention(AnnotationRetention.SOURCE)
 annotation class SpecialAttack(
     val id: String = "",
-    val damage: Boolean = false
+    val damage: Boolean = false,
 )

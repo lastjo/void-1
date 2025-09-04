@@ -255,7 +255,7 @@ class DebugCommands(
     }
 
     @TimerTick("show_path")
-    fun tick(player: Player){
+    fun tick(player: Player) {
         var tile = player.tile
         for (step in player.steps) {
             tile = tile.add(step)

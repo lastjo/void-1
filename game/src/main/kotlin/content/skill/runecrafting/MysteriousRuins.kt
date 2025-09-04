@@ -1,14 +1,12 @@
 package content.skill.runecrafting
 
 import content.entity.obj.ObjectTeleports
-import content.entity.obj.objTeleportTakeOff
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.statement
 import content.entity.sound.sound
 import net.pearx.kasechange.toSentenceCase
 import world.gregs.voidps.cache.definition.data.ObjectDefinition
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interact.itemOnObjectOperate
 import world.gregs.voidps.engine.client.variable.hasClock
 import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.data.definition.ObjectDefinitions
@@ -18,13 +16,8 @@ import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.ObjectOption
-import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.engine.inv.itemAdded
-import world.gregs.voidps.engine.inv.itemRemoved
 import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.equals
 import world.gregs.voidps.type.sub.*
 
@@ -115,5 +108,4 @@ class MysteriousRuins(
         }
         return 0
     }
-
 }

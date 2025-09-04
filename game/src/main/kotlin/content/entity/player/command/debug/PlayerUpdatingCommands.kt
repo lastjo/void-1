@@ -6,17 +6,13 @@ import content.entity.effect.transform
 import content.entity.proj.shoot
 import net.pearx.kasechange.toScreamingSnakeCase
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.event.adminCommand
-import world.gregs.voidps.engine.client.ui.event.modCommand
 import world.gregs.voidps.engine.entity.character.*
 import world.gregs.voidps.engine.entity.character.player.*
 import world.gregs.voidps.engine.get
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.map.zone.DynamicZones
 import world.gregs.voidps.type.Delta
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.PlayerRights
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Command
 
 class PlayerUpdatingCommands(val players: Players) {
@@ -73,7 +69,6 @@ class PlayerUpdatingCommands(val players: Players) {
     @Command("tfm", "transform", description = "transform to npc with int or string id (-1 to clear)", rights = PlayerRights.ADMIN)
     fun transform(player: Player, content: String) {
         player.transform(content)
-
     }
 
     @Command("overlay", rights = PlayerRights.ADMIN)

@@ -6,10 +6,6 @@ import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.flagAppearance
-import world.gregs.voidps.engine.timer.timerStart
-import world.gregs.voidps.engine.timer.timerStop
-import world.gregs.voidps.engine.timer.timerTick
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.TimerState
 import world.gregs.voidps.type.sub.TimerStart
 import world.gregs.voidps.type.sub.TimerStop
@@ -43,5 +39,4 @@ class DressingRoom {
         player.gfx("dressing_room_finish")
         player.flagAppearance()
     }
-
 }

@@ -17,5 +17,4 @@ class Thread {
             player.message("You use up one of your reels of thread.")
         }
     }
-
 }

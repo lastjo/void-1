@@ -25,9 +25,7 @@ class Ranged(
     private val animationDefinitions: AnimationDefinitions,
 ) {
     @Combat(type = "range", stage = CombatStage.PREPARE)
-    fun prepare(player: Player, target: Character): Boolean {
-        return player.specialAttack && !SpecialAttack.hasEnergy(player)
-    }
+    fun prepare(player: Player, target: Character): Boolean = player.specialAttack && !SpecialAttack.hasEnergy(player)
 
     @Combat(type = "scorch", stage = CombatStage.SWING)
     @Combat(type = "range", stage = CombatStage.SWING)

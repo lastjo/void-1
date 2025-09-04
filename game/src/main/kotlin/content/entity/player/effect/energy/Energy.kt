@@ -4,14 +4,10 @@ import world.gregs.voidps.engine.GameLoop
 import world.gregs.voidps.engine.client.sendRunEnergy
 import world.gregs.voidps.engine.client.variable.hasClock
 import world.gregs.voidps.engine.data.Settings
-import world.gregs.voidps.engine.entity.character.mode.move.move
 import world.gregs.voidps.engine.entity.character.move.running
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Interpolation
-import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.timer.timerTick
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Move
 import world.gregs.voidps.type.sub.Spawn
 import world.gregs.voidps.type.sub.TimerTick

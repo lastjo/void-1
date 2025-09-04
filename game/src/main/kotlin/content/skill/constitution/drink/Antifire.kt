@@ -4,11 +4,6 @@ import content.entity.player.effect.antifire
 import content.entity.player.effect.superAntifire
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.timer.timerStart
-import world.gregs.voidps.engine.timer.timerStop
-import world.gregs.voidps.engine.timer.timerTick
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.TimerState
 import world.gregs.voidps.type.sub.Spawn
 import world.gregs.voidps.type.sub.TimerStart
@@ -51,5 +46,4 @@ class Antifire {
         player["antifire"] = 0
         player["super_antifire"] = 0
     }
-
 }

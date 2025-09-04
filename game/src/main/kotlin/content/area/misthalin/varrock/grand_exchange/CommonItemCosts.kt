@@ -4,14 +4,10 @@ import content.social.trade.exchange.GrandExchange
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.sendScript
 import world.gregs.voidps.engine.client.ui.chat.toDigitGroupString
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.data.definition.EnumDefinitions
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Interface
 import world.gregs.voidps.type.sub.Open
 
@@ -20,7 +16,6 @@ class CommonItemCosts(
     private val exchange: GrandExchange,
     private val itemDefinitions: ItemDefinitions,
 ) {
-
 
     @Open("common_item_costs")
     fun open(player: Player) {
@@ -41,5 +36,4 @@ class CommonItemCosts(
     fun examine(player: Player, item: Item) {
         player.message(item.def.getOrNull("examine") ?: return)
     }
-
 }

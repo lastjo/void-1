@@ -15,5 +15,4 @@ class IceSpells(private val definitions: SpellDefinitions) {
         val ticks: Int = definitions.get(spell)["freeze_ticks"]
         source.freeze(target, ticks)
     }
-
 }

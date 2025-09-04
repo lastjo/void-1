@@ -2,12 +2,9 @@ package content.entity.player.effect.energy
 
 import world.gregs.voidps.cache.definition.data.NPCDefinition
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.entity.character.mode.Rest
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Interface
 import world.gregs.voidps.type.sub.Option
 
@@ -21,6 +18,7 @@ class Resting {
             player.mode = Rest(player, -1)
         }
     }
+
     @Option("Listen-to")
     suspend fun operate(player: Player, target: NPC, def: NPCDefinition) {
         player.arriveDelay()
@@ -28,5 +26,4 @@ class Resting {
             player.mode = Rest(player, def["song"])
         }
     }
-
 }

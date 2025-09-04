@@ -1,8 +1,6 @@
 package content.skill.magic.spell
 
 import content.area.wilderness.inMultiCombat
-import content.entity.combat.hit.characterCombatDamage
-import content.entity.combat.hit.combatAttack
 import content.entity.combat.hit.directHit
 import content.entity.sound.sound
 import content.skill.melee.weapon.multiTargets
@@ -10,7 +8,6 @@ import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.type.CombatStage
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
 import world.gregs.voidps.type.sub.Combat
 import kotlin.random.nextInt
@@ -38,5 +35,4 @@ class Spells {
             }
         }
     }
-
 }

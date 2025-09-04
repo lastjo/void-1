@@ -124,9 +124,7 @@ class MakeoverMage {
     }
 
     @TimerStart("makeover")
-    fun start(npc: NPC): Int {
-        return TimeUnit.SECONDS.toTicks(250)
-    }
+    fun start(npc: NPC): Int = TimeUnit.SECONDS.toTicks(250)
 
     @TimerTick("makeover")
     fun tick(npc: NPC) {

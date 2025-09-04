@@ -49,7 +49,7 @@ class CombatAttack {
         if (npc.attackRange != 1) {
             npc.approachRange(npc.attackRange, update = false)
         } else {
-           npc.approachRange(null, update = true)
+            npc.approachRange(null, update = true)
         }
         combatInteraction(npc, target)
     }

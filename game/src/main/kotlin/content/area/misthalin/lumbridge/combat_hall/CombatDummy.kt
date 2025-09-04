@@ -1,7 +1,6 @@
 package content.area.misthalin.lumbridge.combat_hall
 
 import content.entity.combat.attackers
-import content.entity.combat.combatPrepare
 import content.skill.melee.weapon.fightStyle
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.Character
@@ -9,10 +8,7 @@ import world.gregs.voidps.engine.entity.character.mode.EmptyMode
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.entity.character.player.skill.level.CurrentLevelChanged
-import world.gregs.voidps.engine.entity.character.player.skill.level.npcLevelChange
 import world.gregs.voidps.type.CombatStage
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Combat
 import world.gregs.voidps.type.sub.LevelChange
 
@@ -41,5 +37,4 @@ class CombatDummy {
         }
         return false
     }
-
 }

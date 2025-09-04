@@ -56,5 +56,4 @@ class ItemInformation {
             player["item_info_price"] = if (item.amount == 0) 0 else Price.getPrice(player, item.id, index, item.amount)
         }
     }
-
 }

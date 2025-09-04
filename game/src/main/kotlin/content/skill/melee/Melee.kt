@@ -19,9 +19,7 @@ class Melee(
 ) {
 
     @Combat(type = "melee", stage = CombatStage.PREPARE)
-    fun prepare(player: Player, target: Character): Boolean {
-        return player.specialAttack && !SpecialAttack.hasEnergy(player)
-    }
+    fun prepare(player: Player, target: Character): Boolean = player.specialAttack && !SpecialAttack.hasEnergy(player)
 
     @Combat(type = "melee", stage = CombatStage.SWING)
     fun swing(player: Player, target: Character) {
@@ -41,5 +39,4 @@ class Melee(
         player.anim(animation)
         player.hit(target)
     }
-
 }

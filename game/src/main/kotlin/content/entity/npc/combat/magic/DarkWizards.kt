@@ -19,5 +19,4 @@ class DarkWizards {
     fun combat(npc: NPC, target: Player) {
         npc.spell = if (!random.nextBoolean() && Spell.canDrain(target, "weaken")) "weaken" else "earth_strike"
     }
-
 }

@@ -267,5 +267,4 @@ class ItemEmotes {
     fun squirrel(player: Player) {
         // todo summon npc 9682 and 9681 if dismiss have to wait 30mins before able to summon again
     }
-
 }

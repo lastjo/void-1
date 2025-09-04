@@ -4,36 +4,28 @@ import kotlinx.coroutines.*
 import world.gregs.voidps.engine.Contexts
 import world.gregs.voidps.engine.client.PlayerAccountLoader
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.event.adminCommand
 import world.gregs.voidps.engine.data.AccountManager
 import world.gregs.voidps.engine.data.Settings
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.data.definition.EnumDefinitions
 import world.gregs.voidps.engine.data.definition.StructDefinitions
-import world.gregs.voidps.engine.data.settingsReload
 import world.gregs.voidps.engine.entity.MAX_PLAYERS
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.move.running
-import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.appearance
 import world.gregs.voidps.engine.entity.character.player.sex
-import world.gregs.voidps.engine.entity.worldSpawn
 import world.gregs.voidps.engine.event.Event
 import world.gregs.voidps.engine.event.Events
 import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.get
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.timer.toTicks
-import world.gregs.voidps.engine.timer.worldTimerStart
-import world.gregs.voidps.engine.timer.worldTimerTick
 import world.gregs.voidps.network.client.DummyClient
 import world.gregs.voidps.network.login.protocol.visual.update.player.BodyColour
 import world.gregs.voidps.network.login.protocol.visual.update.player.BodyPart
 import world.gregs.voidps.type.PlayerRights
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.random
 import world.gregs.voidps.type.sub.*
 import java.util.concurrent.TimeUnit
@@ -71,9 +63,7 @@ class BotSpawns(
     }
 
     @TimerStart("bot_spawn")
-    fun start(world: World): Int {
-        return TimeUnit.SECONDS.toTicks(Settings["bots.spawnSeconds", 60])
-    }
+    fun start(world: World): Int = TimeUnit.SECONDS.toTicks(Settings["bots.spawnSeconds", 60])
 
     @TimerTick("bot_spawn")
     fun tick(world: World): Int {

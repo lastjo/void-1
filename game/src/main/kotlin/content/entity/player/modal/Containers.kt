@@ -8,7 +8,7 @@ import world.gregs.voidps.type.sub.InventoryUpdated
 
 class Containers(
     private val itemDefinitions: ItemDefinitions,
-    private val inventoryDefinitions: InventoryDefinitions
+    private val inventoryDefinitions: InventoryDefinitions,
 ) {
 
     @InventoryUpdated

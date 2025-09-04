@@ -55,5 +55,4 @@ class EnergyTransfer(private val definitions: SpellDefinitions) {
         target.specialAttackEnergy = MAX_SPECIAL_ATTACK
         target.runEnergy = MAX_RUN_ENERGY
     }
-
 }
