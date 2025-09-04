@@ -10,30 +10,33 @@ import com.tschuchort.compiletesting.*
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
+import kotlin.reflect.KType
+import kotlin.reflect.full.starProjectedType
 
 class PublisherMappingProcessorIntegrationTest {
 
-    abstract class Publishers {
-        open suspend fun onEventSuspendInteract(id: String, name: String = "", approach: Boolean = false): Boolean = false
-        open fun hasOnEventSuspendInteract(id: String, name: String = "", approach: Boolean = false): Boolean = false
+    interface Publishers {
+        suspend fun onEventSuspendInteract(id: String, name: String = "", approach: Boolean = false): Boolean = false
+        fun hasOnEventSuspendInteract(id: String, name: String = "", approach: Boolean = false): Boolean = false
 
-        open suspend fun onEventSuspend(id: String, name: String): Boolean = false
+        suspend fun onEventSuspend(id: String, name: String): Boolean = false
 
-        open suspend fun onEventSuspend(id: String): Boolean = false
+        suspend fun onEventSuspend(id: String): Boolean = false
 
-        open fun hasOnEventSuspend(id: String, name: String): Boolean = false
+        fun hasOnEventSuspend(id: String, name: String): Boolean = false
 
-        open fun hasOnEvent(id: String, name: String, approach: Boolean): Boolean = false
+        fun hasOnEvent(id: String, name: String, approach: Boolean): Boolean = false
 
-        open fun onEvent(id: String, name: String): Boolean = false
+        fun onEvent(id: String, name: String): Boolean = false
 
-        open fun onEvent(id: String): Boolean = false
+        fun onEvent(id: String): Boolean = false
     }
 
     private fun compilation(
         source: String,
-        required: List<TypeName> = listOf(STRING),
+        required: List<KType> = listOf(String::class.starProjectedType),
         notification: Boolean = false,
         cancellable: Boolean = false,
         suspend: Boolean = false,
@@ -74,12 +77,12 @@ class PublisherMappingProcessorIntegrationTest {
         default: Any = false,
         interaction: Boolean = false,
         cancellable: Boolean = false,
-        required: List<TypeName>,
+        required: List<KType>,
     ) : PublisherMapping(
         name = "OnEventPublisher",
         parameters = listOf(
-            "id" to STRING,
-            "name" to STRING,
+            "id" to String::class.starProjectedType,
+            "name" to String::class.starProjectedType,
         ),
         returnsDefault = default,
         notification = notification,
@@ -122,7 +125,7 @@ class PublisherMappingProcessorIntegrationTest {
     }
 
     private class TestProcessorProvider(
-        private val required: List<TypeName> = listOf(STRING),
+        private val required: List<KType> = listOf(String::class.starProjectedType),
         private val notification: Boolean = false,
         private val cancellable: Boolean = false,
         private val suspend: Boolean = false,
@@ -398,7 +401,7 @@ class PublisherMappingProcessorIntegrationTest {
             }
         """.trimIndent()
 
-        val compilation = compilation(source, required = listOf(STRING, STRING), notification = true, cancellable = true)
+        val compilation = compilation(source, required = listOf(String::class.starProjectedType, String::class.starProjectedType), notification = true, cancellable = true)
         val result = compilation.compile()
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
@@ -422,7 +425,7 @@ class PublisherMappingProcessorIntegrationTest {
             }
         """.trimIndent()
 
-        val compilation = compilation(source, required = listOf(STRING, STRING), notification = true)
+        val compilation = compilation(source, required = listOf(String::class.starProjectedType, String::class.starProjectedType), notification = true)
         val result = compilation.compile()
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
@@ -449,7 +452,7 @@ class PublisherMappingProcessorIntegrationTest {
             }
         """.trimIndent()
 
-        val compilation = compilation(source, required = listOf(STRING, STRING), notification = true, cancellable = true)
+        val compilation = compilation(source, required = listOf(String::class.starProjectedType, String::class.starProjectedType), notification = true, cancellable = true)
         val result = compilation.compile()
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
@@ -471,7 +474,7 @@ class PublisherMappingProcessorIntegrationTest {
             }
         """.trimIndent()
 
-        val compilation = compilation(source, required = listOf(STRING))
+        val compilation = compilation(source, required = listOf(String::class.starProjectedType))
         val result = compilation.compile()
 
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)

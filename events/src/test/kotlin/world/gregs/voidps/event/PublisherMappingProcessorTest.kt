@@ -8,6 +8,7 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import world.gregs.voidps.event.PublisherMappingProcessorIntegrationTest.Publishers
+import kotlin.reflect.full.starProjectedType
 
 class PublisherMappingProcessorTest {
 
@@ -17,11 +18,11 @@ class PublisherMappingProcessorTest {
     private val dummyMapping = object : PublisherMapping(
         name = "TestPublisher",
         suspendable = false,
-        parameters = listOf("id" to STRING),
+        parameters = listOf("id" to String::class.starProjectedType),
         returnsDefault = true,
         notification = true,
         methodName = "",
-        required = listOf(STRING),
+        required = listOf(String::class.starProjectedType),
     ) {
         override fun conditions(
             method: Subscriber,
@@ -37,7 +38,7 @@ class PublisherMappingProcessorTest {
         )
 
         val processor = PublisherProcessor(codeGenerator, logger, schemas, Publishers::class.asClassName())
-        val found = processor.findSchema("MyAnnotation", listOf(Pair("id", STRING)))
+        val found = processor.findSchema("MyAnnotation", listOf(Pair("id", String::class)))
 
         assertEquals(dummyMapping, found)
     }
@@ -45,6 +46,6 @@ class PublisherMappingProcessorTest {
     @Test
     fun `Find schema returns null when schema not found`() {
         val processor = PublisherProcessor(codeGenerator, logger, emptyMap(), Publishers::class.asClassName())
-        assertNull(processor.findSchema("Missing", listOf(Pair("id", STRING))))
+        assertNull(processor.findSchema("Missing", listOf(Pair("id", String::class))))
     }
 }
