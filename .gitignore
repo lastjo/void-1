@@ -6,9 +6,6 @@
 *.checksum
 *.jct
 
-# scripts
-scripts.txt
-
 # tools
 *.jar
 /data/dump/

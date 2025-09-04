@@ -40,7 +40,6 @@ application {
 
 tasks {
     named<ShadowJar>("shadowJar") {
-        from(layout.buildDirectory.file("scripts.txt"))
         minimize {
             exclude("world/gregs/voidps/engine/log/**")
             exclude(dependency("org.postgresql:postgresql:.*"))
