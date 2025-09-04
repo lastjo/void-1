@@ -34,7 +34,7 @@ class BartenderFlyingHorseInn {
                 }
             }
             option<Talk>("I'll not have anything then.")
-            option("I'm doing Alfred Grimhand's barcrawl.", filter = barCrawlFilter) {
+            option("I'm doing Alfred Grimhand's barcrawl.", filter = { barCrawlFilter(player, target) }) {
                 barCrawl()
             }
         }

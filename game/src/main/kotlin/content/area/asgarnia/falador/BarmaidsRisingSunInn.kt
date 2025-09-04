@@ -89,7 +89,7 @@ class BarmaidsRisingSunInn(
                     option<Talk>("I don't feel like any of those.")
                 }
             }
-            option("I'm doing Alfred Grimhand's barcrawl.", filter = barCrawlFilter) {
+            option("I'm doing Alfred Grimhand's barcrawl.", filter = { barCrawlFilter(player, target) }) {
                 barCrawl()
             }
             option<Talk>("I've got this beer glass...", filter = { player.inventory.contains("beer_glass", 1) }) {

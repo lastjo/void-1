@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test
 import world.gregs.voidps.engine.GameLoop
 import world.gregs.voidps.engine.event.Event
 import world.gregs.voidps.engine.event.EventDispatcher
-import world.gregs.voidps.engine.event.SuspendableEvent
 import java.util.*
 
 abstract class TimersTest {
@@ -20,12 +19,6 @@ abstract class TimersTest {
         emitted = LinkedList()
         events = object : EventDispatcher {
             override fun <E : Event> emit(event: E): Boolean {
-                block?.invoke(event)
-                emitted.add(event)
-                return super.emit(event)
-            }
-
-            override fun <E : SuspendableEvent> emit(event: E): Boolean {
                 block?.invoke(event)
                 emitted.add(event)
                 return super.emit(event)

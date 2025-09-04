@@ -10,8 +10,6 @@ import world.gregs.voidps.engine.data.definition.*
 import world.gregs.voidps.engine.entity.Despawn
 import world.gregs.voidps.engine.entity.Spawn
 import world.gregs.voidps.engine.entity.World
-import world.gregs.voidps.engine.entity.character.mode.move.AreaEntered
-import world.gregs.voidps.engine.entity.character.mode.move.AreaExited
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.character.player.appearance
@@ -95,12 +93,11 @@ class AccountManager(
         Publishers.all.spawnPlayer(player)
         player.message("Welcome to ${Settings["server.name", "game"]}.", ChatType.Welcome)
         player.emit(Spawn)
-        for (def in areaDefinitions.get(player.tile.zone)) {
-            if (player.tile in def.area) {
-                Publishers.launch {
+        Publishers.launch {
+            for (def in areaDefinitions.get(player.tile.zone)) {
+                if (player.tile in def.area) {
                     Publishers.all.enterArea(player, def.name, def.tags, def.area)
                 }
-                player.emit(AreaEntered(player, def.name, def.tags, def.area))
             }
         }
     }
@@ -129,7 +126,6 @@ class AccountManager(
                 for (def in areaDefinitions.get(player.tile.zone)) {
                     if (player.tile in def.area) {
                         Publishers.all.exitArea(player, def.name, def.tags, def.area, logout = true)
-                        player.emit(AreaExited(player, def.name, def.tags, def.area, logout = true))
                     }
                 }
             }

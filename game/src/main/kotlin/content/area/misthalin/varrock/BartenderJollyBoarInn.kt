@@ -42,7 +42,7 @@ class BartenderJollyBoarInn {
                 npc<Talk>("I'm not that well up on the gossip out here. I've heard that the bartender in the Blue Moon Inn has gone a little crazy, he keeps claiming he is part of something called an online game.")
                 player<Talk>("What that means, I don't know. That's probably old news by now though.")
             }
-            option("I'm doing Alfred Grimhand's barcrawl.", filter = barCrawlFilter) {
+            option("I'm doing Alfred Grimhand's barcrawl.", filter = { barCrawlFilter(player, target) }) {
                 barCrawl()
             }
         }

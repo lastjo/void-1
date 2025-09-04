@@ -12,7 +12,6 @@ import world.gregs.voidps.engine.client.ui.chat.toTag
 import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.TargetContext
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.type.sub.Inventory
@@ -40,10 +39,10 @@ suspend fun Dialogue.barCrawlDrink(
     effects()
 }
 
-val barCrawlFilter: TargetContext<Player, NPC>.() -> Boolean = filter@{
-    val info: Map<String, Any> = target.def.getOrNull("bar_crawl") ?: return@filter false
+fun barCrawlFilter(player: Player, target: NPC): Boolean {
+    val info: Map<String, Any> = target.def.getOrNull("bar_crawl") ?: return false
     val id = info["id"] as String
-    player.quest("alfred_grimhands_barcrawl") == "signatures" && !player.containsVarbit("barcrawl_signatures", id)
+    return player.quest("alfred_grimhands_barcrawl") == "signatures" && !player.containsVarbit("barcrawl_signatures", id)
 }
 
 class AlfredGrimhandsBarCrawl {

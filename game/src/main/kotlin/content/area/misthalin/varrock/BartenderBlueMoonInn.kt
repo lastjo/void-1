@@ -52,7 +52,7 @@ class BartenderBlueMoonInn {
                     }
                 }
             }
-            option("I'm doing Alfred Grimhand's barcrawl.", filter = barCrawlFilter) {
+            option("I'm doing Alfred Grimhand's barcrawl.", filter = { barCrawlFilter(player, target) }) {
                 barCrawl()
             }
         }

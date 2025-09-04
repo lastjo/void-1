@@ -36,7 +36,7 @@ class BartenderDeadMansChest {
                     player.message("You buy a bottle of rum.")
                 }
             }
-            option("I'm doing Alfred Grimhand's barcrawl.", filter = barCrawlFilter) {
+            option("I'm doing Alfred Grimhand's barcrawl.", filter = { barCrawlFilter(player, target) }) {
                 barCrawl()
             }
         }

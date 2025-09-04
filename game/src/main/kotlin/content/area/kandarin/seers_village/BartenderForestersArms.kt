@@ -52,7 +52,7 @@ class BartenderForestersArms {
                     player.message("You buy a pint of beer.")
                 }
             }
-            option("I'm doing Alfred Grimhand's barcrawl.", filter = barCrawlFilter) {
+            option("I'm doing Alfred Grimhand's barcrawl.", filter = { barCrawlFilter(player, target) }) {
                 barCrawl()
             }
             option<Talk>("I don't really want anything thanks.")

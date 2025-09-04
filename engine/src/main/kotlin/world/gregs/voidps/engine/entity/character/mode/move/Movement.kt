@@ -222,22 +222,17 @@ open class Movement(
             }
             if (character is Player) {
                 Publishers.launch {
+                    val areaDefinitions: AreaDefinitions = get()
                     Publishers.all.movePlayer(character, from, to)
                     Publishers.all.moveCharacter(character, from, to)
-                }
-                character.emit(Moved(character, from, to))
-                val areaDefinitions: AreaDefinitions = get()
-                Publishers.launch {
                     for (def in areaDefinitions.get(from.zone)) {
                         if (from in def.area && to !in def.area) {
                             Publishers.all.exitArea(character, def.name, def.tags, def.area)
-                            character.emit(AreaExited(character, def.name, def.tags, def.area))
                         }
                     }
                     for (def in areaDefinitions.get(to.zone)) {
                         if (to in def.area && from !in def.area) {
                             Publishers.all.enterArea(character, def.name, def.tags, def.area)
-                            character.emit(AreaEntered(character, def.name, def.tags, def.area))
                         }
                     }
                 }

@@ -49,7 +49,7 @@ class BartenderDragonInn {
             option<Talk>("I'll give it a miss I think.") {
                 npc<Talk>("Come back when you're a little thirstier.")
             }
-            option("I'm doing Alfred Grimhand's barcrawl.", filter = barCrawlFilter) {
+            option("I'm doing Alfred Grimhand's barcrawl.", filter = { barCrawlFilter(player, target) }) {
                 barCrawl()
             }
         }

@@ -23,7 +23,7 @@ class BartenderZambo {
                 player.openShop("karamja_wines_spirits_and_beers")
             }
             option<Talk>("No, thank you.")
-            option("I'm doing Alfred Grimhand's barcrawl.", filter = barCrawlFilter) {
+            option("I'm doing Alfred Grimhand's barcrawl.", filter = { barCrawlFilter(player, target) }) {
                 barCrawl()
             }
         }
