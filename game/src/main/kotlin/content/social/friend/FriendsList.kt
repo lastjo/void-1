@@ -6,158 +6,160 @@ import content.social.clan.ClanMember
 import content.social.clan.clan
 import content.social.clan.ownClan
 import content.social.ignore.ignores
-import world.gregs.voidps.engine.client.instruction.instruction
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.data.Settings
 import world.gregs.voidps.engine.data.definition.AccountDefinitions
 import world.gregs.voidps.engine.entity.character.player.*
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.chat.clan.Clan
 import world.gregs.voidps.engine.entity.character.player.chat.clan.ClanRank
-import world.gregs.voidps.engine.entity.character.player.chat.clan.LeaveClanChat
-import world.gregs.voidps.engine.entity.character.player.chat.clan.clanChatLeave
-import world.gregs.voidps.engine.entity.playerDespawn
-import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.inject
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.network.client.instruction.FriendAdd
 import world.gregs.voidps.network.client.instruction.FriendDelete
-import world.gregs.voidps.network.login.protocol.encode.*
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.network.login.protocol.encode.Friend
+import world.gregs.voidps.network.login.protocol.encode.appendClanChat
+import world.gregs.voidps.network.login.protocol.encode.leaveClanChat
+import world.gregs.voidps.network.login.protocol.encode.sendFriendsList
+import world.gregs.voidps.type.sub.*
 
-@Script
-class FriendsList {
-
-    val players: Players by inject()
-    val accounts: AccountDefinitions by inject()
-    val accountDefinitions: AccountDefinitions by inject()
+class FriendsList(
+    private val players: Players,
+    private val accounts: AccountDefinitions,
+    private val accountDefinitions: AccountDefinitions,
+) {
 
     val maxFriends = 200
 
-    init {
-        playerSpawn { player ->
-            player.sendFriends()
-            notifyBefriends(player, online = true)
-        }
+    @Spawn
+    fun spawn(player: Player) {
+        player.sendFriends()
+        notifyBefriends(player, online = true)
+    }
 
-        playerDespawn { player ->
-            notifyBefriends(player, online = false)
-        }
+    @Despawn
+    fun despawn(player: Player) {
+        notifyBefriends(player, online = false)
+    }
 
-        instruction<FriendAdd> { player ->
-            val account = accounts.get(friendsName)
-            if (account == null) {
-                player.message("Unable to find player with name '$friendsName'.")
-                return@instruction
+    @Interface(component = "private", id = "filter_buttons")
+    fun private(player: Player, option: String) {
+        if (player.privateStatus != "on" && option != "Off") {
+            val next = option.lowercase()
+            notifyBefriends(player, online = true) { it, current ->
+                when {
+                    current == "off" && next == "on" -> !player.ignores(it)
+                    current == "off" && next == "friends" -> !it.isAdmin() && friends(player, it)
+                    current == "friends" && next == "on" -> !friends(player, it) && !player.ignores(it)
+                    else -> false
+                }
             }
-
-            if (player.name == friendsName) {
-                player.message("You are already your own best friend!")
-                return@instruction
-            }
-
-            if (player.ignores.contains(account.accountName)) {
-                player.message("Please remove $friendsName from your ignore list first.")
-                return@instruction
-            }
-
-            if (player.friends.size >= maxFriends) {
-                player.message("Your friends list is full. Max of 100 for free users, and $maxFriends for members.")
-                return@instruction
-            }
-
-            if (player.friends.contains(account.accountName)) {
-                player.message("$friendsName is already on your friends list.")
-                return@instruction
-            }
-
-            player.friends[account.accountName] = ClanRank.Friend
-            if (player.privateStatus == "friends") {
-                friendsName.updateFriend(player, online = true)
-            }
-            player.updateFriend(account)
-            val clan = player.clan ?: player.ownClan ?: return@instruction
-            if (!clan.hasRank(player, ClanRank.Owner)) {
-                return@instruction
-            }
-            val accountDefinition = accountDefinitions.get(friendsName) ?: return@instruction
-            if (clan.members.any { it.accountName == accountDefinition.accountName }) {
-                val target = players.get(friendsName) ?: return@instruction
-                for (member in clan.members) {
-                    member.client?.appendClanChat(ClanMember.of(target, ClanRank.Friend))
+        } else if (player.privateStatus != "off" && option != "On") {
+            val next = option.lowercase()
+            notifyBefriends(player, online = false) { it, current ->
+                when {
+                    current == "friends" && next == "off" -> player.friend(it) && !it.isAdmin()
+                    current == "on" && next == "friends" -> !friends(player, it)
+                    current == "on" && next == "off" -> !it.isAdmin()
+                    else -> false
                 }
             }
         }
+        player.privateStatus = option.lowercase()
+    }
 
-        instruction<FriendDelete> { player ->
-            val account = accounts.get(friendsName)
-            if (account == null || !player.friends.contains(account.accountName)) {
-                player.message("Unable to find player with name '$friendsName'.")
-                return@instruction
-            }
-
-            player.friends.remove(account.accountName)
-            if (player.privateStatus == "friends") {
-                friendsName.updateFriend(player, online = false)
-            }
-            val clan = player.clan ?: player.ownClan ?: return@instruction
-            if (!clan.hasRank(player, ClanRank.Owner)) {
-                return@instruction
-            }
-            val accountDefinition = accountDefinitions.get(friendsName) ?: return@instruction
-            if (clan.members.any { it.accountName == accountDefinition.accountName }) {
-                val target = players.get(friendsName) ?: return@instruction
-                for (member in clan.members) {
-                    member.client?.appendClanChat(ClanMember.of(target, ClanRank.None))
-                }
-                if (!clan.hasRank(target, clan.joinRank)) {
-                    target.emit(LeaveClanChat(forced = true))
-                }
-            }
+    @Instruction(FriendAdd::class)
+    fun add(player: Player, instruction: FriendAdd) {
+        val friendsName = instruction.friendsName
+        val account = accounts.get(friendsName)
+        if (account == null) {
+            player.message("Unable to find player with name '$friendsName'.")
+            return
         }
 
-        interfaceOption(component = "private", id = "filter_buttons") {
-            if (player.privateStatus != "on" && option != "Off") {
-                val next = option.lowercase()
-                notifyBefriends(player, online = true) { it, current ->
-                    when {
-                        current == "off" && next == "on" -> !player.ignores(it)
-                        current == "off" && next == "friends" -> !it.isAdmin() && friends(player, it)
-                        current == "friends" && next == "on" -> !friends(player, it) && !player.ignores(it)
-                        else -> false
-                    }
-                }
-            } else if (player.privateStatus != "off" && option != "On") {
-                val next = option.lowercase()
-                notifyBefriends(player, online = false) { it, current ->
-                    when {
-                        current == "friends" && next == "off" -> player.friend(it) && !it.isAdmin()
-                        current == "on" && next == "friends" -> !friends(player, it)
-                        current == "on" && next == "off" -> !it.isAdmin()
-                        else -> false
-                    }
-                }
-            }
-            player.privateStatus = option.lowercase()
+        if (player.name == friendsName) {
+            player.message("You are already your own best friend!")
+            return
         }
 
-        clanChatLeave { player ->
-            val clan: Clan? = player.remove("clan")
-            player.clear("clan_chat")
-            player.message("You have ${if (forced) "been kicked from" else "left"} the channel.", ChatType.ClanChat)
-            if (clan != null) {
-                player.client?.leaveClanChat()
-                clan.members.remove(player)
-                for (member in clan.members) {
-                    if (member != player) {
-                        member.client?.appendClanChat(ClanMember.of(player, ClanRank.Anyone))
-                    }
-                }
-                if (player.accountName != clan.owner || player.isAdmin()) {
-                    player.sendFriends()
-                }
-                ClanLootShare.update(player, clan, lootShare = false)
+        if (player.ignores.contains(account.accountName)) {
+            player.message("Please remove $friendsName from your ignore list first.")
+            return
+        }
+
+        if (player.friends.size >= maxFriends) {
+            player.message("Your friends list is full. Max of 100 for free users, and $maxFriends for members.")
+            return
+        }
+
+        if (player.friends.contains(account.accountName)) {
+            player.message("$friendsName is already on your friends list.")
+            return
+        }
+
+        player.friends[account.accountName] = ClanRank.Friend
+        if (player.privateStatus == "friends") {
+            friendsName.updateFriend(player, online = true)
+        }
+        player.updateFriend(account)
+        val clan = player.clan ?: player.ownClan ?: return
+        if (!clan.hasRank(player, ClanRank.Owner)) {
+            return
+        }
+        val accountDefinition = accountDefinitions.get(friendsName) ?: return
+        if (clan.members.any { it.accountName == accountDefinition.accountName }) {
+            val target = players.get(friendsName) ?: return
+            for (member in clan.members) {
+                member.client?.appendClanChat(ClanMember.of(target, ClanRank.Friend))
             }
+        }
+    }
+    @Instruction(FriendDelete::class)
+    fun delete(player: Player, instruction: FriendDelete) {
+        val friendsName = instruction.friendsName
+        val account = accounts.get(friendsName)
+        if (account == null || !player.friends.contains(account.accountName)) {
+            player.message("Unable to find player with name '$friendsName'.")
+            return
+        }
+
+        player.friends.remove(account.accountName)
+        if (player.privateStatus == "friends") {
+            friendsName.updateFriend(player, online = false)
+        }
+        val clan = player.clan ?: player.ownClan ?: return
+        if (!clan.hasRank(player, ClanRank.Owner)) {
+            return
+        }
+        val accountDefinition = accountDefinitions.get(friendsName) ?: return
+        if (clan.members.any { it.accountName == accountDefinition.accountName }) {
+            val target = players.get(friendsName) ?: return
+            for (member in clan.members) {
+                member.client?.appendClanChat(ClanMember.of(target, ClanRank.None))
+            }
+            if (!clan.hasRank(target, clan.joinRank)) {
+                Publishers.all.publishPlayer(target, "leave_clan", true)
+            }
+        }
+    }
+
+    @Subscribe("leave_clan")
+    fun leaveClan(player: Player, id: Any) {
+        val forced = id as? Boolean ?: false
+        val clan: Clan? = player.remove("clan")
+        player.clear("clan_chat")
+        player.message("You have ${if (forced) "been kicked from" else "left"} the channel.", ChatType.ClanChat)
+        if (clan != null) {
+            player.client?.leaveClanChat()
+            clan.members.remove(player)
+            for (member in clan.members) {
+                if (member != player) {
+                    member.client?.appendClanChat(ClanMember.of(player, ClanRank.Anyone))
+                }
+            }
+            if (player.accountName != clan.owner || player.isAdmin()) {
+                player.sendFriends()
+            }
+            ClanLootShare.update(player, clan, lootShare = false)
         }
     }
 

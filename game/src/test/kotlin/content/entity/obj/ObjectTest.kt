@@ -30,7 +30,7 @@ internal class ObjectTest : WorldTest() {
         val player = createPlayer(Tile(3227, 3214))
         tick()
 
-        handler.walk(Walk(3226, 3214), player)
+        handler.handle(player, Walk(3226, 3214))
         tick(1)
 
         assertEquals(Tile(3227, 3214), player.tile)
@@ -44,7 +44,7 @@ internal class ObjectTest : WorldTest() {
 
         player.objectOption(door, "Open")
         tick()
-        handler.walk(Walk(3226, 3214), player)
+        handler.handle(player, Walk(3226, 3214))
         tick(2)
 
         assertEquals(Tile(3226, 3214), player.tile)

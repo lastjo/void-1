@@ -88,11 +88,4 @@ class Navigation {
         }
     }
 
-    @Teleport
-    fun tele(player: Player, target: GameObject) {
-        if (player.isBot) {
-            player.bot.resume("move")
-        }
-    }
-
 }

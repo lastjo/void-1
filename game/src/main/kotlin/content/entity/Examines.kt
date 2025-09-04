@@ -2,7 +2,6 @@ package content.entity
 
 import world.gregs.voidps.cache.definition.data.NPCDefinition
 import world.gregs.voidps.cache.definition.data.ObjectDefinition
-import world.gregs.voidps.engine.client.instruction.instruction
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.data.definition.NPCDefinitions
@@ -15,6 +14,7 @@ import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.network.client.instruction.ExamineItem
 import world.gregs.voidps.network.client.instruction.ExamineNpc
 import world.gregs.voidps.network.client.instruction.ExamineObject
+import world.gregs.voidps.type.sub.Instruction
 import world.gregs.voidps.type.sub.Interface
 import world.gregs.voidps.type.sub.Inventory
 import world.gregs.voidps.type.sub.Option
@@ -25,26 +25,28 @@ class Examines(
     private val objectDefinitions: ObjectDefinitions,
 ) {
 
-    init {
-        instruction<ExamineItem> { player ->
-            val definition = itemDefinitions.get(itemId)
-            if (definition.contains("examine")) {
-                player.message(definition["examine"], ChatType.Game)
-            }
-        }
 
-        instruction<ExamineNpc> { player ->
-            val definition = npcDefinitions.get(npcId)
-            if (definition.contains("examine")) {
-                player.message(definition["examine"], ChatType.Game)
-            }
+    @Instruction(ExamineItem::class)
+    fun item(player: Player, instruction: ExamineItem) {
+        val definition = itemDefinitions.get(instruction.itemId)
+        if (definition.contains("examine")) {
+            player.message(definition["examine"], ChatType.Game)
         }
+    }
 
-        instruction<ExamineObject> { player ->
-            val definition = objectDefinitions.get(objectId)
-            if (definition.contains("examine")) {
-                player.message(definition["examine"], ChatType.Game)
-            }
+    @Instruction(ExamineNpc::class)
+    fun npc(player: Player, instruction: ExamineNpc) {
+        val definition = npcDefinitions.get(instruction.npcId)
+        if (definition.contains("examine")) {
+            player.message(definition["examine"], ChatType.Game)
+        }
+    }
+
+    @Instruction(ExamineObject::class)
+    fun obj(player: Player, instruction: ExamineObject) {
+        val definition = objectDefinitions.get(instruction.objectId)
+        if (definition.contains("examine")) {
+            player.message(definition["examine"], ChatType.Game)
         }
     }
 

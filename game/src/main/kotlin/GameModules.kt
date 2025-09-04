@@ -15,6 +15,7 @@ import content.social.trade.exchange.history.ExchangeHistory
 import kotlinx.io.pool.DefaultPool
 import org.koin.dsl.module
 import org.rsmod.game.pathfinder.LineValidator
+import world.gregs.voidps.cache.secure.Huffman
 import world.gregs.voidps.engine.client.PlayerAccountLoader
 import world.gregs.voidps.engine.client.instruction.InstructionHandlers
 import world.gregs.voidps.engine.client.instruction.InterfaceHandler
@@ -116,6 +117,10 @@ fun gameModule(files: ConfigFiles) = module {
         val prayerDefinitions = get<PrayerDefinitions>()
         val slayerTaskDefinitions = get<SlayerTaskDefinitions>()
         val diangoCodeDefinitions = get<DiangoCodeDefinitions>()
+        val accountDefinitions = get<AccountDefinitions>()
+        val gearDefinitions = get<GearDefinitions>()
+        val huffman = get<Huffman>()
+        val quickChatPhraseDefinitions = get<QuickChatPhraseDefinitions>()
         val start = System.currentTimeMillis()
         val publishers = PublishersImpl(
             fairyRingCodes = fairyCodes,
@@ -160,6 +165,10 @@ fun gameModule(files: ConfigFiles) = module {
             prayerDefinitions = prayerDefinitions,
             slayerTaskDefinitions = slayerTaskDefinitions,
             diangoCodeDefinitions = diangoCodeDefinitions,
+            accountDefinitions = accountDefinitions,
+            gearDefinitions = gearDefinitions,
+            huffman = huffman,
+            quickChatPhraseDefinitions = quickChatPhraseDefinitions,
         )
         Publishers.set(publishers)
         logger.info { "Loaded ${publishers.subscriptions} publisher ${"subscriptions".plural(publishers.subscriptions)} in ${System.currentTimeMillis() - start} ms" }

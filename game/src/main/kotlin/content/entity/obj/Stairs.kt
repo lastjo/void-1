@@ -1,5 +1,8 @@
 package content.entity.obj
 
+import content.bot.bot
+import content.bot.interact.navigation.resume
+import content.bot.isBot
 import content.entity.player.dialogue.type.choice
 import world.gregs.voidps.cache.definition.data.ObjectDefinition
 import world.gregs.voidps.engine.client.variable.remaining
@@ -34,6 +37,9 @@ class Stairs(private val teleports: ObjectTeleports) {
 
     @Teleport
     fun tele(player: Player, target: GameObject, obj: ObjectDefinition, option: String): Int {
+        if (player.isBot) {
+            player.bot.resume("move")
+        }
         if (!obj.name.isLadder()) {
             return 0
         }

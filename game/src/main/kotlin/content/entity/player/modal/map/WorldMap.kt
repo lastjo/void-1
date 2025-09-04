@@ -1,38 +1,28 @@
 package content.entity.player.modal.map
 
 import content.entity.effect.frozen
-import world.gregs.voidps.engine.client.instruction.instruction
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
 import world.gregs.voidps.engine.client.ui.hasOpen
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.client.variable.hasClock
 import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.data.definition.InterfaceDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.inject
-import world.gregs.voidps.engine.timer.timerStart
-import world.gregs.voidps.engine.timer.timerTick
 import world.gregs.voidps.network.client.instruction.WorldMapClick
 import world.gregs.voidps.network.login.protocol.encode.updateInterface
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.TimerState
-import world.gregs.voidps.type.sub.Interface
-import world.gregs.voidps.type.sub.Open
-import world.gregs.voidps.type.sub.TimerStart
-import world.gregs.voidps.type.sub.TimerTick
+import world.gregs.voidps.type.sub.*
 
 class WorldMap(private val definitions: InterfaceDefinitions) {
 
-    init {
-        instruction<WorldMapClick> { player ->
-            if (player.hasClock("world_map_double_click") && player["previous_world_map_click", 0] == tile) {
-                player["world_map_marker_custom"] = tile
-            }
-            player["previous_world_map_click"] = tile
-            player.start("world_map_double_click", 1)
+    @Instruction(WorldMapClick::class)
+    fun click(player: Player, instruction: WorldMapClick) {
+        val tile = instruction.tile
+        if (player.hasClock("world_map_double_click") && player["previous_world_map_click", 0] == tile) {
+            player["world_map_marker_custom"] = tile
         }
+        player["previous_world_map_click"] = tile
+        player.start("world_map_double_click", 1)
     }
 
     @Open("world_map")

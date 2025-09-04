@@ -1,13 +1,10 @@
 package content.entity.world
 
 import content.bot.isBot
-import world.gregs.voidps.engine.client.instruction.InstructionHandlers
-import world.gregs.voidps.engine.client.instruction.instruction
 import world.gregs.voidps.engine.client.update.view.Viewport
 import world.gregs.voidps.engine.entity.MAX_PLAYERS
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
-import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.map.zone.DynamicZones
 import world.gregs.voidps.network.client.instruction.FinishRegionLoad
 import world.gregs.voidps.network.login.protocol.encode.dynamicMapRegion
@@ -34,18 +31,12 @@ class RegionLoading(
 
     private val blankXtea = IntArray(4)
 
-    init {
-        instruction<FinishRegionLoad> { player ->
-            if (player["debug", false]) {
-                println("Finished region load. $player ${player.viewport}")
-            }
-            player.viewport?.loaded = true
-        }
-    }
-
-    @Instruction
+    @Instruction(FinishRegionLoad::class)
     fun regionLoad(player: Player, instruction: FinishRegionLoad) {
-
+        if (player["debug", false]) {
+            println("Finished region load. $player ${player.viewport}")
+        }
+        player.viewport?.loaded = true
     }
 
     @Subscribe("region_load")

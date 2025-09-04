@@ -1,6 +1,7 @@
 package world.gregs.voidps.event.map
 
 import com.squareup.kotlinpoet.TypeName
+import com.squareup.kotlinpoet.asTypeName
 import world.gregs.voidps.event.*
 import kotlin.reflect.KFunction
 
@@ -37,7 +38,7 @@ class InterfaceOnPublisherMapping(function: KFunction<*>, has: KFunction<*>? = n
         val methods = mutableListOf<Method>()
         val count = mutableMapOf<TypeName, Int>()
         for ((_, type) in parameters) {
-            count[type] = count.getOrDefault(type, 0) + 1
+            count[type.asTypeName()] = count.getOrDefault(type.asTypeName(), 0) + 1
         }
         if (this.name == "InterfaceOnItemPublisher" && subscriber.annotationArgs["bidirectional"] as Boolean) {
             val args = matchNames(subscriber.parameters.map {

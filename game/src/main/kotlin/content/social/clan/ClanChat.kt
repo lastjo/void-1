@@ -1,18 +1,19 @@
 package content.social.clan
 
-import content.social.friend.*
-import world.gregs.voidps.engine.client.instruction.instruction
+import content.social.friend.updateFriend
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.variable.hasClock
 import world.gregs.voidps.engine.client.variable.remaining
 import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.data.definition.AccountDefinitions
-import world.gregs.voidps.engine.entity.character.player.*
+import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
-import world.gregs.voidps.engine.entity.character.player.chat.clan.*
-import world.gregs.voidps.engine.entity.playerDespawn
-import world.gregs.voidps.engine.entity.playerSpawn
-import world.gregs.voidps.engine.inject
+import world.gregs.voidps.engine.entity.character.player.chat.clan.Clan
+import world.gregs.voidps.engine.entity.character.player.chat.clan.ClanRank
+import world.gregs.voidps.engine.entity.character.player.isAdmin
+import world.gregs.voidps.engine.entity.character.player.name
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.timer.epochSeconds
 import world.gregs.voidps.engine.timer.toTicks
 import world.gregs.voidps.network.client.instruction.ClanChatJoin
@@ -20,28 +21,25 @@ import world.gregs.voidps.network.client.instruction.ClanChatKick
 import world.gregs.voidps.network.client.instruction.ClanChatRank
 import world.gregs.voidps.network.login.protocol.encode.appendClanChat
 import world.gregs.voidps.network.login.protocol.encode.updateClanChat
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Despawn
+import world.gregs.voidps.type.sub.Instruction
 import world.gregs.voidps.type.sub.Spawn
 import java.util.concurrent.TimeUnit
 
-@Script
-class ClanChat {
-
-    val accounts: AccountDefinitions by inject()
+class ClanChat(
+    private val accounts: AccountDefinitions,
+    private val players: Players,
+) {
     val maxMembers = 100
     val maxAttempts = 10
-    val players: Players by inject()
 
     val list = listOf(ClanRank.None, ClanRank.Recruit, ClanRank.Corporeal, ClanRank.Sergeant, ClanRank.Lieutenant, ClanRank.Captain, ClanRank.General)
-
-    val accountDefinitions: AccountDefinitions by inject()
 
     @Spawn
     fun spawn(player: Player) {
         val current = player["clan_chat", ""]
         if (current.isNotEmpty()) {
-            val account = accountDefinitions.getByAccount(current)
+            val account = accounts.getByAccount(current)
             joinClan(player, account?.displayName ?: "")
         }
         val ownClan = accounts.clan(player.name.lowercase()) ?: return
@@ -57,60 +55,61 @@ class ClanChat {
         updateMembers(player, clan, ClanRank.Anyone)
     }
 
-    init {
-        instruction<ClanChatKick> { player ->
-            val clan = player.clan
-            if (clan == null || !clan.hasRank(player, clan.kickRank)) {
-                player.message("You are not allowed to kick in this clan chat channel.", ChatType.ClanChat)
-                return@instruction
-            }
-
-            if (player.name == name) {
-                player.message("You cannot kick or ban yourself.", ChatType.ClanChat)
-                return@instruction
-            }
-
-            val target = players.get(name)
-            if (target == null) {
-                player.message("Could not find player with the username '$name'.")
-                return@instruction
-            }
-
-            if (!clan.hasRank(player, clan.getRank(target), inclusive = false) || target.isAdmin()) {
-                player.message("You cannot kick this member.", ChatType.ClanChat)
-                return@instruction
-            }
-
-            if (clan.members.contains(target)) {
-                target.emit(LeaveClanChat(forced = true))
-            }
-            player.message("Your request to kick/ban this user was successful.", ChatType.ClanChat)
+    @Instruction(ClanChatKick::class)
+    fun kick(player: Player, instruction: ClanChatKick) {
+        val clan = player.clan
+        if (clan == null || !clan.hasRank(player, clan.kickRank)) {
+            player.message("You are not allowed to kick in this clan chat channel.", ChatType.ClanChat)
+            return
         }
 
-        instruction<ClanChatJoin> { player ->
-            if (name.isBlank()) {
-                player.emit(LeaveClanChat(forced = false))
-                return@instruction
-            }
-            joinClan(player, name)
+        if (player.name == instruction.name) {
+            player.message("You cannot kick or ban yourself.", ChatType.ClanChat)
+            return
         }
 
-        instruction<ClanChatRank> { player ->
-            val clan = player.clan ?: player.ownClan ?: return@instruction
-            if (!clan.hasRank(player, ClanRank.Owner)) {
-                return@instruction
-            }
-            val rank = list[rank]
-            val account = accountDefinitions.get(name) ?: return@instruction
-            if (player.friends[account.accountName] == rank) {
-                return@instruction
-            }
-            player.friends[account.accountName] = rank
-            player.updateFriend(account)
-            if (clan.members.any { it.accountName == account.accountName }) {
-                val target = players.get(name) ?: return@instruction
-                updateMembers(target, clan, rank)
-            }
+        val target = players.get(instruction.name)
+        if (target == null) {
+            player.message("Could not find player with the username '${instruction.name}'.")
+            return
+        }
+
+        if (!clan.hasRank(player, clan.getRank(target), inclusive = false) || target.isAdmin()) {
+            player.message("You cannot kick this member.", ChatType.ClanChat)
+            return
+        }
+
+        if (clan.members.contains(target)) {
+            Publishers.all.publishPlayer(target, "leave_clan", true)
+        }
+        player.message("Your request to kick/ban this user was successful.", ChatType.ClanChat)
+    }
+
+    @Instruction(ClanChatJoin::class)
+    fun join(player: Player, instruction: ClanChatJoin) {
+        if (instruction.name.isBlank()) {
+            Publishers.all.publishPlayer(player, "leave_clan", false)
+            return
+        }
+        joinClan(player, instruction.name)
+    }
+
+    @Instruction(ClanChatRank::class)
+    fun rank(player: Player, instruction: ClanChatRank) {
+        val clan = player.clan ?: player.ownClan ?: return
+        if (!clan.hasRank(player, ClanRank.Owner)) {
+            return
+        }
+        val rank = list[instruction.rank]
+        val account = accounts.get(instruction.name) ?: return
+        if (player.friends[account.accountName] == rank) {
+            return
+        }
+        player.friends[account.accountName] = rank
+        player.updateFriend(account)
+        if (clan.members.any { it.accountName == account.accountName }) {
+            val target = players.get(instruction.name) ?: return
+            updateMembers(target, clan, rank)
         }
     }
 
@@ -135,7 +134,7 @@ class ClanChat {
             if (clan.hasRank(player, ClanRank.Recruit)) {
                 val victim = clan.members.minByOrNull { clan.getRank(it).value }
                 if (victim != null) {
-                    victim.emit(LeaveClanChat(forced = true))
+                    Publishers.all.publishPlayer(victim, "leave_clan", true)
                     space = true
                 }
             }

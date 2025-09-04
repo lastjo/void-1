@@ -19,10 +19,10 @@ class ColourDragon {
     @Combat(id = "black_dragon", stage = CombatStage.SWING)
     @Combat(id = "green_dragon", stage = CombatStage.SWING)
     @Combat(id = "red_dragon", stage = CombatStage.SWING)
-    suspend fun swing(npc: NPC, target: Player) {
+    fun swing(npc: NPC, target: Player) {
         val withinMelee = CharacterTargetStrategy(npc).reached(target)
         if (!withinMelee) {
-            delay(1)
+//            delay(1) FIXME
         }
         val useFire = random.nextInt(4) == 0 // 1 in 4 chance to breathe fire
         if (useFire) {

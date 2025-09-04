@@ -104,10 +104,10 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
                 TimerPublisherMapping(Publishers::timerTickWorld),
             ),
             TimerStop::class.qualifiedName!! to listOf(
-                TimerPublisherMapping(Publishers::timerStopPlayer),
-                TimerPublisherMapping(Publishers::timerStopNPC),
-                TimerPublisherMapping(Publishers::timerStopCharacter),
-                TimerPublisherMapping(Publishers::timerStopWorld),
+                TimerPublisherMapping(Publishers::timerStopPlayer, notification = true),
+                TimerPublisherMapping(Publishers::timerStopNPC, notification = true),
+                TimerPublisherMapping(Publishers::timerStopCharacter, notification = true),
+                TimerPublisherMapping(Publishers::timerStopWorld, notification = true),
             ),
             ItemAdded::class.qualifiedName!! to listOf(ItemChangePublisherMapping(Publishers::itemAdded)),
             ItemRemoved::class.qualifiedName!! to listOf(ItemChangePublisherMapping(Publishers::itemRemoved)),
@@ -177,6 +177,9 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
                 HuntPublisherMapping(Publishers::huntNpc),
                 HuntPublisherMapping(Publishers::huntFloorItem),
                 HuntPublisherMapping(Publishers::huntGameObject),
+            ),
+            Instruction::class.qualifiedName!! to listOf(
+                InstructionPublisherMapping(Publishers::instruction),
             ),
         ),
     )

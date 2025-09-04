@@ -16,6 +16,8 @@ import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.suspend.StringSuspension
 import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Close
+import world.gregs.voidps.type.sub.Interface
 
 private const val QUEST_START_ID = "quest_intro"
 
@@ -90,40 +92,41 @@ suspend fun SuspendableContext<Player>.startQuest(questId: String): Boolean {
     return result
 }
 
-@Script
 class QuestStart {
 
-    init {
-        interfaceOption("Show required items", "items_hidden_button_txt", "quest_intro") {
-            player.interfaces.sendVisibility(id, "items_hide_show_layer", false)
-            player.interfaces.sendVisibility(id, "items_text_details_layer", true)
-            player.interfaces.sendVisibility(id, "scroll_layer_item", true)
-        }
-
-        interfaceOption("Show rewards", "hidden_button_txt", "quest_intro") {
-            player.interfaces.sendVisibility(id, "hide_show_layer", false)
-            player.interfaces.sendVisibility(id, "text_details_layer", true)
-            player.interfaces.sendVisibility(id, "scroll_layer_rewards", true)
-        }
-
-        interfaceOption("Mark", "objective_set", "quest_intro") {
-            player["quest_intro_unmark_map"] = !player["quest_intro_unmark_map", false]
-        }
-
-        interfaceOption("Mark", "objective_text", "quest_intro") {
-            player["quest_intro_unmark_map"] = !player["quest_intro_unmark_map", false]
-        }
-
-        interfaceOption("No", "startno_layer", "quest_intro") {
-            (player.dialogueSuspension as? StringSuspension)?.resume("no")
-        }
-
-        interfaceOption("Yes", "startyes_layer", "quest_intro") {
-            (player.dialogueSuspension as? StringSuspension)?.resume("yes")
-        }
-
-        interfaceClose("quest_intro") { player ->
-            (player.dialogueSuspension as? StringSuspension)?.resume("no")
-        }
+    @Interface("Show required items", "items_hidden_button_txt", "quest_intro")
+    fun required(player: Player, id: String) {
+        player.interfaces.sendVisibility(id, "items_hide_show_layer", false)
+        player.interfaces.sendVisibility(id, "items_text_details_layer", true)
+        player.interfaces.sendVisibility(id, "scroll_layer_item", true)
     }
+
+    @Interface("Show rewards", "hidden_button_txt", "quest_intro")
+    fun rewards(player: Player, id: String) {
+        player.interfaces.sendVisibility(id, "hide_show_layer", false)
+        player.interfaces.sendVisibility(id, "text_details_layer", true)
+        player.interfaces.sendVisibility(id, "scroll_layer_rewards", true)
+    }
+
+    @Interface("Mark", "objective_set", "quest_intro")
+    @Interface("Mark", "objective_text", "quest_intro")
+    fun mark(player: Player) {
+        player["quest_intro_unmark_map"] = !player["quest_intro_unmark_map", false]
+    }
+
+    @Interface("No", "startno_layer", "quest_intro")
+    fun no(player: Player) {
+        (player.dialogueSuspension as? StringSuspension)?.resume("no")
+    }
+
+    @Interface("Yes", "startyes_layer", "quest_intro")
+    fun yes(player: Player) {
+        (player.dialogueSuspension as? StringSuspension)?.resume("yes")
+    }
+
+    @Close("quest_intro")
+    fun close(player: Player) {
+        (player.dialogueSuspension as? StringSuspension)?.resume("no")
+    }
+
 }

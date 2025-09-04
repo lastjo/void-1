@@ -74,7 +74,7 @@ fun Player.skillCreation(
             index = i
         }
     }
-    get<InstructionHandlers>().enterInt.invoke(EnterInt(index), this)
+    Publishers.all.instruction(this, EnterInt(index))
 }
 
 fun Player.interfaceUse(

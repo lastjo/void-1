@@ -14,7 +14,7 @@ import world.gregs.voidps.engine.inv.transact.operation.RemoveItemLimit.removeTo
 import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.sub.Option
 
-class Stiles {
+class StilesFisherman {
 
     private val fishes = setOf("raw_swordfish", "swordfish", "raw_lobster", "lobster", "raw_tuna", "tuna")
 

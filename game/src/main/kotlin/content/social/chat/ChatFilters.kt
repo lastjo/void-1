@@ -6,6 +6,8 @@ import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.playerSpawn
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Interface
+import world.gregs.voidps.type.sub.Spawn
 
 var Player.publicStatus: String
     get() = get("public_status", "on")
@@ -28,25 +30,25 @@ var Player.tradeStatus: String
         publicStatus(publicStatus, value)
     }
 
-@Script
 class ChatFilters {
 
-    init {
-        playerSpawn { player ->
-            player.privateStatus(player.privateStatus)
-            player.publicStatus(player.publicStatus, player.tradeStatus)
-            player.sendVariable("game_status")
-            player.sendVariable("assist_status")
-            player.sendVariable("clan_status")
-        }
+    @Spawn
+    fun spawn(player: Player) {
+        player.privateStatus(player.privateStatus)
+        player.publicStatus(player.publicStatus, player.tradeStatus)
+        player.sendVariable("game_status")
+        player.sendVariable("assist_status")
+        player.sendVariable("clan_status")
+    }
 
-        interfaceOption("View", id = "filter_buttons") {
-            when (component) {
-                "game", "clan" -> player["${component}_status"] = option.lowercase()
-                "public" -> player.publicStatus = option.lowercase()
-                "private" -> player.privateStatus = option.lowercase()
-                "trade" -> player.tradeStatus = option.lowercase()
-            }
+    @Interface("View", id = "filter_buttons")
+    suspend fun view(player: Player, component: String, option: String) {
+        when (component) {
+            "game", "clan" -> player["${component}_status"] = option.lowercase()
+            "public" -> player.publicStatus = option.lowercase()
+            "private" -> player.privateStatus = option.lowercase()
+            "trade" -> player.tradeStatus = option.lowercase()
         }
     }
+
 }

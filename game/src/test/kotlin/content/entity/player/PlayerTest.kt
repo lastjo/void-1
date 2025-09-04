@@ -18,7 +18,7 @@ internal class PlayerTest : WorldTest() {
         val player = createPlayer(start)
         val handler: InstructionHandlers = get()
 
-        handler.walk(Walk(emptyTile.x, emptyTile.y + 10), player)
+        handler.handle(player, Walk(emptyTile.x, emptyTile.y + 10))
         tick(5)
 
         assertEquals(emptyTile.addY(5), player.tile)
@@ -31,7 +31,7 @@ internal class PlayerTest : WorldTest() {
         val handler: InstructionHandlers = get()
 
         player.interfaceOption("energy_orb", "run_background", "Turn Run mode on")
-        handler.walk(Walk(emptyTile.x, emptyTile.y + 10), player)
+        handler.handle(player, Walk(emptyTile.x, emptyTile.y + 10))
         tick(5)
 
         assertEquals(emptyTile.addY(10), player.tile)

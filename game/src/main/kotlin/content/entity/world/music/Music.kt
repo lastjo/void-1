@@ -6,6 +6,7 @@ import world.gregs.voidps.engine.client.ui.playTrack
 import world.gregs.voidps.engine.data.definition.DefinitionsDecoder.Companion.toIdentifier
 import world.gregs.voidps.engine.data.definition.EnumDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.network.client.instruction.SongEnd
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.sub.*
 
@@ -99,10 +100,10 @@ class Music(
         player["playlist_slot_${toSlot + 1}"] = fromSong
     }
 
-    @Subscribe("song_end")
-    fun songEnd(player: Player, id: String) {
+    @Instruction(SongEnd::class)
+    fun songEnd(player: Player, instruction: SongEnd) {
         player["playing_song"] = false
-        if (player["playlist_enabled", false] && playNextPlaylistTrack(player, id.toInt())) {
+        if (player["playlist_enabled", false] && playNextPlaylistTrack(player, instruction.songIndex)) {
             return
         }
         playAreaTrack(player)

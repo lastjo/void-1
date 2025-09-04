@@ -7,6 +7,7 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.event.Context
 import world.gregs.voidps.engine.suspend.StringSuspension
 import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Interface
 
 suspend fun Context<Player>.warning(id: String): Boolean {
     val count = player["warning_$id", 0]
@@ -20,25 +21,22 @@ suspend fun Context<Player>.warning(id: String): Boolean {
     return result
 }
 
-@Script
 class Warning {
 
-    init {
-        interfaceOption("Yes", "yes", "warning_*") {
-            (player.dialogueSuspension as StringSuspension).resume("yes")
-        }
+    @Interface("Yes", "yes", "warning_*")
+    @Interface("No", "no", "warning_*")
+    fun select(player: Player, component: String) {
+        (player.dialogueSuspension as StringSuspension).resume(component)
+    }
 
-        interfaceOption("No", "no", "warning_*") {
-            (player.dialogueSuspension as StringSuspension).resume("no")
-        }
-
-        interfaceOption("Off/On", "dont_ask", "warning_*") {
-            val count = player[id, 0]
-            if (count == 6) {
-                player[id] = 7
-            } else {
-                player[id] = 6
-            }
+    @Interface("Off/On", "dont_ask", "warning_*")
+    fun toggle(player: Player, id: String) {
+        val count = player[id, 0]
+        if (count == 6) {
+            player[id] = 7
+        } else {
+            player[id] = 6
         }
     }
+
 }

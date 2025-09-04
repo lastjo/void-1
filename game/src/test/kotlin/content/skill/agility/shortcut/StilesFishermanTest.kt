@@ -8,7 +8,7 @@ import world.gregs.voidps.type.Delta
 import world.gregs.voidps.type.Tile
 import kotlin.test.assertEquals
 
-internal class StilesTest : WorldTest() {
+internal class StilesFishermanTest : WorldTest() {
 
     @TestFactory
     fun `Climb east facing stile`() = listOf(

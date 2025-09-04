@@ -1,16 +1,15 @@
 package world.gregs.voidps.event
 
 import com.google.devtools.ksp.processing.*
-import com.google.devtools.ksp.symbol.KSAnnotated
-import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSFunctionDeclaration
-import com.google.devtools.ksp.symbol.Modifier
+import com.google.devtools.ksp.symbol.*
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
 import world.gregs.voidps.engine.event.Publishers
 import java.util.*
+import kotlin.reflect.KClass
+import kotlin.reflect.full.createType
 
 /**
  * Takes [Subscriber]s marked with annotations and generates:
@@ -37,7 +36,7 @@ class PublisherProcessor(
         for (annotation in annotations) {
             val symbols = resolver.getSymbolsWithAnnotation(annotation)
             val subscriptions = symbols.filterIsInstance<KSFunctionDeclaration>()
-                .flatMap { fn -> extractSubscription(annotation, fn) }
+                .flatMap { fn -> extractSubscription(annotation, fn, resolver) }
                 .groupBy { it.schema }
             if (subscriptions.isEmpty()) {
                 continue
@@ -146,7 +145,7 @@ class PublisherProcessor(
             method.addModifiers(KModifier.SUSPEND)
         }
         for ((name, type) in schema.parameters) {
-            method.addParameter(name, type)
+            method.addParameter(name, type.asTypeName())
         }
         if (check) {
             method.addStatement("return $fieldName.has(${schema.parameters.joinToString(", ") { it.first }})").returns(BOOLEAN)
@@ -160,7 +159,7 @@ class PublisherProcessor(
      * Looks up the [PublisherMapping] schema by matching the subscribing methods [args] against the [annotation]
      * list of [PublisherMapping.required] args
      */
-    fun findSchema(annotation: String, args: List<Pair<String, TypeName>>): PublisherMapping? {
+    fun findSchema(annotation: String, args: List<Pair<String, KClass<*>>>): PublisherMapping? {
         val publishers = schemas[annotation] ?: return null
         for (publisher in publishers) {
             if (publisher.required.isEmpty()) {
@@ -169,7 +168,7 @@ class PublisherProcessor(
             var i = 0
             for ((_, type) in args) {
                 val suffix = publisher.required[i]
-                if (type == suffix && ++i == publisher.required.size) {
+                if (type.asTypeName() == suffix.asTypeName() && ++i == publisher.required.size) {
                     return publisher
                 }
             }
@@ -181,7 +180,7 @@ class PublisherProcessor(
      * Collect suspension, return type and parameters information about a given function [fn],
      * and check they don't conflict with the expected schema.
      */
-    private fun extractSubscription(annotationName: String, fn: KSFunctionDeclaration): List<Subscriber> {
+    private fun extractSubscription(annotationName: String, fn: KSFunctionDeclaration, resolver: Resolver): List<Subscriber> {
         val parentClass = fn.parentDeclaration as? KSClassDeclaration ?: return emptyList()
         val list = mutableListOf<Subscriber>()
         for (annotation in fn.annotations) {
@@ -190,7 +189,7 @@ class PublisherProcessor(
             }
             val annoType = annotation.annotationType.resolve().declaration.qualifiedName?.asString() ?: continue
             val args = annotation.arguments.associate { it.name?.asString().orEmpty() to it.value!! }
-            val params = fn.parameters.map { it.name!!.getShortName() to it.type.resolve().toTypeName() }
+            val params = fn.parameters.map { it.name!!.getShortName() to it.type.resolve().toKClass() }
             val schema = findSchema(annoType, params) ?: error("Unable to find required $annotation parameters for ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()}.")
             if (fn.modifiers.contains(Modifier.SUSPEND) && !schema.suspendable) {
                 error("Method ${fn.simpleName.asString()} in ${parentClass.qualifiedName?.asString()} cannot be suspendable.")
@@ -222,5 +221,22 @@ class PublisherProcessor(
             )
         }
         return list
+    }
+    fun KSType.toKClass(): KClass<*> {
+        val fqName = this.declaration.qualifiedName!!.asString()
+        return when (fqName) {
+            "kotlin.String" -> String::class
+            "kotlin.Int" -> Int::class
+            "kotlin.Long" -> Long::class
+            "kotlin.Boolean" -> Boolean::class
+            "kotlin.Float" -> Float::class
+            "kotlin.Double" -> Double::class
+            "kotlin.Char" -> Char::class
+            "kotlin.Byte" -> Byte::class
+            "kotlin.Short" -> Short::class
+            "kotlin.Any" -> Any::class
+            "kotlin.Unit" -> Unit::class
+            else -> Class.forName(fqName).kotlin
+        }
     }
 }

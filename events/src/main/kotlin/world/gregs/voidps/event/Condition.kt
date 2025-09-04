@@ -1,6 +1,8 @@
 package world.gregs.voidps.event
 
 import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.TypeName
+import com.squareup.kotlinpoet.ksp.toTypeName
 
 interface Condition {
     val key: String
@@ -41,5 +43,11 @@ data class Contains(override val key: String, override val value: Any?) : Condit
 data class GreaterThan(override val key: String, override val value: Number?) : Condition {
     override fun statement(): Statement {
         return Statement("$key > %L", arrayOf(value))
+    }
+}
+
+data class IsType(override val key: String, override val value: TypeName) : Condition {
+    override fun statement(): Statement {
+        return Statement("$key is %T", arrayOf(value))
     }
 }

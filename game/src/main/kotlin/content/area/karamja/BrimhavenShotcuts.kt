@@ -77,7 +77,7 @@ class BrimhavenShotcuts {
             player.anim("stepping_stone_jump")
             player.exactMoveDelay(player.tile.add(direction), direction = direction)
             player.face(direction)
-            delay()
+            player.delay()
         }
         player.exp(Skill.Agility, 7.5)
         player.message("... You safely cross to the other side.", ChatType.Filter)

@@ -1,32 +1,24 @@
 package content.entity
 
 import content.area.misthalin.Border
-import content.entity.death.npcDeath
-import world.gregs.voidps.engine.client.instruction.instruction
 import world.gregs.voidps.engine.client.ui.closeInterfaces
 import world.gregs.voidps.engine.data.Settings
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
-import world.gregs.voidps.engine.entity.*
+import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
 import world.gregs.voidps.engine.entity.character.mode.PauseMode
-import world.gregs.voidps.engine.entity.character.mode.move.npcMove
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
-import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.map.collision.Collisions
 import world.gregs.voidps.network.client.instruction.Walk
 import world.gregs.voidps.type.Distance.nearestTo
-import world.gregs.voidps.type.Script
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.Zone
 import world.gregs.voidps.type.area.Rectangle
-import world.gregs.voidps.type.sub.Death
-import world.gregs.voidps.type.sub.Despawn
-import world.gregs.voidps.type.sub.Move
-import world.gregs.voidps.type.sub.Spawn
+import world.gregs.voidps.type.sub.*
 
 class Movement(
     private val collisions: Collisions,
@@ -36,31 +28,30 @@ class Movement(
 ) {
     val borders = mutableMapOf<Zone, Rectangle>()
 
-    init {
-        instruction<Walk> { player ->
-            if (player.contains("delay")) {
-                return@instruction
-            }
-            player.closeInterfaces()
-            player.clearWatch()
-            player.queue.clearWeak()
-            player.suspension = null
-            if (minimap && !player["a_world_in_microcosm_task", false]) {
-                player["a_world_in_microcosm_task"] = true
-            }
+    @Instruction(Walk::class)
+    fun walk(player: Player, instruction: Walk) {
+        if (player.contains("delay")) {
+            return
+        }
+        player.closeInterfaces()
+        player.clearWatch()
+        player.queue.clearWeak()
+        player.suspension = null
+        if (instruction.minimap && !player["a_world_in_microcosm_task", false]) {
+            player["a_world_in_microcosm_task"] = true
+        }
 
-            val target = player.tile.copy(x, y)
-            val border = borders[target.zone]
-            if (border != null && (target in border || player.tile in border)) {
-                val tile = border.nearestTo(player.tile)
-                val endSide = Border.getOppositeSide(border, tile)
-                player.walkTo(endSide, noCollision = true, forceWalk = true)
-            } else {
-                if (player.tile == target && player.mode != EmptyMode && player.mode != PauseMode) {
-                    player.mode = EmptyMode
-                }
-                player.walkTo(target)
+        val target = player.tile.copy(instruction.x, instruction.y)
+        val border = borders[target.zone]
+        if (border != null && (target in border || player.tile in border)) {
+            val tile = border.nearestTo(player.tile)
+            val endSide = Border.getOppositeSide(border, tile)
+            player.walkTo(endSide, noCollision = true, forceWalk = true)
+        } else {
+            if (player.tile == target && player.mode != EmptyMode && player.mode != PauseMode) {
+                player.mode = EmptyMode
             }
+            player.walkTo(target)
         }
     }
 

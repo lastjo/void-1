@@ -1,9 +1,15 @@
 package world.gregs.voidps.event
 
 import com.squareup.kotlinpoet.*
+import world.gregs.voidps.engine.entity.character.player.Player
 import java.util.*
+import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
+import kotlin.reflect.KType
+import kotlin.reflect.full.createType
+import kotlin.reflect.full.isSubtypeOf
+import kotlin.reflect.full.isSupertypeOf
 
 /**
  * Contains the mapping from a [Subscriber] method and [Annotation] into a number of [Method]s
@@ -12,8 +18,8 @@ import kotlin.reflect.KParameter
 abstract class PublisherMapping(
     val name: String,
     val suspendable: Boolean = false,
-    val parameters: List<Pair<String, TypeName>>,
-    val required: List<TypeName>,
+    val parameters: List<Pair<String, KType>>,
+    val required: List<KType>,
     var returnsDefault: Any = false,
     var notification: Boolean = false,
     var cancellable: Boolean = false,
@@ -25,10 +31,9 @@ abstract class PublisherMapping(
     constructor(function: KFunction<*>, hasFunction: KFunction<*>? = null, notification: Boolean = false, cancellable: Boolean = false, returnsDefault: Any? = null) : this(
         name = "${function.name.replaceFirstChar { it.uppercase() }}Publisher",
         parameters = function.parameters.filter { it.kind == KParameter.Kind.VALUE }.map {
-            val typeName = it.type.asTypeName()
-            it.name!! to typeName
+            it.name!! to it.type
         },
-        required = function.parameters.filter { it.kind == KParameter.Kind.VALUE }.filter { !it.isOptional }.map { it.type.asTypeName() },
+        required = function.parameters.filter { it.kind == KParameter.Kind.VALUE }.filter { !it.isOptional }.map { it.type },
         returnsDefault = returnsDefault ?: when (function.returnType.asTypeName()) {
             STRING -> ""
             INT -> -1
@@ -85,19 +90,26 @@ abstract class PublisherMapping(
     open fun arguments(method: Subscriber): List<List<String>> {
         val count = mutableMapOf<TypeName, Int>()
         for ((_, type) in parameters) {
-            count[type] = count.getOrDefault(type, 0) + 1
+            count[type.asTypeName()] = count.getOrDefault(type.asTypeName(), 0) + 1
         }
         return listOf(matchNames(method.parameters, count, method))
     }
 
-    fun matchNames(names: List<Pair<String, TypeName>>, counts: MutableMap<TypeName, Int>, method: Subscriber) = names.map { (name, type) ->
-        if (counts.getOrDefault(type, 0) > 1) {
-            // match by name
-            parameters.firstOrNull { it.first == name }
-        } else {
-            // match by type
-            parameters.firstOrNull { it.second == type }
-        }?.first ?: error("Expected parameter [${parameters.filter { it.second == type }.joinToString(", ") { it.first }}] for ${method.methodName}($name: ${type.toString().substringAfter(".")}) in ${method.className}.")
+    fun matchNames(names: List<Pair<String, KClass<*>>>, counts: MutableMap<TypeName, Int>, method: Subscriber) = names.map { (name, type) ->
+        val typeName = type.asTypeName()
+        val nullable = type.createType(nullable = true).asTypeName()
+
+
+        parameters.firstOrNull { it.first == name && it.second == type.createType(nullable = it.second.isMarkedNullable)  }?.first
+            ?: parameters.firstOrNull { it.second == type.createType(nullable = it.second.isMarkedNullable) }?.first
+            ?: parameters.firstOrNull { it.second.isSupertypeOf(type.createType(nullable = it.second.isMarkedNullable)) }?.first ?: error("Expected parameter [${parameters.filter { it.second.asTypeName() == typeName }.joinToString(", ") { it.first }}] for ${method.methodName}($name: ${type.toString().substringAfter(".")}) in ${method.className}.")
+//        if (counts.getOrDefault(typename, 0) > 1) {
+//            // match by name
+//            parameters.firstOrNull { it.first == name }
+//        } else {
+//            // match by type
+//
+//        }?.first ?:
     }
 
     abstract fun conditions(method: Subscriber): List<List<Condition>>
@@ -136,10 +148,10 @@ abstract class PublisherMapping(
         val builder = FunSpec.builder(if (callOnly) "has" else "publish")
         var player: String? = null
         for ((name, type) in parameters) {
-            if (player == null && type == PLAYER) {
+            if (player == null && type.classifier as KClass<*> == Player::class) {
                 player = name
             }
-            builder.addParameter(name, type)
+            builder.addParameter(name, type.asTypeName())
         }
         if (callOnly) {
             builder.addCode(trie.generate(this, callOnly = true))

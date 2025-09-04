@@ -16,6 +16,7 @@ import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.item.floor.FloorItem
 import world.gregs.voidps.engine.entity.obj.GameObject
+import world.gregs.voidps.network.client.Instruction
 import world.gregs.voidps.type.Area
 import world.gregs.voidps.type.PlayerRights
 import world.gregs.voidps.type.Tile
@@ -326,6 +327,10 @@ interface Publishers {
 
     fun specialAttack(player: Player, target: Character, id: String = "", damage: Int = -2): Boolean = false
     fun specialAttackPrepare(player: Player, id: String = ""): Boolean = false
+
+    fun message(player: Player, type: String, source: String, rights: Int, effects: Int, message: String, compressed: ByteArray): Boolean = false
+
+    fun instruction(player: Player, instruction: Instruction = object : Instruction {}): Boolean = false
 
     companion object {
 

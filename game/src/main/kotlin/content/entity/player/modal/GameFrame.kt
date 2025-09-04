@@ -1,17 +1,11 @@
 package content.entity.player.modal
 
-import net.pearx.kasechange.toSnakeCase
-import net.pearx.kasechange.toTitleCase
-import world.gregs.voidps.engine.client.instruction.instruction
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.event.interfaceRefresh
 import world.gregs.voidps.engine.client.ui.hasOpen
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.queue.weakQueue
 import world.gregs.voidps.network.client.instruction.ChangeDisplayMode
-import world.gregs.voidps.type.Script
+import world.gregs.voidps.type.sub.Instruction
 import world.gregs.voidps.type.sub.Interface
 import world.gregs.voidps.type.sub.Open
 import world.gregs.voidps.type.sub.Refresh
@@ -46,14 +40,13 @@ class GameFrame {
         "area_status_icon",
     )
 
-
-    init {
-        instruction<ChangeDisplayMode> { player ->
-            if (player.interfaces.displayMode == displayMode || !player.hasOpen("graphics_options")) {
-                return@instruction
-            }
-            player.interfaces.setDisplayMode(displayMode)
+    @Instruction(ChangeDisplayMode::class)
+    fun displayMode(player: Player, instruction: ChangeDisplayMode) {
+        val displayMode = instruction.displayMode
+        if (player.interfaces.displayMode == displayMode || !player.hasOpen("graphics_options")) {
+            return
         }
+        player.interfaces.setDisplayMode(displayMode)
     }
 
     @Interface("Combat Styles", "combat_styles", "toplevel*")
