@@ -19,7 +19,6 @@ import world.gregs.voidps.engine.data.definition.*
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.item.drop.DropTables
 import world.gregs.voidps.engine.map.collision.CollisionDecoder
-import world.gregs.voidps.engine.script.Scripts
 import world.gregs.voidps.network.GameServer
 import world.gregs.voidps.network.LoginServer
 import world.gregs.voidps.network.login.protocol.decoders
@@ -93,7 +92,6 @@ object Main {
                 cache(cache, configFiles),
             )
         }
-        Scripts.load()
         Runtime.getRuntime().addShutdownHook(thread(start = false, block = World::shutdown))
     }
 

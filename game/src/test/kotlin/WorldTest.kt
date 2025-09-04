@@ -46,7 +46,6 @@ import world.gregs.voidps.engine.map.collision.CollisionDecoder
 import world.gregs.voidps.engine.map.collision.Collisions
 import world.gregs.voidps.engine.map.collision.GameObjectCollisionAdd
 import world.gregs.voidps.engine.map.collision.GameObjectCollisionRemove
-import world.gregs.voidps.engine.script.Scripts
 import world.gregs.voidps.engine.timer.setCurrentTime
 import world.gregs.voidps.network.client.Client
 import world.gregs.voidps.network.client.ConnectionQueue
@@ -195,7 +194,6 @@ abstract class WorldTest : KoinTest {
                 },
             )
         }
-        Scripts.load()
         MapDefinitions(CollisionDecoder(get()), get(), get(), cache).loadCache()
         saves = File(Settings["storage.players.path"])
         saves?.mkdirs()
