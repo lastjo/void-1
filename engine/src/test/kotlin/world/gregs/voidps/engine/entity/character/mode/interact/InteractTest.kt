@@ -14,7 +14,6 @@ import org.rsmod.game.pathfinder.LineValidator
 import org.rsmod.game.pathfinder.PathFinder
 import org.rsmod.game.pathfinder.StepValidator
 import org.rsmod.game.pathfinder.collision.CollisionStrategies
-import world.gregs.voidps.cache.definition.data.NPCDefinition
 import world.gregs.voidps.engine.GameLoop
 import world.gregs.voidps.engine.client.sendScript
 import world.gregs.voidps.engine.client.ui.close
@@ -22,7 +21,6 @@ import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.event.Events
 import world.gregs.voidps.engine.map.collision.Collisions
@@ -81,26 +79,20 @@ internal class InteractTest : KoinMock() {
     }
 
     private fun interact(operate: Boolean, approach: Boolean, suspend: Boolean) {
-        interaction = NPCOption(player, target, NPCDefinition.EMPTY, "interact")
-        interact = Interact(player, target, interaction)
-        player.mode = interact
-        Events.events.clear()
-        if (operate) {
-            Events.handle<Player, NPCOption<Player>>("player_operate_npc", "*", "*") {
-                if (suspend) {
-                    Suspension.start(character, 2)
-                }
-                operated = true
+        val block: suspend (Boolean) -> Unit = {
+            if (suspend) {
+                Suspension.start(player, 2)
             }
-        }
-        if (approach) {
-            Events.handle<Player, NPCOption<Player>>("player_approach_npc", "*", "*") {
-                if (suspend) {
-                    Suspension.start(character, 2)
-                }
+            if (operate && !it) {
+                operated = true
+            } else if (approach && it) {
                 approached = true
             }
         }
+        val check: (Boolean) -> Boolean = { true }
+        interact = Interact(player, target, interact = block, has = check)
+        player.mode = interact
+        Events.events.clear()
     }
 
     @ParameterizedTest

@@ -11,13 +11,13 @@ import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.ObjectShape
 import world.gregs.voidps.engine.event.Context
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.holdsItem
 import world.gregs.voidps.engine.inv.inventory
@@ -237,7 +237,9 @@ class Gudrun(
         player["gudrun_after_cutscene"] = "shown"
         val gudrunAfter = npcs[Tile(3082, 3417)].firstOrNull { it.id == "gudrun_after_cutscene" }
         if (gudrunAfter != null) {
-            player.mode = Interact(player, gudrunAfter, NPCOption(player, gudrunAfter, gudrunAfter.def, "Talk-to"))
+            val block: suspend (Boolean) -> Unit = { Publishers.all.playerNPCOption(player, gudrunAfter, gudrunAfter.def, "Talk-to", it) }
+            val check: (Boolean) -> Boolean = { Publishers.all.hasPlayerNPCOption(player, gudrunAfter, gudrunAfter.def, "Talk-to", it) }
+            player.mode = Interact(player, gudrunAfter, interact = block, has = check)
         } else {
             gunnarsGround()
         }

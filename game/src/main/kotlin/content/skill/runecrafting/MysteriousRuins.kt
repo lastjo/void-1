@@ -15,7 +15,7 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.ObjectOption
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.equals
@@ -57,7 +57,9 @@ class MysteriousRuins(
         player.message("You hold the ${item.id.toSentenceCase()} towards the mysterious ruins.")
         player.anim("bend_down")
         player.delay(2)
-        player.mode = Interact(player, target, ObjectOption(player, target, definition, "Enter"), approachRange = -1)
+        val block: suspend (Boolean) -> Unit = { Publishers.all.playerGameObjectOption(player, target, definition, "Enter", it) }
+        val check: (Boolean) -> Boolean = { Publishers.all.hasPlayerGameObjectOption(player, target, definition, "Enter", it) }
+        player.mode = Interact(player, target, interact = block, has = check, approachRange = -1)
     }
 
     @Teleport("Enter", "*_altar_ruins_enter")

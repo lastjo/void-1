@@ -10,8 +10,8 @@ import world.gregs.voidps.engine.entity.character.mode.interact.Interact
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.character.player.PlayerOption
 import world.gregs.voidps.engine.entity.character.player.chat.noInterest
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.inv.replace
@@ -44,7 +44,9 @@ class LadyKeli(private val npcs: NPCs) {
                 target.say("You tricked me, and tied me up, Guards kill this stranger!!")
                 player.message("Guards alerted to kill you!")
                 val guard = npcs[player.tile.regionLevel].sortedBy { it.tile.distanceTo(player.tile) }.firstOrNull { it.id.startsWith("draynor_jail_guard") } ?: return@talkWith
-                guard.mode = Interact(guard, player, PlayerOption(guard, player, "Attack"))
+                val block: suspend (Boolean) -> Unit = { Publishers.all.npcPlayerOption(guard, player, "Attack", it) }
+                val check: (Boolean) -> Boolean = { Publishers.all.hasNPCPlayerOption(guard, player, "Attack", it) }
+                guard.mode = Interact(guard, player, interact = block, has = check)
                 guard.say("Yes M'lady")
             }
             else -> {

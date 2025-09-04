@@ -24,7 +24,6 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.has
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.ObjectOption
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.timer.epochSeconds
@@ -90,7 +89,7 @@ class TrainingBot(
         while (player.levels.getMax(skill) < range.last + 1 && hasAmmo(skill)) {
             if (target is GameObject) {
                 objectOption(target, "Shoot-at")
-                await<Player, ObjectOption<Player>>()
+//                await<Player, ObjectOption<Player>>() // FIXME
                 await("tick")
             } else if (target is NPC) {
                 npcOption(target, "Attack")

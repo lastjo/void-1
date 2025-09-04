@@ -10,19 +10,15 @@ import world.gregs.voidps.engine.data.definition.NPCDefinitions
 import world.gregs.voidps.engine.data.definition.ObjectDefinitions
 import world.gregs.voidps.engine.entity.character.mode.Follow
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
-import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.character.player.PlayerOption
 import world.gregs.voidps.engine.entity.character.player.PlayerOptions
 import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.item.floor.FloorItem
-import world.gregs.voidps.engine.entity.item.floor.FloorItemOption
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
 import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.GameObjects
-import world.gregs.voidps.engine.entity.obj.ObjectOption
 import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.network.client.instruction.InteractFloorItem
 import world.gregs.voidps.network.client.instruction.InteractNPC
@@ -60,9 +56,8 @@ class Interaction(
         player.closeInterfaces()
         val block: suspend (Boolean) -> Unit = { Publishers.all.playerFloorItemOption(player, floorItem, selectedOption, it) }
         val check: (Boolean) -> Boolean = { Publishers.all.hasPlayerFloorItemOption(player, floorItem, selectedOption, it) }
-        player.mode = Interact(player, floorItem, FloorItemOption(player, floorItem, selectedOption), shape = -1, interact = block, has = check)
+        player.mode = Interact(player, floorItem, shape = -1, interact = block, has = check)
     }
-
 
     @Instruction(InteractNPC::class)
     fun npc(player: Player, instruction: InteractNPC) {
@@ -70,7 +65,7 @@ class Interaction(
             return
         }
         val npc = npcs.indexed(instruction.npcIndex) ?: return
-        val def = if(npc.transform.isBlank()) npc.def else npcDefinitions.get(npc.transform)
+        val def = if (npc.transform.isBlank()) npc.def else npcDefinitions.get(npc.transform)
         val definition = npcDefinitions.resolve(def, player)
         val selectedOption = validateOption(definition.options, instruction.option - 1, "npc", definition.id) ?: return
         if (selectedOption == "Listen-to" && player["movement", "walk"] == "music") {
@@ -85,7 +80,7 @@ class Interaction(
         player.talkWith(npc, definition)
         val block: suspend (Boolean) -> Unit = { Publishers.all.playerNPCOption(player, npc, definition, selectedOption, it) }
         val check: (Boolean) -> Boolean = { Publishers.all.hasPlayerNPCOption(player, npc, definition, selectedOption, it) }
-        player.mode = Interact(player, npc, NPCOption(player, npc, definition, selectedOption), interact = block, has = check)
+        player.mode = Interact(player, npc, interact = block, has = check)
     }
 
     @Instruction(InteractPlayer::class)
@@ -106,7 +101,7 @@ class Interaction(
         } else {
             val block: suspend (Boolean) -> Unit = { Publishers.all.playerPlayerOption(player, target, option, it) }
             val check: (Boolean) -> Boolean = { Publishers.all.hasPlayerPlayerOption(player, target, option, it) }
-            player.mode = Interact(player, target, PlayerOption(player, target, option), interact = block, has = check)
+            player.mode = Interact(player, target, interact = block, has = check)
         }
     }
 
@@ -127,9 +122,8 @@ class Interaction(
         player.closeInterfaces()
         val block: suspend (Boolean) -> Unit = { Publishers.all.playerGameObjectOption(player, target, definition, selectedOption, it) }
         val check: (Boolean) -> Boolean = { Publishers.all.hasPlayerGameObjectOption(player, target, definition, selectedOption, it) }
-        player.mode = Interact(player, target, ObjectOption(player, target, definition, selectedOption), interact = block, has = check)
+        player.mode = Interact(player, target, interact = block, has = check)
     }
-
 
     private fun validateFloorItem(player: Player, x: Int, y: Int, id: Int): FloorItem? {
         val tile = player.tile.copy(x, y)
@@ -162,5 +156,4 @@ class Interaction(
             objects[tile, definition.id]
         }
     }
-
 }

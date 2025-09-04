@@ -2,13 +2,13 @@ package content.quest.member.ghosts_ahoy
 
 import content.skill.magic.spell.Teleport.Companion.teleport
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interact.ItemOnObject
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.GameObjects
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.replace
 import world.gregs.voidps.type.Tile
@@ -48,6 +48,8 @@ class Ectophial(private val objects: GameObjects) {
         player.message("... and the world changes around you.", ChatType.Filter)
         val ectofuntus = objects[Tile(3658, 3518), "ectofuntus"] ?: return
         val slot = player.inventory.indexOf("ectophial")
-        player.mode = Interact(player, ectofuntus, ItemOnObject(player, ectofuntus, Item("ectophial_empty"), slot, "inventory"))
+        val block: suspend (Boolean) -> Unit = { Publishers.all.interfaceOnGameObject(player, ectofuntus, ectofuntus.def, "", "", Item("ectophial_empty"), slot, "inventory", it) }
+        val check: (Boolean) -> Boolean = { Publishers.all.hasInterfaceOnGameObject(player, ectofuntus, ectofuntus.def, "", "", Item("ectophial_empty"), slot, "inventory", it) }
+        player.mode = Interact(player, ectofuntus, interact = block, has = check)
     }
 }

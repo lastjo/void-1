@@ -9,9 +9,7 @@ import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import content.entity.player.dialogue.type.statement
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interact.itemOnNPCOperate
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.inv.Inventory
 import world.gregs.voidps.engine.inv.holdsItem
@@ -21,6 +19,7 @@ import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItemLimit.removeToLimit
 import world.gregs.voidps.engine.inv.transact.operation.ReplaceItem.replace
 import world.gregs.voidps.engine.suspend.SuspendableContext
+import world.gregs.voidps.type.sub.Option
 import world.gregs.voidps.type.sub.UseOn
 
 class GuardianMummy {
@@ -29,31 +28,34 @@ class GuardianMummy {
     private val stone = listOf("stone_seal", "stone_scarab", "stone_statuette")
     private val gold = listOf("gold_seal", "gold_scarab", "gold_statuette")
 
-    init {
-        npcOperate("Talk-to", "guardian_mummy") {
-            if (player.holdsItem("pharaohs_sceptre")) {
-                sceptreRecharging()
-                return@npcOperate
-            }
-            notAnother()
-        }
-
-        npcOperate("Start-activity", "guardian_mummy") {
-            player<Pleased>("I know what I'm doing - let's get on with it.")
-            iKnowWhatImDoing()
-        }
-
-        itemOnNPCOperate("pharaohs_sceptre_*", "guardian_mummy") {
-            discharge(itemSlot)
-        }
-
-        itemOnNPCOperate("pharaohs_sceptre", "guardian_mummy") {
+    @Option("Talk-to", "guardian_mummy")
+    suspend fun talk(player: Player, npc: NPC) = player.talkWith(npc) {
+        if (player.holdsItem("pharaohs_sceptre")) {
             sceptreRecharging()
+            return@talkWith
         }
+        notAnother()
+    }
 
-        itemOnNPCOperate("*", "guardian_mummy") {
-            player.message("The Mummy is not interested in this")
-        }
+    @Option("Start-activity", "guardian_mummy")
+    suspend fun start(player: Player, npc: NPC) = player.talkWith(npc) {
+        player<Pleased>("I know what I'm doing - let's get on with it.")
+        iKnowWhatImDoing()
+    }
+
+    @UseOn("pharaohs_sceptre_*", "guardian_mummy")
+    suspend fun discharge(player: Player, target: NPC, itemSlot: Int) = player.talkWith(target) {
+        discharge(itemSlot)
+    }
+
+    @UseOn("pharaohs_sceptre", "guardian_mummy")
+    suspend fun charge(player: Player, target: NPC) = player.talkWith(target) {
+        sceptreRecharging()
+    }
+
+    @UseOn(on = "guardian_mummy")
+    fun use(player: Player, target: NPC) {
+        player.message("The Mummy is not interested in this")
     }
 
     @UseOn(item = "pharaohs_sceptre", on = "guardian_mummy")

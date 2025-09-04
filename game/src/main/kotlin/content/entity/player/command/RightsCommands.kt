@@ -15,7 +15,6 @@ import world.gregs.voidps.type.PlayerRights
 import world.gregs.voidps.type.sub.Command
 import world.gregs.voidps.type.sub.Instruction
 import world.gregs.voidps.type.sub.Spawn
-import world.gregs.voidps.type.sub.Subscribe
 
 class RightsCommands {
 

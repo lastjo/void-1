@@ -6,9 +6,6 @@ import world.gregs.voidps.cache.definition.data.InterfaceDefinition
 import world.gregs.voidps.engine.client.ui.InterfaceSwitch
 import world.gregs.voidps.engine.client.ui.dialogue
 import world.gregs.voidps.engine.client.ui.hasOpen
-import world.gregs.voidps.engine.client.ui.interact.ItemOnItem
-import world.gregs.voidps.engine.client.ui.interact.ItemOnNPC
-import world.gregs.voidps.engine.client.ui.interact.ItemOnObject
 import world.gregs.voidps.engine.data.definition.InterfaceDefinitions
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.data.definition.NPCDefinitions
@@ -84,16 +81,7 @@ fun Player.interfaceUse(
     toSlot: Int = -1,
 ) {
     Assertions.assertTrue(hasOpen(id)) { "Player $this doesn't have interface $id open" }
-    emit(
-        ItemOnItem(
-            fromItem = fromItem,
-            toItem = toItem,
-            fromSlot = fromSlot,
-            toSlot = toSlot,
-            fromInventory = inventory,
-            toInventory = inventory,
-        ),
-    )
+    Publishers.all.interfaceOnItem(this, toItem, id, "", toSlot, fromItem, fromSlot, inventory, inventory)
 }
 
 fun Player.interfaceSwitch(
@@ -178,13 +166,11 @@ fun Player.walk(toTile: Tile) = runTest {
 fun Player.itemOnObject(obj: GameObject, itemSlot: Int, inventory: String = "inventory") = runTest {
     val item = inventories.inventory(inventory)[itemSlot]
     Publishers.all.interfaceOnGameObject(this@itemOnObject, obj, obj.def, "", "", item, itemSlot, inventory)
-    emit(ItemOnObject(this@itemOnObject, obj, item, itemSlot, inventory))
 }
 
 fun Player.itemOnNpc(npc: NPC, itemSlot: Int, inventory: String = "inventory") = runTest {
     val item = inventories.inventory(inventory)[itemSlot]
     Publishers.all.interfaceOnNPC(this@itemOnNpc, npc, npc.def, "", "", item, itemSlot, inventory)
-    emit(ItemOnNPC(this@itemOnNpc, npc, item, itemSlot, inventory))
 }
 
 fun Player.itemOnItem(

@@ -18,7 +18,7 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.notEnough
 import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.GameObjects
-import world.gregs.voidps.engine.entity.obj.ObjectOption
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
@@ -91,7 +91,9 @@ class Tollgate(private val objects: GameObjects) {
 
     fun pass(player: Player) {
         val gate = getGate(player)
-        player.mode = Interact(player, gate, ObjectOption(player, gate, gate.def, "Pay-toll(10gp)"))
+        val block: suspend (Boolean) -> Unit = { Publishers.all.playerGameObjectOption(player, gate, gate.def, "Pay-toll(10gp)", it) }
+        val check: (Boolean) -> Boolean = { Publishers.all.hasPlayerGameObjectOption(player, gate, gate.def, "Pay-toll(10gp)", it) }
+        player.mode = Interact(player, gate, interact = block, has = check)
         player["passing_out_task"] = true
     }
 }

@@ -8,7 +8,7 @@ import world.gregs.voidps.engine.client.ui.dialogue.Dialogue
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.character.player.PlayerOption
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.type.sub.Option
 
 class Haakon {
@@ -48,6 +48,8 @@ class Haakon {
 
     suspend fun Dialogue.attack() {
         npc<Mad>("Make peace with your god, outerlander!")
-        target.mode = Interact(target, player, PlayerOption(target, player, "Attack"))
+        val block: suspend (Boolean) -> Unit = { Publishers.all.npcPlayerOption(target, player, "Attack", it) }
+        val check: (Boolean) -> Boolean = { Publishers.all.hasNPCPlayerOption(target, player, "Attack", it) }
+        target.mode = Interact(target, player, interact = block, has = check)
     }
 }

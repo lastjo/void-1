@@ -6,9 +6,8 @@ import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.mode.combat.CombatMovement
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.character.player.PlayerOption
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.type.sub.Hunt
 
 class Aggression(
@@ -24,7 +23,9 @@ class Aggression(
         if (Settings["world.npcs.safeZone", false] && npc.tile in areas["lumbridge"]) {
             return
         }
-        npc.mode = Interact(npc, target, PlayerOption(npc, target, "Attack"))
+        val block: suspend (Boolean) -> Unit = { Publishers.all.npcPlayerOption(npc, target, "Attack", it) }
+        val check: (Boolean) -> Boolean = { Publishers.all.hasNPCPlayerOption(npc, target, "Attack", it) }
+        npc.mode = Interact(npc, target, interact = block, has = check)
     }
 
     @Hunt("cowardly")
@@ -35,14 +36,18 @@ class Aggression(
         if (Settings["world.npcs.safeZone", false] && npc.tile in areas["lumbridge"]) {
             return
         }
-        npc.mode = Interact(npc, target, PlayerOption(npc, target, "Attack"))
+        val block: suspend (Boolean) -> Unit = { Publishers.all.npcPlayerOption(npc, target, "Attack", it) }
+        val check: (Boolean) -> Boolean = { Publishers.all.hasNPCPlayerOption(npc, target, "Attack", it) }
+        npc.mode = Interact(npc, target, interact = block, has = check)
     }
 
     @Hunt("aggressive")
     @Hunt("aggressive_intolerant")
     fun hunt(npc: NPC, target: NPC) {
         if (!attacking(npc, target)) {
-            npc.mode = Interact(npc, target, NPCOption(npc, target, target.def, "Attack"))
+            val block: suspend (Boolean) -> Unit = { Publishers.all.npcNPCOption(npc, target, target.def, "Attack", it) }
+            val check: (Boolean) -> Boolean = { Publishers.all.hasNPCNPCOption(npc, target, target.def, "Attack", it) }
+            npc.mode = Interact(npc, target, interact = block, has = check)
         }
     }
 
@@ -51,7 +56,9 @@ class Aggression(
         if (attacking(npc, target)) {
             return
         }
-        npc.mode = Interact(npc, target, NPCOption(npc, target, target.def, "Attack"))
+        val block: suspend (Boolean) -> Unit = { Publishers.all.npcNPCOption(npc, target, target.def, "Attack", it) }
+        val check: (Boolean) -> Boolean = { Publishers.all.hasNPCNPCOption(npc, target, target.def, "Attack", it) }
+        npc.mode = Interact(npc, target, interact = block, has = check)
     }
 
     fun attacking(npc: NPC, target: Character): Boolean {

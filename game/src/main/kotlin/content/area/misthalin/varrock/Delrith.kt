@@ -31,7 +31,6 @@ import world.gregs.voidps.engine.entity.character.mode.PauseMode
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
@@ -157,7 +156,9 @@ class Delrith(
     fun prepare(player: Player, target: Character): Boolean {
         if (target is NPC && target.id == "delrith" && target.transform == "delrith_weakened") {
             player.strongQueue("banish_delrith", 1) {
-                player.mode = Interact(player, target, NPCOption(player, target, target.def, "Banish"))
+                val block: suspend (Boolean) -> Unit = { Publishers.all.playerNPCOption(player, target, target.def, "Banish", it) }
+                val check: (Boolean) -> Boolean = { Publishers.all.hasPlayerNPCOption(player, target, target.def, "Banish", it) }
+                player.mode = Interact(player, target, interact = block, has = check)
             }
             return true
         }

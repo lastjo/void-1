@@ -6,10 +6,9 @@ import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.character.player.PlayerOption
 import world.gregs.voidps.engine.entity.item.Item
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.equipment
 import world.gregs.voidps.type.random
 import world.gregs.voidps.type.sub.*
@@ -81,17 +80,23 @@ class GodwarsAggression(areas: AreaDefinitions) {
 
     @Hunt("godwars_aggressive")
     fun huntPlayers(npc: NPC, target: Player) {
-        npc.mode = Interact(npc, target, PlayerOption(npc, target, "Attack"))
+        val block: suspend (Boolean) -> Unit = { Publishers.all.npcPlayerOption(npc, target, "Attack", it) }
+        val check: (Boolean) -> Boolean = { Publishers.all.hasNPCPlayerOption(npc, target, "Attack", it) }
+        npc.mode = Interact(npc, target, interact = block, has = check)
     }
 
     @Hunt("zamorak_aggressive")
     fun huntOtherGods(npc: NPC, target: NPC) {
-        npc.mode = Interact(npc, target, NPCOption(npc, target, target.def, "Attack"))
+        val block: suspend (Boolean) -> Unit = { Publishers.all.npcNPCOption(npc, target, target.def, "Attack", it) }
+        val check: (Boolean) -> Boolean = { Publishers.all.hasNPCNPCOption(npc, target, target.def, "Attack", it) }
+        npc.mode = Interact(npc, target, interact = block, has = check)
     }
 
     @Hunt("anti_zamorak_aggressive")
     fun huntZamorak(npc: NPC, target: NPC) {
-        npc.mode = Interact(npc, target, NPCOption(npc, target, target.def, "Attack"))
+        val block: suspend (Boolean) -> Unit = { Publishers.all.npcNPCOption(npc, target, target.def, "Attack", it) }
+        val check: (Boolean) -> Boolean = { Publishers.all.hasNPCNPCOption(npc, target, target.def, "Attack", it) }
+        npc.mode = Interact(npc, target, interact = block, has = check)
     }
 
     fun randomHuntMode(npc: NPC) {

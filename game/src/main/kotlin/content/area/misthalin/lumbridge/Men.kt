@@ -7,8 +7,8 @@ import content.entity.player.dialogue.type.player
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.character.player.PlayerOption
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.type.random
@@ -55,7 +55,9 @@ class Men(private val floorItems: FloorItems) {
             9 -> npc<Happy>("Not too bad thanks.")
             10 -> {
                 npc<Angry>("Are you asking for a fight?")
-                target.mode = Interact(target, player, PlayerOption(target, player, "Attack"))
+                val block: suspend (Boolean) -> Unit = { Publishers.all.npcPlayerOption(target, player, "Attack", it) }
+                val check: (Boolean) -> Boolean = { Publishers.all.hasNPCPlayerOption(target, player, "Attack", it) }
+                target.mode = Interact(target, player, interact = block, has = check)
             }
             11 -> npc<Neutral>("I'm busy right now.")
             12 -> npc<Happy>("Hello.")

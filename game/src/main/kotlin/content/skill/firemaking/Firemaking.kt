@@ -14,7 +14,6 @@ import world.gregs.voidps.engine.entity.character.player.skill.level.Level
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.item.floor.FloorItem
-import world.gregs.voidps.engine.entity.item.floor.FloorItemOption
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.ObjectLayer
@@ -46,10 +45,9 @@ class Firemaking(
         player.queue.clearWeak()
         if (player.inventory.remove(logSlot, log.id)) {
             val floorItem = floorItems.add(player.tile, log.id, disappearTicks = 300, owner = player)
-            Publishers.launch {
-                Publishers.all.playerFloorItemOption(player, floorItem, "Light")
-            }
-            player.mode = Interact(player, floorItem, FloorItemOption(player, floorItem, "Light"))
+            val block: suspend (Boolean) -> Unit = { Publishers.all.playerFloorItemOption(player, floorItem, "Light", it) }
+            val check: (Boolean) -> Boolean = { Publishers.all.hasPlayerFloorItemOption(player, floorItem, "Light", it) }
+            player.mode = Interact(player, floorItem, interact = block, has = check)
         }
     }
 

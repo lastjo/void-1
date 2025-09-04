@@ -4,7 +4,6 @@ import com.github.michaelbull.logging.InlineLogger
 import world.gregs.voidps.cache.definition.data.InterfaceComponentDefinition
 import world.gregs.voidps.engine.client.ui.closeInterfaces
 import world.gregs.voidps.engine.client.ui.dialogue.talkWith
-import world.gregs.voidps.engine.client.ui.interact.*
 import world.gregs.voidps.engine.data.definition.EnumDefinitions
 import world.gregs.voidps.engine.data.definition.InterfaceDefinitions
 import world.gregs.voidps.engine.data.definition.InventoryDefinitions
@@ -80,18 +79,14 @@ class InterfaceClicks(
     @Instruction(InteractInterface::class)
     fun option(player: Player, instruction: InteractInterface) {
         val (interfaceId, componentId, itemId, itemSlot, option) = instruction
-
         var (id, component, item, inventory, options) = getInterfaceItem(player, interfaceId, componentId, itemId, itemSlot) ?: return
-
         if (options == null) {
             options = interfaceDefinitions.getComponent(id, component)?.get("options") ?: emptyArray()
         }
-
         if (option !in options.indices) {
             logger.info { "Interface option not found [$player, interface=$interfaceId, component=$componentId, option=$option, options=${options.toList()}]" }
             return
         }
-
         val selectedOption = options.getOrNull(option) ?: ""
         Publishers.launch {
             Publishers.all.interfaceOption(
@@ -118,7 +113,6 @@ class InterfaceClicks(
         }
         val (fromId, fromComponent, fromItem, fromInventory) = getInterfaceItem(player, fromInterfaceId, fromComponentId, fromItemId, fromSlot) ?: return
         val (toId, toComponent, toItem, toInventory) = getInterfaceItem(player, toInterfaceId, toComponentId, toItemId, toSlot) ?: return
-
         Publishers.all.inventorySwap(player, id = fromId, component = fromComponent, fromItem = fromItem, fromSlot = fromSlot, fromInventory = fromInventory, toId = toId, toComponent = toComponent, toItem = toItem, toSlot = toSlot, toInventory = toInventory)
     }
 
@@ -128,28 +122,10 @@ class InterfaceClicks(
         val target = players.indexed(playerIndex) ?: return
 
         val (id, component, item, inventory) = getInterfaceItem(player, interfaceId, componentId, itemId, itemSlot) ?: return
-
-        val interaction = if (item.isEmpty()) {
-            InterfaceOnPlayer(
-                player,
-                target,
-                id,
-                component,
-                itemSlot,
-            )
-        } else {
-            ItemOnPlayer(
-                player,
-                target,
-                item,
-                itemSlot,
-                inventory,
-            )
-        }
         player.closeInterfaces()
         val block: suspend (Boolean) -> Unit = { Publishers.all.interfaceOnPlayer(player, target, id, component, item, itemSlot, inventory, it) }
         val check: (Boolean) -> Boolean = { Publishers.all.hasInterfaceOnPlayer(player, target, id, component, item, itemSlot, inventory, it) }
-        player.mode = Interact(player, target, interaction, interact = block, has = check)
+        player.mode = Interact(player, target, interact = block, has = check)
     }
 
     @Instruction(InteractInterfaceObject::class)
@@ -161,96 +137,36 @@ class InterfaceClicks(
             player.noInterest()
             return
         }
-
         val (id, component, item, inventory) = getInterfaceItem(player, interfaceId, componentId, itemId, itemSlot) ?: return
-        val interaction = if (item.isEmpty()) {
-            InterfaceOnObject(
-                player,
-                obj,
-                id,
-                component,
-                itemSlot,
-            )
-        } else {
-            ItemOnObject(
-                player,
-                obj,
-                item,
-                itemSlot,
-                inventory,
-            )
-        }
         player.closeInterfaces()
         val def = obj.def(player)
         val block: suspend (Boolean) -> Unit = { Publishers.all.interfaceOnGameObject(player, obj, def, id, component, item, itemSlot, inventory, it) }
         val check: (Boolean) -> Boolean = { Publishers.all.hasInterfaceOnGameObject(player, obj, def, id, component, item, itemSlot, inventory, it) }
-        player.mode = Interact(player, obj, interaction, interact = block, has = check)
+        player.mode = Interact(player, obj, interact = block, has = check)
     }
 
     @Instruction(InteractInterfaceNPC::class)
     fun onNPC(player: Player, instruction: InteractInterfaceNPC) {
         val (npcIndex, interfaceId, componentId, itemId, itemSlot) = instruction
         val npc = npcs.indexed(npcIndex) ?: return
-
         val (id, component, item, inventory) = getInterfaceItem(player, interfaceId, componentId, itemId, itemSlot) ?: return
-
         player.closeInterfaces()
         player.talkWith(npc)
-        val interaction = if (item.isEmpty()) {
-            InterfaceOnNPC(
-                player,
-                npc,
-                id,
-                component,
-                itemSlot,
-            )
-        } else {
-            ItemOnNPC(
-                player,
-                npc,
-                item,
-                itemSlot,
-                inventory,
-            )
-        }
         val def = npc.def(player)
         val block: suspend (Boolean) -> Unit = { Publishers.all.interfaceOnNPC(player, npc, def, id, component, item, itemSlot, inventory, it) }
         val check: (Boolean) -> Boolean = { Publishers.all.hasInterfaceOnNPC(player, npc, def, id, component, item, itemSlot, inventory, it) }
-        player.mode = Interact(player, npc, interaction, interact = block, has = check)
+        player.mode = Interact(player, npc, interact = block, has = check)
     }
 
     @Instruction(InteractInterfaceItem::class)
     fun onItem(player: Player, instruction: InteractInterfaceItem) {
         val (fromItemId, toItemId, fromSlot, toSlot, fromInterfaceId, fromComponentId, toInterfaceId, toComponentId) = instruction
-
         val (fromId, fromComponent, fromItem, fromInventory) = getInterfaceItem(player, fromInterfaceId, fromComponentId, fromItemId, fromSlot) ?: return
         val (_, _, toItem, toInventory) = getInterfaceItem(player, toInterfaceId, toComponentId, toItemId, toSlot) ?: return
-
         player.closeInterfaces()
         player.queue.clearWeak()
         player.suspension = null
-
         Publishers.all.interfaceOnItem(player, toItem, fromId, fromComponent, toSlot, fromItem, fromSlot, fromInventory, toInventory)
-        val event = if (fromItem.isEmpty()) {
-            InterfaceOnItem(
-                fromId,
-                fromComponent,
-                fromSlot,
-                toItem,
-                toSlot,
-                toInventory,
-            )
-        } else {
-            ItemOnItem(
-                fromItem,
-                toItem,
-                fromSlot,
-                toSlot,
-                fromInventory,
-                toInventory,
-            )
-        }
-        player.emit(event)
     }
 
     @Instruction(InteractInterfaceFloorItem::class)
@@ -263,18 +179,13 @@ class InterfaceClicks(
             return
         }
         val (id, component, item, inventory) = getInterfaceItem(player, interfaceId, componentId, itemId, itemSlot) ?: return
-        val interaction = if (item.isEmpty()) {
-            InterfaceOnFloorItem(player, floorItem, id, component, itemSlot)
-        } else {
-            ItemOnFloorItem(player, floorItem, item, itemSlot, inventory)
-        }
         player.closeInterfaces()
         val block: suspend (Boolean) -> Unit = { Publishers.all.interfaceOnFloorItem(player, floorItem, id, component, item, itemSlot, inventory, it) }
         val check: (Boolean) -> Boolean = { Publishers.all.hasInterfaceOnFloorItem(player, floorItem, id, component, item, itemSlot, inventory, it) }
-        player.mode = Interact(player, floorItem, interaction, approachRange = -1, interact = block, has = check)
+        player.mode = Interact(player, floorItem, approachRange = -1, interact = block, has = check)
     }
 
-    fun getInterfaceItem(player: Player, interfaceId: Int, componentId: Int, itemId: Int, itemSlot: Int): InterfaceData? {
+    private fun getInterfaceItem(player: Player, interfaceId: Int, componentId: Int, itemId: Int, itemSlot: Int): InterfaceData? {
         val id = getOpenInterface(player, interfaceId) ?: return null
         val componentDefinition = getComponentDefinition(player, interfaceId, componentId) ?: return null
         val component = componentDefinition.stringId
@@ -347,5 +258,4 @@ class InterfaceClicks(
         val inventory: String,
         val options: Array<String?>?,
     )
-
 }

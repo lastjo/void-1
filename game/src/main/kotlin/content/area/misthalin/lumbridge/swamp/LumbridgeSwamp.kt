@@ -8,8 +8,8 @@ import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.character.player.PlayerOption
 import world.gregs.voidps.engine.entity.obj.GameObject
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.queue.softQueue
@@ -50,7 +50,9 @@ class LumbridgeSwamp(private val npcs: NPCs) {
         warlock.anim("restless_ghost_warlock_spawn")
         val player = player
         warlock.softQueue("delayed_attack", 4) {
-            warlock.mode = Interact(warlock, player, PlayerOption(warlock, player, "Attack"))
+            val block: suspend (Boolean) -> Unit = { Publishers.all.npcPlayerOption(warlock, player, "Attack", it) }
+            val check: (Boolean) -> Boolean = { Publishers.all.hasNPCPlayerOption(warlock, player, "Attack", it) }
+            warlock.mode = Interact(warlock, player, interact = block, has = check)
         }
         World.queue("skeleton_warlock", TimeUnit.SECONDS.toTicks(60)) {
             npcs.remove(warlock)

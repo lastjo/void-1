@@ -2,7 +2,6 @@ package world.gregs.voidps.event
 
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
-import com.squareup.kotlinpoet.STRING
 import com.squareup.kotlinpoet.asClassName
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.*
