@@ -28,7 +28,6 @@ open class Variables(
         // Don't check if default or not as values must be set.
         data(key)[key] = value
         Publishers.all.variableSet(entity, key, null, value)
-        events.emit(VariableSet(key, null, value))
         return value
     }
 
@@ -47,7 +46,6 @@ open class Variables(
             send(key)
         }
         Publishers.all.variableSet(entity, key, previous, value)
-        events.emit(VariableSet(key, previous, value))
     }
 
     open fun clear(key: String, refresh: Boolean = true): Any? {
@@ -57,7 +55,6 @@ open class Variables(
         }
         val from = removed ?: return null
         Publishers.all.variableSet(entity, key, from, null)
-        events.emit(VariableSet(key, from, null))
         return removed
     }
 

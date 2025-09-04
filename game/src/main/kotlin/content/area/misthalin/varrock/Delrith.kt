@@ -145,7 +145,6 @@ class Delrith(
         npc.strongQueue("death", TimeUnit.MINUTES.toTicks(5)) {
             Publishers.all.npcDeath(character)
             Publishers.all.characterDeath(character)
-            npc.emit(Death)
         }
         //    player.playSound("demon_slayer_portal_open")
         npc.transform("delrith_weakened")

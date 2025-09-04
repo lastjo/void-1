@@ -74,8 +74,6 @@ class PlayerDeath(
             player.message("Oh dear, you are dead!")
             player.anim("human_death")
             delay(5)
-            val after = AfterDeath()
-            player.emit(after)
             player.clearAnim()
             player.attackers.clear()
             player.damageDealers.clear()
@@ -83,13 +81,9 @@ class PlayerDeath(
             player.timers.stopAll()
             player.softTimers.stopAll()
             player.clear(player.getActivePrayerVarKey())
-            if (after.dropItems) {
-                dropItems(player, killer, tile, wilderness)
-            }
+            dropItems(player, killer, tile, wilderness)
             player.levels.clear()
-            if (after.teleport) {
-                player.tele(respawnTile)
-            }
+            player.tele(respawnTile)
             player.face(Direction.SOUTH, update = false)
             player.dead = false
         }

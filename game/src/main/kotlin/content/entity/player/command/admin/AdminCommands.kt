@@ -3,7 +3,7 @@
 package content.entity.player.command.admin
 
 import content.bot.interact.navigation.graph.NavigationGraph
-import content.entity.npc.shop.OpenShop
+import content.entity.npc.shop.openShop
 import content.entity.obj.ObjectTeleports
 import content.entity.obj.ship.CharterShips
 import content.entity.player.combat.special.MAX_SPECIAL_ATTACK
@@ -61,6 +61,7 @@ import world.gregs.voidps.engine.entity.item.floor.ItemSpawns
 import world.gregs.voidps.engine.entity.item.floor.loadItemSpawns
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.loadObjectSpawns
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.inv.*
 import world.gregs.voidps.engine.inv.transact.TransactionError
@@ -536,14 +537,14 @@ class AdminCommands(
             "cs2", "cs2s", "client scripts" -> get<ClientScriptDefinitions>().load(files.list(Settings["definitions.clientScripts"]))
             "settings", "setting", "game setting", "game settings", "games settings", "properties", "props" -> {
                 Settings.load()
-                World.emit(SettingsReload)
+                Publishers.all.publishWorld(World, "settings_reload")
             }
         }
     }
 
     @Command("shop (shop-id)", description = "open a shop by id", rights = PlayerRights.ADMIN)
     fun shop(player: Player, content: String) {
-        player.emit(OpenShop(content))
+        player.openShop(content)
     }
 
     @Command("debug", description = "toggle debug mode and printing logs", rights = PlayerRights.ADMIN)

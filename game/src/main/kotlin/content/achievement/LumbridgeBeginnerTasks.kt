@@ -380,7 +380,7 @@ class LumbridgeBeginnerTasks(
         }
     }
 
-    @Subscribe("shop_open", "lumbridge_general_store")
+    @Subscribe("open_shop", "lumbridge_general_store")
     fun generalStore(player: Player) {
         player["window_shopping_task"] = true
     }

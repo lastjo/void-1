@@ -120,7 +120,6 @@ class CombatMovement(
     override fun stop(replacement: Mode) {
         if (replacement !is CombatMovement || replacement.target != target) {
             Publishers.all.combatAttack(character, target, stage = CombatStage.STOP)
-            character.emit(CombatStop(target))
         }
     }
 }

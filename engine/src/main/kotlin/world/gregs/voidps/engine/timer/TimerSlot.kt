@@ -1,28 +1,24 @@
 package world.gregs.voidps.engine.timer
 
 import world.gregs.voidps.engine.entity.Entity
-import world.gregs.voidps.engine.event.EventDispatcher
 import world.gregs.voidps.engine.event.Publishers
+import world.gregs.voidps.type.TimerState
 
 class TimerSlot(
-    private val events: EventDispatcher,
     private val entity: Entity,
 ) : Timers {
 
     private var timer: Timer? = null
 
     override fun start(name: String, restart: Boolean): Boolean {
-        val start = TimerStart(name, restart)
         val interval = Publishers.all.timerStart(entity, name, restart)
-        events.emit(start)
-        if (start.cancelled) {
+        if (interval == TimerState.CANCEL) {
             return false
         }
         if (timer != null) {
             Publishers.all.timerStop(entity, timer!!.name, logout = false)
-            events.emit(TimerStop(timer!!.name, logout = false))
         }
-        this.timer = Timer(name, if (interval != -1) interval else start.interval)
+        this.timer = Timer(name, interval)
         return true
     }
 
@@ -34,22 +30,18 @@ class TimerSlot(
             return
         }
         timer.reset()
-        val tick = TimerTick(timer.name)
-        val next = Publishers.all.timerTick(entity, timer.name)
-        events.emit(tick)
-        if (tick.cancelled) {
+        val nextInterval = Publishers.all.timerTick(entity, timer.name)
+        if (nextInterval == TimerState.CANCEL) {
             Publishers.all.timerStop(entity, timer.name, logout = false)
-            events.emit(TimerStop(timer.name, logout = false))
             this.timer = null
-        } else if (tick.nextInterval != -1) {
-            timer.next(if (next != -1) next else tick.nextInterval)
+        } else if (nextInterval != TimerState.CONTINUE) {
+            timer.next(nextInterval)
         }
     }
 
     override fun stop(name: String) {
         if (contains(name)) {
             Publishers.all.timerStop(entity, timer!!.name, logout = false)
-            events.emit(TimerStop(timer!!.name, logout = false))
             timer = null
         }
     }
@@ -69,7 +61,6 @@ class TimerSlot(
     override fun stopAll() {
         if (timer != null) {
             Publishers.all.timerStop(entity, timer!!.name, logout = true)
-            events.emit(TimerStop(timer!!.name, logout = true))
         }
         timer = null
     }

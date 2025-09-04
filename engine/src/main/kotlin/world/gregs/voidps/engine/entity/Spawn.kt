@@ -21,28 +21,3 @@ object Spawn : Event {
         else -> null
     }
 }
-
-fun playerSpawn(priority: Boolean = true, handler: suspend Spawn.(Player) -> Unit) {
-    Events.handle("player_spawn", if (priority) "player" else "*", handler = handler)
-}
-
-fun npcSpawn(npc: String = "*", handler: suspend Spawn.(NPC) -> Unit) {
-    Events.handle("npc_spawn", npc, handler = handler)
-}
-
-fun characterSpawn(handler: suspend Spawn.(Character) -> Unit) {
-    Events.handle("player_spawn", "*", handler = handler)
-    Events.handle("npc_spawn", "*", handler = handler)
-}
-
-fun floorItemSpawn(item: String = "*", handler: suspend Spawn.(FloorItem) -> Unit) {
-    Events.handle("floor_item_spawn", item, handler = handler)
-}
-
-fun objectSpawn(obj: String = "*", handler: suspend Spawn.(GameObject) -> Unit) {
-    Events.handle("object_spawn", obj, handler = handler)
-}
-
-fun worldSpawn(handler: suspend Spawn.(World) -> Unit) {
-    Events.handle("world_spawn", "world", handler = handler)
-}

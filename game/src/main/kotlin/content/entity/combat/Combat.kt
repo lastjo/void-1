@@ -113,8 +113,6 @@ class Combat {
             if (character.hasClock("action_delay")) {
                 return
             }
-            val prepare = CombatPrepare(target)
-            character.emit(prepare)
             if (Publishers.all.combatAttack(character, target, character.fightStyle, -1, character.weapon, character.spell, stage = CombatStage.PREPARE)) {
                 character.mode = EmptyMode
                 return
@@ -125,13 +123,10 @@ class Combat {
             }
             if (!target.hasClock("in_combat")) {
                 Publishers.all.combatAttack(character, target, character.fightStyle, -1, character.weapon, character.spell, stage = CombatStage.START)
-                character.emit(CombatStart(target))
             }
             target.start("in_combat", 8)
 
             Publishers.all.combatAttack(character, target, character.fightStyle, -1, character.weapon, character.spell, stage = CombatStage.SWING)
-            val swing = CombatSwing(target)
-            character.emit(swing)
             (character as? Player)?.specialAttack = false
             var nextDelay = character.attackSpeed
             if (character.hasClock("miasmic") && (character.fightStyle == "range" || character.fightStyle == "melee")) {

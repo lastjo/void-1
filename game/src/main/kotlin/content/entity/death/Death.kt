@@ -19,16 +19,3 @@ object Death : Event {
         else -> null
     }
 }
-
-fun playerDeath(handler: suspend Death.(Player) -> Unit) {
-    Events.handle("player_death", "player", handler = handler)
-}
-
-fun npcDeath(npc: String = "*", handler: suspend Death.(NPC) -> Unit) {
-    Events.handle("npc_death", npc, handler = handler)
-}
-
-fun characterDeath(handler: suspend Death.(Character) -> Unit) {
-    Events.handle("player_death", "player", handler = handler)
-    Events.handle("npc_death", "*", handler = handler)
-}

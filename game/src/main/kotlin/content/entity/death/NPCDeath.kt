@@ -13,8 +13,6 @@ import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.chat.plural
 import world.gregs.voidps.engine.data.definition.AnimationDefinitions
 import world.gregs.voidps.engine.data.definition.SoundDefinitions
-import world.gregs.voidps.engine.entity.Despawn
-import world.gregs.voidps.engine.entity.Spawn
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
@@ -31,6 +29,7 @@ import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.item.drop.DropTables
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.charges
 import world.gregs.voidps.engine.queue.strongQueue
@@ -82,12 +81,12 @@ class NPCDeath {
                 npc.hide = false
                 npc.dead = false
                 npc.mode = EmptyMode
-                npc.emit(Spawn)
+                Publishers.all.spawnNPC(npc)
             } else {
                 World.queue("remove_npc") {
                     npcs.remove(npc)
                 }
-                npc.emit(Despawn)
+                Publishers.all.despawnNPC(npc)
             }
         }
     }
@@ -105,7 +104,7 @@ class NPCDeath {
             .map { it.toItem() }
             .filter { World.members || !it.def.members }
             .toMutableList()
-        npc.emit(DropItems(killer, drops))
+        Publishers.all.publishNPC(npc, "drop_items", drops)
         if (npc.inMultiCombat && killer is Player && killer["loot_share", false]) {
             shareLoot(killer, npc, tile, drops)
         } else {

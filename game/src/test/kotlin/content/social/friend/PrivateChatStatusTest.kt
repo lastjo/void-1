@@ -9,9 +9,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import world.gregs.voidps.engine.entity.Spawn
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.clan.ClanRank
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.network.client.Client
 import world.gregs.voidps.network.login.protocol.encode.Friend
 import world.gregs.voidps.network.login.protocol.encode.sendFriendsList
@@ -46,9 +46,7 @@ internal class PrivateChatStatusTest : WorldTest() {
     fun `Send friends list on login with status off`() {
         player["private_status"] = "off"
 
-        runBlocking(Dispatchers.Default) {
-            player.emit(Spawn)
-        }
+        Publishers.all.spawnPlayer(player)
 
         verify {
             player.client?.sendFriendsList(listOf(Friend("friend", "", world = 16, worldName = "World 16")))
@@ -65,9 +63,7 @@ internal class PrivateChatStatusTest : WorldTest() {
     fun `Send friends list on login with status friends`() {
         player["private_status"] = "friends"
 
-        runBlocking(Dispatchers.Default) {
-            player.emit(Spawn)
-        }
+        Publishers.all.spawnPlayer(player)
 
         verify {
             player.client?.sendFriendsList(listOf(Friend("friend", "", world = 16, worldName = "World 16")))
@@ -84,9 +80,7 @@ internal class PrivateChatStatusTest : WorldTest() {
     fun `Send friends list on login with status on`() {
         player["private_status"] = "on"
 
-        runBlocking(Dispatchers.Default) {
-            player.emit(Spawn)
-        }
+        Publishers.all.spawnPlayer(player)
 
         verify {
             player.client?.sendFriendsList(listOf(Friend("friend", "", world = 16, worldName = "World 16")))

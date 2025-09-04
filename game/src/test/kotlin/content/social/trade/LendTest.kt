@@ -8,12 +8,11 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import playerOption
 import world.gregs.voidps.engine.client.ui.open
-import world.gregs.voidps.engine.entity.Despawn
-import world.gregs.voidps.engine.entity.Spawn
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level
 import world.gregs.voidps.engine.entity.item.Item
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.equipment
 import world.gregs.voidps.engine.inv.inventory
@@ -73,7 +72,7 @@ internal class LendTest : WorldTest() {
         acceptTrade(lender, borrower)
 
         assertTrue(borrower.inventory.contains("abyssal_whip_lent"))
-        lender.emit(Despawn)
+        Publishers.all.despawnPlayer(lender)
         assertFalse(lender.softTimers.contains("loan_message"))
         assertFalse(borrower.inventory.contains("abyssal_whip_lent"))
     }
@@ -85,7 +84,7 @@ internal class LendTest : WorldTest() {
         acceptTrade(lender, borrower)
 
         assertTrue(borrower.inventory.contains("abyssal_whip_lent"))
-        borrower.emit(Despawn)
+        Publishers.all.despawnPlayer(borrower)
         assertFalse(lender.softTimers.contains("loan_message"))
         assertFalse(borrower.inventory.contains("abyssal_whip_lent"))
     }
@@ -229,11 +228,11 @@ internal class LendTest : WorldTest() {
 
     private fun login(lender: Player) {
         players.add(lender)
-        lender.emit(Spawn)
+        Publishers.all.spawnPlayer(lender)
     }
 
     private fun logout(borrower: Player) {
-        borrower.emit(Despawn)
+        Publishers.all.despawnPlayer(borrower)
         players.remove(borrower)
     }
 

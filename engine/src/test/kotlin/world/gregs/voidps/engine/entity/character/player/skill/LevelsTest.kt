@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import world.gregs.voidps.engine.entity.character.Character
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.exp.Experience
 import world.gregs.voidps.engine.entity.character.player.skill.level.Levels
 import world.gregs.voidps.engine.entity.character.player.skill.level.PlayerLevels
@@ -16,18 +17,18 @@ internal class LevelsTest {
 
     private lateinit var exp: Experience
     private lateinit var levels: Levels
-    private lateinit var character: Character
+    private lateinit var player: Player
     private lateinit var publishers: Publishers
 
     @BeforeEach
     fun setup() {
         exp = Experience(maximum = 10000.0)
-        character = mockk(relaxed = true)
+        player = mockk(relaxed = true)
         publishers = mockk(relaxed = true)
         Publishers.set(publishers)
         levels = Levels()
-        exp.events = character
-        levels.link(character, PlayerLevels(exp))
+        exp.player = player
+        levels.link(player, PlayerLevels(exp))
     }
 
     @Test
@@ -121,8 +122,8 @@ internal class LevelsTest {
     @Test
     fun `Boosting with stack has arbitrary limit`() {
         exp = Experience()
-        exp.events = character
-        levels.link(character, PlayerLevels(exp))
+        exp.player = player
+        levels.link(player, PlayerLevels(exp))
 
         exp.set(Skill.Strength, 14000000.0)
         levels.set(Skill.Strength, 99)
@@ -291,7 +292,7 @@ internal class LevelsTest {
         levels.set(Skill.Magic, 9)
         levels.set(Skill.Magic, 12)
         verify {
-            publishers.levelChangeCharacter(character, Skill.Magic, 9, 12)
+            publishers.levelChangeCharacter(player, Skill.Magic, 9, 12)
         }
     }
 
@@ -299,7 +300,7 @@ internal class LevelsTest {
     fun `Listen to level up`() {
         exp.set(Skill.Magic, 1154.0)
         verifyOrder {
-            publishers.levelChangeCharacter(character, Skill.Magic, 1, 10, max = true)
+            publishers.levelChangeCharacter(player, Skill.Magic, 1, 10, max = true)
         }
     }
 }

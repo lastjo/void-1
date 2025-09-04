@@ -10,7 +10,6 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.Skill.*
 import world.gregs.voidps.engine.entity.character.player.skill.exp.Experience
-import world.gregs.voidps.engine.entity.character.player.skill.level.MaxLevelChanged
 import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.suspend.ContinueSuspension
 import world.gregs.voidps.engine.suspend.SuspendableContext
@@ -45,7 +44,6 @@ class LevelUp {
             player.levels.restore(skill, currentLevel - previousLevel)
             Publishers.all.levelChangePlayer(player, skill, previousLevel, currentLevel, max = true)
             Publishers.all.levelChangeCharacter(player, skill, previousLevel, currentLevel, max = true)
-            player.emit(MaxLevelChanged(skill, previousLevel, currentLevel))
         }
     }
 

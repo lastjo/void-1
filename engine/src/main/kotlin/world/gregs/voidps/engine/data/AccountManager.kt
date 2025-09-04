@@ -7,8 +7,6 @@ import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.client.update.view.Viewport
 import world.gregs.voidps.engine.client.variable.PlayerVariables
 import world.gregs.voidps.engine.data.definition.*
-import world.gregs.voidps.engine.entity.Despawn
-import world.gregs.voidps.engine.entity.Spawn
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
@@ -65,7 +63,7 @@ class AccountManager(
         player.inventories.player = player
         player.inventories.start()
         player.steps.previous = player.tile.add(Direction.WEST.delta)
-        player.experience.events = player
+        player.experience.player = player
         player.levels.link(player, PlayerLevels(player.experience))
         player.body.link(player.equipment, overrides)
         player.body.updateAll()
@@ -90,9 +88,8 @@ class AccountManager(
         }
         Publishers.all.publishPlayer(player, "region_load")
         player.open(player.interfaces.gameFrame)
-        Publishers.all.spawnPlayer(player)
         player.message("Welcome to ${Settings["server.name", "game"]}.", ChatType.Welcome)
-        player.emit(Spawn)
+        Publishers.all.spawnPlayer(player)
         Publishers.launch {
             for (def in areaDefinitions.get(player.tile.zone)) {
                 if (player.tile in def.area) {
@@ -128,8 +125,8 @@ class AccountManager(
                         Publishers.all.exitArea(player, def.name, def.tags, def.area, logout = true)
                     }
                 }
+                Publishers.all.despawnPlayer(player)
             }
-            player.emit(Despawn)
             player.queue.logout()
             player.softTimers.stopAll()
             player.timers.stopAll()

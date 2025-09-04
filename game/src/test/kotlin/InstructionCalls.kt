@@ -2,7 +2,6 @@ import content.entity.effect.transform
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import world.gregs.voidps.cache.definition.data.InterfaceDefinition
-import world.gregs.voidps.engine.client.ui.InterfaceSwitch
 import world.gregs.voidps.engine.client.ui.dialogue
 import world.gregs.voidps.engine.client.ui.hasOpen
 import world.gregs.voidps.engine.data.definition.InterfaceDefinitions
@@ -93,19 +92,18 @@ fun Player.interfaceSwitch(
     toSlot: Int = -1,
 ) {
     Assertions.assertTrue(hasOpen(id)) { "Player $this doesn't have interface $id open" }
-    emit(
-        InterfaceSwitch(
-            id = id,
-            component = component,
-            fromItem = fromItem,
-            fromSlot = fromSlot,
-            fromInventory = inventory,
-            toId = id,
-            toComponent = component,
-            toItem = toItem,
-            toSlot = toSlot,
-            toInventory = inventory,
-        ),
+    Publishers.all.inventorySwap(
+        this,
+        id = id,
+        component = component,
+        fromItem = fromItem,
+        fromSlot = fromSlot,
+        fromInventory = inventory,
+        toId = id,
+        toComponent = component,
+        toItem = toItem,
+        toSlot = toSlot,
+        toInventory = inventory
     )
 }
 

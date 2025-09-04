@@ -39,7 +39,7 @@ class ShopOpen(
         }
     }
 
-    @Subscribe("shop_open")
+    @Subscribe("open_shop")
     fun open(player: Player, id: String) {
         val definition = inventoryDefinitions.getOrNull(id) ?: return
         val currency: String = definition["currency", "coins"]

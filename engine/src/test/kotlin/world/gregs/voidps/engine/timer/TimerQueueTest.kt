@@ -4,14 +4,16 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import world.gregs.voidps.engine.GameLoop
+import world.gregs.voidps.engine.entity.Entity
 import world.gregs.voidps.engine.entity.World
+import world.gregs.voidps.engine.event.Publishers
 
 internal class TimerQueueTest : TimersTest() {
 
     @BeforeEach
     override fun setup() {
         super.setup()
-        val queue = TimerQueue(events, World)
+        val queue = TimerQueue(World)
         timers = queue
     }
 
@@ -25,28 +27,24 @@ internal class TimerQueueTest : TimersTest() {
         }
         assertTrue(timers.contains("1"))
         assertTrue(timers.contains("2"))
-        assertEquals(TimerStart("1"), emitted.pop())
-        assertEquals(TimerStart("2"), emitted.pop())
+        assertEquals(Pair("start_1", false), emitted.pop())
+        assertEquals(Pair("start_2", false), emitted.pop())
         repeat(3) {
-            assertEquals(TimerTick("1"), emitted.pop())
-            assertEquals(TimerTick("2"), emitted.pop())
+            assertEquals(Pair("tick_1", false), emitted.pop())
+            assertEquals(Pair("tick_2", false), emitted.pop())
         }
         assertTrue(emitted.isEmpty())
     }
 
     @Test
     fun `Updating next timer tick changes order`() {
-        block = {
-            if (it is TimerStart) {
-                it.interval = 2
-            }
-        }
+        Publishers.set(object : Publishers {
+            override fun timerStart(source: Entity, timer: String, restart: Boolean) = 2
+        })
         timers.start("mutable")
-        block = {
-            if (it is TimerStart) {
-                it.interval = 3
-            }
-        }
+        Publishers.set(object : Publishers {
+            override fun timerStart(source: Entity, timer: String, restart: Boolean) = 3
+        })
         timers.start("fixed")
 
         repeat(3) {
@@ -54,9 +52,9 @@ internal class TimerQueueTest : TimersTest() {
             GameLoop.tick++
         }
         assertFalse(timers.contains("timer"))
-        assertEquals(TimerStart("mutable"), emitted.pop())
-        assertEquals(TimerStart("fixed"), emitted.pop())
-        assertEquals(TimerTick("mutable"), emitted.pop())
+        assertEquals(Pair("start_mutable", false), emitted.pop())
+        assertEquals(Pair("start_fixed", false), emitted.pop())
+        assertEquals(Pair("tick_mutable", false), emitted.pop())
         assertTrue(emitted.isEmpty())
     }
 

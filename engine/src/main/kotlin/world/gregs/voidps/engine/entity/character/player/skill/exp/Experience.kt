@@ -4,7 +4,6 @@ import world.gregs.voidps.engine.data.Settings
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level
-import world.gregs.voidps.engine.event.EventDispatcher
 import world.gregs.voidps.engine.event.Publishers
 
 class Experience(
@@ -13,7 +12,7 @@ class Experience(
     private val maximum: Double = MAXIMUM_EXPERIENCE,
 ) {
 
-    lateinit var events: EventDispatcher
+    lateinit var player: Player
 
     fun get(skill: Skill): Double = experience[skill.ordinal]
 
@@ -27,7 +26,7 @@ class Experience(
 
     fun update(skill: Skill, previous: Double = get(skill)) {
         val experience = get(skill)
-        events.emit(GrantExp(skill, previous, experience))
+        Publishers.all.experience(player, skill, previous, experience)
     }
 
     fun add(skill: Skill, experience: Double) {
@@ -36,7 +35,7 @@ class Experience(
         }
         if (blocked.contains(skill)) {
             val exp = experience * Settings["world.experienceRate", DEFAULT_EXPERIENCE_RATE]
-            Publishers.all.experience(events as Player, skill, to = exp, blocked = true)
+            Publishers.all.experience(player, skill, to = exp, blocked = true)
         } else {
             val current = get(skill)
             set(skill, current + experience * Settings["world.experienceRate", DEFAULT_EXPERIENCE_RATE])

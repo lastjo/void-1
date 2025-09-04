@@ -51,7 +51,6 @@ class ItemTake(private val floorItems: FloorItems) {
                     player.anim("take")
                 }
                 player.sound("take_item")
-                player.emit(Taken(target, item))
             }
             is TransactionError.Full -> player.inventoryFull()
             else -> logger.warn { "Error taking item $target ${player.inventory.transaction.error}" }

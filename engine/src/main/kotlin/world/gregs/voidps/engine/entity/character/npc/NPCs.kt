@@ -4,9 +4,7 @@ import com.github.michaelbull.logging.InlineLogger
 import world.gregs.voidps.cache.definition.data.NPCDefinition
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.data.definition.NPCDefinitions
-import world.gregs.voidps.engine.entity.Despawn
 import world.gregs.voidps.engine.entity.MAX_NPCS
-import world.gregs.voidps.engine.entity.Spawn
 import world.gregs.voidps.engine.entity.character.CharacterMap
 import world.gregs.voidps.engine.entity.character.CharacterSearch
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
@@ -165,7 +163,6 @@ data class NPCs(
             npc["respawn_direction"] = npc.direction
         }
         Publishers.all.spawnNPC(npc)
-        npc.emit(Spawn)
         return true
     }
 
@@ -180,7 +177,6 @@ data class NPCs(
     fun clear() {
         for (npc in this) {
             Publishers.all.despawnNPC(npc)
-            npc.emit(Despawn)
             npc.softTimers.stopAll()
         }
         indexArray.fill(null)

@@ -6,10 +6,7 @@ import world.gregs.voidps.engine.event.Event
 import world.gregs.voidps.engine.event.EventDispatcher
 import world.gregs.voidps.engine.event.Events
 
-/**
- * Variable with name [key] was set to [to]
- * @param from previous value
- */
+
 data class VariableSet(
     val key: String,
     val from: Any?,

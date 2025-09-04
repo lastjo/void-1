@@ -119,7 +119,6 @@ class Levels(
             is NPC -> Publishers.all.levelChangeNPC(character, skill, previous, level)
         }
         Publishers.all.levelChangeCharacter(character, skill, previous, level)
-        character.emit(CurrentLevelChanged(skill, previous, level))
     }
 
     private fun minimumLevel(skill: Skill): Int {

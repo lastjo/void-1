@@ -17,7 +17,6 @@ class CharacterDeath {
                 is NPC -> Publishers.all.npcDeath(character)
             }
             Publishers.all.characterDeath(character)
-            character.emit(Death)
         }
     }
 }

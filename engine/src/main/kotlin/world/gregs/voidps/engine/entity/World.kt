@@ -17,7 +17,6 @@ import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.loadObjectSpawns
 import world.gregs.voidps.engine.event.EventDispatcher
 import world.gregs.voidps.engine.event.Publishers
-import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.timer.TimerQueue
 import world.gregs.voidps.engine.timer.Timers
 import world.gregs.voidps.type.Tile
@@ -40,10 +39,9 @@ object World : Entity, Variable, EventDispatcher, Runnable, KoinComponent {
         loadObjectSpawns(get<GameObjects>(), files.list(Settings["spawns.objects"]), get())
         loadNpcSpawns(get<NPCs>(), files.list(Settings["spawns.npcs"]), get())
         Publishers.all.spawnWorld(this)
-        emit(Spawn)
     }
 
-    val timers: Timers = TimerQueue(this, this)
+    val timers: Timers = TimerQueue(this)
 
     private val actions = ConcurrentHashMap<String, Pair<Int, () -> Unit>>()
 

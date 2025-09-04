@@ -23,7 +23,6 @@ import world.gregs.voidps.engine.client.update.view.Viewport
 import world.gregs.voidps.engine.data.*
 import world.gregs.voidps.engine.data.definition.*
 import world.gregs.voidps.engine.engineModule
-import world.gregs.voidps.engine.entity.Spawn
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCs
@@ -213,7 +212,6 @@ abstract class WorldTest : KoinTest {
             )
             engine = GameLoop(tickStages)
             Publishers.all.spawnWorld(World)
-            World.emit(Spawn)
         }
         players = get()
         npcs = get()

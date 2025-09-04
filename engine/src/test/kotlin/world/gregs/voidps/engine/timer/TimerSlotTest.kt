@@ -11,7 +11,7 @@ internal class TimerSlotTest : TimersTest() {
     @BeforeEach
     override fun setup() {
         super.setup()
-        timers = TimerSlot(events, NPC())
+        timers = TimerSlot(NPC())
     }
 
     @Test
@@ -24,12 +24,12 @@ internal class TimerSlotTest : TimersTest() {
         }
         assertFalse(timers.contains("1"))
         assertTrue(timers.contains("2"))
-        assertEquals(TimerStart("1"), emitted.pop())
-        assertEquals(TimerStart("2"), emitted.pop())
-        assertEquals(TimerStop("1", logout = false), emitted.pop())
-        assertEquals(TimerTick("2"), emitted.pop())
-        assertEquals(TimerTick("2"), emitted.pop())
-        assertEquals(TimerTick("2"), emitted.pop())
+        assertEquals(Pair("start_1", false), emitted.pop())
+        assertEquals(Pair("start_2", false), emitted.pop())
+        assertEquals(Pair("stop_1", false), emitted.pop())
+        assertEquals(Pair("tick_2", false), emitted.pop())
+        assertEquals(Pair("tick_2", false), emitted.pop())
+        assertEquals(Pair("tick_2", false), emitted.pop())
         assertTrue(emitted.isEmpty())
     }
 }

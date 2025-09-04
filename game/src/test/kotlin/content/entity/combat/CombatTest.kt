@@ -2,7 +2,6 @@ package content.entity.combat
 
 import FakeRandom
 import WorldTest
-import content.entity.combat.hit.npcCombatDamage
 import content.entity.player.effect.skull
 import equipItem
 import interfaceOption
@@ -12,9 +11,14 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import playerOption
+import world.gregs.voidps.engine.entity.character.Character
+import world.gregs.voidps.engine.entity.character.npc.NPC
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.appearance
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Levels
+import world.gregs.voidps.engine.entity.item.Item
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.equipment
 import world.gregs.voidps.engine.inv.inventory
@@ -120,9 +124,12 @@ internal class CombatTest : WorldTest() {
     @Test
     fun `Dragon dagger special attack`() {
         var hits = 0
-        npcCombatDamage {
-            hits++
-        }
+        Publishers.set(object : Publishers {
+            override fun npcCombatAttackCharacter(source: NPC, target: Character, type: String, damage: Int, weapon: Item, spell: String, special: Boolean, delay: Int, stage: Int): Boolean {
+                hits++
+                return super.npcCombatAttackCharacter(source, target, type, damage, weapon, spell, special, delay, stage)
+            }
+        })
         val player = createPlayer(emptyTile)
         player.experience.set(Skill.Attack, EXPERIENCE)
         player.levels.set(Skill.Attack, 99)

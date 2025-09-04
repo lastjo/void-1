@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import world.gregs.voidps.cache.definition.data.NPCDefinition
 import world.gregs.voidps.cache.definition.data.ObjectDefinition
+import world.gregs.voidps.engine.client.ui.event.CloseInterface
 import world.gregs.voidps.engine.entity.Entity
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.Character
@@ -86,12 +87,21 @@ interface Publishers {
     fun hasNPCFloorItemOption(npc: NPC, target: FloorItem, option: String = "", approach: Boolean = false): Boolean = false
     fun hasCharacterFloorItemOption(character: Character, target: FloorItem, option: String = "", approach: Boolean = false): Boolean = false
 
+    /**
+     * Notification that an interface was opened.
+     * @see [interfaceRefreshed] for re-opened interfaces
+     */
     fun interfaceOpened(player: Player, id: String = ""): Boolean = false
 
     /**
      * An interface was open and has now been closed
      */
     fun interfaceClosed(player: Player, id: String = ""): Boolean = false
+
+    /**
+     * When an interface is initially opened or opened again
+     * Primarily for interface changes like unlocking.
+     */
     fun interfaceRefreshed(player: Player, id: String = ""): Boolean = false
 
     suspend fun command(player: Player, content: String = "", prefix: String = "", rights: Int = PlayerRights.NONE): Boolean = false
@@ -234,10 +244,18 @@ interface Publishers {
     suspend fun moveCharacter(character: Character, from: Tile = Tile.EMPTY, to: Tile = Tile.EMPTY): Boolean = false
 
     fun experience(player: Player, skill: Skill = Skill.Attack, from: Double = 0.0, to: Double = 0.0, blocked: Boolean = false): Boolean = false
+
+    /**
+     * Notification when current skill level has changed.
+     */
     fun levelChangePlayer(player: Player, skill: Skill = Skill.Attack, from: Int = -1, to: Int = -1, max: Boolean = false): Boolean = false
     fun levelChangeNPC(npc: NPC, skill: Skill = Skill.Attack, from: Int = -1, to: Int = -1, max: Boolean = false): Boolean = false
     fun levelChangeCharacter(character: Character, skill: Skill = Skill.Attack, from: Int = -1, to: Int = -1, max: Boolean = false): Boolean = false
 
+    /**
+     * Variable with name [key] was set to [to]
+     * @param from previous value
+     */
     fun variableSet(entity: Entity, id: String = "", from: Any? = null, to: Any? = null): Boolean {
         when (entity) {
             is Player -> {

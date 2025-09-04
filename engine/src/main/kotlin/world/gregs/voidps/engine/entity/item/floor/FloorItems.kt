@@ -6,8 +6,6 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import kotlinx.io.pool.DefaultPool
 import world.gregs.voidps.engine.client.update.batch.ZoneBatchUpdates
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
-import world.gregs.voidps.engine.entity.Despawn
-import world.gregs.voidps.engine.entity.Spawn
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.name
 import world.gregs.voidps.engine.entity.item.floor.FloorItems.Companion.MAX_TILE_ITEMS
@@ -44,13 +42,11 @@ class FloorItems(
     override fun run() {
         for (floorItem in removeQueue) {
             Publishers.all.despawnFloorItem(floorItem)
-            floorItem.emit(Despawn)
         }
         removeQueue.clear()
         for (floorItem in addQueue) {
             add(floorItem)
             Publishers.all.spawnFloorItem(floorItem)
-            floorItem.emit(Spawn)
         }
         addQueue.clear()
     }

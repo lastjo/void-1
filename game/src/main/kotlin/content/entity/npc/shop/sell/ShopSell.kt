@@ -78,7 +78,7 @@ class ShopSell {
                 }
             }
             TransactionError.Invalid -> player.message("You can't sell this item to this shop.")
-            else -> player.emit(SoldItem(Item(item.id, moved), shop.id))
+            else -> {}
         }
     }
 }

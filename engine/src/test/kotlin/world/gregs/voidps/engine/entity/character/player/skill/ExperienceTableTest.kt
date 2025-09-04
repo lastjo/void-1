@@ -25,7 +25,7 @@ internal class ExperienceTableTest {
         Publishers.set(publishers)
         events = mockk(relaxed = true)
         experience = Experience(maximum = 200.0)
-        experience.events = events
+        experience.player = events
     }
 
     @Test
@@ -52,7 +52,7 @@ internal class ExperienceTableTest {
     fun `Add experience with 10x rate`() {
         Settings.load(mapOf("world.experienceRate" to "10.0"))
         experience = Experience(maximum = 500.0)
-        experience.events = events
+        experience.player = events
         experience.add(Skill.Attack, 10.0)
         experience.add(Skill.Attack, 10.0)
         assertEquals(200.0, experience.get(Skill.Attack))

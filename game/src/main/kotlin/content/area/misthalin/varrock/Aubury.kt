@@ -1,6 +1,6 @@
 package content.area.misthalin.varrock
 
-import content.entity.npc.shop.OpenShop
+import content.entity.npc.shop.openShop
 import content.entity.player.bank.bank
 import content.entity.player.bank.ownsItem
 import content.entity.player.dialogue.*
@@ -9,6 +9,7 @@ import content.quest.quest
 import content.skill.runecrafting.EssenceMine
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
@@ -46,7 +47,7 @@ class Aubury {
     }
 
     fun PlayerChoice.openShop(): Unit = option<Happy>("Yes please!") {
-        player.emit(OpenShop("auburys_rune_shop"))
+        player.openShop("auburys_rune_shop")
     }
 
     fun PlayerChoice.noThanks(message: String = "Oh, it's a rune shop. No thank you, then."): Unit = option<Neutral>(message) {
@@ -128,7 +129,7 @@ class Aubury {
         npc<Neutral>("The Cape of Runecrafting has been upgraded with each talisman, allowing you to access all Runecrafting altars. Is there anything else I can help you with?")
         choice {
             option<Happy>("I'd like to view your store please.") {
-                player.emit(OpenShop("runecrafting_skillcape"))
+                player.openShop("runecrafting_skillcape")
             }
             noThanks("No thank you.")
         }

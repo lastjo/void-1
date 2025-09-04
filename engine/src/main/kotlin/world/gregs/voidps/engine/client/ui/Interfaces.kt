@@ -6,8 +6,6 @@ import world.gregs.voidps.engine.client.playMusicTrack
 import world.gregs.voidps.engine.client.sendScript
 import world.gregs.voidps.engine.client.ui.chat.Colour
 import world.gregs.voidps.engine.client.ui.chat.Colours
-import world.gregs.voidps.engine.client.ui.event.InterfaceOpened
-import world.gregs.voidps.engine.client.ui.event.InterfaceRefreshed
 import world.gregs.voidps.engine.data.definition.AnimationDefinitions
 import world.gregs.voidps.engine.data.definition.EnumDefinitions
 import world.gregs.voidps.engine.data.definition.InterfaceDefinitions
@@ -94,7 +92,6 @@ class Interfaces(
             interfaces[type] = id
             sendOpen(id)
             Publishers.all.interfaceOpened(player, id)
-            player.emit(InterfaceOpened(id))
             notifyRefresh(id)
             return true
         }
@@ -154,7 +151,6 @@ class Interfaces(
 
     private fun notifyRefresh(id: String) {
         Publishers.all.interfaceRefreshed(player, id)
-        player.emit(InterfaceRefreshed(id))
     }
 
     fun sendAnimation(id: String, component: String, animation: Int): Boolean {

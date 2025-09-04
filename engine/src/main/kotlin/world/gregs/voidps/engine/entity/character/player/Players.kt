@@ -1,8 +1,8 @@
 package world.gregs.voidps.engine.entity.character.player
 
-import world.gregs.voidps.engine.entity.Despawn
 import world.gregs.voidps.engine.entity.MAX_PLAYERS
 import world.gregs.voidps.engine.entity.character.CharacterSearch
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.Zone
 
@@ -50,7 +50,7 @@ class Players :
 
     fun clear() {
         for (player in this) {
-            player.emit(Despawn)
+            Publishers.all.despawnPlayer(player)
         }
         indexArray.fill(null)
         players.clear()

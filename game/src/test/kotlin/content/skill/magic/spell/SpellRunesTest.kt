@@ -7,11 +7,11 @@ import org.junit.jupiter.params.provider.ValueSource
 import set
 import world.gregs.voidps.cache.definition.data.ItemDefinition
 import world.gregs.voidps.engine.data.Settings
-import world.gregs.voidps.engine.entity.Spawn
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.item.Item
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.equipment
 import world.gregs.voidps.engine.inv.inventory
@@ -48,7 +48,7 @@ class SpellRunesTest : MagicSpellTest() {
     @Test
     fun `Members spell`() {
         Settings.load(mapOf("world.members" to "false"))
-        World.emit(Spawn)
+        Publishers.all.spawnWorld(World)
 
         val player = player()
         setItems(Item("blood_rune") to ItemDefinition(stringId = "blood_rune", members = true))

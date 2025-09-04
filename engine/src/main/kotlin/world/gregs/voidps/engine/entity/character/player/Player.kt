@@ -107,12 +107,12 @@ class Player(
     /**
      * Always ticks
      */
-    override var softTimers: Timers = TimerQueue(this, this)
+    override var softTimers: Timers = TimerQueue(this)
 
     /**
      * Ticks while not delayed or has interface open
      */
-    var timers = TimerQueue(this, this)
+    var timers = TimerQueue(this)
 
     override var variables: Variables = PlayerVariables(this, variables)
 
