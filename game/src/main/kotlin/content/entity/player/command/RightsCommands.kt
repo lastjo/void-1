@@ -1,5 +1,6 @@
 package content.entity.player.command
 
+import com.github.michaelbull.logging.InlineLogger
 import net.pearx.kasechange.toSentenceCase
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.data.Settings
@@ -7,12 +8,38 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.character.player.name
 import world.gregs.voidps.engine.entity.character.player.rights
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.get
+import world.gregs.voidps.network.client.instruction.ExecuteCommand
 import world.gregs.voidps.type.PlayerRights
 import world.gregs.voidps.type.sub.Command
+import world.gregs.voidps.type.sub.Instruction
 import world.gregs.voidps.type.sub.Spawn
+import world.gregs.voidps.type.sub.Subscribe
 
 class RightsCommands {
+
+    private val logger = InlineLogger("RightsCommands")
+
+    @Instruction(ExecuteCommand::class)
+    fun findCommand(player: Player, instruction: ExecuteCommand) {
+        Publishers.launch {
+            try {
+                Publishers.all.command(
+                    player,
+                    instruction.content,
+                    instruction.prefix,
+                    when (player.rights) {
+                        PlayerRights.None -> PlayerRights.NONE
+                        PlayerRights.Mod -> PlayerRights.MOD
+                        PlayerRights.Admin -> PlayerRights.ADMIN
+                    },
+                )
+            } catch (exception: Exception) {
+                logger.warn(exception) { "An error occurred while executing command." }
+            }
+        }
+    }
 
     @Spawn
     fun spawn(player: Player) {

@@ -5,10 +5,10 @@ import objectOption
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import world.gregs.voidps.engine.client.instruction.InstructionHandlers
 import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.ObjectLayer
 import world.gregs.voidps.engine.entity.obj.ObjectShape
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.map.collision.Collisions
 import world.gregs.voidps.network.client.instruction.Walk
@@ -17,12 +17,12 @@ import world.gregs.voidps.type.Tile
 internal class ObjectTest : WorldTest() {
 
     private lateinit var collision: Collisions
-    private lateinit var handler: InstructionHandlers
+    private lateinit var publishers: Publishers
 
     @BeforeEach
     fun start() {
         collision = get()
-        handler = get()
+        publishers = get()
     }
 
     @Test
@@ -30,7 +30,7 @@ internal class ObjectTest : WorldTest() {
         val player = createPlayer(Tile(3227, 3214))
         tick()
 
-        handler.handle(player, Walk(3226, 3214))
+        publishers.instruction(player, Walk(3226, 3214))
         tick(1)
 
         assertEquals(Tile(3227, 3214), player.tile)
@@ -44,7 +44,7 @@ internal class ObjectTest : WorldTest() {
 
         player.objectOption(door, "Open")
         tick()
-        handler.handle(player, Walk(3226, 3214))
+        publishers.instruction(player, Walk(3226, 3214))
         tick(2)
 
         assertEquals(Tile(3226, 3214), player.tile)

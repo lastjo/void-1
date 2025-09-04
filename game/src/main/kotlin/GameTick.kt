@@ -1,5 +1,4 @@
 import content.social.trade.exchange.GrandExchange
-import world.gregs.voidps.engine.client.instruction.InstructionHandlers
 import world.gregs.voidps.engine.client.instruction.InstructionTask
 import world.gregs.voidps.engine.client.update.CharacterTask
 import world.gregs.voidps.engine.client.update.CharacterUpdateTask
@@ -14,7 +13,6 @@ import world.gregs.voidps.engine.client.update.npc.NPCUpdateTask
 import world.gregs.voidps.engine.client.update.player.PlayerResetTask
 import world.gregs.voidps.engine.client.update.player.PlayerUpdateTask
 import world.gregs.voidps.engine.data.SaveQueue
-import world.gregs.voidps.engine.entity.AiTick
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCs
@@ -42,7 +40,6 @@ fun getTickStages(
     hunting: Hunting = get(),
     grandExchange: GrandExchange = get(),
     sequential: Boolean = CharacterTask.DEBUG,
-    handlers: InstructionHandlers = get(),
 ): List<Runnable> {
     val sequentialNpc: TaskIterator<NPC> = SequentialIterator()
     val sequentialPlayer: TaskIterator<Player> = SequentialIterator()
@@ -57,7 +54,7 @@ fun getTickStages(
         npcs,
         items,
         // Tick
-        InstructionTask(players, handlers),
+        InstructionTask(players),
         World,
         NPCTask(sequentialNpc, npcs),
         PlayerTask(sequentialPlayer, players),

@@ -3,8 +3,6 @@ import content.entity.player.inv.InventoryOption
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import world.gregs.voidps.cache.definition.data.InterfaceDefinition
-import world.gregs.voidps.engine.client.instruction.InstructionHandlers
-import world.gregs.voidps.engine.client.instruction.handle.ObjectOptionHandler
 import world.gregs.voidps.engine.client.ui.InterfaceSwitch
 import world.gregs.voidps.engine.client.ui.dialogue
 import world.gregs.voidps.engine.client.ui.hasOpen
@@ -45,7 +43,7 @@ fun Player.itemOption(
     Assertions.assertTrue(hasOpen(id)) { "Player $this doesn't have interface $id open" }
     val item = inventories.inventory(inventory).getOrNull(slot) ?: Item(item)
     val definition = get<InterfaceDefinitions>().getComponent(id, component)!!
-    get<InstructionHandlers>().interactInterface.validate(this, InteractInterface(InterfaceDefinition.id(definition.id), InterfaceDefinition.componentId(definition.id), item.def.id, slot, optionIndex))
+    Publishers.all.instruction(this, InteractInterface(InterfaceDefinition.id(definition.id), InterfaceDefinition.componentId(definition.id), item.def.id, slot, optionIndex))
 }
 
 fun Player.interfaceOption(
@@ -58,7 +56,7 @@ fun Player.interfaceOption(
 ) {
     Assertions.assertTrue(hasOpen(id)) { "Player $this doesn't have interface $id open" }
     val definition = get<InterfaceDefinitions>().getComponent(id, component)!!
-    get<InstructionHandlers>().interactInterface.validate(this, InteractInterface(InterfaceDefinition.id(definition.id), InterfaceDefinition.componentId(definition.id), item.def.id, slot, optionIndex))
+    Publishers.all.instruction(this, InteractInterface(InterfaceDefinition.id(definition.id), InterfaceDefinition.componentId(definition.id), item.def.id, slot, optionIndex))
 }
 
 fun Player.skillCreation(
@@ -197,7 +195,7 @@ fun Player.itemOnItem(
 ) {
     val one = inventories.inventory(firstInventory)
     val two = inventories.inventory(secondInventory)
-    get<InstructionHandlers>().interactInterfaceItem.validate(
+    Publishers.all.instruction(
         this,
         InteractInterfaceItem(
             fromItem = one[firstSlot].def.id,
@@ -217,7 +215,7 @@ fun Player.npcOption(npc: NPC, option: String) {
     val def = if (npc.transform.isNotBlank()) {
         definitions.get(npc.transform)
     } else {
-        ObjectOptionHandler.getDefinition(this, definitions, npc.def, npc.def)
+        definitions.resolve(npc.def, this)
     }
     npcOption(npc, def.options.indexOf(option))
 }

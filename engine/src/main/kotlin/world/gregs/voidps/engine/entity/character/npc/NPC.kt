@@ -3,7 +3,6 @@ package world.gregs.voidps.engine.entity.character.npc
 import org.rsmod.game.pathfinder.collision.CollisionStrategy
 import org.rsmod.game.pathfinder.flag.CollisionFlag
 import world.gregs.voidps.cache.definition.data.NPCDefinition
-import world.gregs.voidps.engine.client.instruction.handle.ObjectOptionHandler
 import world.gregs.voidps.engine.client.variable.Variables
 import world.gregs.voidps.engine.data.definition.NPCDefinitions
 import world.gregs.voidps.engine.entity.character.Character
@@ -43,7 +42,7 @@ data class NPC(
         }
     }
 
-    fun def(player: Player, definitions: NPCDefinitions = get()): NPCDefinition = ObjectOptionHandler.getDefinition(player, definitions, def, def)
+    fun def(player: Player, definitions: NPCDefinitions = get()): NPCDefinition = definitions.resolve(def, player)
 
     override val size = def.size
     override var mode: Mode = EmptyMode

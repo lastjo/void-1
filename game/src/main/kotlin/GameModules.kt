@@ -17,8 +17,6 @@ import org.koin.dsl.module
 import org.rsmod.game.pathfinder.LineValidator
 import world.gregs.voidps.cache.secure.Huffman
 import world.gregs.voidps.engine.client.PlayerAccountLoader
-import world.gregs.voidps.engine.client.instruction.InstructionHandlers
-import world.gregs.voidps.engine.client.instruction.InterfaceHandler
 import world.gregs.voidps.engine.client.ui.chat.plural
 import world.gregs.voidps.engine.data.*
 import world.gregs.voidps.engine.data.definition.*
@@ -50,19 +48,6 @@ fun gameModule(files: ConfigFiles) = module {
     single(createdAtStart = true) { MusicTracks().load(files.find(Settings["map.music"])) }
     single(createdAtStart = true) { FairyRingCodes().load(files.find(Settings["definitions.fairyCodes"])) }
     single(createdAtStart = true) { CharterShips().load(files.find(Settings["map.ships.prices"])) }
-    single {
-        InstructionHandlers(
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            InterfaceHandler(get(), get(), get(), get()),
-        )
-    }
     single(createdAtStart = true) {
         get<Storage>().offers(Settings["grandExchange.offers.activeDays", 0])
     }

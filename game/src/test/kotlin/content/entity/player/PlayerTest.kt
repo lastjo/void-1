@@ -6,8 +6,7 @@ import interfaceOption
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import world.gregs.voidps.engine.client.instruction.InstructionHandlers
-import world.gregs.voidps.engine.get
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.network.client.instruction.Walk
 
 internal class PlayerTest : WorldTest() {
@@ -16,9 +15,8 @@ internal class PlayerTest : WorldTest() {
     fun `Walk to location`() {
         val start = emptyTile
         val player = createPlayer(start)
-        val handler: InstructionHandlers = get()
 
-        handler.handle(player, Walk(emptyTile.x, emptyTile.y + 10))
+        Publishers.all.instruction(player, Walk(emptyTile.x, emptyTile.y + 10))
         tick(5)
 
         assertEquals(emptyTile.addY(5), player.tile)
@@ -28,10 +26,9 @@ internal class PlayerTest : WorldTest() {
     fun `Run to location`() {
         val start = emptyTile
         val player = createPlayer(start)
-        val handler: InstructionHandlers = get()
 
         player.interfaceOption("energy_orb", "run_background", "Turn Run mode on")
-        handler.handle(player, Walk(emptyTile.x, emptyTile.y + 10))
+        Publishers.all.instruction(player, Walk(emptyTile.x, emptyTile.y + 10))
         tick(5)
 
         assertEquals(emptyTile.addY(10), player.tile)

@@ -2,10 +2,10 @@ package world.gregs.voidps.engine.client.instruction
 
 import com.github.michaelbull.logging.InlineLogger
 import world.gregs.voidps.engine.entity.character.player.Players
+import world.gregs.voidps.engine.event.Publishers
 
 class InstructionTask(
     private val players: Players,
-    private val handlers: InstructionHandlers,
 ) : Runnable {
 
     private val logger = InlineLogger()
@@ -18,7 +18,7 @@ class InstructionTask(
                     logger.debug { "${player.accountName} ${player.tile} - $instruction" }
                 }
                 try {
-                    handlers.handle(player, instruction)
+                    Publishers.all.instruction(player, instruction)
                 } catch (e: Throwable) {
                     logger.error(e) { "Error in instruction $instruction" }
                 }
