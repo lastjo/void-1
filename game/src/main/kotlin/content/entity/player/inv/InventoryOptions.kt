@@ -61,14 +61,5 @@ class InventoryOptions {
         Publishers.launch {
             Publishers.all.inventoryOption(player, item, id, equipOption, itemSlot)
         }
-        player.emit(
-            InventoryOption(
-                player,
-                id,
-                item,
-                itemSlot,
-                equipOption,
-            ),
-        )
     }
 }

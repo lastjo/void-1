@@ -154,10 +154,10 @@ interface Publishers {
 
     fun publish(event: String = "", id: Any = ""): Boolean = false
     fun publishPlayer(player: Player, event: String = "", id: Any = ""): Boolean = false
-    fun publishNPC(npc: NPC, def: NPCDefinition = npc.def, event: String = "", id: String = ""): Boolean = false
-    fun publishFloorItem(floorItem: FloorItem, event: String = "", id: String = ""): Boolean = false
-    fun publishGameObject(obj: GameObject, def: ObjectDefinition = obj.def, event: String = "", id: String = ""): Boolean = false
-    fun publishWorld(world: World, event: String = "", id: String = ""): Boolean = false
+    fun publishNPC(npc: NPC, event: String = "", id: Any = ""): Boolean = false
+    fun publishFloorItem(floorItem: FloorItem, event: String = "", id: Any = ""): Boolean = false
+    fun publishGameObject(obj: GameObject, event: String = "", id: Any = ""): Boolean = false
+    fun publishWorld(world: World, event: String = "", id: Any = ""): Boolean = false
 
     fun timerStart(source: Entity, timer: String, restart: Boolean = false): Int = when (source) {
         is Player -> {

@@ -37,7 +37,6 @@ internal class InteractTest : KoinMock() {
     private lateinit var player: Player
     private lateinit var target: NPC
     private lateinit var interact: Interact
-    private lateinit var interaction: Interaction<Player>
     private var approached = false
     private var operated = false
 

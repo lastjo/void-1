@@ -1,7 +1,6 @@
 package content.entity.player.equip
 
 import content.entity.player.equip.EquipBonuses.names
-import content.entity.player.inv.InventoryOption
 import content.entity.player.modal.Tab
 import content.entity.player.modal.tab
 import world.gregs.voidps.cache.definition.data.ItemDefinition
@@ -81,7 +80,6 @@ class EquipmentBonuses(private val definitions: ItemDefinitions) {
     suspend fun equip(player: Player, item: Item, itemSlot: Int) {
         if (player.equipping()) {
             Publishers.all.inventoryOption(player, item, "inventory", "Wield", itemSlot)
-            player.emit(InventoryOption(player, "inventory", item, itemSlot, "Wield"))
             checkEmoteUpdate(player)
         }
     }
@@ -90,7 +88,6 @@ class EquipmentBonuses(private val definitions: ItemDefinitions) {
     suspend fun remove(player: Player, item: Item, itemSlot: Int) {
         if (player.equipping()) {
             Publishers.all.inventoryOption(player, item, "worn_equipment", "Remove", itemSlot)
-            player.emit(InventoryOption(player, "worn_equipment", item, itemSlot, "Remove"))
             checkEmoteUpdate(player)
         }
     }

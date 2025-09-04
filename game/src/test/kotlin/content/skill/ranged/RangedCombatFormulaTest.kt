@@ -71,7 +71,7 @@ internal class RangedCombatFormulaTest : CombatFormulaTest() {
         player.equipment.set(EquipSlot.Ammo.index, "rune_arrow")
         val potion = Item("super_ranging_potion_4")
         player.inventory.add(potion.id)
-        player.inventoryOption(player, "inventory", potion, 0, "Drink")
+        player.inventoryOption("inventory", potion, 0, "Drink")
         val npc = createNPC("giant_rat")
 
         val (offensiveRating, defensiveRating, maxHit, chance) = calculate(player, npc, "range", weapon)
@@ -109,7 +109,7 @@ internal class RangedCombatFormulaTest : CombatFormulaTest() {
         val potion = Item("super_ranging_potion_4")
         player.inventory.add(potion.id)
 
-        player.inventoryOption(player, "inventory", potion, 0, "Drink")
+        player.inventoryOption("inventory", potion, 0, "Drink")
         val npc = createNPC("giant_rat")
 
         val (offensiveRating, defensiveRating, maxHit, chance) = calculate(player, npc, "range", weapon)

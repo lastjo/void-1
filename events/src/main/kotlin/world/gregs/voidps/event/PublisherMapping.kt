@@ -76,7 +76,7 @@ abstract class PublisherMapping(
                 suspendable = suspendable,
                 className = subscriber.className,
                 methodName = subscriber.methodName,
-                arguments = arguments(subscriber).first(),
+                arguments = matchNames(subscriber.parameters, subscriber),
                 methodReturnType = subscriber.returnType,
             )
         }
@@ -84,30 +84,12 @@ abstract class PublisherMapping(
 
     /**
      * Map arguments between what the [method] wants and what the [schema] has.
-     * Match by name first, fallback to type if names aren't identical.
+     * Match first by name and type exactly, if not then by first type, and finally by subtype
      */
-    open fun arguments(method: Subscriber): List<List<String>> {
-        val count = mutableMapOf<TypeName, Int>()
-        for ((_, type) in parameters) {
-            count[type.asTypeName()] = count.getOrDefault(type.asTypeName(), 0) + 1
-        }
-        return listOf(matchNames(method.parameters, count, method))
-    }
-
-    fun matchNames(names: List<Pair<String, KClass<*>>>, counts: MutableMap<TypeName, Int>, method: Subscriber) = names.map { (name, type) ->
-        val typeName = type.asTypeName()
-        val nullable = type.createType(nullable = true).asTypeName()
-
+    fun matchNames(names: List<Pair<String, KClass<*>>>, method: Subscriber) = names.map { (name, type) ->
         parameters.firstOrNull { it.first == name && it.second == type.createType(nullable = it.second.isMarkedNullable) }?.first
             ?: parameters.firstOrNull { it.second == type.createType(nullable = it.second.isMarkedNullable) }?.first
-            ?: parameters.firstOrNull { it.second.isSupertypeOf(type.createType(nullable = it.second.isMarkedNullable)) }?.first ?: error("Expected parameter [${parameters.filter { it.second.asTypeName() == typeName }.joinToString(", ") { it.first }}] for ${method.methodName}($name: ${type.toString().substringAfter(".")}) in ${method.className}.")
-//        if (counts.getOrDefault(typename, 0) > 1) {
-//            // match by name
-//            parameters.firstOrNull { it.first == name }
-//        } else {
-//            // match by type
-//
-//        }?.first ?:
+            ?: parameters.firstOrNull { it.second.isSupertypeOf(type.createType(nullable = it.second.isMarkedNullable)) }?.first ?: error("Expected parameter [${parameters.filter { it.second.asTypeName() == type.asTypeName() }.joinToString(", ") { it.first }}] for ${method.methodName}($name: ${type.toString().substringAfter(".")}) in ${method.className}.")
     }
 
     abstract fun conditions(method: Subscriber): List<List<Condition>>

@@ -103,7 +103,7 @@ class PublisherProcessor(
 
     private fun constructor(allDependencies: TreeMap<TypeName, String>): FunSpec {
         val constructor = FunSpec.constructorBuilder()
-        for ((type, param) in allDependencies) {
+        for ((type, param) in allDependencies.toList().sortedBy { it.second }) {
             if (param == "this") {
                 continue
             }
@@ -115,8 +115,8 @@ class PublisherProcessor(
     private fun extractProperties(subs: List<Subscriber>, scripts: MutableMap<String, ClassName>, dependencies: MutableMap<TypeName, String>): List<PropertySpec> {
         val properties = mutableListOf<PropertySpec>()
         for (method in subs) {
-            val methodName = method.className.simpleName.replaceFirstChar { it.lowercase() }
-            if (scripts.putIfAbsent(methodName, method.className) == null) {
+            val className = method.className.simpleName.replaceFirstChar { it.lowercase() }
+            if (scripts.putIfAbsent(className, method.className) == null) {
                 // Add all params to publisher classes
                 for ((_, type) in method.classParams) {
                     val name = (type as ClassName).simpleName.replace("NPC", "Npc").replaceFirstChar { it.lowercase() }
@@ -127,7 +127,7 @@ class PublisherProcessor(
                     dependencies.getValue(it.second)
                 }
                 properties.add(
-                    PropertySpec.builder(methodName, method.className)
+                    PropertySpec.builder(className, method.className)
                         .addModifiers(KModifier.PRIVATE)
                         .initializer("${method.className.simpleName}($classParams)")
                         .build(),

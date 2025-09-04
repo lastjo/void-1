@@ -1,5 +1,4 @@
 import content.entity.effect.transform
-import content.entity.player.inv.InventoryOption
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions
 import world.gregs.voidps.cache.definition.data.InterfaceDefinition
@@ -210,9 +209,8 @@ fun Player.npcOption(npc: NPC, option: Int) = runTest {
     instructions.send(InteractNPC(npc.index, option + 1))
 }
 
-fun Player.inventoryOption(player: Player, inventory: String, item: Item, slot: Int, option: String) = runTest {
-    Publishers.all.inventoryOption(player, item, inventory, option, slot)
-    player.emit(InventoryOption(player, inventory, item, slot, option))
+fun Player.inventoryOption(inventory: String, item: Item, slot: Int, option: String) = runTest {
+    Publishers.all.inventoryOption(this@Player, item, inventory, option, slot)
 }
 
 fun Player.objectOption(gameObject: GameObject, option: String = "", optionIndex: Int? = null) = runTest {

@@ -36,10 +36,6 @@ class InterfaceOnPublisherMapping(function: KFunction<*>, has: KFunction<*>? = n
     override fun methods(subscriber: Subscriber): List<Method> {
         val conditions = conditions(subscriber).first()
         val methods = mutableListOf<Method>()
-        val count = mutableMapOf<TypeName, Int>()
-        for ((_, type) in parameters) {
-            count[type.asTypeName()] = count.getOrDefault(type.asTypeName(), 0) + 1
-        }
         if (this.name == "InterfaceOnItemPublisher" && subscriber.annotationArgs["bidirectional"] as Boolean) {
             val args = matchNames(
                 subscriber.parameters.map {
@@ -51,7 +47,6 @@ class InterfaceOnPublisherMapping(function: KFunction<*>, has: KFunction<*>? = n
                         else -> it.first
                     } to it.second
                 },
-                count,
                 subscriber,
             )
             val flipped = conditions.map {
@@ -68,7 +63,7 @@ class InterfaceOnPublisherMapping(function: KFunction<*>, has: KFunction<*>? = n
             }
             methods.add(Method(flipped, suspendable, subscriber.className, subscriber.methodName, args, subscriber.returnType))
         }
-        val args = matchNames(subscriber.parameters, count, subscriber)
+        val args = matchNames(subscriber.parameters, subscriber)
         methods.add(Method(conditions, suspendable, subscriber.className, subscriber.methodName, args, subscriber.returnType))
         return methods
     }

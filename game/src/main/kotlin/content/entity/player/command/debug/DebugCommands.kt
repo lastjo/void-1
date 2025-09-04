@@ -48,8 +48,8 @@ class DebugCommands(
 ) {
 
     init {
-        world.gregs.voidps.engine.client.ui.event.Command.adminCommands.add("${Colours.PURPLE.toTag()}====== Testing Commands ======</col>")
-        world.gregs.voidps.engine.client.ui.event.Command.adminCommands.add("")
+        world.gregs.voidps.engine.client.ui.event.OldCommand.adminCommands.add("${Colours.PURPLE.toTag()}====== Testing Commands ======</col>")
+        world.gregs.voidps.engine.client.ui.event.OldCommand.adminCommands.add("")
     }
 
     @Command("test", rights = PlayerRights.ADMIN)
@@ -60,7 +60,7 @@ class DebugCommands(
 
     @Command("commands [list]", rights = PlayerRights.MOD)
     fun commands(player: Player, content: String) {
-        val commands = if (player.isAdmin()) world.gregs.voidps.engine.client.ui.event.Command.adminCommands else world.gregs.voidps.engine.client.ui.event.Command.modCommands
+        val commands = if (player.isAdmin()) world.gregs.voidps.engine.client.ui.event.OldCommand.adminCommands else world.gregs.voidps.engine.client.ui.event.OldCommand.modCommands
         val list = listOf(
             "Commands list with descriptions and usage instructions in the format:",
             "${Colours.BLUE.toTag()}command_name (required-variable) [optional-variable]</col>",

@@ -86,7 +86,11 @@ class CombatMovement(
         val melee = attackRange == 1 && character["weapon", Item.EMPTY].def["weapon_type", ""] != "salamander"
         if (arrived(if (melee) -1 else attackRange)) {
             clearSteps()
-            character.emit(CombatReached(target))
+            if (character is Player) {
+                Publishers.all.publishPlayer(character, "combat_reached", target)
+            } else if (character is NPC) {
+                Publishers.all.publishNPC(character, "combat_reached", target)
+            }
             return true
         }
         return false

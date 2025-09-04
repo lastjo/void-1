@@ -31,7 +31,6 @@ class QuestJournals(private val questDefinitions: QuestDefinitions) {
             return
         }
         Publishers.all.publishPlayer(player, "quest_journal", quest.stringId)
-        player.emit(OpenQuestJournal(player, quest.stringId))
     }
 
     @Variable

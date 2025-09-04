@@ -1,6 +1,6 @@
 package content.entity.player.combat
 
-import content.entity.combat.CombatInteraction
+import content.entity.combat.CombatSwing
 import content.entity.player.dialogue.type.statement
 import content.skill.magic.spell.spell
 import content.skill.melee.weapon.attackRange
@@ -9,6 +9,7 @@ import net.pearx.kasechange.toTitleCase
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
+import world.gregs.voidps.engine.entity.character.mode.combat.CombatMovement
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
@@ -92,11 +93,14 @@ class CombatAttack {
     }
 
     /**
-     * Switch out the current Interaction with [CombatInteraction] to allow hits this tick
+     * Replaces the current interaction when combat is triggered via [Interact] to
+     * allow the first [CombatSwing] to occur on the same tick.
+     * After [Interact] is complete it is switched to [CombatMovement]
      */
     fun combatInteraction(character: Character, target: Character) {
         val interact = character.mode as? Interact ?: return
-        interact.updateInteraction(CombatInteraction(character, target))
+        val block: suspend (Boolean) -> Unit = { content.entity.combat.Combat.combat(character, target) }
+        interact.updateInteraction(block) { true }
     }
 
     suspend fun handleCombatDummies(player: Player, target: NPC): Boolean {

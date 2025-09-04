@@ -20,8 +20,8 @@ import world.gregs.voidps.type.sub.Command
 class InterfaceCommands(private val definitions: InterfaceDefinitions) {
 
     init {
-        world.gregs.voidps.engine.client.ui.event.Command.adminCommands.add("${Colours.PURPLE.toTag()}====== Interface Commands ======</col>")
-        world.gregs.voidps.engine.client.ui.event.Command.adminCommands.add("")
+        world.gregs.voidps.engine.client.ui.event.OldCommand.adminCommands.add("${Colours.PURPLE.toTag()}====== Interface Commands ======</col>")
+        world.gregs.voidps.engine.client.ui.event.OldCommand.adminCommands.add("")
     }
 
     @Command("inter (interface-id)", description = "open an interface with int or string id", rights = PlayerRights.ADMIN)

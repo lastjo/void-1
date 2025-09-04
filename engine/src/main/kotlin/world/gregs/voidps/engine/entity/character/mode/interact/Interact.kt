@@ -16,7 +16,6 @@ import world.gregs.voidps.engine.entity.character.mode.move.target.TargetStrateg
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.cantReach
 import world.gregs.voidps.engine.entity.character.player.chat.noInterest
-import world.gregs.voidps.engine.event.Events
 import world.gregs.voidps.engine.suspend.resumeSuspension
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -26,14 +25,13 @@ import kotlin.coroutines.cancellation.CancellationException
  * Operate interactions require the [character] to be standing next-to but not under [target]
  * Approach interactions require the [character] within [approachRange] and line of sight of [target]
  *
- * [Interaction] event is emitted when within range and will continue to
+ * Interaction event is emitted when within range and will continue to
  * resume [Character.suspension] every subsequent tick until the interaction is completed.
  * Interactions are only processed while the [character] isn't delayed or has menu interface open.
  */
 class Interact(
     character: Character,
     val target: Entity,
-    interaction: Interaction<*>? = null,
     strategy: TargetStrategy = TargetStrategy(target),
     private var approachRange: Int? = null,
     private val faceTarget: Boolean = true,
@@ -42,13 +40,11 @@ class Interact(
     private var interact: (suspend (Boolean) -> Unit)? = null,
 ) : Movement(character, strategy, shape) {
 
-    private var approach: Interaction<*>? = interaction?.copy(true)
-    private var operate: Interaction<*>? = interaction?.copy(false)
     private var clearInteracted = false
 
-    fun updateInteraction(interaction: Interaction<*>) {
-        approach = interaction.copy(true)
-        operate = interaction.copy(false)
+    fun updateInteraction(interact: (suspend (Boolean) -> Unit)?, has: (Boolean) -> Boolean) {
+        this.interact = interact
+        this.has = has
         clearInteracted = true
     }
 
@@ -147,8 +143,6 @@ class Interact(
         when {
             withinMelee && has.invoke(false) -> if (launch(false) && afterMovement) updateRange = false
             withinRange && has.invoke(true) -> if (launch(true) && afterMovement) updateRange = false
-            withinMelee && operate != null && Events.events.contains(character, operate!!) -> if (launch(operate!!) && afterMovement) updateRange = false
-            withinRange && approach != null && Events.events.contains(character, approach!!) -> if (launch(approach!!) && afterMovement) updateRange = false
             withinMelee -> {
                 character.noInterest()
                 clear()
@@ -158,6 +152,9 @@ class Interact(
         return true
     }
 
+    /**
+     * Continue any suspended, clear any finished or start a new interaction
+     */
     private fun launch(interact: Boolean): Boolean {
         if (character.resumeSuspension()) {
             return true
@@ -176,20 +173,6 @@ class Interact(
 
     fun launch(block: suspend CoroutineScope.() -> Unit) {
         scope.launch(errorHandler, block = block)
-    }
-
-    /**
-     * Continue any suspended, clear any finished or start a new interaction
-     */
-    private fun launch(event: Interaction<*>): Boolean {
-        if (character.resumeSuspension()) {
-            return true
-        }
-        if (!event.launched && character.emit(event)) {
-            event.launched = true
-            return true
-        }
-        return false
     }
 
     private fun interactionFinished() = character.suspension == null && !character.contains("delay")

@@ -98,8 +98,8 @@ class AdminCommands(
     val utf8Regex = "[^\\x20-\\x7e]".toRegex()
 
     init {
-        world.gregs.voidps.engine.client.ui.event.Command.adminCommands.add("${Colours.PURPLE.toTag()}====== Admin Commands ======</col>")
-        world.gregs.voidps.engine.client.ui.event.Command.adminCommands.add("")
+        world.gregs.voidps.engine.client.ui.event.OldCommand.adminCommands.add("${Colours.PURPLE.toTag()}====== Admin Commands ======</col>")
+        world.gregs.voidps.engine.client.ui.event.OldCommand.adminCommands.add("")
     }
 
     @Command("tele (x) (y) [level]", "tp", description = "teleport to given coordinates or area name", rights = PlayerRights.ADMIN)
@@ -250,7 +250,7 @@ class AdminCommands(
         player.message("===== NPCs =====", ChatType.Console)
         found += search(player, get<NPCDefinitions>(), search) { it.name }
         player.message("===== Commands =====", ChatType.Console)
-        for (command in world.gregs.voidps.engine.client.ui.event.Command.adminCommands) {
+        for (command in world.gregs.voidps.engine.client.ui.event.OldCommand.adminCommands) {
             if (command.startsWith(Colours.BLUE.toTag()) && command.contains(content, ignoreCase = true)) {
                 val colourless = command.removePrefix(Colours.BLUE.toTag()).removeSuffix("</col>")
                 val cmd = colourless.substringBefore("(").substringBefore("[").trim()

@@ -1,7 +1,6 @@
 package content.entity.player.equip
 
 import com.github.michaelbull.logging.InlineLogger
-import content.entity.player.inv.InventoryOption
 import world.gregs.voidps.cache.definition.data.ItemDefinition
 import world.gregs.voidps.engine.client.ui.closeInterfaces
 import world.gregs.voidps.engine.client.ui.open
@@ -48,7 +47,6 @@ class WornEquipment {
         val slot = EquipSlot.by(component.removeSuffix("_slot"))
         player.closeInterfaces()
         Publishers.all.inventoryOption(player, item, id, equipOption, slot.index)
-        player.emit(InventoryOption(player, id, item, slot.index, equipOption))
     }
 
     fun getEquipmentOption(itemDef: ItemDefinition, optionId: Int): String? {

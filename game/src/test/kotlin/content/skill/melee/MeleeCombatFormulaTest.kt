@@ -79,9 +79,9 @@ internal class MeleeCombatFormulaTest : CombatFormulaTest() {
         player.inventory.add(attackPotion.id)
         player.inventory.add(strengthPotion.id)
 
-        player.inventoryOption(player, "inventory", attackPotion, 0, "Drink")
+        player.inventoryOption("inventory", attackPotion, 0, "Drink")
         tick(2)
-        player.inventoryOption(player, "inventory", strengthPotion, 1, "Drink")
+        player.inventoryOption("inventory", strengthPotion, 1, "Drink")
         val npc = createNPC("giant_rat")
 
         val (offensiveRating, defensiveRating, maxHit, chance) = calculate(player, npc, "melee", weapon)
