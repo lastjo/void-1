@@ -96,13 +96,13 @@ internal class InterfacesMultipleTest : InterfaceTest() {
         assertFalse(interfaces.contains(zeroId))
         verifyOrder {
             client.closeInterface(InterfaceDefinition.pack(2, 0))
-            publishers.interfaceOpened(player, oneId)
+            publishers.interfaceClosed(player, oneId)
             client.closeInterface(InterfaceDefinition.pack(1, 0))
-            publishers.interfaceOpened(player, zeroId)
+            publishers.interfaceClosed(player, zeroId)
         }
         verify(exactly = 0) {
             client.closeInterface(InterfaceDefinition.pack(0, 0))
-            publishers.interfaceOpened(player, twoId)
+            publishers.interfaceClosed(player, twoId)
         }
     }
 
@@ -119,11 +119,11 @@ internal class InterfacesMultipleTest : InterfaceTest() {
         assertFalse(interfaces.contains(oneId))
         assertFalse(interfaces.contains(zeroId))
         verifyOrder {
-            publishers.interfaceOpened(player, twoId)
+            publishers.interfaceClosed(player, twoId)
             client.closeInterface(InterfaceDefinition.pack(2, 0))
-            publishers.interfaceOpened(player, oneId)
+            publishers.interfaceClosed(player, oneId)
             client.closeInterface(InterfaceDefinition.pack(1, 0))
-            publishers.interfaceOpened(player, zeroId)
+            publishers.interfaceClosed(player, zeroId)
         }
     }
 }

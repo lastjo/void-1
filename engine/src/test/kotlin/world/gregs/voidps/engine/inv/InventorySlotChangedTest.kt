@@ -13,12 +13,14 @@ class InventorySlotChangedTest {
 
     private var additions = 0
     private var removals = 0
+    private var updates = 0
     private var changes = 0
 
     @BeforeEach
     fun setup() {
         additions = 0
         removals = 0
+        updates = 0
         changes = 0
         Publishers.set(object : Publishers {
             override fun itemAdded(player: Player, item: Item, itemSlot: Int, inventory: String): Boolean {
@@ -32,14 +34,18 @@ class InventorySlotChangedTest {
             }
 
             override fun inventoryUpdated(player: Player, inventory: String): Boolean {
-                changes++
+                updates++
                 return super.inventoryUpdated(player, inventory)
+            }
+
+            override fun inventoryChanged(player: Player, inventory: String, itemSlot: Int, item: Item, from: String, fromSlot: Int, fromItem: Item): Boolean {
+                changes++
+                return super.inventoryChanged(player, inventory, itemSlot, item, from, fromSlot, fromItem)
             }
         })
         inventory = Inventory.debug(1, id = "inventory")
         val dispatcher = Player()
         inventory.transaction.changes.bind(dispatcher)
-        Publishers.clear()
     }
 
     @Test
@@ -49,6 +55,7 @@ class InventorySlotChangedTest {
         manager.send()
         manager.clear()
 
+        assertEquals(1, updates)
         assertEquals(1, changes)
     }
 

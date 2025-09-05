@@ -34,12 +34,12 @@ internal class VariablesTest {
         every { variable.persistent } returns true
         every { variable.defaultValue } returns 0
         definitions = mockk(relaxed = true)
+        player = mockk(relaxed = true)
+        client = mockk(relaxed = true)
         publishers = mockk(relaxed = true)
         Publishers.set(publishers)
         variables = spyk(PlayerVariables(player, map))
         variables.bits = VariableBits(variables, player)
-        player = mockk(relaxed = true)
-        client = mockk(relaxed = true)
         every { player.variables } returns variables
         every { definitions.get(KEY) } returns variable
         variables.definitions = definitions
@@ -57,7 +57,7 @@ internal class VariablesTest {
         assertEquals(42, map[KEY])
         verify {
             variables.send(any())
-            publishers.variableSetPlayer(player, KEY, 1, 42)
+            publishers.variableSet(player, KEY, 1, 42)
         }
     }
 
@@ -128,7 +128,7 @@ internal class VariablesTest {
         assertEquals(arrayListOf("First"), map[KEY])
         verify {
             variables.send(KEY)
-            publishers.variableBitsPlayer(player, KEY, "First", true)
+            publishers.variableBits(player, KEY, "First", true)
         }
     }
 
@@ -144,7 +144,7 @@ internal class VariablesTest {
         assertEquals(arrayListOf("First", "Second"), map[KEY])
         verify {
             variables.send(KEY)
-            publishers.variableBitsPlayer(player, KEY, "Second", true)
+            publishers.variableBits(player, KEY, "Second", true)
         }
     }
 
@@ -186,7 +186,7 @@ internal class VariablesTest {
         assertEquals(emptyList<Any>(), map[KEY])
         verify {
             variables.send(KEY)
-            publishers.variableBitsPlayer(player, KEY, "First", false)
+            publishers.variableBits(player, KEY, "First", false)
         }
     }
 
@@ -228,7 +228,7 @@ internal class VariablesTest {
         assertNull(map[KEY])
         verifyOrder {
             variables.send(KEY)
-            publishers.variableSetPlayer(player, KEY, arrayListOf("Third"), null)
+            publishers.variableSet(player, KEY, arrayListOf("Third"), null)
         }
     }
 

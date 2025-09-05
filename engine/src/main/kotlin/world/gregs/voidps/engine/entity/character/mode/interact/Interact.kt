@@ -1,10 +1,5 @@
 package world.gregs.voidps.engine.entity.character.mode.interact
 
-import com.github.michaelbull.logging.InlineLogger
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import world.gregs.voidps.engine.client.ui.closeDialogue
 import world.gregs.voidps.engine.client.ui.hasMenuOpen
 import world.gregs.voidps.engine.client.variable.hasClock
@@ -16,8 +11,8 @@ import world.gregs.voidps.engine.entity.character.mode.move.target.TargetStrateg
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.cantReach
 import world.gregs.voidps.engine.entity.character.player.chat.noInterest
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.suspend.resumeSuspension
-import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * Moves a player within interact distance of [target]
@@ -161,18 +156,12 @@ class Interact(
         }
         val interaction = this.interact
         if (interaction != null) {
-            this.interact = null
-            this.has = { false }
-            launch {
+            Publishers.launch {
                 interaction.invoke(interact)
             }
             return true
         }
         return false
-    }
-
-    fun launch(block: suspend CoroutineScope.() -> Unit) {
-        scope.launch(errorHandler, block = block)
     }
 
     private fun interactionFinished() = character.suspension == null && !character.contains("delay")
@@ -189,15 +178,5 @@ class Interact(
     }
 
     override fun onCompletion() {
-    }
-
-    companion object {
-        private val logger = InlineLogger()
-        private val errorHandler = CoroutineExceptionHandler { _, throwable ->
-            if (throwable !is CancellationException) {
-                logger.warn(throwable) { "Error in event." }
-            }
-        }
-        private val scope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined)
     }
 }

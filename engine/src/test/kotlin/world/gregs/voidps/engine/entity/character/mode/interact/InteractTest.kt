@@ -14,10 +14,12 @@ import org.rsmod.game.pathfinder.LineValidator
 import org.rsmod.game.pathfinder.PathFinder
 import org.rsmod.game.pathfinder.StepValidator
 import org.rsmod.game.pathfinder.collision.CollisionStrategies
+import world.gregs.voidps.cache.definition.data.FontDefinition
 import world.gregs.voidps.engine.GameLoop
 import world.gregs.voidps.engine.client.sendScript
 import world.gregs.voidps.engine.client.ui.close
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
+import world.gregs.voidps.engine.data.definition.FontDefinitions
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.npc.NPC
@@ -75,10 +77,14 @@ internal class InteractTest : KoinMock() {
         declareMock<AreaDefinitions> {
             every { get(any<Zone>()) } returns emptySet()
         }
+        declareMock<FontDefinitions> {
+            every { this@declareMock.get(any<String>()) } returns FontDefinition(glyphWidths = ByteArray(200))
+        }
     }
 
     private fun interact(operate: Boolean, approach: Boolean, suspend: Boolean) {
         val block: suspend (Boolean) -> Unit = {
+            println("Invoke $operate $approach $suspend approach=$it")
             if (suspend) {
                 Suspension.start(player, 2)
             }
@@ -87,11 +93,11 @@ internal class InteractTest : KoinMock() {
             } else if (approach && it) {
                 approached = true
             }
+            println("Operated: $operated approached: $approached")
         }
-        val check: (Boolean) -> Boolean = { true }
+        val check: (Boolean) -> Boolean = { (approach && it)|| (operate && !it) }
         interact = Interact(player, target, interact = block, has = check)
         player.mode = interact
-        Publishers.clear()
     }
 
     @ParameterizedTest

@@ -16,7 +16,6 @@ abstract class TimersTest {
     open fun setup() {
         GameLoop.tick = 0
         emitted = LinkedList()
-        Publishers.clear()
         set()
     }
 

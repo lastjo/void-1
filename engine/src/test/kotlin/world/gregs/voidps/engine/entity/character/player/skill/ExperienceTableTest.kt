@@ -115,7 +115,7 @@ internal class ExperienceTableTest {
         experience.set(Skill.Attack, 100.0)
         experience.addBlock(Skill.Attack)
         experience.add(Skill.Attack, 10.0)
-        verify { publishers.experience(events, Skill.Attack, 10.0, blocked = true) }
+        verify { publishers.experience(events, Skill.Attack, 0.0, 10.0, blocked = true) }
     }
 
     @Test

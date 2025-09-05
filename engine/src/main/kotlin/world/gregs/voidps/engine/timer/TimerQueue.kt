@@ -42,7 +42,7 @@ class TimerQueue(
             val nextInterval = Publishers.all.timerTick(entity, timer.name)
             if (nextInterval == TimerState.CANCEL) {
                 names.remove(timer.name)
-                Publishers.all.timerStop(entity, timer.name, logout = true)
+                Publishers.all.timerStop(entity, timer.name, logout = false)
             } else {
                 if (nextInterval != TimerState.CONTINUE) {
                     timer.next(nextInterval)

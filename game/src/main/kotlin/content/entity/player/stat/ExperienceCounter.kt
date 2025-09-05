@@ -8,7 +8,7 @@ import world.gregs.voidps.type.sub.Interface
 import world.gregs.voidps.type.sub.LevelChange
 import world.gregs.voidps.type.sub.Spawn
 
-class Experience {
+class ExperienceCounter {
 
     @Spawn
     fun spawn(player: Player) {

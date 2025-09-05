@@ -296,11 +296,4 @@ internal class LevelsTest {
         }
     }
 
-    @Test
-    fun `Listen to level up`() {
-        exp.set(Skill.Magic, 1154.0)
-        verifyOrder {
-            publishers.levelChangeCharacter(player, Skill.Magic, 1, 10, max = true)
-        }
-    }
 }

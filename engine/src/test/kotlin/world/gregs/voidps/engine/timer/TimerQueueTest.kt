@@ -38,13 +38,9 @@ internal class TimerQueueTest : TimersTest() {
 
     @Test
     fun `Updating next timer tick changes order`() {
-        Publishers.set(object : Publishers {
-            override fun timerStart(source: Entity, timer: String, restart: Boolean) = 2
-        })
+        set(2)
         timers.start("mutable")
-        Publishers.set(object : Publishers {
-            override fun timerStart(source: Entity, timer: String, restart: Boolean) = 3
-        })
+        set(3)
         timers.start("fixed")
 
         repeat(3) {
