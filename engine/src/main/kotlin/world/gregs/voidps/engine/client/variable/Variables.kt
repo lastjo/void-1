@@ -2,17 +2,15 @@ package world.gregs.voidps.engine.client.variable
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import world.gregs.voidps.engine.entity.Entity
-import world.gregs.voidps.engine.event.EventDispatcher
 import world.gregs.voidps.engine.event.Publishers
 
 open class Variables(
-    private var events: EventDispatcher,
     private var entity: Entity,
     val data: MutableMap<String, Any> = Object2ObjectOpenHashMap(2),
 ) {
 
     @Suppress("LeakingThis")
-    var bits = VariableBits(this, events)
+    var bits = VariableBits(this, entity)
 
     @Suppress("UNCHECKED_CAST")
     open fun <T : Any> get(key: String): T? = data(key)[key] as? T

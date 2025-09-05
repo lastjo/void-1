@@ -56,7 +56,7 @@ data class NPC(
     override var softTimers: Timers = TimerSlot(this)
     override var delay: Continuation<Unit>? = null
     override var suspension: Suspension? = null
-    override var variables: Variables = Variables(this, this)
+    override var variables: Variables = Variables(this)
     override val steps: Steps = Steps(this)
 
     override lateinit var collision: CollisionStrategy

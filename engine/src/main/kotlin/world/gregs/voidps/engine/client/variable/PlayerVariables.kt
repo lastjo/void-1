@@ -10,7 +10,7 @@ class PlayerVariables(
     data: MutableMap<String, Any>,
     var definitions: VariableDefinitions = VariableDefinitions(),
     val temp: MutableMap<String, Any> = mutableMapOf(),
-) : Variables(events, events, data) {
+) : Variables(events, data) {
 
     var client: Client? = null
 

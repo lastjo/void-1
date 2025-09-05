@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.event.Events
 import world.gregs.voidps.engine.event.Publishers
 import kotlin.test.assertEquals
 
@@ -40,7 +39,7 @@ class InventorySlotChangedTest {
         inventory = Inventory.debug(1, id = "inventory")
         val dispatcher = Player()
         inventory.transaction.changes.bind(dispatcher)
-        Events.events.clear()
+        Publishers.clear()
     }
 
     @Test

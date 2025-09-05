@@ -37,7 +37,6 @@ import world.gregs.voidps.engine.entity.item.floor.FloorItems
 import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.ObjectShape
-import world.gregs.voidps.engine.event.Events
 import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.inv.Inventory
@@ -250,7 +249,7 @@ abstract class WorldTest : KoinTest {
     @AfterAll
     fun afterAll() {
         saves?.deleteRecursively()
-        Events.events.clear()
+        Publishers.clear()
 //        World.shutdown()
         stopKoin()
     }

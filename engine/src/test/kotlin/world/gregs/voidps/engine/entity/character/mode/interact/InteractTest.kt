@@ -22,7 +22,7 @@ import world.gregs.voidps.engine.entity.character.mode.EmptyMode
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Events
+import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.engine.map.collision.Collisions
 import world.gregs.voidps.engine.script.KoinMock
 import world.gregs.voidps.engine.suspend.Suspension
@@ -59,7 +59,7 @@ internal class InteractTest : KoinMock() {
 
     @BeforeEach
     fun setup() {
-        Events.setEvents(Events())
+        Publishers.clear()
         mockkStatic("world.gregs.voidps.engine.client.ui.InterfacesKt")
         mockkStatic("world.gregs.voidps.engine.client.EncodeExtensionsKt")
         approached = false
@@ -91,7 +91,7 @@ internal class InteractTest : KoinMock() {
         val check: (Boolean) -> Boolean = { true }
         interact = Interact(player, target, interact = block, has = check)
         player.mode = interact
-        Events.events.clear()
+        Publishers.clear()
     }
 
     @ParameterizedTest

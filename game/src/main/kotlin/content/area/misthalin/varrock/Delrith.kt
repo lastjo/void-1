@@ -1,6 +1,5 @@
 package content.area.misthalin.varrock
 
-import content.entity.death.Death
 import content.entity.effect.transform
 import content.entity.gfx.areaGfx
 import content.entity.player.dialogue.*

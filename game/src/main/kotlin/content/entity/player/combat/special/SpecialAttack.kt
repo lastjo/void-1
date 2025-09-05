@@ -2,25 +2,14 @@ package content.entity.player.combat.special
 
 import content.skill.melee.weapon.weapon
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
-import world.gregs.voidps.engine.event.Event
-import world.gregs.voidps.engine.event.EventDispatcher
-import world.gregs.voidps.engine.event.Events
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import kotlin.math.floor
 
 const val MAX_SPECIAL_ATTACK = 1000
 
-data class SpecialAttack(val id: String, val target: Character) : Event {
-    override val size = 2
-
-    override fun parameter(dispatcher: EventDispatcher, index: Int) = when (index) {
-        0 -> "special_attack"
-        1 -> id
-        else -> null
-    }
+class SpecialAttack {
 
     companion object {
         fun hasEnergy(player: Player) = drain(player, drain = false)
@@ -47,10 +36,6 @@ data class SpecialAttack(val id: String, val target: Character) : Event {
             return true
         }
     }
-}
-
-fun specialAttack(id: String = "*", handler: suspend SpecialAttack.(Player) -> Unit) {
-    Events.handle("special_attack", id, handler = handler)
 }
 
 var Player.specialAttack: Boolean

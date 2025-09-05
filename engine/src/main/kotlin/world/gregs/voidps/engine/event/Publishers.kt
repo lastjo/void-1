@@ -7,7 +7,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import world.gregs.voidps.cache.definition.data.NPCDefinition
 import world.gregs.voidps.cache.definition.data.ObjectDefinition
-import world.gregs.voidps.engine.client.ui.event.CloseInterface
 import world.gregs.voidps.engine.entity.Entity
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.Character
@@ -140,8 +139,20 @@ interface Publishers {
 
     fun inventorySwap(player: Player, id: String = "", component: String = "", fromItem: Item = Item.EMPTY, fromSlot: Int = -1, fromInventory: String = "", toId: String = "", toComponent: String = "", toItem: Item = Item.EMPTY, toSlot: Int = -1, toInventory: String = ""): Boolean = false
 
+    /**
+     * An item slot updated to an item in an inventory.
+     * @param inventory The transaction inventory
+     * @param item the new state of the item
+     * @param itemSlot the index of the item in the target inventory
+     */
     fun itemAdded(player: Player, item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false
 
+    /**
+     * An item slot updated to an item in an inventory.
+     * @param inventory the inventory id the item was removed from
+     * @param item the previous state of the item before it was removed
+     * @param itemSlot the index in the inventory the item was in
+     */
     fun itemRemoved(player: Player, item: Item = Item.EMPTY, itemSlot: Int = -1, inventory: String = ""): Boolean = false
 
     fun spawnPlayer(player: Player): Boolean = false
@@ -274,6 +285,9 @@ interface Publishers {
     fun variableSetNPC(npc: NPC, id: String = "", from: Any? = null, to: Any? = null): Boolean = false
     fun variableSetCharacter(character: Character, id: String = "", from: Any? = null, to: Any? = null): Boolean = false
 
+    /**
+     * Variable with name [id] had a sub-value [value] [added] to or removed from it
+     */
     fun variableBits(entity: Entity, id: String = "", value: Any? = null, added: Boolean = true): Boolean {
         when (entity) {
             is Player -> {
@@ -335,6 +349,9 @@ interface Publishers {
 
     fun consume(player: Player, item: Item = Item.EMPTY, slot: Int = -1): Boolean = true
 
+    /**
+     * Checks that an item can be taken off of the floor. Continues unless returns "cancel".
+     */
     fun playerTakeItem(player: Player, id: String = ""): String = id
     fun npcTakeItem(npc: NPC, id: String = ""): String = id
 

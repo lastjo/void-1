@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 import world.gregs.voidps.cache.definition.data.ObjectDefinition
 import world.gregs.voidps.engine.client.update.batch.ZoneBatchUpdates
 import world.gregs.voidps.engine.data.definition.ObjectDefinitions
-import world.gregs.voidps.engine.event.Events
 import world.gregs.voidps.engine.event.Publishers
 import world.gregs.voidps.network.login.protocol.encode.zone.ObjectAddition
 import world.gregs.voidps.network.login.protocol.encode.zone.ObjectRemoval
@@ -21,7 +20,6 @@ class GameObjectsTest {
 
     private lateinit var objects: GameObjects
     private lateinit var updates: ZoneBatchUpdates
-    private lateinit var events: Events
     private lateinit var publishers: Publishers
 
     @BeforeEach
@@ -34,8 +32,6 @@ class GameObjectsTest {
         publishers = mockk(relaxed = true)
         Publishers.set(publishers)
         objects = GameObjects(mockk(relaxed = true), mockk(relaxed = true), updates, definitions, storeUnused = true)
-        events = spyk(Events())
-        Events.setEvents(events)
     }
 
     @Test
@@ -248,7 +244,7 @@ class GameObjectsTest {
         @JvmStatic
         @AfterAll
         fun tearDown() {
-            Events.setEvents(Events())
+            Publishers.clear()
         }
     }
 }

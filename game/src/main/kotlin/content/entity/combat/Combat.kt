@@ -18,9 +18,9 @@ import world.gregs.voidps.engine.entity.character.mode.PauseMode
 import world.gregs.voidps.engine.entity.character.mode.combat.*
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.entity.character.player.name
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.event.Publishers
-import world.gregs.voidps.engine.event.onEvent
 import world.gregs.voidps.type.CombatStage
 import world.gregs.voidps.type.sub.Combat
 import world.gregs.voidps.type.sub.Death
@@ -119,7 +119,7 @@ class Combat {
             }
             if (character["debug", false] || target["debug", false]) {
                 val player = if (character["debug", false] && character is Player) character else target as Player
-                player.message("---- Swing (${character.identifier}) -> (${target.identifier}) -----")
+                player.message("---- Swing (${if (character is NPC) character.id else if (character is Player) character.name else ""}) -> (${if (target is NPC) target.id else if (target is Player) target.name else ""}) -----")
             }
             if (!target.hasClock("in_combat")) {
                 Publishers.all.combatAttack(character, target, character.fightStyle, -1, character.weapon, character.spell, stage = CombatStage.START)
