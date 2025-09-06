@@ -14,9 +14,6 @@ class InstructionTask(
         for (player in players) {
             for (i in 0 until MAX_INSTRUCTIONS) {
                 val instruction = player.instructions.tryReceive().getOrNull() ?: break
-                if (player["debug", false]) {
-                    logger.debug { "${player.accountName} ${player.tile} - $instruction" }
-                }
                 try {
                     Publishers.all.instruction(player, instruction)
                 } catch (e: Throwable) {

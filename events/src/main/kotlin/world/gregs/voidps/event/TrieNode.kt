@@ -28,7 +28,7 @@ data class TrieNode(
     /**
      * Generate a nested if else statement for all [children]
      */
-    fun generate(context: PublisherMapping, callOnly: Boolean = false, skipElse: Boolean = false): CodeBlock {
+    fun generate(context: PublisherMapping, callOnly: Boolean = false, skipElse: Boolean = false, topLevel: Boolean = false): CodeBlock {
         val block = CodeBlock.builder()
         if (condition != null) {
             val (string, args) = condition.statement()!!
@@ -40,9 +40,11 @@ data class TrieNode(
             first = false
         }
         if (callOnly) {
-            block.addStatement("return ${methods.isNotEmpty()}")
+            if (topLevel || methods.isNotEmpty()) {
+                block.addStatement("return ${methods.isNotEmpty()}")
+            }
         } else {
-            block.add(codeBlock(context))
+            block.add(codeBlock(context, topLevel))
         }
         if (condition != null) {
             block.endControlFlow()
@@ -53,12 +55,16 @@ data class TrieNode(
     /**
      * Build a block of [methods] with the appropriate return type.
      */
-    private fun codeBlock(context: PublisherMapping): CodeBlock {
+    private fun codeBlock(context: PublisherMapping, topLevel: Boolean): CodeBlock {
         val block = CodeBlock.builder()
         if (!context.notification) {
             val branch = methods.firstOrNull()
             if (branch == null) {
-                block.addStatement("return ${if (context.returnsDefault is String) "%S" else "%L"}", context.returnsDefault)
+                if (topLevel) {
+                    block.addStatement("return ${if (context.returnsDefault is String) "%S" else "%L"}", context.returnsDefault)
+                } else {
+                    return block.build()
+                }
             } else if (context.returnsDefault == Unit) {
                 block.addStatement(branch.method())
                 block.addStatement("return")
@@ -75,14 +81,18 @@ data class TrieNode(
             for (branch in methods) {
                 block.addStatement(branch.method())
             }
-            block.addStatement("return")
+            if (topLevel || methods.isNotEmpty()) {
+                block.addStatement("return")
+            }
             return block.build()
         }
         if (methods.none { it.methodReturnType == context.returnsDefault::class.qualifiedName }) {
             for (branch in methods) {
                 block.addStatement(branch.method())
             }
-            block.addStatement("return ${if (context.returnsDefault is String) "%S" else "%L"}", context.returnsDefault)
+            if (topLevel || methods.isNotEmpty()) {
+                block.addStatement("return ${if (context.returnsDefault is String) "%S" else "%L"}", context.returnsDefault)
+            }
             return block.build()
         }
         if (methods.size == 1 && methods.all { it.methodReturnType == context.returnsDefault::class.qualifiedName }) {

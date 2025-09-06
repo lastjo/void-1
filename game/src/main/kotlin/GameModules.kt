@@ -59,6 +59,7 @@ fun gameModule(files: ConfigFiles) = module {
     }
     single(createdAtStart = true) {
         val logger = InlineLogger("Publishers")
+        var start = System.currentTimeMillis()
         val fairyCodes = get<FairyRingCodes>()
         val variableDefinitions = get<VariableDefinitions>()
         val npcs = get<NPCs>()
@@ -82,7 +83,6 @@ fun gameModule(files: ConfigFiles) = module {
         val spellDefinitions = get<SpellDefinitions>()
         val itemSpawns = get<ItemSpawns>()
         val charterShips = get<CharterShips>()
-
         val objectTeleports = get<ObjectTeleports>()
         val grandExchange = get<GrandExchange>()
         val dropTables = get<DropTables>()
@@ -106,7 +106,8 @@ fun gameModule(files: ConfigFiles) = module {
         val gearDefinitions = get<GearDefinitions>()
         val huffman = get<Huffman>()
         val quickChatPhraseDefinitions = get<QuickChatPhraseDefinitions>()
-        val start = System.currentTimeMillis()
+        logger.info { "Finding dependencies took ${System.currentTimeMillis() - start} ms" }
+        start = System.currentTimeMillis()
         val publishers = PublishersImpl(
             fairyRingCodes = fairyCodes,
             lineValidator = lineValidator,

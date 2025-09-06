@@ -34,7 +34,6 @@ class TrieNodeTest {
                 test.handle()
                 return 0
               }
-              return 0
             }
             else if (!approach) {
               test.use()
@@ -61,7 +60,6 @@ class TrieNodeTest {
                 test.handle()
                 return
               }
-              return kotlin.Unit
             }
             else if (!approach) {
               test.use()
@@ -72,7 +70,6 @@ class TrieNodeTest {
                 test.handle()
                 return
               }
-              return kotlin.Unit
             }
             return kotlin.Unit
             """.trimIndent(),
@@ -86,14 +83,12 @@ class TrieNodeTest {
                 test.handle()
                 return
               }
-              return kotlin.Unit
             }
             else if (option == "Pick") {
               if (!approach) {
                 test.handle()
                 return
               }
-              return kotlin.Unit
             }
             else if (!approach) {
               test.use()
@@ -332,9 +327,7 @@ class TrieNodeTest {
                 if (z == 1) {
                   return test.handleA()
                 }
-                return -1
               }
-              return -1
             }
             return -1
             """.trimIndent(),
@@ -357,12 +350,10 @@ class TrieNodeTest {
                 if (z == 1) {
                   return test.handleA()
                 }
-                return -1
               }
               else if (y == 2) {
                 return test.handleB()
               }
-              return -1
             }
             return -1
             """.trimIndent(),
@@ -386,7 +377,6 @@ class TrieNodeTest {
                 if (z == 1) {
                   return test.handleA()
                 }
-                return -1
               }
               else if (z == 2) {
                 return test.handleB()
@@ -419,7 +409,7 @@ class TrieNodeTest {
         if (sort) {
             node.sort()
         }
-        cb.add(node.generate(context, callOnly))
+        cb.add(node.generate(context, callOnly, topLevel = true))
         val string = cb.build().toString().trim()
         return string
     }

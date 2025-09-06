@@ -135,7 +135,7 @@ abstract class PublisherMapping(
             builder.addParameter(name, type.asTypeName())
         }
         if (callOnly) {
-            builder.addCode(trie.generate(this, callOnly = true))
+            builder.addCode(trie.generate(this, callOnly = true, topLevel = true))
             builder.returns(BOOLEAN)
             return builder.build()
         }
@@ -149,7 +149,7 @@ abstract class PublisherMapping(
 //        tryCatch.add("println(%P)\n", "${name.removeSuffix("Publisher")}[${parameters.joinToString(", ") { "\$${it.first}" }}]")
         builder.addCode(
             tryCatch
-                .add(trie.generate(this, callOnly = false))
+                .add(trie.generate(this, callOnly = false, topLevel = true))
                 .endControlFlow()
                 .beginControlFlow("catch (e: %T)", Exception::class)
                 .addStatement(if (player != null) "$player.warn(e) { \"Failed to publish ${name.removeSuffix("Publisher")}\" }" else "e.printStackTrace()")

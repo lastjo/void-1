@@ -101,13 +101,20 @@ class PublisherProcessor(
             .build()
     }
 
+    private val inject = false
+    private val get = ClassName("world.gregs.voidps.engine", "get")
+
     private fun constructor(allDependencies: TreeMap<TypeName, String>): FunSpec {
         val constructor = FunSpec.constructorBuilder()
         for ((type, param) in allDependencies.toList().sortedBy { it.second }) {
             if (param == "this") {
                 continue
             }
-            constructor.addParameter(param, type)
+            val builder = ParameterSpec.builder(param, type)
+            if (inject) {
+                builder.defaultValue("%T()", get)
+            }
+            constructor.addParameter(builder.build())
         }
         return constructor.build()
     }
