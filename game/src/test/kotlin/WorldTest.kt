@@ -250,7 +250,6 @@ abstract class WorldTest : KoinTest {
     fun afterAll() {
         saves?.deleteRecursively()
         Publishers.clear()
-//        World.shutdown()
         stopKoin()
     }
 
@@ -273,6 +272,8 @@ abstract class WorldTest : KoinTest {
             properties["world.npcs.randomWalk"] = false
             properties["events.shootingStars.enabled"] = false
             properties["bots.count"] = 0
+            properties["storage.autoSave.minutes"] = 0
+            properties["storage.disabled"] = true
             properties.remove("world.id")
             properties.remove("world.name")
             properties
