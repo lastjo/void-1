@@ -12,10 +12,10 @@ class OptionPublisherMapping(function: KFunction<*>, has: KFunction<*>) : Publis
         val ids = method.annotationArgs["ids"] as List<String>
         val approach = method.annotationArgs["approach"] as Boolean
         val list = mutableListOf<Condition>()
+        list.add(Equals("approach", approach))
         if (option != "*") {
             list.add(Equals("option", option))
         }
-        list.add(Equals("approach", approach))
         if (ids.isEmpty()) {
             return listOf(list)
         }

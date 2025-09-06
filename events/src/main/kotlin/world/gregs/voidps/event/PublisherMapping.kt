@@ -103,6 +103,7 @@ abstract class PublisherMapping(
             dependencies[methodName] = method.className
             trie.insert(method, notification)
         }
+        trie.sort()
         builder.addFunction(method(trie))
         if (interaction) {
             builder.addFunction(method(trie, callOnly = true))

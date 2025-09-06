@@ -29,18 +29,77 @@ class TrieNodeTest {
 
         assertEquals(
             """
-            if (!approach) {
-              test.use()
-              return 0
-            }
-            else if (fromItem.id == "banana") {
+            if (fromItem.id == "banana") {
               if (toItem.id.endsWith("_satchel")) {
                 test.handle()
                 return 0
               }
               return 0
             }
+            else if (!approach) {
+              test.use()
+              return 0
+            }
             return 0
+            """.trimIndent(),
+            code,
+        )
+    }
+
+    @Test
+    fun `Trie nodes sorted`() {
+        val root = TrieNode()
+        root.insert(method("handle", Equals("option", "Take"), Equals("approach", false)))
+        root.insert(method("use", Equals("approach", false)))
+        root.insert(method("handle", Equals("option", "Pick"), Equals("approach", false)))
+
+        var code = emit(root, allowMultiple = false, sort = false)
+        assertEquals(
+            """
+            if (option == "Take") {
+              if (!approach) {
+                test.handle()
+                return
+              }
+              return kotlin.Unit
+            }
+            else if (!approach) {
+              test.use()
+              return
+            }
+            else if (option == "Pick") {
+              if (!approach) {
+                test.handle()
+                return
+              }
+              return kotlin.Unit
+            }
+            return kotlin.Unit
+            """.trimIndent(),
+            code,
+        )
+        code = emit(root, allowMultiple = false, sort = true)
+        assertEquals(
+            """
+            if (option == "Take") {
+              if (!approach) {
+                test.handle()
+                return
+              }
+              return kotlin.Unit
+            }
+            else if (option == "Pick") {
+              if (!approach) {
+                test.handle()
+                return
+              }
+              return kotlin.Unit
+            }
+            else if (!approach) {
+              test.use()
+              return
+            }
+            return kotlin.Unit
             """.trimIndent(),
             code,
         )
@@ -341,7 +400,7 @@ class TrieNodeTest {
         )
     }
 
-    private fun emit(node: TrieNode, allowMultiple: Boolean, returnValue: Any = Unit, callOnly: Boolean = false): String {
+    private fun emit(node: TrieNode, allowMultiple: Boolean, returnValue: Any = Unit, callOnly: Boolean = false, sort: Boolean = true): String {
         val cb = CodeBlock.builder()
         val context = object : PublisherMapping(
             name = "",
@@ -356,6 +415,9 @@ class TrieNodeTest {
             override fun conditions(method: Subscriber): List<List<Condition>> {
                 TODO("Not yet implemented")
             }
+        }
+        if (sort) {
+            node.sort()
         }
         cb.add(node.generate(context, callOnly))
         val string = cb.build().toString().trim()

@@ -6,29 +6,11 @@ import java.util.TreeSet
 /**
  * A nested trie storing [Method]'s in order of specificity ([Method.conditions] length)
  * that can be used to [generate] valid if else statement code
+ * Note: [sort] must be called after all insertions in order to generate valid code
  */
 data class TrieNode(
     val condition: Condition? = null,
-    val children: MutableSet<TrieNode> = TreeSet(
-        Comparator<TrieNode> { a, b ->
-            when {
-                a.condition != null && b.condition == null -> -1 // a comes first (has condition)
-                a.condition == null && b.condition != null -> 1 // b comes first (has condition)
-                else -> {
-                    // Both have conditions, sort by depth of branches (more conditions = higher priority)
-                    val maxDepthA = a.maxDepth()
-                    val maxDepthB = b.maxDepth()
-                    val depthCompare = maxDepthB.compareTo(maxDepthA) // deeper first
-                    if (depthCompare != 0) {
-                        depthCompare
-                    } else {
-                        // Same depth, sort alphabetically for consistency
-                        (a.condition?.key ?: "").compareTo(b.condition?.key ?: "")
-                    }
-                }
-            }
-        },
-    ),
+    var children: MutableList<TrieNode> = mutableListOf(),
     val methods: MutableSet<Method> = TreeSet(
         Comparator<Method> { a, b ->
             val specA = a.conditions.size
@@ -36,25 +18,12 @@ data class TrieNode(
             if (specA != specB) {
                 specB - specA
             } else {
-                val expected = a.conditions.joinToString { it.statement().toString() }.compareTo(b.conditions.joinToString { it.statement().toString() })
-                if (expected == 0) {
-                    a.method().compareTo(b.methodName)
-                } else {
-                    expected
-                }
+                a.methodName.compareTo(b.methodName)
             }
         },
     ),
+    var maxDepth: Int = 0
 ) {
-    private fun maxDepth(): Int {
-        if (methods.isNotEmpty()) {
-            return methods.maxOf { it.conditions.size }
-        }
-        if (children.isEmpty()) {
-            return 0
-        }
-        return children.maxOf { it.maxDepth() }
-    }
 
     /**
      * Generate a nested if else statement for all [children]
@@ -166,5 +135,48 @@ data class TrieNode(
         val child = children.firstOrNull { it.condition == cond }
             ?: TrieNode(cond).also { children += it }
         child.insertConditions(conditions, idx + 1, method, allowMultiple)
+    }
+
+    /**
+     * Computes maxDepth and rebuilds children sets in sorted order.
+     * Call this once after all insertions are done.
+     */
+    fun sort(): Int {
+        if (children.isEmpty()) {
+            maxDepth = 0
+            return 0
+        }
+
+        var maxChildDepth = 0
+        for (child in children) {
+            val childDepth = child.sort()
+            maxChildDepth = maxOf(maxChildDepth, childDepth + 1)
+        }
+        children.sortWith(
+            compareByDescending<TrieNode> { it.maxDepth }
+                .thenBy { it.condition?.key ?: "" }
+        )
+        maxDepth = maxChildDepth
+        return maxDepth
+    }
+
+    /**
+     * For debugging
+     */
+    @Suppress("unused")
+    fun asString(indent: Int = 0): String = buildString {
+        appendLine("${" ".repeat(indent * 4)}Cond: ${condition?.statement()} Depth: ${maxDepth}")
+        if (children.isNotEmpty()) {
+            appendLine("${" ".repeat(indent * 4)}Children:")
+        }
+        for (child in children) {
+            appendLine("${" ".repeat(indent * 4)}${child.asString(indent + 1)}")
+        }
+        if (methods.isNotEmpty()) {
+            appendLine("${" ".repeat(indent * 4)}Methods:")
+        }
+        for (method in methods) {
+            appendLine("${" ".repeat(indent * 4)}${method.className}.${method.methodName}()")
+        }
     }
 }
