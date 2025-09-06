@@ -18,7 +18,7 @@ data class TrieNode(
             if (specA != specB) {
                 specB - specA
             } else {
-                a.methodName.compareTo(b.methodName)
+                a.method().compareTo(b.method())
             }
         },
     ),
