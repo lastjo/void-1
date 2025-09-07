@@ -36,6 +36,7 @@ class Interact(
 ) : Movement(character, strategy, shape) {
 
     private var clearInteracted = false
+    private var launched = false
 
     fun updateInteraction(interact: (suspend (Boolean) -> Unit)?, has: (Boolean) -> Boolean) {
         this.interact = interact
@@ -155,7 +156,8 @@ class Interact(
             return true
         }
         val interaction = this.interact
-        if (interaction != null) {
+        if (!launched && interaction != null) {
+            launched = true
             Publishers.launch {
                 interaction.invoke(interact)
             }

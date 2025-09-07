@@ -84,7 +84,7 @@ class Canoes(
         player.interfaces.sendVisibility(id, "invisible_waka", !waka)
     }
 
-    @Interface("Sekect", "a_*", "canoe")
+    @Interface("Select", "a_*", "canoe")
     fun click(player: Player, component: String) {
         val type = component.removePrefix("a_")
         (player.dialogueSuspension as? StringSuspension)?.resume(type)

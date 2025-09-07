@@ -41,7 +41,7 @@ class SpinningWheel {
     val Item.spinning: Spinning
         get() = def["spinning"]
 
-    @Option("Spin", "spinning_wheel*") // arrive = false
+    @Option("Spin", "spinning_wheel*", arrive = false)
     suspend fun operate(player: Player, target: GameObject) {
         val strings = fibres.map { if (it.id == "tree_roots") "crossbow_string" else it.spinning.to }
         val (index, amount) = player.makeAmountIndex(
@@ -67,7 +67,7 @@ class SpinningWheel {
         start(player, target, fibre, amount)
     }
 
-    @UseOn(on = "spinning_wheel") // arrive = false
+    @UseOn(on = "spinning_wheel", arrive = false)
     suspend fun use(player: Player, target: GameObject, item: Item) {
         if (!item.def.contains("spinning")) {
             return

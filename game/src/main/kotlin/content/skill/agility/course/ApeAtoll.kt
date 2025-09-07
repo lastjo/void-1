@@ -118,6 +118,7 @@ class ApeAtoll {
                 } else {
                     player.exactMoveDelay(Tile(2753, 2743), 30, Direction.SOUTH)
                 }
+                player.clearAnim()
                 player.renderEmote(if (monkey) "ninja_monkey_swim" else "swim")
                 player.sound("water_splash")
                 player.sound("swim_stroke", repeat = 6)

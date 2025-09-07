@@ -47,7 +47,7 @@ class Interaction(
             return
         }
         val (id, x, y, optionIndex) = instruction
-        val floorItem = validateFloorItem(player, id, x, y) ?: return
+        val floorItem = validateFloorItem(player, x, y, id) ?: return
         val selectedOption = validateOption(floorItem.def.floorOptions, optionIndex, "floor item", id) ?: return
         if (selectedOption == "Examine") {
             player.message(floorItem.def.getOrNull("examine") ?: return, ChatType.ItemExamine)
@@ -121,7 +121,9 @@ class Interaction(
         val selectedOption = validateOption(definition.options, option - 1, "obj", definition.id) ?: return
         player.closeInterfaces()
         val block: suspend (Boolean) -> Unit = { Publishers.all.playerGameObjectOption(player, target, definition, selectedOption, it) }
-        val check: (Boolean) -> Boolean = { Publishers.all.hasPlayerGameObjectOption(player, target, definition, selectedOption, it) }
+        val check: (Boolean) -> Boolean = {
+            println("Check $player, $target, $definition, $selectedOption $it")
+            Publishers.all.hasPlayerGameObjectOption(player, target, definition, selectedOption, it) }
         player.mode = Interact(player, target, interact = block, has = check)
     }
 

@@ -19,12 +19,12 @@ import world.gregs.voidps.type.sub.UseOn
 
 class Pottery {
 
-    @UseOn("soft_clay", "potters_wheel*") // arrive = false
+    @UseOn("soft_clay", "potters_wheel*", arrive = false)
     suspend fun spin(player: Player, target: GameObject, item: Item) {
         make(player, target, "spinning", item)
     }
 
-    @UseOn(on = "pottery_oven*") // arrive = false
+    @UseOn(on = "pottery_oven*", arrive = false)
     suspend fun fire(player: Player, target: GameObject, item: Item) {
         if (!item.def.contains("pottery")) {
             return
@@ -34,7 +34,7 @@ class Pottery {
         }
     }
 
-    @Option("Fire", "pottery_oven*") // arrive = false
+    @Option("Fire", "pottery_oven*", arrive = false)
     suspend fun operate(player: Player, target: GameObject) {
         val item = player.inventory.items.firstOrNull { it.def.contains("pottery") && it.id != "soft_clay" } ?: return
         make(player, target, "cook_range", item)

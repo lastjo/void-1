@@ -174,7 +174,7 @@ class PublisherProcessor(
             var i = 0
             for ((_, type) in args) {
                 val suffix = publisher.required[i]
-                if (type.asTypeName() == suffix.asTypeName() && ++i == publisher.required.size) {
+                if (type.asTypeName() == suffix && ++i == publisher.required.size) {
                     return publisher
                 }
             }

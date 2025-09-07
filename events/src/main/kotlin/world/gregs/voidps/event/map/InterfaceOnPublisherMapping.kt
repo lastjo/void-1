@@ -36,6 +36,11 @@ class InterfaceOnPublisherMapping(function: KFunction<*>, has: KFunction<*>? = n
     override fun methods(subscriber: Subscriber): List<Method> {
         val conditions = conditions(subscriber).first()
         val methods = mutableListOf<Method>()
+        val approach = subscriber.annotationArgs["approach"] as Boolean
+        var arrive = false
+        if (!approach && (name == "InterfaceOnGameObjectPublisher" || name == "InterfaceOnFloorItemPublisher")) {
+            arrive = subscriber.annotationArgs["arrive"] as Boolean
+        }
         if (this.name == "InterfaceOnItemPublisher" && subscriber.annotationArgs["bidirectional"] as Boolean) {
             val args = matchNames(
                 subscriber.parameters.map {
@@ -51,12 +56,10 @@ class InterfaceOnPublisherMapping(function: KFunction<*>, has: KFunction<*>? = n
             )
             val flipped = conditions.map {
                 Equals(
-                    if (it.key == "toItem.id") {
-                        "fromItem.id"
-                    } else if (it.key == "fromItem.id") {
-                        "toItem.id"
-                    } else {
-                        it.key
+                    when (it.key) {
+                        "toItem.id" -> "fromItem.id"
+                        "fromItem.id" -> "toItem.id"
+                        else -> it.key
                     },
                     it.value,
                 )
@@ -64,7 +67,7 @@ class InterfaceOnPublisherMapping(function: KFunction<*>, has: KFunction<*>? = n
             methods.add(Method(flipped, suspendable, subscriber.className, subscriber.methodName, args, subscriber.returnType))
         }
         val args = matchNames(subscriber.parameters, subscriber)
-        methods.add(Method(conditions, suspendable, subscriber.className, subscriber.methodName, args, subscriber.returnType))
+        methods.add(Method(conditions, suspendable, subscriber.className, subscriber.methodName, args, subscriber.returnType, arrive))
         return methods
     }
 }

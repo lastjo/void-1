@@ -7,6 +7,14 @@ interface Condition {
     val key: String
     val value: Any?
     fun statement(): Statement?
+    companion object {
+        operator fun invoke(key: String, any: Any): Condition {
+            if (any is String && any == "*") {
+                return Else(key)
+            }
+            return Equals(key, any)
+        }
+    }
 }
 
 data class Equals(override val key: String, override val value: Any?, val explicit: Boolean = false) : Condition {
@@ -21,10 +29,11 @@ data class Equals(override val key: String, override val value: Any?, val explic
         is Boolean -> if (explicit) {
             Statement("$key == %L", arrayOf(value))
         } else {
-            Statement("${if (value) "" else "!"}$key", arrayOf(value))
+            Statement("${if (value) "" else "!"}$key", arrayOf())
         }
         else -> Statement("$key == %L", arrayOf(value))
     }
+
 }
 
 data class Contains(override val key: String, override val value: Any?) : Condition {
@@ -41,4 +50,9 @@ data class GreaterThan(override val key: String, override val value: Number?) : 
 
 data class IsType(override val key: String, override val value: TypeName) : Condition {
     override fun statement(): Statement = Statement("$key is %T", arrayOf(value))
+}
+
+data class Else(override val key: String) : Condition {
+    override val value: Any? = null
+    override fun statement(): Statement = Statement("else", arrayOf())
 }

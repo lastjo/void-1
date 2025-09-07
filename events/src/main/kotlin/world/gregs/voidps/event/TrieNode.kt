@@ -28,11 +28,20 @@ data class TrieNode(
     /**
      * Generate a nested if else statement for all [children]
      */
-    fun generate(context: PublisherMapping, callOnly: Boolean = false, skipElse: Boolean = false, topLevel: Boolean = false): CodeBlock {
+    fun generate(context: PublisherMapping, callOnly: Boolean = false, skipElse: Boolean = false): CodeBlock {
         val block = CodeBlock.builder()
+        var skips = false
         if (condition != null) {
             val (string, args) = condition.statement()!!
-            block.beginControlFlow("${if (skipElse) "" else "else "}if ($string)", *args)
+            if (string == "else") {
+                if (!skipElse) {
+                    block.beginControlFlow("else")
+                } else {
+                    skips = true
+                }
+            } else {
+                block.beginControlFlow("${if (skipElse) "" else "else "}if ($string)", *args)
+            }
         }
         var first = true
         for (child in children) {
@@ -40,13 +49,11 @@ data class TrieNode(
             first = false
         }
         if (callOnly) {
-            if (topLevel || methods.isNotEmpty()) {
-                block.addStatement("return ${methods.isNotEmpty()}")
-            }
+            block.addStatement("return ${methods.isNotEmpty()}")
         } else {
-            block.add(codeBlock(context, topLevel))
+            block.add(codeBlock(context))
         }
-        if (condition != null) {
+        if (condition != null && !skips) {
             block.endControlFlow()
         }
         return block.build()
@@ -55,16 +62,12 @@ data class TrieNode(
     /**
      * Build a block of [methods] with the appropriate return type.
      */
-    private fun codeBlock(context: PublisherMapping, topLevel: Boolean): CodeBlock {
+    private fun codeBlock(context: PublisherMapping): CodeBlock {
         val block = CodeBlock.builder()
         if (!context.notification) {
             val branch = methods.firstOrNull()
             if (branch == null) {
-                if (topLevel) {
-                    block.addStatement("return ${if (context.returnsDefault is String) "%S" else "%L"}", context.returnsDefault)
-                } else {
-                    return block.build()
-                }
+                block.addStatement("return ${if (context.returnsDefault is String) "%S" else "%L"}", context.returnsDefault)
             } else if (context.returnsDefault == Unit) {
                 block.addStatement(branch.method())
                 block.addStatement("return")
@@ -81,18 +84,14 @@ data class TrieNode(
             for (branch in methods) {
                 block.addStatement(branch.method())
             }
-            if (topLevel || methods.isNotEmpty()) {
-                block.addStatement("return")
-            }
+            block.addStatement("return")
             return block.build()
         }
         if (methods.none { it.methodReturnType == context.returnsDefault::class.qualifiedName }) {
             for (branch in methods) {
                 block.addStatement(branch.method())
             }
-            if (topLevel || methods.isNotEmpty()) {
-                block.addStatement("return ${if (context.returnsDefault is String) "%S" else "%L"}", context.returnsDefault)
-            }
+            block.addStatement("return ${if (context.returnsDefault is String) "%S" else "%L"}", context.returnsDefault)
             return block.build()
         }
         if (methods.size == 1 && methods.all { it.methodReturnType == context.returnsDefault::class.qualifiedName }) {
@@ -163,7 +162,8 @@ data class TrieNode(
             maxChildDepth = maxOf(maxChildDepth, childDepth + 1)
         }
         children.sortWith(
-            compareByDescending<TrieNode> { it.maxDepth }
+            compareByDescending<TrieNode> { it.condition !is Else }
+                .thenBy { it.maxDepth }
                 .thenBy { it.condition?.key ?: "" }
         )
         maxDepth = maxChildDepth

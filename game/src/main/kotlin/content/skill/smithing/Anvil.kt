@@ -122,7 +122,7 @@ class Anvil(
         player.interfaces.sendVisibility("smithing", "pickaxes", player.quest("perils_of_ice_mountain") == "completed")
     }
 
-    @UseOn("hammer", "anvil*") // arrive = false
+    @UseOn("hammer", "anvil*", arrive = false)
     fun hammer(player: Player, target: GameObject) {
         player.message("To smith metal equipment, you must use the metal bar on the anvil.")
     }

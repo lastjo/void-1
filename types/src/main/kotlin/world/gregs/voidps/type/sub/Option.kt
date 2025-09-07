@@ -25,4 +25,5 @@ annotation class Option(
     val option: String = "*",
     vararg val ids: String,
     val approach: Boolean = false,
+    val arrive: Boolean = true
 )

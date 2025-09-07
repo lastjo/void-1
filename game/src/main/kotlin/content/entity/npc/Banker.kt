@@ -33,7 +33,7 @@ class Banker(private val npcs: NPCs) {
         menu()
     }
 
-    @Option("Use", "bank_*") // TODO arrive = false
+    @Option("Use", "bank_*", arrive = false)
     suspend fun operate(player: Player, target: GameObject) {
         val banker = npcs.first { it.def.name == "Banker" }
         player.talkWith(banker) {

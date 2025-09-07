@@ -9,7 +9,7 @@ import world.gregs.voidps.type.sub.InventorySlotChanged
 
 class Appearance {
 
-    @InventorySlotChanged
+    @InventorySlotChanged("worn_equipment")
     fun update(player: Player, itemSlot: Int) {
         if (needsUpdate(itemSlot, player.body)) {
             player.flagAppearance()

@@ -41,12 +41,12 @@ class Furnace(private val itemDefinitions: ItemDefinitions) {
 
     val logger = InlineLogger()
 
-    @Option("Smelt", "furnace*") // arrive = false
+    @Option("Smelt", "furnace*", arrive = false)
     suspend fun smelt(player: Player, target: GameObject) {
         smeltingOptions(player, target, bars)
     }
 
-    @UseOn("*_ore", "furnace*") // arrive = false
+    @UseOn("*_ore", "furnace*", arrive = false)
     suspend fun use(player: Player, target: GameObject, item: Item) {
         val list = mutableListOf<String>()
         list.add(oreToBar(item.id))

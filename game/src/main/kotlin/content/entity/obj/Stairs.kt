@@ -14,7 +14,7 @@ import world.gregs.voidps.type.sub.Teleport
 
 class Stairs(private val teleports: ObjectTeleports) {
 
-    @Option("Climb") // TODO arrive = false
+    @Option("Climb", arrive = false)
     suspend fun climb(player: Player, target: GameObject, def: ObjectDefinition) {
         if (def.options?.filterNotNull()?.any { it.startsWith("Climb-") } != true) {
             return

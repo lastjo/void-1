@@ -62,12 +62,12 @@ class SilverCasting(private val itemDefinitions: ItemDefinitions) {
         }
     }
 
-    @UseOn("silver_bar", "furnace*") // arrive = false
+    @UseOn("silver_bar", "furnace*", arrive = false)
     fun silver(player: Player, target: GameObject) {
         player.open("silver_mould")
     }
 
-    @UseOn(on = "furnace*") // arrive = false
+    @UseOn(on = "furnace*", arrive = false)
     fun use(player: Player, target: GameObject, item: Item) {
         if (!item.def.contains("silver_jewellery")) {
             return

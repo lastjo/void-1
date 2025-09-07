@@ -18,7 +18,7 @@ abstract class PublisherMapping(
     val name: String,
     val suspendable: Boolean = false,
     val parameters: List<Pair<String, KType>>,
-    val required: List<KType>,
+    val required: List<TypeName>,
     var returnsDefault: Any = false,
     var notification: Boolean = false,
     var cancellable: Boolean = false,
@@ -32,7 +32,7 @@ abstract class PublisherMapping(
         parameters = function.parameters.filter { it.kind == KParameter.Kind.VALUE }.map {
             it.name!! to it.type
         },
-        required = function.parameters.filter { it.kind == KParameter.Kind.VALUE }.filter { !it.isOptional }.map { it.type },
+        required = function.parameters.filter { it.kind == KParameter.Kind.VALUE }.filter { !it.isOptional }.map { it.type.asTypeName() },
         returnsDefault = returnsDefault ?: when (function.returnType.asTypeName()) {
             STRING -> ""
             INT -> -1
@@ -70,6 +70,11 @@ abstract class PublisherMapping(
         if (conditions.isEmpty()) {
             error("Conditions must not be empty $this.")
         }
+        var arrive = false
+        if (name == "InterfaceOnGameObjectPublisher" || name == "InterfaceOnFloorItemPublisher" || name == "PlayerGameObjectOptionPublisher" || name == "PlayerFloorItemOptionPublisher") {
+            val approach = subscriber.annotationArgs["approach"] as Boolean
+            arrive = !approach && subscriber.annotationArgs["arrive"] as Boolean
+        }
         return conditions.map { comparisons ->
             Method(
                 conditions = comparisons,
@@ -78,6 +83,7 @@ abstract class PublisherMapping(
                 methodName = subscriber.methodName,
                 arguments = matchNames(subscriber.parameters, subscriber),
                 methodReturnType = subscriber.returnType,
+                arrive = arrive,
             )
         }
     }
@@ -96,17 +102,16 @@ abstract class PublisherMapping(
 
     fun produce(methods: List<Method>): TypeSpec {
         val builder = TypeSpec.classBuilder(name)
-        val trie = TrieNode()
+        val list = Methods()
         val dependencies = TreeMap<String, ClassName>()
         for (method in methods) {
             val methodName = method.className.simpleName.replaceFirstChar { it.lowercase() }
             dependencies[methodName] = method.className
-            trie.insert(method, notification)
+            list.insert(method, notification)
         }
-        trie.sort()
-        builder.addFunction(method(trie))
+        builder.addFunction(method(list))
         if (interaction) {
-            builder.addFunction(method(trie, callOnly = true))
+            builder.addFunction(method(list, callOnly = true))
         }
         builder.primaryConstructor(constructor(dependencies))
         addDependencies(builder, dependencies)
@@ -125,7 +130,7 @@ abstract class PublisherMapping(
         }
     }
 
-    fun method(trie: TrieNode, callOnly: Boolean = false): FunSpec {
+    fun method(list: Methods, callOnly: Boolean = false): FunSpec {
         val builder = FunSpec.builder(if (callOnly) "has" else "publish")
         var player: String? = null
         for ((name, type) in parameters) {
@@ -135,7 +140,7 @@ abstract class PublisherMapping(
             builder.addParameter(name, type.asTypeName())
         }
         if (callOnly) {
-            builder.addCode(trie.generate(this, callOnly = true, topLevel = true))
+            builder.addCode(list.generate(this, callOnly = true))
             builder.returns(BOOLEAN)
             return builder.build()
         }
@@ -149,7 +154,7 @@ abstract class PublisherMapping(
 //        tryCatch.add("println(%P)\n", "${name.removeSuffix("Publisher")}[${parameters.joinToString(", ") { "\$${it.first}" }}]")
         builder.addCode(
             tryCatch
-                .add(trie.generate(this, callOnly = false, topLevel = true))
+                .add(list.generate(this, callOnly = false))
                 .endControlFlow()
                 .beginControlFlow("catch (e: %T)", Exception::class)
                 .addStatement(if (player != null) "$player.warn(e) { \"Failed to publish ${name.removeSuffix("Publisher")}\" }" else "e.printStackTrace()")

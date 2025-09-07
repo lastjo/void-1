@@ -1,9 +1,6 @@
 package world.gregs.voidps.event.map
 
-import world.gregs.voidps.event.Condition
-import world.gregs.voidps.event.Equals
-import world.gregs.voidps.event.PublisherMapping
-import world.gregs.voidps.event.Subscriber
+import world.gregs.voidps.event.*
 import kotlin.reflect.KFunction
 
 class InterfacePublisherMapping(function: KFunction<*>) : PublisherMapping(function) {

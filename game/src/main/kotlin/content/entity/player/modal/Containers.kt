@@ -11,7 +11,7 @@ class Containers(
     private val inventoryDefinitions: InventoryDefinitions,
 ) {
 
-    @InventoryUpdated
+    @InventoryUpdated("*")
     fun sendUpdates(player: Player, id: String) {
         val secondary = id.startsWith("_")
         val actualId = if (secondary) id.removePrefix("_") else id

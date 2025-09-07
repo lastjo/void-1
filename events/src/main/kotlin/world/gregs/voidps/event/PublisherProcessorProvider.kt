@@ -21,20 +21,6 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
         logger = environment.logger,
         superclass = ClassName("world.gregs.voidps.engine.event", "Publishers"),
         schemas = mapOf(
-            Option::class.qualifiedName!! to listOf(
-                OptionPublisherMapping(Publishers::playerGameObjectOption, Publishers::hasPlayerGameObjectOption),
-                OptionPublisherMapping(Publishers::playerPlayerOption, Publishers::hasPlayerPlayerOption),
-                OptionPublisherMapping(Publishers::playerNPCOption, Publishers::hasPlayerNPCOption),
-                OptionPublisherMapping(Publishers::playerFloorItemOption, Publishers::hasPlayerFloorItemOption),
-                OptionPublisherMapping(Publishers::npcGameObjectOption, Publishers::hasNPCGameObjectOption),
-                OptionPublisherMapping(Publishers::npcPlayerOption, Publishers::hasNPCPlayerOption),
-                OptionPublisherMapping(Publishers::npcNPCOption, Publishers::hasNPCNPCOption),
-                OptionPublisherMapping(Publishers::npcFloorItemOption, Publishers::hasNPCFloorItemOption),
-                OptionPublisherMapping(Publishers::characterGameObjectOption, Publishers::hasCharacterGameObjectOption),
-                OptionPublisherMapping(Publishers::characterPlayerOption, Publishers::hasCharacterPlayerOption),
-                OptionPublisherMapping(Publishers::characterNPCOption, Publishers::hasCharacterNPCOption),
-                OptionPublisherMapping(Publishers::characterGameObjectOption, Publishers::hasCharacterGameObjectOption),
-            ),
             Interface::class.qualifiedName!! to listOf(InterfacePublisherMapping(Publishers::interfaceOption)),
             Continue::class.qualifiedName!! to listOf(
                 InterfacePublisherMapping(Publishers::continueDialogueItem),
@@ -180,6 +166,20 @@ class PublisherProcessorProvider : SymbolProcessorProvider {
             ),
             Instruction::class.qualifiedName!! to listOf(
                 InstructionPublisherMapping(Publishers::instruction),
+            ),
+            Option::class.qualifiedName!! to listOf(
+                OptionPublisherMapping(Publishers::playerGameObjectOption, Publishers::hasPlayerGameObjectOption),
+                OptionPublisherMapping(Publishers::playerPlayerOption, Publishers::hasPlayerPlayerOption),
+                OptionPublisherMapping(Publishers::playerNPCOption, Publishers::hasPlayerNPCOption),
+                OptionPublisherMapping(Publishers::playerFloorItemOption, Publishers::hasPlayerFloorItemOption),
+                OptionPublisherMapping(Publishers::npcGameObjectOption, Publishers::hasNPCGameObjectOption),
+                OptionPublisherMapping(Publishers::npcPlayerOption, Publishers::hasNPCPlayerOption),
+                OptionPublisherMapping(Publishers::npcNPCOption, Publishers::hasNPCNPCOption),
+                OptionPublisherMapping(Publishers::npcFloorItemOption, Publishers::hasNPCFloorItemOption),
+                OptionPublisherMapping(Publishers::characterGameObjectOption, Publishers::hasCharacterGameObjectOption),
+                OptionPublisherMapping(Publishers::characterPlayerOption, Publishers::hasCharacterPlayerOption),
+                OptionPublisherMapping(Publishers::characterNPCOption, Publishers::hasCharacterNPCOption),
+                OptionPublisherMapping(Publishers::characterGameObjectOption, Publishers::hasCharacterGameObjectOption),
             ),
         ),
     )

@@ -24,6 +24,6 @@ class MovePublisherMapping(function: KFunction<*>) : PublisherMapping(function, 
         if (ids.isEmpty()) {
             return listOf(list)
         }
-        return ids.map { list + listOf(Equals("${method.parameters.first().first}.id", it)) }
+        return ids.map { list + listOf(Equals("${method.parameters.firstOrNull()?.first}.id", it)) }
     }
 }

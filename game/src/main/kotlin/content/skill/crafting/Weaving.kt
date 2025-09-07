@@ -33,7 +33,7 @@ class Weaving {
     val Item.weaving: Weaving
         get() = def["weaving"]
 
-    @Option("Weave", "loom_*") // arrive = false
+    @Option("Weave", "loom_*", arrive = false)
     suspend fun operate(player: Player, target: GameObject) {
         val strings = materials.map { it.weaving.to }
         val (index, amount) = player.makeAmountIndex(
@@ -46,7 +46,7 @@ class Weaving {
         startWeave(player, target, item, amount)
     }
 
-    @UseOn(on = "loom_*") // arrive = false
+    @UseOn(on = "loom_*", arrive = false)
     suspend fun use(player: Player, target: GameObject, item: Item) {
         if (!item.def.contains("weaving")) {
             return

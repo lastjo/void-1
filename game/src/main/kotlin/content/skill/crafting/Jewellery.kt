@@ -37,7 +37,7 @@ class Jewellery {
     val Item.jewellery: Jewellery?
         get() = def.getOrNull("jewellery")
 
-    @UseOn("*_mould", "furnace*") // TODO arrive = false
+    @UseOn("*_mould", "furnace*", arrive = false)
     fun use(player: Player, target: GameObject) {
         player.open("make_mould${if (World.members) "_slayer" else ""}")
     }

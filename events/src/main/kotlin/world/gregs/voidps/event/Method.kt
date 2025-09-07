@@ -12,6 +12,7 @@ data class Method(
     val methodName: String,
     val arguments: List<String> = emptyList(),
     val methodReturnType: String,
+    val arrive: Boolean = false,
 ) {
     fun method(): String = "${className.simpleName.replaceFirstChar { it.lowercase() }}.$methodName(${arguments.joinToString(", ")})"
 }
