@@ -19,7 +19,7 @@ import world.gregs.voidps.engine.script.Script
 @Script
 class ShopSell {
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("ShopSell")
 
     init {
         interfaceOption("Value", "inventory", "shop_side") {

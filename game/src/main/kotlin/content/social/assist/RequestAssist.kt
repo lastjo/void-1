@@ -45,7 +45,7 @@ class RequestAssist {
         Skill.Cooking,
         Skill.Herblore,
     )
-    val logger = InlineLogger()
+    val logger = InlineLogger("RequestAssist")
 
     init {
         playerOperate("Req Assist") {

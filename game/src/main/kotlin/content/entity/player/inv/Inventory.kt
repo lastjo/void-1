@@ -15,7 +15,7 @@ import world.gregs.voidps.engine.script.Script
 @Script
 class Inventory {
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("Inventory")
 
     init {
         interfaceRefresh("inventory") { player ->

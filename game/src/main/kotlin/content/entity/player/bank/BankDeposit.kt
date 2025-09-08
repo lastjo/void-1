@@ -20,7 +20,7 @@ import world.gregs.voidps.engine.script.Script
 @Script
 class BankDeposit {
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("BankDeposit")
 
     init {
         interfaceOption("Deposit-*", "inventory", "bank_side") {

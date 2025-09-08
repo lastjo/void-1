@@ -21,7 +21,7 @@ import world.gregs.voidps.type.random
 import kotlin.math.floor
 
 object Hit {
-    private val logger = InlineLogger()
+    private val logger = InlineLogger("Hit")
 
     /**
      * @return true if [chance] of hitting was successful

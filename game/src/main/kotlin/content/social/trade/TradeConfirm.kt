@@ -21,7 +21,7 @@ import world.gregs.voidps.engine.script.Script
 @Script
 class TradeConfirm {
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("TradeConfirm")
 
     init {
         interfaceOption("Accept", "accept", "trade_main") {

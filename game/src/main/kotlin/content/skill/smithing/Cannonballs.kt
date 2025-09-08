@@ -25,7 +25,7 @@ import world.gregs.voidps.engine.script.Script
 @Script
 class Cannonballs {
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("Cannonballs")
 
     init {
         itemOnObjectOperate("steel_bar", "furnace*") {

@@ -21,7 +21,7 @@ import world.gregs.voidps.engine.script.Script
 @Script
 class CraftingGuild {
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("CraftingGuild")
 
     init {
         objectOperate("Open", "guild_door_2_closed") {

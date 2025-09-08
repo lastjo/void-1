@@ -34,7 +34,7 @@ class Jewellery {
     val moulds = listOf("ring", "necklace", "amulet_unstrung", "bracelet")
     val gems = listOf("gold", "sapphire", "emerald", "ruby", "diamond", "dragonstone", "onyx", "enchanted_gem")
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("Jewellery")
 
     val Item.jewellery: Jewellery?
         get() = def.getOrNull("jewellery")

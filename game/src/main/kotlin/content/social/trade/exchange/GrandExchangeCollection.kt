@@ -21,7 +21,7 @@ import world.gregs.voidps.engine.script.Script
 class GrandExchangeCollection {
 
     val exchange: GrandExchange by inject()
-    val logger = InlineLogger()
+    val logger = InlineLogger("GrandExchangeCollection")
 
     init {
         interfaceOption("Collect*", "collect_slot_*", "grand_exchange") {

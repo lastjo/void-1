@@ -11,7 +11,7 @@ import world.gregs.voidps.engine.script.Script
 @Script
 class ItemDestroy {
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("ItemDestroy")
 
     init {
         inventoryOptions("Destroy", "Dismiss", "Release", inventory = "inventory") {

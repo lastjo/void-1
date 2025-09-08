@@ -35,7 +35,7 @@ import kotlin.math.min
 class Runecrafting {
 
     val itemDefinitions: ItemDefinitions by inject()
-    val logger = InlineLogger()
+    val logger = InlineLogger("Runecrafting")
 
     init {
         itemOnObjectOperate("*_essence", "*_altar") {

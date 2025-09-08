@@ -22,7 +22,7 @@ class GrandExchangeConfirm {
 
     val exchange: GrandExchange by inject()
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("GrandExchangeConfirm")
 
     init {
         interfaceOption("Confirm Offer", "confirm", "grand_exchange") {

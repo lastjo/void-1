@@ -18,7 +18,7 @@ import world.gregs.voidps.engine.script.Script
 class ItemTake {
 
     val floorItems: FloorItems by inject()
-    val logger = InlineLogger()
+    val logger = InlineLogger("ItemTake")
 
     init {
         floorItemOperate("Take") {

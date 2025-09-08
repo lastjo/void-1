@@ -21,7 +21,7 @@ import world.gregs.voidps.engine.script.Script
 @Script
 class VarrockPalaceDrain {
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("VarrockPalaceDrain")
 
     init {
         objectOperate("Search", "varrock_palace_drain") {

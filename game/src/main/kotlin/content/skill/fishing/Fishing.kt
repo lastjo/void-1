@@ -33,7 +33,7 @@ import world.gregs.voidps.type.random
 @Script
 class Fishing {
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("Fishing")
     val itemDefinitions: ItemDefinitions by inject()
 
     val NPC.spot: Map<String, Spot>

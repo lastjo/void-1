@@ -16,7 +16,7 @@ import world.gregs.voidps.engine.timer.epochSeconds
 import java.util.concurrent.TimeUnit
 
 object Loan {
-    private val logger = InlineLogger()
+    private val logger = InlineLogger("Loan")
 
     fun getSecondsRemaining(player: Player, timeKey: String): Int {
         val remaining = player.remaining(timeKey, epochSeconds())

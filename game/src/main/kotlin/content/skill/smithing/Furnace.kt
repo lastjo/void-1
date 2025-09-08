@@ -42,7 +42,7 @@ class Furnace {
         "rune_bar",
     )
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("Furnace")
     val itemDefinitions: ItemDefinitions by inject()
 
     init {

@@ -29,7 +29,7 @@ class GrandExchangeOffers {
 
     val exchange: GrandExchange by inject()
     val itemDefinitions: ItemDefinitions by inject()
-    val logger = InlineLogger()
+    val logger = InlineLogger("GrandExchangeOffers")
 
     init {
         playerSpawn { player ->

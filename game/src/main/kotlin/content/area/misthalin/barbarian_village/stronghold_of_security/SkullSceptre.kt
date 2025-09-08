@@ -18,7 +18,7 @@ import world.gregs.voidps.type.Tile
 @Script
 class SkullSceptre {
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("SkullSceptre")
 
     init {
         inventoryItem("Invoke", "skull_sceptre") {

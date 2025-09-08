@@ -17,7 +17,7 @@ import world.gregs.voidps.engine.script.Script
 @Script
 class BoneBurying {
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("BoneBurying")
 
     init {
         inventoryOption("Bury", "inventory") {

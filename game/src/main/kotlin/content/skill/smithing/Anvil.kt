@@ -70,7 +70,7 @@ class Anvil {
 
     val itemDefinitions: ItemDefinitions by inject()
     val interfaceDefinitions: InterfaceDefinitions by inject()
-    val logger = InlineLogger()
+    val logger = InlineLogger("Anvil")
 
     init {
         interfaceOption(id = "smithing") {

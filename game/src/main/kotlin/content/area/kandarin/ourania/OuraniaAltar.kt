@@ -24,7 +24,7 @@ import world.gregs.voidps.type.random
 class OuraniaAltar {
 
     val drops: DropTables by inject()
-    val logger = InlineLogger()
+    val logger = InlineLogger("OuraniaAltar")
 
     init {
         objectOperate("Craft-rune", "ourania_altar") {

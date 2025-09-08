@@ -14,7 +14,7 @@ import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 @Script
 class WornEquipment {
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("WornEquipment")
 
     init {
         interfaceRefresh("worn_equipment") { player ->

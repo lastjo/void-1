@@ -38,7 +38,7 @@ import kotlin.random.Random
 @Script
 class GiantMole {
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("GiantMole")
     val areas: AreaDefinitions by inject()
     val players: Players by inject()
 

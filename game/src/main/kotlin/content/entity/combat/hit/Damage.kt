@@ -25,7 +25,7 @@ import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.random
 
 object Damage {
-    private val logger = InlineLogger()
+    private val logger = InlineLogger("Damage")
 
     /**
      * Rolls a real hit against [target] without modifiers

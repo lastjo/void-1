@@ -15,7 +15,7 @@ import world.gregs.voidps.engine.script.Script
 class ItemDropping {
 
     val floorItems: FloorItems by inject()
-    val logger = InlineLogger()
+    val logger = InlineLogger("ItemDropping")
 
     init {
         inventoryOption("Drop", "inventory") {

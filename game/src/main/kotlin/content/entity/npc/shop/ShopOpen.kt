@@ -22,7 +22,7 @@ class ShopOpen {
 
     val itemDefinitions: ItemDefinitions by inject()
     val inventoryDefinitions: InventoryDefinitions by inject()
-    val logger = InlineLogger()
+    val logger = InlineLogger("ShopOpen")
 
     init {
         npcOperate("Trade") {

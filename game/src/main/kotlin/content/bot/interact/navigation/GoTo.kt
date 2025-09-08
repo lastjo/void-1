@@ -22,7 +22,7 @@ import world.gregs.voidps.network.client.instruction.InteractObject
 import world.gregs.voidps.network.client.instruction.Walk
 import world.gregs.voidps.type.Tile
 
-private val logger = InlineLogger()
+private val logger = InlineLogger("GoTo")
 
 suspend fun Bot.goToNearest(tag: String) = goToNearest { it.tags.contains(tag) }
 

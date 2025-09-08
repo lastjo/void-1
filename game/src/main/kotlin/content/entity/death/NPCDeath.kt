@@ -51,7 +51,7 @@ class NPCDeath {
         get() = get("loot_share_potential", 0)
         set(value) = set("loot_share_potential", value)
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("NPCDeath")
 
     init {
         npcDeath { npc ->

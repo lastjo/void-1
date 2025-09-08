@@ -27,7 +27,7 @@ import world.gregs.voidps.engine.script.Script
 class GrandExchangeItemSets {
 
     val enumDefinitions: EnumDefinitions by inject()
-    val logger = InlineLogger()
+    val logger = InlineLogger("GrandExchangeItemSets")
 
     init {
         interfaceOpen("exchange_item_sets") { player ->

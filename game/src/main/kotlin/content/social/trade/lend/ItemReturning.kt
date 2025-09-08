@@ -20,7 +20,7 @@ import world.gregs.voidps.engine.script.Script
 @Script
 class ItemReturning {
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("ItemReturning")
     val players: Players by inject()
 
     init {

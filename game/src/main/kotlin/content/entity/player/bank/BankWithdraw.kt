@@ -17,7 +17,7 @@ import world.gregs.voidps.engine.script.Script
 @Script
 class BankWithdraw {
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("BankWithdraw")
 
     init {
         interfaceOption("Withdraw-*", "inventory", "bank") {

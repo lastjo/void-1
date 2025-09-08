@@ -28,7 +28,7 @@ import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 class Equipping {
 
     val areas: AreaDefinitions by inject()
-    val logger = InlineLogger()
+    val logger = InlineLogger("Equipping")
 
     init {
         inventoryOptions("Wield", "Wear", "Hold", "Equip", inventory = "inventory") {

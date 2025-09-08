@@ -66,7 +66,7 @@ class GrandExchange(
 
     private val cancellations = mutableListOf<Cancellation>()
 
-    private val logger = InlineLogger()
+    private val logger = InlineLogger("GrandExchange")
 
     /**
      * Add an offer to sell an item starting next tick

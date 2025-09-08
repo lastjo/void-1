@@ -51,7 +51,7 @@ class ShootingStar {
     val objects: GameObjects by inject()
     val npcs: NPCs by inject()
     val players: Players by inject()
-    val logger = InlineLogger()
+    val logger = InlineLogger("ShootingStar")
 
     init {
         worldSpawn {

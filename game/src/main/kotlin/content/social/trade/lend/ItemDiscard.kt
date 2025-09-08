@@ -17,7 +17,7 @@ import world.gregs.voidps.engine.script.Script
 @Script
 class ItemDiscard {
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("ItemDiscard")
     val players: Players by inject()
     val itemDefinitions: ItemDefinitions by inject()
 

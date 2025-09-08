@@ -31,7 +31,7 @@ class Pickpocketing {
 
     val animationDefinitions: AnimationDefinitions by inject()
     val dropTables: DropTables by inject()
-    val logger = InlineLogger()
+    val logger = InlineLogger("Pickpocketing")
 
     init {
         npcApproach("Pickpocket") {

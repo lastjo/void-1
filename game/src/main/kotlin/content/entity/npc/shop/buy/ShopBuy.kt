@@ -24,7 +24,7 @@ import kotlin.math.min
 class ShopBuy {
 
     val itemDefs: ItemDefinitions by inject()
-    val logger = InlineLogger()
+    val logger = InlineLogger("ShopBuy")
 
     init {
         interfaceOption("Buy *", "button", "item_info") {

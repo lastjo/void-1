@@ -16,7 +16,7 @@ import world.gregs.voidps.engine.timer.timerStop
 @Script
 class QuestJournals {
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("QuestJournals")
 
     val questDefinitions: QuestDefinitions by inject()
 

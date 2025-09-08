@@ -16,7 +16,7 @@ import world.gregs.voidps.engine.script.Script
 @Script
 class Baskets {
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("Baskets")
 
     private data class Fruit(val name: String, val plural: String, val description: String = "a $name")
 

@@ -23,7 +23,7 @@ class Restock {
 
     val inventoryDefinitions: InventoryDefinitions by inject()
     val restockTimeTicks = TimeUnit.SECONDS.toTicks(60)
-    val logger = InlineLogger()
+    val logger = InlineLogger("Restock")
 
     init {
         playerSpawn { player ->

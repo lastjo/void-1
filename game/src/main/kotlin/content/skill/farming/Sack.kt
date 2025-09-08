@@ -24,7 +24,7 @@ class Sack {
         "cabbage" to Vegetable("cabbage", "cabbages"),
     )
 
-    val logger = InlineLogger()
+    val logger = InlineLogger("Sack")
 
     init {
         inventoryItem("Fill", "empty_sack") {

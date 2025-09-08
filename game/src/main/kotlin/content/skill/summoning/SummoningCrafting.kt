@@ -100,7 +100,7 @@ class SummoningCrafting {
         }
     }
 
-    private val logger = InlineLogger()
+    private val logger = InlineLogger("SummoningCrafting")
 
     /**
      * Crafts summoning familiar pouches.
