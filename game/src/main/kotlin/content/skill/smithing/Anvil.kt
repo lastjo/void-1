@@ -20,7 +20,6 @@ import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.data.definition.data.Smithing
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
@@ -28,44 +27,16 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
-import world.gregs.voidps.engine.queue.weakQueue
 import world.gregs.voidps.engine.suspend.SuspendableContext
 
 @Script
 class Anvil {
 
     val types = listOf(
-        "dagger",
-        "hatchet",
-        "mace",
-        "med_helm",
-        "bolts_unf",
-        "sword",
-        "dart_tip",
-        "nails",
-        "wire",
-        "spit",
-        "studs",
-        "arrowtips",
-        "scimitar",
-        "limbs",
-        "longsword",
-        "knife",
-        "full_helm",
-        "sq_shield",
-        "grapple_tip",
-        "warhammer",
-        "battleaxe",
-        "chainbody",
-        "kiteshield",
-        "claws",
-        "2h_sword",
-        "plateskirt",
-        "platelegs",
-        "platebody",
-        "pickaxe",
-        "crossbow_bolt",
-        "crossbow_limbs",
+        "dagger", "hatchet", "mace", "med_helm", "bolts_unf", "sword", "dart_tip", "nails", "wire",
+        "spit", "studs", "arrowtips", "scimitar", "limbs", "longsword", "knife", "full_helm", "sq_shield",
+        "grapple_tip", "warhammer", "battleaxe", "chainbody", "kiteshield", "claws", "2h_sword",
+        "plateskirt", "platelegs", "platebody", "pickaxe", "crossbow_bolt", "crossbow_limbs",
     )
 
     val itemDefinitions: ItemDefinitions by inject()
@@ -91,25 +62,32 @@ class Anvil {
                 statement("You need a hammer to work the metal with.")
                 return@itemOnObjectOperate
             }
+
             player.open("smithing")
             val bars = player.inventory.count(item.id)
             val metal = item.id.removeSuffix("_bar")
             player["smithing_metal"] = metal
             player.interfaces.sendText("smithing", "title", "${metal.toSentenceCase()} Smithing")
+
             for (type in types) {
                 val componentDefinition = interfaceDefinitions.getComponent("smithing", type)
                 val itemDefinition = itemDefinitions.get("${metal}_$type")
                 val id = itemDefinition.id
                 if (id != -1) {
-                    val amount = componentDefinition?.getOrNull("amount") ?: 1
-                    player.interfaces.sendItem("smithing", type, id, amount)
-                    val smithing: Smithing = itemDefinition["smithing"]
-                    player.interfaces.sendColour("smithing", "${type}_name", if (player.has(Skill.Smithing, smithing.level)) Colours.WHITE else Colours.BLACK)
+                    val quantity = componentDefinition?.getOrNull("amount") ?: 1
+                    player.interfaces.sendItem("smithing", type, id, quantity)
+                    val smithing: Smithing = itemDefinition.getOrNull("smithing") ?: continue
+                    player.interfaces.sendColour(
+                        "smithing",
+                        "${type}_name",
+                        if (player.has(Skill.Smithing, smithing.level)) Colours.WHITE else Colours.BLACK,
+                    )
                 }
                 val required = componentDefinition?.getOrNull("bars") ?: 1
                 player.interfaces.sendColour("smithing", "${type}_bar", if (bars < required) Colours.ORANGE else Colours.GREEN)
             }
 
+            // Visibility for special items
             player.interfaces.sendVisibility("smithing", "wire_bronze", metal == "bronze")
             player.interfaces.sendVisibility("smithing", "spit_iron", metal == "iron")
             player.interfaces.sendVisibility("smithing", "studs_steel", metal == "steel")
@@ -131,31 +109,32 @@ class Anvil {
     }
 
     suspend fun SuspendableContext<Player>.smith(player: Player, metal: String, type: String, amount: Int) {
-        val item = if (metal == "steel" && type == "lantern") {
-            "bullseye_lantern_frame"
-        } else if (metal == "mithril" && type == "grapple") {
-            "mithril_grapple_tip"
-        } else {
-            "${metal}_$type"
+        val item = when {
+            metal == "steel" && type == "lantern" -> "bullseye_lantern_frame"
+            metal == "mithril" && type == "grapple" -> "mithril_grapple_tip"
+            else -> "${metal}_$type"
         }
         val itemDefinition = itemDefinitions.get(item)
         val smithing: Smithing = itemDefinition.getOrNull("smithing") ?: return
         val component = interfaceDefinitions.getComponent("smithing", type)
         val quantity = component?.getOrNull("amount") ?: 1
-        val bars = component?.getOrNull("bars") ?: 1
+        val barsRequired = component?.getOrNull("bars") ?: 1
         val bar = "${metal}_bar"
-        val actualAmount = amount.coerceAtMost(player.inventory.count(bar) / bars)
+        val actualAmount = amount.coerceAtMost(player.inventory.count(bar) / barsRequired)
         player.closeMenu()
         player.softTimers.start("smithing")
+
         if (actualAmount <= 0) {
             statement("You don't have enough $metal bars to make a $type.")
             player.softTimers.stop("smithing")
             return
         }
-        smith(smithing, metal, bars, quantity, type, item, actualAmount, true)
+
+        smithBulk(player, smithing, metal, barsRequired, quantity, type, item, actualAmount)
     }
 
-    suspend fun SuspendableContext<Player>.smith(
+    suspend fun SuspendableContext<Player>.smithBulk(
+        player: Player,
         smithing: Smithing,
         metal: String,
         bars: Int,
@@ -163,12 +142,7 @@ class Anvil {
         type: String,
         item: String,
         count: Int,
-        first: Boolean,
     ) {
-        if (count <= 0) {
-            player.softTimers.stop("smithing")
-            return
-        }
         if (!player.inventory.contains("hammer")) {
             player.message("You need a Hammer to smith items.")
             player.softTimers.stop("smithing")
@@ -183,22 +157,34 @@ class Anvil {
         }
 
         val bar = "${metal}_bar"
-        player.anim("smith_item")
-        player.weakQueue("smithing", if (first) 0 else 5) {
-            player.inventory.transaction {
-                remove(bar, bars)
-                add(item, quantity)
-            }
-            when (player.inventory.transaction.error) {
-                is TransactionError.Deficient -> player.message("You do not have enough bars to smith this item.")
-                TransactionError.None -> {
-                    player.exp(Skill.Smithing, smithing.xp)
-                    smith(smithing, metal, bars, quantity, type, item, count - 1, false)
-                    val name = type.removeSuffix("_unf").replace("_", " ")
-                    player.message("You hammer the $metal and make${name.an()} $name.")
-                }
-                else -> logger.warn { "Error smithing ${this@smith} $item ${player.inventory.transaction.error} ${player.inventory.items.contentToString()}" }
-            }
+        val totalBarsRequired = bars * count
+        val totalItemsToMake = quantity * count
+        val barsAvailable = player.inventory.count(bar)
+        val actualCount = if (barsAvailable < totalBarsRequired) barsAvailable / bars else count
+        val totalItemsActual = actualCount * quantity
+
+        if (totalItemsActual <= 0) {
+            player.message("You do not have enough $metal bars to make any $type.")
+            player.softTimers.stop("smithing")
+            return
         }
+
+        player.anim("smith_item")
+        player.inventory.transaction {
+            remove(bar, actualCount * bars)
+            add(item, totalItemsActual)
+        }
+
+        when (player.inventory.transaction.error) {
+            is TransactionError.Deficient -> player.message("You do not have enough bars to smith this item.")
+            TransactionError.None -> {
+                player.experience.add(Skill.Smithing, smithing.xp * actualCount)
+                val name = type.removeSuffix("_unf").replace("_", " ")
+                player.message("You hammer the $metal and make $actualCount ${name.toTitleCase()}${if (actualCount > 1) "s" else ""}.")
+            }
+            else -> logger.warn { "Error smithing $item ${player.inventory.transaction.error} ${player.inventory.items.contentToString()}" }
+        }
+
+        player.softTimers.stop("smithing")
     }
 }
