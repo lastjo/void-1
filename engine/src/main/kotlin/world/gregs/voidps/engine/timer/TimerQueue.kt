@@ -1,5 +1,6 @@
 package world.gregs.voidps.engine.timer
 
+import world.gregs.voidps.engine.GameLoop
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.event.EventDispatcher
@@ -85,5 +86,13 @@ class TimerQueue(
         for (name in names) {
             stop(name, logout = true)
         }
+    }
+
+    override fun remaining(name: String): Int {
+        if (!names.contains(name)) {
+            return -1
+        }
+        val task = queue.first { it.name == name }
+        return task.nextTick - GameLoop.tick
     }
 }
