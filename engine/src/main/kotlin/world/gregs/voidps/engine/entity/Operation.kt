@@ -116,8 +116,8 @@ interface Operation {
             override fun clear() {}
         }
         private val noDelays = mutableSetOf<Operation>()
-        var playerObjectDispatcher = NoDelayDispatcher(noDelays)
-        var playerFloorItemDispatcher = NoDelayDispatcher(noDelays)
+        var playerObjectDispatcher = NoDelayDispatcher(noDelays, "@Operate")
+        var playerFloorItemDispatcher = NoDelayDispatcher(noDelays, "@Operate")
         var npcPlayerDispatcher = MapDispatcher<Operation>("@Operate")
         var npcNpcDispatcher = MapDispatcher<Operation>("@Operate")
         var npcObjectDispatcher = MapDispatcher<Operation>("@Operate")
@@ -129,7 +129,7 @@ interface Operation {
         }
 
         override suspend fun operate(player: Player, target: NPC, option: String) {
-            playerNpcDispatcher.onFirst("$option:${target.id}", option) { instance ->
+            playerNpcDispatcher.onFirst("$option:${target.def(player).stringId}", option) { instance ->
                 if (option != "Talk-to") {
                     instance.operate(player, target, option)
                     return@onFirst
@@ -142,7 +142,7 @@ interface Operation {
             }
         }
 
-        override suspend fun operate(player: Player, target: GameObject, option: String) = playerObjectDispatcher.onFirst("$option:${target.id}", option) { instance ->
+        override suspend fun operate(player: Player, target: GameObject, option: String) = playerObjectDispatcher.onFirst("$option:${target.def(player).stringId}", option) { instance ->
             if (!noDelays.contains(instance)) {
                 player.arriveDelay()
             }

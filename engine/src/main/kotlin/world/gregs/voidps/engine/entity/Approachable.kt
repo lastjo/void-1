@@ -102,8 +102,8 @@ interface Approachable {
         var playerPlayerDispatcher = MapDispatcher<Approachable>("@Approach")
         var playerNpcDispatcher = MapDispatcher<Approachable>("@Approach")
         private val noDelays = mutableSetOf<Approachable>()
-        var playerObjectDispatcher = NoDelayDispatcher(noDelays)
-        var playerFloorItemDispatcher = NoDelayDispatcher(noDelays)
+        var playerObjectDispatcher = NoDelayDispatcher(noDelays, "@Approach")
+        var playerFloorItemDispatcher = NoDelayDispatcher(noDelays, "@Approach")
         var npcPlayerDispatcher = MapDispatcher<Approachable>("@Approach")
         var npcNpcDispatcher = MapDispatcher<Approachable>("@Approach")
         var npcObjectDispatcher = MapDispatcher<Approachable>("@Approach")
@@ -113,11 +113,11 @@ interface Approachable {
             instance.approach(player, target, option)
         }
 
-        override suspend fun approach(player: Player, target: NPC, option: String) = playerNpcDispatcher.onFirst("$option:${target.id}", option) { instance ->
+        override suspend fun approach(player: Player, target: NPC, option: String) = playerNpcDispatcher.onFirst("$option:${target.def(player).stringId}", option) { instance ->
             instance.approach(player, target, option)
         }
 
-        override suspend fun approach(player: Player, target: GameObject, option: String) = playerObjectDispatcher.onFirst("$option:${target.id}", option) { instance ->
+        override suspend fun approach(player: Player, target: GameObject, option: String) = playerObjectDispatcher.onFirst("$option:${target.def(player).stringId}", option) { instance ->
             if (!noDelays.contains(instance)) {
                 player.arriveDelay()
             }
