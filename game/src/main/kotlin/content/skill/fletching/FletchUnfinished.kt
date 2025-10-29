@@ -25,56 +25,69 @@ class FletchUnfinished {
         itemOnItem("knife", "*logs*") {
             val displayItems = toItem.def.extras?.get("fletchables") as? List<String> ?: return@itemOnItem
             it.weakQueue("fletching_make_dialog") {
-                val (selected, amount) = makeAmount(
+                val (selected, _) = makeAmount(
                     displayItems,
                     type = "Make",
                     maximum = 27,
                     text = "What would you like to fletch?",
                 )
+
                 val itemToFletch: Fletching = itemDefinitions.get(selected).getOrNull("fletching_unf") ?: return@weakQueue
                 if (!it.has(Skill.Fletching, itemToFletch.level, true)) {
                     return@weakQueue
                 }
-                fletch(it, selected, itemToFletch, toItem.id, amount)
+
+                fletchAll(it, selected, itemToFletch, toItem.id)
             }
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
-    fun fletch(player: Player, addItem: String, addItemDef: Fletching, removeItem: String, amount: Int) {
-        if (amount <= 0) {
-            player.softTimers.stop("fletching")
+    fun fletchAll(player: Player, addItem: String, addItemDef: Fletching, removeItem: String) {
+        val logsCount = getTotalLogs(player, removeItem)
+        if (logsCount <= 0) {
+            player.message("You don't have any logs to fletch.", ChatType.Game)
             return
         }
 
-        if (!player.inventory.contains("knife") || !player.inventory.contains(removeItem)) {
-            player.softTimers.stop("fletching")
+        val notedId = getNotedId(removeItem)
+        val success = player.inventory.transaction {
+            when {
+                player.inventory.contains(removeItem) -> remove(removeItem, logsCount)
+                player.inventory.contains(notedId) -> remove(notedId, logsCount)
+                else -> return@transaction
+            }
+            add(addItem, logsCount * addItemDef.makeAmount)
+        }
+
+        if (!success) {
+            player.message("You don't have enough space in your inventory.", ChatType.Game)
             return
         }
 
-        player.weakQueue("fletching", addItemDef.tick) {
-            val success = player.inventory.transaction {
-                remove(removeItem)
-                add(addItem, addItemDef.makeAmount)
-            }
+        val itemCreated = getFletched(addItem)
+        player.message("You carefully cut all your logs into $itemCreated.", ChatType.Game)
+        player.experience.add(Skill.Fletching, addItemDef.xp * logsCount)
+        player.anim(addItemDef.animation)
+    }
 
-            if (!success) {
-                return@weakQueue
-            }
+    private fun getTotalLogs(player: Player, item: String): Int {
+        val notedId = getNotedId(item)
+        return player.inventory.count(item) + player.inventory.count(notedId)
+    }
 
-            val itemCreated = getFletched(addItem)
-            player.message("You carefully cut the wood into $itemCreated.", ChatType.Game)
-            player.experience.add(Skill.Fletching, addItemDef.xp)
-            player.anim(addItemDef.animation)
-            fletch(player, addItem, addItemDef, removeItem, amount - 1)
-        }
+    private fun getNotedId(item: String): String {
+        val def = itemDefinitions.get(item)
+        val noted = def.noteId
+        return if (noted != -1) itemDefinitions.get(noted).stringId else item
     }
 
     fun getFletched(itemName: String): String = when {
-        itemName.contains("shortbow", ignoreCase = true) -> "a Shortbow"
-        itemName.contains("longbow", ignoreCase = true) -> "a Longbow"
-        itemName.contains("stock", ignoreCase = true) -> "a Stock"
-        itemName.contains("shaft", ignoreCase = true) -> "Shafts"
-        else -> "null"
+        itemName.contains("shortbow", ignoreCase = true) -> "Shortbows"
+        itemName.contains("longbow", ignoreCase = true) -> "Longbows"
+        itemName.contains("stock", ignoreCase = true) -> "Stocks"
+        itemName.contains("shaft", ignoreCase = true) -> "Arrow shafts"
+        else -> "items"
     }
 }
+
+
