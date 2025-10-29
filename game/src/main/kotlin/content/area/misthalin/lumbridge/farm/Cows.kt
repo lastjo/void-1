@@ -6,6 +6,7 @@ import content.quest.questCompleted
 import world.gregs.voidps.engine.Api
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.interact.itemOnNPCOperate
+import world.gregs.voidps.engine.entity.Id
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
@@ -15,32 +16,33 @@ import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
-import world.gregs.voidps.engine.timer.npcTimerStart
-import world.gregs.voidps.engine.timer.npcTimerTick
+import world.gregs.voidps.engine.timer.Timer
 import world.gregs.voidps.type.random
 
 @Script
 class Cows : Api {
 
+    @Id("cow_*")
     override fun spawn(npc: NPC) {
-        if (npc.id.startsWith("cow_")) {
-            npc.softTimers.start("eat_grass")
+        npc.softTimers.start("eat_grass")
+    }
+
+    @Timer("eat_grass")
+    override fun start(npc: NPC, timer: String, restart: Boolean): Int {
+        npc.mode = EmptyMode
+        return random.nextInt(50, 200)
+    }
+
+    @Timer("eat_grass")
+    override fun tick(npc: NPC, timer: String): Int {
+        if (npc.mode == EmptyMode) {
+            npc.say("Moo")
+            npc.anim("cow_eat_grass")
         }
+        return Timer.CONTINUE
     }
 
     init {
-        npcTimerStart("eat_grass") { npc ->
-            npc.mode = EmptyMode
-            interval = random.nextInt(50, 200)
-        }
-
-        npcTimerTick("eat_grass") { npc ->
-            if (npc.mode == EmptyMode) {
-                npc.say("Moo")
-                npc.anim("cow_eat_grass")
-            }
-        }
-
         itemOnNPCOperate("*", "cow*") {
             player.message("The cow doesn't want that.")
         }

@@ -10,6 +10,7 @@ import world.gregs.voidps.engine.client.ui.event.interfaceClose
 import world.gregs.voidps.engine.client.ui.event.interfaceOpen
 import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.data.definition.EnumDefinitions
+import world.gregs.voidps.engine.entity.Id
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.NPCs
@@ -26,9 +27,7 @@ import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.queue.softQueue
-import world.gregs.voidps.engine.timer.npcTimerStart
-import world.gregs.voidps.engine.timer.npcTimerTick
-import world.gregs.voidps.engine.timer.toTicks
+import world.gregs.voidps.engine.timer.*
 import world.gregs.voidps.network.login.protocol.visual.update.player.BodyColour
 import world.gregs.voidps.network.login.protocol.visual.update.player.BodyPart
 import world.gregs.voidps.type.random
@@ -118,27 +117,27 @@ class MakeoverMage : Api {
             }
             player<Quiz>("Uh, thanks, I guess.")
         }
-
-        npcTimerStart("makeover") {
-            interval = TimeUnit.SECONDS.toTicks(250)
-        }
-
-        npcTimerTick("makeover") { npc ->
-            val current: String = npc["transform_id", "makeover_mage_male"]
-            val toFemale = current == "makeover_mage_male"
-            npc.transform(if (toFemale) "makeover_mage_female" else "makeover_mage_male")
-            npc.gfx("curse_impact", delay = 15)
-            npc.anim("bind_staff")
-            npc.softQueue("transform", 1) {
-                npc.say(if (toFemale) "Ooh!" else "Aha!")
-            }
-        }
     }
 
-    override fun spawn(npc: NPC) {
-        if (npc.id.startsWith("makeover_mage")) {
-            npc.softTimers.start("makeover")
+    @Timer("makeover")
+    override fun start(npc: NPC, timer: String, restart: Boolean): Int = TimeUnit.SECONDS.toTicks(250)
+
+    @Timer("makeover")
+    override fun tick(npc: NPC, timer: String): Int {
+        val current: String = npc["transform_id", "makeover_mage_male"]
+        val toFemale = current == "makeover_mage_male"
+        npc.transform(if (toFemale) "makeover_mage_female" else "makeover_mage_male")
+        npc.gfx("curse_impact", delay = 15)
+        npc.anim("bind_staff")
+        npc.softQueue("transform", 1) {
+            npc.say(if (toFemale) "Ooh!" else "Aha!")
         }
+        return Timer.CONTINUE
+    }
+
+    @Id("makeover_mage*")
+    override fun spawn(npc: NPC) {
+        npc.softTimers.start("makeover")
     }
 
     suspend fun ChoiceBuilder<NPCOption<Player>>.more(): Unit = option<Quiz>("Tell me more about this 'makeover'.") {

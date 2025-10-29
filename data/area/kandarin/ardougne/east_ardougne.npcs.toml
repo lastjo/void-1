@@ -192,9 +192,6 @@ examine = "Keeps the peace... kind of."
 [edmond_ardougne]
 id = 3213
 
-[elena_ardougne]
-id = 335
-
 [jerico]
 id = 366
 examine = "He looks friendly enough."
@@ -312,10 +309,6 @@ id = 6386
 [penguin_keeper_ardougne]
 id = 6891
 examine = "He looks like the type of guy who would keep penguins."
-
-[alrena]
-id = 710
-examine = "She looks concerned."
 
 [tool_leprechaun_ardougne]
 id = 7563

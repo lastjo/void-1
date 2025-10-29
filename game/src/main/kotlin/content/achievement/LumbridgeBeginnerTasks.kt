@@ -10,6 +10,7 @@ import content.skill.melee.weapon.attackStyle
 import content.skill.prayer.prayerStart
 import content.skill.ranged.ammo
 import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.client.variable.Variable
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.data.definition.WeaponStyleDefinitions
 import world.gregs.voidps.engine.entity.character.mode.move.enterArea
@@ -19,10 +20,11 @@ import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.maxLevelChange
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.ObjectShape
+import world.gregs.voidps.engine.event.AuditLog
 import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.*
-import world.gregs.voidps.engine.timer.timerStop
+import world.gregs.voidps.engine.timer.Timer
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.Tile
 
@@ -41,11 +43,24 @@ class LumbridgeBeginnerTasks : Api {
         }
     }
 
+    @Variable("task_progress_overall,quest_points")
     override fun variableSet(player: Player, key: String, from: Any?, to: Any?) {
         if (key == "task_progress_overall" && (from == null || from is Int && from < 10) && to is Int && to >= 10) {
             player["on_your_way_task"] = true
         } else if (key == "quest_points" && (from == null || from is Int && from < 4) && to != null && to is Int && to >= 4) {
             player["fledgeling_adventurer_task"] = true
+        }
+    }
+
+    @Timer("firemaking")
+    override fun stop(player: Player, timer: String, logout: Boolean) {
+        val regular: Boolean = player.remove("burnt_regular_log") ?: return
+        val tile: Tile = player.remove("fire_tile") ?: return
+        if (regular) {
+            val fire = objects.getShape(tile, ObjectShape.CENTRE_PIECE_STRAIGHT)
+            if (fire != null && fire.id.startsWith("fire_")) {
+                player["log_a_rhythm_task"] = true
+            }
         }
     }
 
@@ -76,17 +91,6 @@ class LumbridgeBeginnerTasks : Api {
             if (!player["log_a_rhythm_task", false]) {
                 player["burnt_regular_log"] = true
                 player["fire_tile"] = player.tile
-            }
-        }
-
-        timerStop("firemaking") { player ->
-            val regular: Boolean = player.remove("burnt_regular_log") ?: return@timerStop
-            val tile: Tile = player.remove("fire_tile") ?: return@timerStop
-            if (regular) {
-                val fire = objects.getShape(tile, ObjectShape.CENTRE_PIECE_STRAIGHT)
-                if (fire != null && fire.id.startsWith("fire_")) {
-                    player["log_a_rhythm_task"] = true
-                }
             }
         }
 
@@ -216,6 +220,7 @@ class LumbridgeBeginnerTasks : Api {
         maxLevelChange { player ->
             if (!player["on_the_level_task", false] || !player["quarter_centurion_task", false]) {
                 val total = Skill.all.sumOf { (if (it == Skill.Constitution) player.levels.getMax(it) / 10 - 10 else player.levels.getMax(it) - 1) }
+                AuditLog.event(player, "total_level_up", total)
                 if (total == 10) {
                     player["on_the_level_task"] = true
                 } else if (total == 25) {

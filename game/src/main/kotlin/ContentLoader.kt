@@ -3,10 +3,13 @@ import content.skill.thieving.Stole
 import world.gregs.voidps.engine.client.ui.chat.plural
 import world.gregs.voidps.engine.client.variable.VariableSet
 import world.gregs.voidps.engine.dispatch.Dispatcher
+import world.gregs.voidps.engine.entity.Approachable
+import world.gregs.voidps.engine.entity.Operation
 import world.gregs.voidps.engine.entity.Spawn
 import world.gregs.voidps.engine.entity.character.mode.move.Moved
 import world.gregs.voidps.engine.entity.character.player.skill.level.LevelChanged
 import world.gregs.voidps.engine.get
+import world.gregs.voidps.engine.timer.TimerApi
 import java.nio.file.NoSuchFileException
 import kotlin.system.exitProcess
 
@@ -31,6 +34,35 @@ object ContentLoader {
         method("variableSet", "Player", "String", "Any?", "Any?") to VariableSet.playerDispatcher,
         method("variableSet", "NPC", "String", "Any?", "Any?") to VariableSet.npcDispatcher,
         method("stole", "Player", "GameObject", "Item") to Stole.dispatcher,
+        method("Dialogue.talk", "Player", "NPC") to Operation.talkDispatcher,
+        method("operate", "Player", "Player", "String") to Operation.playerPlayerDispatcher,
+        method("operate", "Player", "NPC", "String") to Operation.playerNpcDispatcher,
+        method("operate", "Player", "GameObject", "String") to Operation.playerObjectDispatcher,
+        method("operate", "Player", "FloorItem", "String") to Operation.playerFloorItemDispatcher,
+        method("operate", "NPC", "Player", "String") to Operation.npcPlayerDispatcher,
+        method("operate", "NPC", "NPC", "String") to Operation.npcNpcDispatcher,
+        method("operate", "NPC", "GameObject", "String") to Operation.npcObjectDispatcher,
+        method("operate", "NPC", "FloorItem", "String") to Operation.npcFloorItemDispatcher,
+        method("approach", "Player", "Player", "String") to Approachable.playerPlayerDispatcher,
+        method("approach", "Player", "NPC", "String") to Approachable.playerNpcDispatcher,
+        method("approach", "Player", "GameObject", "String") to Approachable.playerObjectDispatcher,
+        method("approach", "Player", "FloorItem", "String") to Approachable.playerFloorItemDispatcher,
+        method("approach", "NPC", "Player", "String") to Approachable.npcPlayerDispatcher,
+        method("approach", "NPC", "NPC", "String") to Approachable.npcNpcDispatcher,
+        method("approach", "NPC", "GameObject", "String") to Approachable.npcObjectDispatcher,
+        method("approach", "NPC", "FloorItem", "String") to Approachable.npcFloorItemDispatcher,
+        method("start", "Player", "String", "Boolean", returnType = "Int") to TimerApi.playerStartDispatcher,
+        method("tick", "Player", "String", returnType = "Int") to TimerApi.playerTickDispatcher,
+        method("stop", "Player", "String", "Boolean") to TimerApi.playerStopDispatcher,
+        method("start", "NPC", "String", "Boolean", returnType = "Int") to TimerApi.npcStartDispatcher,
+        method("tick", "NPC", "String", returnType = "Int") to TimerApi.npcTickDispatcher,
+        method("stop", "NPC", "String", "Boolean") to TimerApi.npcStopDispatcher,
+        method("start", "Character", "String", "Boolean", returnType = "Int") to TimerApi.characterStartDispatcher,
+        method("tick", "Character", "String", returnType = "Int") to TimerApi.characterTickDispatcher,
+        method("stop", "Character", "String", "Boolean") to TimerApi.characterStopDispatcher,
+        method("start", "String", returnType = "Int") to TimerApi.worldStartDispatcher,
+        method("tick", "String", returnType = "Int") to TimerApi.worldTickDispatcher,
+        method("stop", "String", "Boolean") to TimerApi.worldStopDispatcher,
     )
 
     fun load() {
@@ -63,6 +95,7 @@ object ContentLoader {
             logger.error(e) { "Failed to load script: $script" }
             logger.error { "If the file exists make sure the scripts package is correct." }
             logger.error { "If the file has been deleted try running 'gradle cleanScriptMetadata'." }
+            logger.error { "Otherwise make sure the return type is written explicitly." }
             exitProcess(1)
         }
 
@@ -72,14 +105,14 @@ object ContentLoader {
         logger.info { "Loaded $scriptCount ${"script".plural(scriptCount)} in ${System.currentTimeMillis() - start}ms" }
     }
 
-    private fun method(name: String, vararg argTypes: String, returnType: Any = Unit, annotation: String? = null) = buildString {
+    private fun method(name: String, vararg argTypes: String, returnType: String = "", annotation: String? = null) = buildString {
         if (annotation != null) {
             append(annotation).append("@")
         }
         append(name)
         append("(").append(argTypes.joinToString(",")).append(")")
-        if (returnType != Unit) {
-            append(":").append(returnType::class.simpleName)
+        if (returnType.isNotBlank()) {
+            append(":").append(returnType)
         }
     }
 

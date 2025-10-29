@@ -38,9 +38,11 @@ import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
+import world.gregs.voidps.engine.entity.character.player.skill.SkillId
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.ObjectShape
 import world.gregs.voidps.engine.entity.playerDespawn
+import world.gregs.voidps.engine.event.AuditLog
 import world.gregs.voidps.engine.event.Context
 import world.gregs.voidps.engine.event.Events
 import world.gregs.voidps.engine.event.Script
@@ -155,21 +157,20 @@ class Delrith : Api {
         }
     }
 
+    @SkillId(Skill.Constitution, "delrith")
     override fun levelChanged(npc: NPC, skill: Skill, from: Int, to: Int) {
-        if (npc.id == "delrith" && skill == Skill.Constitution) {
-            if (to > 0) {
-                return
-            }
-            if (npc.queue.contains("death")) {
-                npc.queue.clear("death")
-            }
-            npc.strongQueue("death", TimeUnit.MINUTES.toTicks(5)) {
-                npc.emit(Death)
-            }
-            //    player.playSound("demon_slayer_portal_open")
-            npc.transform("delrith_weakened")
-            npc.mode = PauseMode
+        if (to > 0) {
+            return
         }
+        if (npc.queue.contains("death")) {
+            npc.queue.clear("death")
+        }
+        npc.strongQueue("death", TimeUnit.MINUTES.toTicks(5)) {
+            npc.emit(Death)
+        }
+        //    player.playSound("demon_slayer_portal_open")
+        npc.transform("delrith_weakened")
+        npc.mode = PauseMode
     }
 
     fun exitArea(player: Player, to: Tile): Boolean {
@@ -299,6 +300,7 @@ class Delrith : Api {
     }
 
     fun Context<Player>.questComplete() {
+        AuditLog.event(player, "quest_completed", "demon_slayer")
         player.anim("silverlight_showoff")
         player.gfx("silverlight_sparkle")
         player.sound("equip_silverlight")
