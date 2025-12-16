@@ -21,14 +21,14 @@ defaults = [
 [auburys_rune_shop]
 id = 5
 defaults = [
-    { id = "fire_rune", amount = 3000 },
-    { id = "water_rune", amount = 3000 },
-    { id = "air_rune", amount = 3000 },
-    { id = "earth_rune", amount = 3000 },
-    { id = "mind_rune", amount = 1000 },
+    { id = "fire_rune", amount = 300 },
+    { id = "water_rune", amount = 300 },
+    { id = "air_rune", amount = 300 },
+    { id = "earth_rune", amount = 300 },
+    { id = "mind_rune", amount = 100 },
     { id = "body_rune", amount = 100 },
-    { id = "chaos_rune", amount = 3000 },
-    { id = "death_rune", amount = 3000 },
+    { id = "chaos_rune", amount = 30 },
+    { id = "death_rune", amount = 10 },
 ]
 
 [varrock_sword_shop]

@@ -53,10 +53,10 @@ clone = "greater_demon"
 
 [lesser_demon]
 id = 82
-hitpoints = 100000
+hitpoints = 790
 att = 68
 str = 70
-def = 0
+def = 71
 style = "slash"
 max_hit_melee = 80
 wander_radius = 4
@@ -65,7 +65,7 @@ combat_sounds = "demon"
 drop_table = "lesser_demon"
 hunt_mode = "aggressive"
 categories = ["demons"]
-respawn_delay = 1
+respawn_delay = 30
 examine = "Lesser, but still pretty big."
 
 [lesser_demon_2]

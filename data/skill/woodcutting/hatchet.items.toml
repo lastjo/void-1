@@ -244,7 +244,7 @@ canoe_chance_max = 350
 aka = ["dragon_axe", "daxe"]
 special_energy = 1000
 special = "clobber"
-rank = 12
+rank = 7
 slot = "Weapon"
 examine = "A very powerful hatchet."
 

@@ -26,7 +26,7 @@ class HeadlessArrows {
                 val (selected, amount) = makeAmount(
                     listOf("headless_arrow"),
                     type = "Make sets: ",
-                    maximum = 1000,
+                    maximum = 10,
                     text = "How many sets of 15 do you wish to feather?",
                 )
                 makeHeadlessArrows(player, selected, amount)
