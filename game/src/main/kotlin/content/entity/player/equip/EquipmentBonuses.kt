@@ -1,32 +1,23 @@
 package content.entity.player.equip
 
 import content.entity.player.equip.EquipBonuses.names
-import content.entity.player.inv.InventoryOption
 import content.entity.player.modal.Tab
 import content.entity.player.modal.tab
 import world.gregs.voidps.cache.definition.data.ItemDefinition
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.sendScript
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.event.interfaceRefresh
-import world.gregs.voidps.engine.client.ui.interfaceOption
-import world.gregs.voidps.engine.client.ui.menu
-import world.gregs.voidps.engine.client.ui.open
+import world.gregs.voidps.engine.client.ui.*
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.appearance
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.equipment
-import world.gregs.voidps.engine.inv.inventoryChanged
 import world.gregs.voidps.network.login.protocol.visual.VisualMask.APPEARANCE_MASK
 import java.math.RoundingMode
 import java.text.DecimalFormat
 
-@Script
-class EquipmentBonuses : Api {
+class EquipmentBonuses : Script {
 
     val definitions: ItemDefinitions by inject()
 
@@ -34,63 +25,64 @@ class EquipmentBonuses : Api {
         roundingMode = RoundingMode.FLOOR
     }
 
-    override fun spawn(player: Player) {
-        updateStats(player)
-        player["bank_hidden"] = true
-    }
-
     init {
-        inventoryChanged("worn_equipment") { player ->
-            updateStats(player, fromItem, false)
-            updateStats(player, item, true)
+        playerSpawn {
+            updateStats(this)
+            set("bank_hidden", true)
         }
 
-        interfaceOpen("equipment_bonuses") { player ->
-            player.interfaces.sendVisibility("equipment_bonuses", "close", !player["equipment_bank_button", false])
-            updateEmote(player)
-            player.open("equipment_side")
-            player.interfaceOptions.unlockAll("equipment_bonuses", "inventory", 0 until 16)
-            updateStats(player)
-            player["bank_hidden"] = true
-            player.sendScript("bank_show_equip_screen")
-            player.tab(Tab.Inventory)
+        slotChanged("worn_equipment") {
+            updateStats(this, it.fromItem, false)
+            updateStats(this, it.item, true)
         }
 
-        interfaceClose("equipment_bonuses") { player ->
-            player.open("inventory")
+        interfaceOpened("equipment_bonuses") {
+            interfaces.sendVisibility("equipment_bonuses", "close", !get("equipment_bank_button", false))
+            updateEmote(this)
+            open("equipment_side")
+            interfaceOptions.unlockAll("equipment_bonuses", "inventory", 0 until 16)
+            updateStats(this)
+            set("bank_hidden", true)
+            sendScript("bank_show_equip_screen")
+            tab(Tab.Inventory)
         }
 
-        interfaceRefresh("equipment_side") { player ->
-            player.interfaceOptions.send("equipment_side", "inventory")
-            player.interfaceOptions.unlockAll("equipment_side", "inventory", 0 until 28)
+        interfaceClosed("equipment_bonuses") {
+            close("equipment_side")
+            open("inventory")
         }
 
-        interfaceOption("Stats", "inventory", "equipment_bonuses") {
-            if (player.equipping()) {
-                showStats(player, definitions.get(item.id))
+        interfaceRefresh("equipment_side") {
+            interfaceOptions.send("equipment_side", "inventory")
+            interfaceOptions.unlockAll("equipment_side", "inventory", 0 until 28)
+        }
+
+        interfaceOption("Stats", "equipment_bonuses:inventory") { (item) ->
+            if (equipping()) {
+                showStats(this, definitions.get(item.id))
             }
         }
 
-        interfaceOption("Done", "stats_done", "equipment_bonuses") {
-            if (player.equipping()) {
-                player.clear("equipment_titles")
-                player.clear("equipment_names")
-                player.clear("equipment_stats")
-                player.clear("equipment_name")
+        interfaceOption("Done", "equipment_bonuses:stats_done") {
+            if (equipping()) {
+                clear("equipment_titles")
+                clear("equipment_names")
+                clear("equipment_stats")
+                clear("equipment_name")
             }
         }
 
-        interfaceOption("Equip", "inventory", "equipment_side") {
-            if (player.equipping()) {
-                player.emit(InventoryOption(player, "inventory", item, itemSlot, "Wield"))
-                checkEmoteUpdate(player)
+        interfaceOption("Equip", "equipment_side:inventory") { (item, itemSlot) ->
+            if (equipping()) {
+                InterfaceApi.itemOption(this, ItemOption(item, itemSlot, "inventory", "Wield"))
+                checkEmoteUpdate(this)
             }
         }
 
-        interfaceOption("Remove", "inventory", "equipment_bonuses") {
-            if (player.equipping()) {
-                player.emit(InventoryOption(player, "worn_equipment", item, itemSlot, "Remove"))
-                checkEmoteUpdate(player)
+        interfaceOption("Remove", "equipment_bonuses:inventory") { (item, itemSlot) ->
+            if (equipping()) {
+                InterfaceApi.itemOption(this, ItemOption(item, itemSlot, "inventory", "Remove"))
+                checkEmoteUpdate(this)
             }
         }
     }

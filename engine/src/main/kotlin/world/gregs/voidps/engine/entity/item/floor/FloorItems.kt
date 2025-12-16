@@ -42,12 +42,12 @@ class FloorItems(
 
     override fun run() {
         for (floorItem in removeQueue) {
-            floorItem.emit(Despawn)
+            Despawn.floorItem(floorItem)
         }
         removeQueue.clear()
         for (floorItem in addQueue) {
             add(floorItem)
-            Spawn.spawn(floorItem)
+            Spawn.floorItem(floorItem)
         }
         addQueue.clear()
     }

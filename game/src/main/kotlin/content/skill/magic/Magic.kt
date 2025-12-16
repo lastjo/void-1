@@ -1,11 +1,8 @@
 package content.skill.magic
 
-import content.entity.combat.characterCombatSwing
-import content.entity.combat.combatSwing
 import content.entity.combat.hit.hit
 import content.entity.npc.combat.NPCAttack
 import content.entity.proj.shoot
-import content.entity.sound.sound
 import content.skill.magic.book.modern.teleBlock
 import content.skill.magic.spell.Spell
 import content.skill.magic.spell.removeSpellItems
@@ -18,37 +15,17 @@ import world.gregs.voidps.engine.data.definition.SpellDefinitions
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
-import world.gregs.voidps.engine.inject
+import world.gregs.voidps.engine.entity.character.sound
+import world.gregs.voidps.engine.get
 
-@Script
-class Magic {
-
-    val spellDefinitions: SpellDefinitions by inject()
-
-    val animationDefinitions: AnimationDefinitions by inject()
-
-    init {
-        combatSwing(style = "blaze") { player ->
-            if (!castSpell(player, target)) {
-                cancel()
-            }
-        }
-
-        characterCombatSwing(style = "magic") { source ->
-            if (!castSpell(source, target)) {
-                cancel()
-            }
-        }
-    }
-
+object Magic {
     fun castSpell(source: Character, target: Character): Boolean {
         if (source.spell.isNotBlank() && source is Player && !source.removeSpellItems(source.spell)) {
             source.clear("autocast")
             return false
         }
         val spell = source.spell
-        val definition = spellDefinitions.get(spell)
+        val definition = get<SpellDefinitions>().get(spell)
 
         val time = time(source, target, definition)
         source.anim(animation(source, definition))
@@ -83,7 +60,7 @@ class Magic {
                 definition["animation", ""]
             }
         } else if (source is NPC) {
-            return NPCAttack.anim(animationDefinitions, source, "attack")
+            return NPCAttack.anim(get<AnimationDefinitions>(), source, "attack")
         }
         return ""
     }

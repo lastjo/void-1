@@ -1,36 +1,31 @@
 package content.skill.melee.weapon
 
-import world.gregs.voidps.engine.Api
-import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
-import world.gregs.voidps.engine.inv.itemAdded
-import world.gregs.voidps.engine.inv.itemRemoved
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 
-@Script
-class Whacking : Api {
-
-    override fun spawn(player: Player) {
-        if (player.weapon.id == "rubber_chicken" || player.weapon.id == "easter_carrot") {
-            player.options.set(5, "Whack")
-        }
-    }
+class Whacking : Script {
 
     init {
-        itemAdded("rubber_chicken", EquipSlot.Weapon, "worn_equipment") { player ->
-            player.options.set(5, "Whack")
+        playerSpawn {
+            if (weapon.id == "rubber_chicken" || weapon.id == "easter_carrot") {
+                options.set(5, "Whack")
+            }
         }
 
-        itemRemoved("rubber_chicken", EquipSlot.Weapon, "worn_equipment") { player ->
-            player.options.remove("Whack")
+        itemAdded("rubber_chicken", "worn_equipment", EquipSlot.Weapon) {
+            options.set(5, "Whack")
         }
 
-        itemAdded("easter_carrot", EquipSlot.Weapon, "worn_equipment") { player ->
-            player.options.set(5, "Whack")
+        itemRemoved("rubber_chicken", "worn_equipment", EquipSlot.Weapon) {
+            options.remove("Whack")
         }
 
-        itemRemoved("easter_carrot", EquipSlot.Weapon, "worn_equipment") { player ->
-            player.options.remove("Whack")
+        itemAdded("easter_carrot", "worn_equipment", EquipSlot.Weapon) {
+            options.set(5, "Whack")
+        }
+
+        itemRemoved("easter_carrot", "worn_equipment", EquipSlot.Weapon) {
+            options.remove("Whack")
         }
     }
 }

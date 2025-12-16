@@ -1,12 +1,13 @@
 package world.gregs.voidps.engine.timer
 
+import world.gregs.voidps.engine.entity.Entity
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.EventDispatcher
+import world.gregs.voidps.engine.GameLoop
 import java.util.*
 
 class TimerQueue(
-    private val events: EventDispatcher,
+    private val entity: Entity,
 ) : Timers {
 
     val queue = PriorityQueue<TimerTask>()
@@ -16,8 +17,8 @@ class TimerQueue(
         if (names.contains(name)) {
             return false
         }
-        val interval = when (events) {
-            is Player -> TimerApi.start(events, name, restart)
+        val interval = when (entity) {
+            is Player -> TimerApi.start(entity, name, restart)
             is World -> TimerApi.start(name)
             else -> return false
         }
@@ -40,8 +41,8 @@ class TimerQueue(
                 break
             }
             queue.poll()
-            val interval = when (events) {
-                is Player -> TimerApi.tick(events, timer.name)
+            val interval = when (entity) {
+                is Player -> TimerApi.tick(entity, timer.name)
                 is World -> TimerApi.tick(timer.name)
                 else -> return
             }
@@ -59,8 +60,8 @@ class TimerQueue(
     }
 
     private fun stop(name: String, logout: Boolean) {
-        when (events) {
-            is Player -> TimerApi.stop(events, name, logout)
+        when (entity) {
+            is Player -> TimerApi.stop(entity, name, logout)
             is World -> TimerApi.stop(name, logout)
             else -> return
         }
@@ -85,5 +86,13 @@ class TimerQueue(
         for (name in names) {
             stop(name, logout = true)
         }
+    }
+
+    override fun remaining(name: String): Int {
+        if (!names.contains(name)) {
+            return -1
+        }
+        val task = queue.first { it.name == name }
+        return task.nextTick - GameLoop.tick
     }
 }

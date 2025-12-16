@@ -1,6 +1,5 @@
 package content.skill.woodcutting
 
-import content.entity.player.bank.bank
 import content.entity.sound.areaSound
 import net.pearx.kasechange.toLowerSpaceCase
 import world.gregs.voidps.engine.client.message
@@ -9,13 +8,11 @@ import world.gregs.voidps.engine.client.variable.remaining
 import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.client.variable.stop
 import world.gregs.voidps.engine.data.definition.ObjectDefinitions
-import world.gregs.voidps.engine.data.definition.data.Fire
 import world.gregs.voidps.engine.data.definition.data.Tree
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.character.player.chat.inventoryFull
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.character.player.skill.level.Interpolation
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
@@ -76,21 +73,19 @@ class Woodcutting {
                     player.message("You swing your hatchet at the ${if (ivy) "ivy" else "tree"}.")
                     first = false
                 }
-
                 val remaining = player.remaining("action_delay")
                 if (remaining < 0) {
                     player.anim("${hatchet.id}_chop${if (ivy) "_ivy" else ""}")
-                    player.start("action_delay", 0)
-                    pause(0)
+                    player.start("action_delay", 3)
+                    pause(3)
                 } else if (remaining > 0) {
                     pause(remaining)
                 }
-
                 if (!objects.contains(target)) {
                     break
                 }
-
                 if (success(player.levels.get(Skill.Woodcutting), hatchet, tree)) {
+                    player.experience.add(Skill.Woodcutting, tree.xp)
                     tryDropNest(player, ivy)
                     if (!addLog(player, tree) || deplete(tree, target)) {
                         break
@@ -99,7 +94,6 @@ class Woodcutting {
                         player.message("You successfully chop away some ivy.")
                     }
                 }
-
                 player.stop("action_delay")
             }
             player.softTimers.stop("woodcutting")
@@ -107,7 +101,7 @@ class Woodcutting {
     }
 
     fun tryDropNest(player: Player, ivy: Boolean) {
-        val dropChance = 4
+        val dropChance = 254
         if (random.nextInt(dropChance) != 0) return
         val table = drops.get("birds_nest_table") ?: return
 
@@ -115,22 +109,13 @@ class Woodcutting {
         val totalWeight = if (hasRabbitFoot) 95 else 100
 
         val drop = table.role(totalWeight).firstOrNull() ?: return
-        val source = if (ivy) "ivy" else "tree"
 
-        // Add nest directly to the bank
-        val amount = drop.amount?.start ?: 1
-        val added = player.bank.add(drop.id, amount = amount)
-        if (added) {
-            val current = player["birds_nests_received", 0] + amount
-            player["birds_nests_received"] = current
-            player.message("<red>A bird's nest falls out of the $source! (Total nests in bank: $current)")
-            areaSound("bird_chirp", player.tile)
-        } else {
-            player.inventoryFull()
-            val dropTile = player.tile.toCuboid(1).random(player) ?: player.tile
-            floorItems.add(tile = dropTile, id = drop.id, amount = amount, disappearTicks = 500)
-            player.message("<red>A bird's nest falls out of the $source, but your bank is full!")
-        }
+        val source = if (ivy) "ivy" else "tree"
+        player.message("<red>A bird's nest falls out of the $source!")
+        areaSound("bird_chirp", player.tile)
+
+        val dropTile = player.tile.toCuboid(1).random(player) ?: player.tile
+        floorItems.add(tile = dropTile, id = drop.id, amount = drop.amount?.start ?: 1, disappearTicks = 50)
     }
 
     fun success(level: Int, hatchet: Item, tree: Tree): Boolean {
@@ -142,33 +127,22 @@ class Woodcutting {
 
     fun calculateChance(hatchet: Item, treeHatchetDifferences: IntRange): Int = (0 until hatchet.def["rank", 0]).sumOf { calculateHatchetChance(it, treeHatchetDifferences) }
 
+    /**
+     * Calculates the chance of success out of 256 given a [hatchet] and the hatchet chances for that tree [treeHatchetDifferences]
+     * @param hatchet The index of the hatchet (0..7)
+     * @param treeHatchetDifferences The min and max increase chance between each hatchet
+     * @return chance of success
+     */
     fun calculateHatchetChance(hatchet: Int, treeHatchetDifferences: IntRange): Int = if (hatchet % 4 < 2) treeHatchetDifferences.last else treeHatchetDifferences.first
 
     fun addLog(player: Player, tree: Tree): Boolean {
         val log = tree.log
-        if (log.isEmpty()) return true
-
-        val amount = if (random.nextBoolean()) 2 else 1
-        val added = player.bank.add(log, amount = amount)
+        if (log.isEmpty()) {
+            return true
+        }
+        val added = player.inventory.add(log)
         if (added) {
-            // Woodcutting XP
-            player.experience.add(Skill.Woodcutting, tree.xp * amount)
-
-            // 50% chance to gain Firemaking XP
-            if (random.nextBoolean()) {
-                val fire: Fire? = Item(log).def.getOrNull("firemaking")
-                if (fire != null) {
-                    player.exp(Skill.Firemaking, fire.xp * amount)
-                    player.message("You gain ${fire.xp * amount} Firemaking XP from the logs.")
-                }
-            }
-
-            // Track total logs
-            val current = player["logs_chopped_$log", 0] + amount
-            player["logs_chopped_$log"] = current
-
-            // Show message
-            player.message("You get $amount ${log.toLowerSpaceCase()}${if (amount > 1) "s" else ""}. (Total in bank: $current)")
+            player.message("You get some ${log.toLowerSpaceCase()}.")
         } else {
             player.inventoryFull()
         }
@@ -177,8 +151,9 @@ class Woodcutting {
 
     fun deplete(tree: Tree, obj: GameObject): Boolean {
         val depleted = random.nextDouble() <= tree.depleteRate
-        if (!depleted) return false
-
+        if (!depleted) {
+            return false
+        }
         val stumpId = "${obj.id}_stump"
         if (definitions.contains(stumpId)) {
             val delay = getRegrowTickDelay(tree)
@@ -188,10 +163,13 @@ class Woodcutting {
         return true
     }
 
+    /**
+     * Returns regrow delay based on the type of tree and number of players online
+     */
     fun getRegrowTickDelay(tree: Tree): Int {
         val delay = tree.respawnDelay
         return if (tree.level == 1) {
-            random.nextInt(delay.first, delay.last)
+            random.nextInt(delay.first, delay.last) // Regular tree's
         } else {
             Interpolation.interpolate(players.size, delay.last, delay.first, minPlayers, maxPlayers)
         }

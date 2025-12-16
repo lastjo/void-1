@@ -10,29 +10,24 @@ import content.social.assist.Assistance.redirectSkillExperience
 import content.social.assist.Assistance.stopRedirectingSkillExp
 import content.social.assist.Assistance.toggleInventory
 import content.social.friend.friend
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.chat.plural
 import world.gregs.voidps.engine.client.ui.close
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
 import world.gregs.voidps.engine.client.variable.hasClock
 import world.gregs.voidps.engine.client.variable.remaining
 import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.name
-import world.gregs.voidps.engine.entity.character.player.playerOperate
 import world.gregs.voidps.engine.entity.character.player.req.hasRequest
 import world.gregs.voidps.engine.entity.character.player.req.request
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.entity.character.player.skill.exp.BlockedExperience
-import world.gregs.voidps.engine.event.Script
-import world.gregs.voidps.engine.event.onEvent
 import world.gregs.voidps.engine.timer.TICKS
 import java.util.concurrent.TimeUnit
 import kotlin.math.min
 
-@Script
-class RequestAssist {
+class RequestAssist : Script {
 
     val skills = listOf(
         Skill.Runecrafting,
@@ -48,41 +43,41 @@ class RequestAssist {
     val logger = InlineLogger()
 
     init {
-        playerOperate("Req Assist") {
+        playerOperate("Req Assist") { (target) ->
             val filter = target["assist_filter", "on"]
-            if (filter == "off" || (filter == "friends" && !target.friend(player))) {
+            if (filter == "off" || (filter == "friends" && !target.friend(this))) {
                 return@playerOperate
             }
-            if (!player["accept_aid", true]) {
-                player.message("This player is not currently accepting aid.") // TODO proper message
+            if (!get("accept_aid", true)) {
+                message("This player is not currently accepting aid.") // TODO proper message
                 return@playerOperate
             }
-            if (target.hasRequest(player, "assist")) {
-                player.message("Sending assistance response.", ChatType.Assist)
+            if (target.hasRequest(this, "assist")) {
+                message("Sending assistance response.", ChatType.Assist)
             } else {
-                if (requestingTooQuickly(player) || refuseRequest(target, player)) {
+                if (requestingTooQuickly(this) || refuseRequest(target, this)) {
                     return@playerOperate
                 }
-                player.message("Sending assistance request.", ChatType.Assist)
-                target.message("is requesting your assistance.", ChatType.AssistRequest, name = player.name)
+                message("Sending assistance request.", ChatType.Assist)
+                target.message("is requesting your assistance.", ChatType.AssistRequest, name = name)
             }
-            player.request(target, "assist") { requester, acceptor ->
+            request(target, "assist") { requester, acceptor ->
                 setupAssisted(requester, acceptor)
                 setupAssistant(acceptor, requester)
             }
         }
 
-        interfaceClose("assist_xp") { player ->
-            val assisted: Player = player["assisted"] ?: return@interfaceClose
-            cancelAssist(player, assisted)
+        interfaceClosed("assist_xp") {
+            val assisted: Player = get("assisted") ?: return@interfaceClosed
+            cancelAssist(this, assisted)
         }
 
-        onEvent<Player, BlockedExperience> { assisted ->
-            val player: Player = assisted["assistant"] ?: return@onEvent
+        blockedExperience { skill, experience ->
+            val player: Player = get("assistant") ?: return@blockedExperience
             val active = player["assist_toggle_${skill.name.lowercase()}", false]
             var gained = player["total_xp_earned", 0].toDouble()
             if (active && !exceededMaximum(gained)) {
-                val exp = min(experience, (MAX_EXPERIENCE - gained) / 10)
+                val exp = min(experience / 10.0, (MAX_EXPERIENCE - gained) / 10)
                 gained += exp * 10.0
                 val maxed = exceededMaximum(gained)
                 player.experience.add(skill, exp)
@@ -97,7 +92,7 @@ class RequestAssist {
                         """,
                     )
                     player.start("assist_timeout", TimeUnit.HOURS.toSeconds(24).toInt())
-                    stopRedirectingAllExp(assisted)
+                    stopRedirectingAllExp(this)
                 }
             }
         }

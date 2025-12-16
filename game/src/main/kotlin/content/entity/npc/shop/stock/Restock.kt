@@ -3,12 +3,10 @@ package content.entity.npc.shop.stock
 import com.github.michaelbull.logging.InlineLogger
 import content.entity.npc.shop.general.GeneralStores
 import world.gregs.voidps.cache.config.data.InventoryDefinition
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.data.definition.InventoryDefinitions
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.playerDespawn
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.Inventory
 import world.gregs.voidps.engine.inv.add
@@ -18,55 +16,28 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.math.max
 
-@Script
-class Restock : Api {
+class Restock : Script {
 
     val inventoryDefinitions: InventoryDefinitions by inject()
     val logger = InlineLogger()
 
-    override fun spawn(player: Player) {
-        player.softTimers.restart("shop_restock")
-    }
-
-    override fun worldSpawn() {
-        World.timers.start("general_store_restock")
-    }
-
-    @Timer("shop_restock")
-    override fun start(player: Player, timer: String, restart: Boolean): Int = TimeUnit.SECONDS.toTicks(60)
-
-    @Timer("shop_restock")
-    override fun tick(player: Player, timer: String): Int {
-        for ((name, inventory) in player.inventories.instances) {
-            val def = inventoryDefinitions.get(name)
-            if (!def["shop", false]) {
-                continue
-            }
-            restock(def, inventory)
-        }
-        return Timer.CONTINUE
-    }
-
-    @Timer("general_store_restock")
-    override fun start(timer: String): Int = TimeUnit.SECONDS.toTicks(60)
-
-    /**
-     * Every 60 seconds update stock of all players shops and [GeneralStores] by 10%
-     */
-    @Timer("general_store_restock")
-    override fun tick(timer: String): Int {
-        logger.debug { "Restocking general stores." }
-        for ((key, inventory) in GeneralStores.stores) {
-            val def = inventoryDefinitions.get(key)
-            restock(def, inventory)
-        }
-        return Timer.CONTINUE
-    }
-
     init {
-        playerDespawn { player ->
+        playerSpawn {
+            softTimers.restart("shop_restock")
+        }
+
+        worldSpawn {
+            World.timers.start("general_store_restock")
+        }
+
+        timerStart("shop_restock") { TimeUnit.SECONDS.toTicks(60) }
+        timerTick("shop_restock", ::restockShops)
+        worldTimerStart("general_store_restock") { TimeUnit.SECONDS.toTicks(60) }
+        worldTimerTick("general_store_restock", ::restockGeneralStores)
+
+        playerDespawn {
             val removal = mutableListOf<String>()
-            for ((name, inventory) in player.inventories.instances) {
+            for ((name, inventory) in inventories.instances) {
                 val def = inventoryDefinitions.get(name)
                 if (!def["shop", false]) {
                     continue
@@ -77,9 +48,32 @@ class Restock : Api {
                 }
             }
             for (name in removal) {
-                player.inventories.instances.remove(name)
+                inventories.instances.remove(name)
             }
         }
+    }
+
+    fun restockShops(player: Player): Int {
+        for ((name, inventory) in player.inventories.instances) {
+            val def = inventoryDefinitions.get(name)
+            if (!def["shop", false]) {
+                continue
+            }
+            restock(def, inventory)
+        }
+        return Timer.CONTINUE
+    }
+
+    /**
+     * Every 60 seconds update stock of all players shops and [GeneralStores] by 10%
+     */
+    fun restockGeneralStores(): Int {
+        logger.debug { "Restocking general stores." }
+        for ((key, inventory) in GeneralStores.stores) {
+            val def = inventoryDefinitions.get(key)
+            restock(def, inventory)
+        }
+        return Timer.CONTINUE
     }
 
     // Remove restocked shops to save space

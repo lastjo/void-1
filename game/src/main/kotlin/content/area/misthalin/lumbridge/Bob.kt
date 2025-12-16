@@ -7,19 +7,16 @@ import content.entity.player.dialogue.Talk
 import content.entity.player.dialogue.Upset
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
-import world.gregs.voidps.engine.client.ui.interact.itemOnNPCOperate
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Interpolation.interpolate
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.inv.transact.operation.ReplaceItem.replace
 
-@Script
-class Bob {
+class Bob : Script {
 
     init {
         npcOperate("Talk-to", "bob") {
@@ -29,7 +26,7 @@ class Bob {
                 }
                 option<Quiz>("I'd like to trade.") {
                     npc<Happy>("Great! I buy and sell pickaxes and hatchets. There are plenty to choose from, and I've some free samples too. Take your pick... or hatchet.")
-                    player.openShop("bobs_brilliant_axes")
+                    openShop("bobs_brilliant_axes")
                 }
                 option<Upset>("Can you repair my items for me?") {
                     npc<Quiz>("Of course I can, though the material may cost you. Just hand me the item and I'll have a look.")
@@ -37,16 +34,16 @@ class Bob {
             }
         }
 
-        itemOnNPCOperate("*", "bob") {
+        itemOnNPCOperate("*", "bob") { (_, item) ->
             if (!repairable(item.id)) {
                 npc<Quiz>("Sorry friend, but I can't do anything with that.")
                 return@itemOnNPCOperate
             }
-            val cost = repairCost(player, item)
+            val cost = repairCost(this, item)
             npc<Talk>("That'll cost you $cost gold coins to fix, are you sure?")
             choice {
                 option("Yes I'm sure!") {
-                    val repaired = player.inventory.transaction {
+                    val repaired = inventory.transaction {
                         remove("coins", cost)
                         replace(item.id, repaired(item.id))
                     }

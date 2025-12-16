@@ -20,6 +20,7 @@ import world.gregs.voidps.engine.entity.Despawn
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.item.drop.DropTables
 import world.gregs.voidps.engine.event.AuditLog
+import world.gregs.voidps.engine.event.Wildcards
 import world.gregs.voidps.engine.map.collision.CollisionDecoder
 import world.gregs.voidps.network.GameServer
 import world.gregs.voidps.network.LoginServer
@@ -97,10 +98,12 @@ object Main {
                 cache(cache, configFiles),
             )
         }
+        Wildcards.load(Settings["storage.wildcards"])
         ContentLoader.load()
+        Wildcards.update(Settings["storage.wildcards"])
         Runtime.getRuntime().addShutdownHook(
             thread(start = false) {
-                World.emit(Despawn)
+                Despawn.world()
                 AuditLog.save()
             },
         )

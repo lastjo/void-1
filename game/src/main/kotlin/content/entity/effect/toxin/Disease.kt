@@ -1,13 +1,12 @@
 package content.entity.effect.toxin
 
 import content.entity.combat.hit.directHit
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.timer.*
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import java.util.concurrent.TimeUnit
@@ -52,23 +51,30 @@ fun Player.antiDisease(duration: Int, timeUnit: TimeUnit) {
     timers.startIfAbsent("disease")
 }
 
-@Script
-class Disease : Api {
+class Disease : Script {
 
-    override fun spawn(player: Player) {
-        if (player.diseaseCounter != 0) {
-            player.timers.restart("disease")
+    init {
+        playerSpawn {
+            if (diseaseCounter != 0) {
+                timers.restart("disease")
+            }
         }
+
+        npcSpawn {
+            if (diseaseCounter != 0) {
+                softTimers.restart("disease")
+            }
+        }
+
+        timerStart("disease", ::start)
+        npcTimerStart("disease", ::start)
+        timerTick("disease", ::tick)
+        npcTimerTick("disease", ::tick)
+        timerStop("disease", ::stop)
+        npcTimerStop("disease", ::stop)
     }
 
-    override fun spawn(npc: NPC) {
-        if (npc.diseaseCounter != 0) {
-            npc.softTimers.restart("disease")
-        }
-    }
-
-    @Timer("disease")
-    override fun start(character: Character, timer: String, restart: Boolean): Int {
+    fun start(character: Character, restart: Boolean): Int {
         if (character.antiDisease || immune(character)) {
             return Timer.CANCEL
         }
@@ -79,8 +85,7 @@ class Disease : Api {
         return 30
     }
 
-    @Timer("disease")
-    override fun tick(character: Character, timer: String): Int {
+    fun tick(character: Character): Int {
         val diseased = character.diseased
         character.diseaseCounter -= character.diseaseCounter.sign
         when {
@@ -96,8 +101,7 @@ class Disease : Api {
         return Timer.CONTINUE
     }
 
-    @Timer("disease")
-    override fun stop(character: Character, timer: String, logout: Boolean) {
+    fun stop(character: Character, logout: Boolean) {
         character.diseaseCounter = 0
         character.clear("disease_damage")
         character.clear("disease_source")

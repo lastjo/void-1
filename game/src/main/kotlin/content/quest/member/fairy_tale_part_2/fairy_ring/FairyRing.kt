@@ -4,25 +4,20 @@ import content.entity.player.modal.Tab
 import content.entity.player.modal.tab
 import content.quest.quest
 import content.quest.questCompleted
-import content.skill.magic.spell.Teleport
 import content.skill.melee.weapon.weapon
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.closeMenu
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.client.variable.ListValues
 import world.gregs.voidps.engine.data.definition.VariableDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.entity.character.player.Teleport
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.suspend.StringSuspension
 import world.gregs.voidps.type.Tile
 
-@Script
-class FairyRing {
+class FairyRing : Script {
 
     val fairyRing: FairyRingCodes by inject()
 
@@ -32,52 +27,52 @@ class FairyRing {
         get() = "${get("fairy_ring_code_1", "a")}${get("fairy_ring_code_2", "j")}${get("fairy_ring_code_3", "r")}"
 
     init {
-        objectOperate("Use", "fairy_ring_*") {
-            if (player.quest("fairy_tale_ii") == "unstarted") {
-                player.message("You don't have permission to use that fairy ring.")
+        objectOperate("Use", "fairy_ring_*") { (target) ->
+            if (quest("fairy_tale_ii") == "unstarted") {
+                message("You don't have permission to use that fairy ring.")
                 return@objectOperate
             }
-            if (!player.questCompleted("fairy_tale_iii") && player.weapon.id != "dramen_staff") {
-                player.message("The fairy ring only works for those who wield fairy magic.")
+            if (!questCompleted("fairy_tale_iii") && weapon.id != "dramen_staff") {
+                message("The fairy ring only works for those who wield fairy magic.")
                 return@objectOperate
             }
-            player.open("fairy_ring")
-            player.open("travel_log")
-            val code = StringSuspension.get(player)
+            open("fairy_ring")
+            open("travel_log")
+            val code = StringSuspension.get(this)
             val fairyRing = fairyRing.codes[code] ?: return@objectOperate
             if (fairyRing.tile == Tile.EMPTY) {
                 return@objectOperate
             }
-            player.closeMenu()
+            closeMenu()
             delay()
-            player.walkOverDelay(target.tile)
+            walkOverDelay(target.tile)
             delay()
-            Teleport.teleport(player, fairyRing.tile, "fairy_ring")
-            val list: MutableList<String> = player.getOrPut("travel_log_locations") { mutableListOf() }
+            Teleport.teleport(this, fairyRing.tile, "fairy_ring")
+            val list: MutableList<String> = getOrPut("travel_log_locations") { mutableListOf() }
             list.add(code)
         }
 
-        interfaceClose("fairy_ring") { player ->
-            player.open("inventory")
+        interfaceClosed("fairy_ring") {
+            open("inventory")
         }
 
-        interfaceOption("Teleport", "teleport", "fairy_ring") {
-            val code = player.code
-            (player.dialogueSuspension as? StringSuspension)?.resume(code)
+        interfaceOption("Teleport", "fairy_ring:teleport") {
+            val code = code
+            (dialogueSuspension as? StringSuspension)?.resume(code)
         }
 
-        interfaceOpen("fairy_ring") { player ->
-            player.tab(Tab.Inventory)
+        interfaceOpened("fairy_ring") {
+            tab(Tab.Inventory)
         }
 
-        interfaceOption("Rotate clockwise", "clockwise_*", "fairy_ring") {
-            val codeIndex = component.removePrefix("clockwise_").toInt()
-            rotate(player, codeIndex, 1)
+        interfaceOption("Rotate clockwise", "fairy_ring:clockwise_*") {
+            val codeIndex = it.component.removePrefix("clockwise_").toInt()
+            rotate(this, codeIndex, 1)
         }
 
-        interfaceOption("Rotate anticlockwise", "anticlockwise_*", "fairy_ring") {
-            val codeIndex = component.removePrefix("anticlockwise_").toInt()
-            rotate(player, codeIndex, -1)
+        interfaceOption("Rotate anticlockwise", "fairy_ring:anticlockwise_*") {
+            val codeIndex = it.component.removePrefix("anticlockwise_").toInt()
+            rotate(this, codeIndex, -1)
         }
     }
 

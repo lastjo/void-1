@@ -7,17 +7,15 @@ import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import content.quest.questCompleted
 import content.skill.runecrafting.EssenceMine
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
-import world.gregs.voidps.engine.event.Script
 
-@Script
-class WizardDistentor {
+class WizardDistentor : Script {
 
     init {
-        npcOperate("Talk-to", "wizard_distentor") {
+        npcOperate("Talk-to", "wizard_distentor") { (target) ->
             npc<Talk>("Welcome to the Magicians' Guild!")
-            if (!player.questCompleted("rune_mysteries")) {
+            if (!questCompleted("rune_mysteries")) {
                 return@npcOperate
             }
             player<Talk>("Hello there.")
@@ -27,16 +25,16 @@ class WizardDistentor {
                     npc<Talk>("That's fine with me.")
                 }
                 option<Quiz>("Can you teleport me to the Rune Essence Mine?") {
-                    EssenceMine.teleport(target, player)
+                    EssenceMine.teleport(target, this)
                 }
             }
         }
 
-        npcOperate("Teleport", "wizard_distentor") {
-            if (player.questCompleted("rune_mysteries")) {
-                EssenceMine.teleport(target, player)
+        npcOperate("Teleport", "wizard_distentor") { (target) ->
+            if (questCompleted("rune_mysteries")) {
+                EssenceMine.teleport(target, this)
             } else {
-                player.message("You need to have completed the Rune Mysteries Quest to use this feature.")
+                message("You need to have completed the Rune Mysteries Quest to use this feature.")
             }
         }
     }

@@ -1,25 +1,22 @@
 package content.area.kandarin.catherby
 
-import content.entity.npc.shop.buy.itemBought
 import content.entity.npc.shop.openShop
 import content.entity.player.dialogue.Talk
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
 
-@Script
-class Hickton {
+class Hickton : Script {
 
     init {
         npcOperate("Trade", "hickton") {
-            openHicktonShop(player)
+            openHicktonShop(this)
         }
 
         npcOperate("Talk-to", "hickton") {
@@ -33,7 +30,7 @@ class Hickton {
 
                     choice {
                         option("I'd like to view your store, please.") {
-                            openHicktonShop(player)
+                            openHicktonShop(this)
                         }
                         option("No thank you.") {
                             player<Talk>("No thank you.")
@@ -42,7 +39,7 @@ class Hickton {
                 }
 
                 option("Yes, please.") {
-                    openHicktonShop(player)
+                    openHicktonShop(this)
                 }
 
                 option("No, I prefer to bash things close up.") {
@@ -51,12 +48,12 @@ class Hickton {
             }
         }
 
-        itemBought("fletching_cape") { player ->
-            player.inventory.add("fletching_hood")
+        bought("fletching_cape") {
+            inventory.add("fletching_hood")
         }
 
-        itemBought("fletching_cape_(t)") { player ->
-            player.inventory.add("fletching_hood")
+        bought("fletching_cape_(t)") {
+            inventory.add("fletching_hood")
         }
     }
 

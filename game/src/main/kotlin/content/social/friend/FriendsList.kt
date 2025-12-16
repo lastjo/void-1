@@ -6,27 +6,22 @@ import content.social.clan.ClanMember
 import content.social.clan.clan
 import content.social.clan.ownClan
 import content.social.ignore.ignores
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.instruction.instruction
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.data.Settings
 import world.gregs.voidps.engine.data.definition.AccountDefinitions
 import world.gregs.voidps.engine.entity.character.player.*
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.chat.clan.Clan
 import world.gregs.voidps.engine.entity.character.player.chat.clan.ClanRank
-import world.gregs.voidps.engine.entity.character.player.chat.clan.LeaveClanChat
-import world.gregs.voidps.engine.entity.character.player.chat.clan.clanChatLeave
-import world.gregs.voidps.engine.entity.playerDespawn
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.network.client.instruction.FriendAdd
 import world.gregs.voidps.network.client.instruction.FriendDelete
 import world.gregs.voidps.network.login.protocol.encode.*
 
-@Script
-class FriendsList : Api {
+class FriendsList : Script {
 
     val players: Players by inject()
     val accounts: AccountDefinitions by inject()
@@ -34,14 +29,14 @@ class FriendsList : Api {
 
     val maxFriends = 200
 
-    override fun spawn(player: Player) {
-        player.sendFriends()
-        notifyBefriends(player, online = true)
-    }
-
     init {
-        playerDespawn { player ->
-            notifyBefriends(player, online = false)
+        playerSpawn {
+            sendFriends()
+            notifyBefriends(this, online = true)
+        }
+
+        playerDespawn {
+            notifyBefriends(this, online = false)
         }
 
         instruction<FriendAdd> { player ->
@@ -111,37 +106,40 @@ class FriendsList : Api {
                     member.client?.appendClanChat(ClanMember.of(target, ClanRank.None))
                 }
                 if (!clan.hasRank(target, clan.joinRank)) {
-                    target.emit(LeaveClanChat(forced = true))
+                    leaveClan(target, true)
                 }
             }
         }
 
-        interfaceOption(component = "private", id = "filter_buttons") {
-            if (player.privateStatus != "on" && option != "Off") {
+        interfaceOption(id = "filter_buttons:private") {
+            val option = it.option
+            if (privateStatus != "on" && option != "Off") {
                 val next = option.lowercase()
-                notifyBefriends(player, online = true) { it, current ->
+                notifyBefriends(this, online = true) { p, current ->
                     when {
-                        current == "off" && next == "on" -> !player.ignores(it)
-                        current == "off" && next == "friends" -> !it.isAdmin() && friends(player, it)
-                        current == "friends" && next == "on" -> !friends(player, it) && !player.ignores(it)
+                        current == "off" && next == "on" -> !ignores(p)
+                        current == "off" && next == "friends" -> !p.isAdmin() && friends(this, p)
+                        current == "friends" && next == "on" -> !friends(this, p) && !ignores(p)
                         else -> false
                     }
                 }
-            } else if (player.privateStatus != "off" && option != "On") {
+            } else if (privateStatus != "off" && option != "On") {
                 val next = option.lowercase()
-                notifyBefriends(player, online = false) { it, current ->
+                notifyBefriends(this, online = false) { p, current ->
                     when {
-                        current == "friends" && next == "off" -> player.friend(it) && !it.isAdmin()
-                        current == "on" && next == "friends" -> !friends(player, it)
-                        current == "on" && next == "off" -> !it.isAdmin()
+                        current == "friends" && next == "off" -> friend(p) && !p.isAdmin()
+                        current == "on" && next == "friends" -> !friends(this, p)
+                        current == "on" && next == "off" -> !p.isAdmin()
                         else -> false
                     }
                 }
             }
-            player.privateStatus = option.lowercase()
+            privateStatus = option.lowercase()
         }
+    }
 
-        clanChatLeave { player ->
+    companion object {
+        val leaveClan: (Player, Boolean) -> Unit = { player, forced ->
             val clan: Clan? = player.remove("clan")
             player.clear("clan_chat")
             player.message("You have ${if (forced) "been kicked from" else "left"} the channel.", ChatType.ClanChat)
@@ -159,6 +157,10 @@ class FriendsList : Api {
                 ClanLootShare.update(player, clan, lootShare = false)
             }
         }
+
+        private fun Player.sendFriends() {
+            client?.sendFriendsList(friends.mapNotNull { toFriend(this, get<AccountDefinitions>().getByAccount(it.key) ?: return@mapNotNull null) })
+        }
     }
 
     fun friends(player: Player) = { other: Player, status: String ->
@@ -171,10 +173,6 @@ class FriendsList : Api {
     }
 
     fun friends(player: Player, it: Player) = player.friend(it) || it.isAdmin()
-
-    fun Player.sendFriends() {
-        client?.sendFriendsList(friends.mapNotNull { toFriend(this, accounts.getByAccount(it.key) ?: return@mapNotNull null) })
-    }
 
     fun notifyBefriends(player: Player, online: Boolean, notify: (Player, String) -> Boolean = friends(player)) {
         players

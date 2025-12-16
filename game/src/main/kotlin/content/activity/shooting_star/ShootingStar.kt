@@ -8,8 +8,7 @@ import content.entity.combat.hit.damage
 import content.entity.player.dialogue.Happy
 import content.entity.player.dialogue.Sad
 import content.entity.player.dialogue.type.npc
-import content.entity.sound.areaSound
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.command.adminCommand
 import world.gregs.voidps.engine.client.command.stringArg
 import world.gregs.voidps.engine.client.message
@@ -18,18 +17,15 @@ import world.gregs.voidps.engine.client.ui.chat.plural
 import world.gregs.voidps.engine.client.ui.chat.toTag
 import world.gregs.voidps.engine.data.Settings
 import world.gregs.voidps.engine.data.definition.data.Rock
-import world.gregs.voidps.engine.data.settingsReload
 import world.gregs.voidps.engine.entity.World
+import world.gregs.voidps.engine.entity.character.areaSound
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
 import world.gregs.voidps.engine.entity.character.npc.NPCs
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.obj.*
-import world.gregs.voidps.engine.entity.objectDespawn
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
@@ -43,56 +39,47 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 import kotlin.text.toIntOrNull
 
-@Script
-class ShootingStar : Api {
+class ShootingStar : Script {
 
     val objects: GameObjects by inject()
     val npcs: NPCs by inject()
     val players: Players by inject()
     val logger = InlineLogger()
 
-    override fun spawn(player: Player) {
-        if (player["shooting_star_bonus_ore", 0] > 0) {
-            player.timers.restart("shooting_star_bonus_ore_timer")
+    init {
+        worldSpawn {
+            if (Settings["events.shootingStars.enabled", false]) {
+                eventUpdate()
+            }
         }
-    }
 
-    override fun worldSpawn() {
-        if (Settings["events.shootingStars.enabled", false]) {
-            eventUpdate()
+        playerSpawn {
+            if (get("shooting_star_bonus_ore", 0) > 0) {
+                timers.restart("shooting_star_bonus_ore_timer")
+            }
         }
-    }
 
-    @Timer("shooting_star_bonus_ore_timer,mining")
-    override fun start(player: Player, timer: String, restart: Boolean): Int {
-        if (timer == "mining") {
-            val target = (player.mode as? Interact)?.target as GameObject
+        timerStart("mining") {
+            val target = (mode as? Interact)?.target as GameObject
             if (target.id.startsWith("crashed_star")) {
                 if (ShootingStarHandler.isEarlyBird()) {
-                    player.message("Congratulations! You were the first person to find this star!")
-                    player.experience.add(Skill.Mining, player.levels.get(Skill.Mining) * 75.0)
+                    message("Congratulations! You were the first person to find this star!")
+                    experience.add(Skill.Mining, levels.get(Skill.Mining) * 75.0)
                 }
             }
-            return Timer.CONTINUE
-        } else {
-            return TimeUnit.SECONDS.toTicks(1)
+            Timer.CONTINUE
         }
-    }
 
-    @Timer("shooting_star_bonus_ore_timer")
-    override fun tick(player: Player, timer: String): Int {
-        if (player.dec("shooting_star_bonus_ore") <= 0) {
-            return Timer.CANCEL
+        timerStart("shooting_star_bonus_ore_timer") { TimeUnit.SECONDS.toTicks(1) }
+
+        timerTick("shooting_star_bonus_ore_timer") {
+            if (dec("shooting_star_bonus_ore") <= 0) Timer.CANCEL else Timer.CONTINUE
         }
-        return Timer.CONTINUE
-    }
 
-    @Timer("shooting_star_bonus_ore_timer")
-    override fun stop(player: Player, timer: String, logout: Boolean) {
-        player.message("<dark_red>The ability to mine an extra ore has worn off.")
-    }
+        timerStop("shooting_star_bonus_ore_timer") {
+            message("<dark_red>The ability to mine an extra ore has worn off.")
+        }
 
-    init {
         settingsReload {
             if (Settings["events.shootingStars.enabled", false] && !World.contains("shooting_star_event_timer")) {
                 eventUpdate()
@@ -102,50 +89,50 @@ class ShootingStar : Api {
         }
 
         objectDespawn("shooting_star_tier_1") {
-            areaSound("star_meteor_despawn", it.tile, radius = 15)
+            areaSound("star_meteor_despawn", tile, radius = 15)
             cleanseEvent(false)
         }
 
-        objectApproach("Prospect", "crashed_star_tier_#") {
-            if (player.queue.contains("prospect")) {
+        objectApproach("Prospect", "crashed_star_tier_#") { (target) ->
+            if (queue.contains("prospect")) {
                 return@objectApproach
             }
             approachRange(1)
             arriveDelay()
             val starPayout = target.def["collect_for_next_layer", -1]
-            player.message("You examine the crashed star...")
+            message("You examine the crashed star...")
             delay(4)
-            val star = def.getOrNull<Rock>("mining")?.ores?.firstOrNull()
+            val star = target.def(this).getOrNull<Rock>("mining")?.ores?.firstOrNull()
             if (star == null) {
-                player.message("Star has been mined...")
+                message("Star has been mined...")
             } else if (starPayout != -1) {
                 val percentageCollected = getLayerPercentage(totalCollected, starPayout)
-                player.message("There is $percentageCollected% left of this layer.")
+                message("There is $percentageCollected% left of this layer.")
             }
         }
 
         npcOperate("Talk-to", "star_sprite") {
             npc<Happy>("Thank you for helping me out of here")
-            val starDustCount = player.inventory.count("stardust")
-            if (player.inventory.isFull()) {
-                player.message("Inventory full. To make more room, sell, drop or bank something.", ChatType.Game)
+            val starDustCount = inventory.count("stardust")
+            if (inventory.isFull()) {
+                message("Inventory full. To make more room, sell, drop or bank something.", ChatType.Game)
             } else if (starDustCount == 0) {
                 npc<Sad>("You don't seem to have any stardust that I can exchange for a reward")
             } else if (starDustCount > 0) {
                 val rewards = calculateRewards(starDustCount)
-                player.inventory.remove("stardust", starDustCount)
+                inventory.remove("stardust", starDustCount)
                 val messageBuilder = StringBuilder("Also, ")
                 rewards.entries.forEachIndexed { index, (reward, amount) ->
-                    player.inventory.add(reward, amount)
+                    inventory.add(reward, amount)
                     if (index == 0) {
                         messageBuilder.append("have $amount $reward")
                     } else {
                         messageBuilder.append(", $amount ${reward.replace("_", " ").replace("noted", "").plural(amount)}")
                     }
                 }
-                if (!ShootingStarHandler.rewardPlayerBonusOre(player)) {
+                if (!ShootingStarHandler.rewardPlayerBonusOre(this)) {
                     npc<Happy>("I have rewarded you by making it so you can mine extra ore for the next 15 minutes, $messageBuilder.")
-                    givePlayerBonusOreReward(player)
+                    givePlayerBonusOreReward(this)
                 } else {
                     npc<Happy>("You already have the ability to mine an extra ore, ${messageBuilder.replace(0, 4, "However")}.")
                 }

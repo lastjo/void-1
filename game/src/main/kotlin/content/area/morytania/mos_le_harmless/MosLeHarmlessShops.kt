@@ -1,16 +1,15 @@
 package content.area.morytania.mos_le_harmless
 
 import content.entity.npc.shop.openShop
-import world.gregs.voidps.engine.entity.character.npc.npcApproach
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.Script
 
-@Script
-class MosLeHarmlessShops {
+class MosLeHarmlessShops : Script {
     init {
-        npcApproach("Trade", "mike", "charley", "joe", "smith") {
+        npcApproach("Trade", "mike,charley,joe,smith") { (target) ->
             approachRange(2)
-            target.face(player)
-            player.openShop(def["shop"])
+            target.face(this)
+            val def = target.def(this)
+            openShop(def["shop"])
         }
     }
 }

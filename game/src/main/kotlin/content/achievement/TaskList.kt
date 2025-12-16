@@ -1,98 +1,92 @@
 package content.achievement
 
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.sendScript
 import world.gregs.voidps.engine.client.ui.close
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
-import world.gregs.voidps.engine.client.variable.Variable
 import world.gregs.voidps.engine.data.definition.EnumDefinitions
 import world.gregs.voidps.engine.data.definition.VariableDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 
-@Script
-class TaskList : Api {
+class TaskList : Script {
 
     val variables: VariableDefinitions by inject()
 
     val enumDefinitions: EnumDefinitions by inject()
 
-    override fun spawn(player: Player) {
-        player.sendVariable("task_disable_popups")
-        player["task_popup"] = 0
-        player["task_previous_popup"] = 0
-        var total = 0
-        for (area in 0 until 8) {
-            Tasks.forEach(area) {
-                if (Tasks.isCompleted(player, definition.stringId)) {
-                    player.sendVariable(definition.stringId)
-                    total++
-                }
-                null
-            }
-        }
-        player["task_progress_overall"] = total
-        player.sendVariable("task_hide_completed")
-        player.sendVariable("task_filter_sets")
-    }
-
     init {
-        interfaceOpen("task_list") { player ->
-            player.interfaceOptions.unlockAll("task_list", "tasks", 0..492)
-            refresh(player)
+        playerSpawn {
+            sendVariable("task_disable_popups")
+            set("task_popup", 0)
+            set("task_previous_popup", 0)
+            var total = 0
+            for (area in 0 until 8) {
+                Tasks.forEach(area) {
+                    if (Tasks.isCompleted(this@playerSpawn, definition.stringId)) {
+                        sendVariable(definition.stringId)
+                        total++
+                    }
+                    null
+                }
+            }
+            set("task_progress_overall", total)
+            sendVariable("task_hide_completed")
+            sendVariable("task_filter_sets")
         }
 
-        interfaceOption("Select", "area_*", "task_list") {
-            player["task_list_area"] = component.removePrefix("area_")
-            refresh(player)
+        interfaceOpened("task_list") {
+            interfaceOptions.unlockAll("task_list", "tasks", 0..492)
+            refresh(this)
         }
 
-        interfaceOption("Summary", "tasks", "task_list") {
-            player["task_slot_selected"] = itemSlot / 4
+        variableSet("task_pin_slot") { _, _, _ ->
+            close("task_list")
         }
 
-        interfaceOption("Pin", "tasks", "task_list") {
-            pin(player, itemSlot / 4)
+        interfaceOption("Select", "task_list:area_*") {
+            set("task_list_area", it.component.removePrefix("area_"))
+            refresh(this)
         }
 
-        interfaceOption("Pin", "pin", "task_list") {
-            pin(player, player["task_slot_selected", 0])
+        interfaceOption("Summary", "task_list:tasks") { (_, itemSlot) ->
+            set("task_slot_selected", itemSlot / 4)
         }
 
-        interfaceOption("Filter-sets", "filter_sets", "task_list") {
-            player["task_filter_sets"] = !player["task_filter_sets", false]
+        interfaceOption("Pin", "task_list:tasks") { (_, itemSlot) ->
+            pin(this, itemSlot / 4)
         }
 
-        interfaceOption("Filter-done", "filter_done", "task_list") {
-            player["task_hide_completed"] = !player["task_hide_completed", false]
+        interfaceOption("Pin", "task_list:pin") {
+            pin(this, get("task_slot_selected", 0))
         }
 
-        interfaceOption("Turn-off", "toggle_popups", "task_list") {
-            val disable = !player["task_disable_popups", false]
-            player["task_disable_popups"] = disable
+        interfaceOption("Filter-sets", "task_list:filter_sets") {
+            set("task_filter_sets", !get("task_filter_sets", false))
+        }
+
+        interfaceOption("Filter-done", "task_list:filter_done") {
+            set("task_hide_completed", !get("task_hide_completed", false))
+        }
+
+        interfaceOption("Turn-off", "task_list:toggle_popups") {
+            val disable = !get("task_disable_popups", false)
+            set("task_disable_popups", disable)
             if (disable) {
-                player["task_popup"] = 0
-                player["task_previous_popup"] = 0
+                set("task_popup", 0)
+                set("task_previous_popup", 0)
             }
         }
 
-        interfaceOption("Hint", "hint_*", "task_list") {
-            val selected = player["task_slot_selected", 0]
-            val index = indexOfSlot(player, selected) ?: return@interfaceOption
-            val tile: Int = enumDefinitions.getStructOrNull("task_structs", index, component.replace("hint_", "task_hint_tile_")) ?: return@interfaceOption
+        interfaceOption("Hint", "task_list:hint_*") {
+            val selected = get("task_slot_selected", 0)
+            val index = indexOfSlot(this, selected) ?: return@interfaceOption
+            val tile: Int = enumDefinitions.getStructOrNull("task_structs", index, it.component.replace("hint_", "task_hint_tile_")) ?: return@interfaceOption
             // TODO I expect the functionality is actually minimap highlights not world map
-            player["world_map_marker_1"] = tile
-            player["world_map_marker_text_1"] = ""
-            player.open("world_map")
+            set("world_map_marker_1", tile)
+            set("world_map_marker_text_1", "")
+            open("world_map")
         }
-    }
-
-    @Variable("task_pin_slot")
-    override fun variableSet(player: Player, key: String, from: Any?, to: Any?) {
-        player.close("task_list")
     }
 
     fun indexOfSlot(player: Player, slot: Int): Int? {

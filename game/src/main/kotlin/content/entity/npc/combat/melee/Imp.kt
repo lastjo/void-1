@@ -1,52 +1,41 @@
 package content.entity.npc.combat.melee
 
-import content.entity.combat.hit.npcCombatDamage
 import content.entity.gfx.areaGfx
-import content.entity.sound.areaSound
-import world.gregs.voidps.engine.Api
-import world.gregs.voidps.engine.entity.Id
+import world.gregs.voidps.engine.Script
+import world.gregs.voidps.engine.entity.character.areaSound
 import world.gregs.voidps.engine.entity.character.mode.PauseMode
 import world.gregs.voidps.engine.entity.character.mode.Retreat
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.map.collision.random
 import world.gregs.voidps.engine.queue.softQueue
-import world.gregs.voidps.engine.timer.Timer
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.random
 
-@Script
-class Imp : Api {
-
-    @Id("imp")
-    override fun spawn(npc: NPC) {
-        npc.softTimers.start("teleport_timer")
-    }
-
-    @Timer("teleport_timer")
-    override fun start(npc: NPC, timer: String, restart: Boolean): Int = random.nextInt(50, 200)
-
-    @Timer("teleport_timer")
-    override fun tick(npc: NPC, timer: String): Int {
-        teleportImp(npc, teleportChance)
-        // https://x.com/JagexAsh/status/1711280844504007132
-        return random.nextInt(50, 200)
-    }
+class Imp : Script {
 
     init {
-        npcCombatDamage("imp") { npc ->
-            val player = source
-            if (npc.levels.get(Skill.Constitution) - damage > 0) {
-                if (random.nextDouble() < retreatChance) {
-                    if (npc.levels.get(Skill.Constitution) - damage < 10) {
-                        npc.softQueue("imp_retreat") {
-                            npc.mode = Retreat(npc, player)
-                        }
-                    } else if (npc.mode !is Retreat) {
-                        teleportImp(npc, teleportChanceHit)
+        npcSpawn("imp") {
+            softTimers.start("teleport_timer")
+        }
+
+        npcTimerStart("teleport_timer") { random.nextInt(50, 200) }
+
+        npcTimerTick("teleport_timer") {
+            teleportImp(this, teleportChance)
+            // https://x.com/JagexAsh/status/1711280844504007132
+            random.nextInt(50, 200)
+        }
+
+        npcCombatDamage("imp") { (source, _, damage) ->
+            if (levels.get(Skill.Constitution) - damage > 0 && random.nextDouble() < retreatChance) {
+                if (levels.get(Skill.Constitution) - damage < 10) {
+                    softQueue("imp_retreat") {
+                        mode = Retreat(npc, source)
                     }
+                } else if (mode !is Retreat) {
+                    teleportImp(this, teleportChanceHit)
                 }
             }
         }
@@ -89,7 +78,7 @@ class Imp : Api {
             val mode = npc.mode
             npc.mode = PauseMode
             npc.tele(destination)
-            delay(1)
+            npc.delay(1)
             npc.gfx("imp_puff")
             npc.mode = mode
         }

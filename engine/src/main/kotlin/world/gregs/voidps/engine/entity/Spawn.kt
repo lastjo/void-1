@@ -1,59 +1,94 @@
 package world.gregs.voidps.engine.entity
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
+import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import world.gregs.voidps.engine.data.ConfigFiles
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.dispatch.ListDispatcher
-import world.gregs.voidps.engine.dispatch.MapDispatcher
 import world.gregs.voidps.engine.entity.item.floor.FloorItem
+import world.gregs.voidps.engine.event.Wildcard
+import world.gregs.voidps.engine.event.Wildcards
 
 interface Spawn {
-    fun spawn(player: Player) {}
-    fun spawn(npc: NPC) {}
-    fun spawn(obj: GameObject) {}
-    fun spawn(floorItem: FloorItem) {}
-    fun worldSpawn(files: ConfigFiles) {
-        worldSpawn()
+    fun playerSpawn(handler: Player.() -> Unit) {
+        playerSpawns.add(handler)
     }
 
-    fun worldSpawn() {}
+    fun npcSpawn(id: String = "*", handler: NPC.() -> Unit) {
+        Wildcards.find(id, Wildcard.Npc) { key ->
+            npcSpawns.getOrPut(key) { mutableListOf() }.add(handler)
+        }
+    }
 
-    companion object : Spawn {
-        var playerDispatcher = ListDispatcher<Spawn>()
-        var npcDispatcher = MapDispatcher<Spawn>("@Id", "")
-        var objectDispatcher = MapDispatcher<Spawn>("@Id", "")
-        var floorItemDispatcher = MapDispatcher<Spawn>("@Id", "")
-        var worldDispatcher = ListDispatcher<Spawn>()
+    fun objectSpawn(id: String = "*", handler: GameObject.() -> Unit) {
+        Wildcards.find(id, Wildcard.Object) { key ->
+            objectSpawns.getOrPut(key) { mutableListOf() }.add(handler)
+        }
+    }
 
-        override fun spawn(player: Player) {
-            for (instance in playerDispatcher.instances) {
-                instance.spawn(player)
+    fun floorItemSpawn(id: String = "*", handler: FloorItem.() -> Unit) {
+        Wildcards.find(id, Wildcard.Item) { key ->
+            floorItemSpawns.getOrPut(key) { mutableListOf() }.add(handler)
+        }
+    }
+
+    fun worldSpawn(handler: (ConfigFiles) -> Unit) {
+        worldSpawns.add(handler)
+    }
+
+    companion object : AutoCloseable {
+        private val playerSpawns = ObjectArrayList<(Player) -> Unit>(100)
+        private val npcSpawns = Object2ObjectOpenHashMap<String, MutableList<(NPC) -> Unit>>(250)
+        private val objectSpawns = Object2ObjectOpenHashMap<String, MutableList<(GameObject) -> Unit>>(2)
+        private val floorItemSpawns = Object2ObjectOpenHashMap<String, MutableList<(FloorItem) -> Unit>>(2)
+        private val worldSpawns = ObjectArrayList<(ConfigFiles) -> Unit>(25)
+
+        fun player(player: Player) {
+            for (handler in playerSpawns) {
+                handler(player)
             }
         }
 
-        override fun spawn(npc: NPC) {
-            npcDispatcher.forEach(npc.id, "*") { instance ->
-                instance.spawn(npc)
+        fun npc(npc: NPC) {
+            for (handler in npcSpawns["*"] ?: emptyList()) {
+                handler(npc)
+            }
+            for (handler in npcSpawns[npc.id] ?: return) {
+                handler(npc)
             }
         }
 
-        override fun spawn(obj: GameObject) {
-            objectDispatcher.forEach(obj.id, "*") { instance ->
-                instance.spawn(obj)
+        fun gameObject(gameObject: GameObject) {
+            for (handler in objectSpawns["*"] ?: emptyList()) {
+                handler(gameObject)
+            }
+            for (handler in objectSpawns[gameObject.id] ?: return) {
+                handler(gameObject)
             }
         }
 
-        override fun spawn(floorItem: FloorItem) {
-            floorItemDispatcher.forEach(floorItem.id, "*") { instance ->
-                instance.spawn(floorItem)
+        fun floorItem(floorItem: FloorItem) {
+            for (handler in floorItemSpawns["*"] ?: emptyList()) {
+                handler(floorItem)
+            }
+            for (handler in floorItemSpawns[floorItem.id] ?: return) {
+                handler(floorItem)
             }
         }
 
-        override fun worldSpawn(files: ConfigFiles) {
-            for (spawner in worldDispatcher.instances) {
-                spawner.worldSpawn(files)
+        fun world(configFiles: ConfigFiles) {
+            for (handler in worldSpawns) {
+                handler(configFiles)
             }
+        }
+
+        override fun close() {
+            playerSpawns.clear()
+            npcSpawns.clear()
+            objectSpawns.clear()
+            floorItemSpawns.clear()
+            worldSpawns.clear()
         }
     }
 }

@@ -5,37 +5,34 @@ import content.entity.combat.attackers
 import content.entity.combat.hit.damage
 import content.entity.combat.inCombat
 import content.entity.effect.transform
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interact.itemOnNPCOperate
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.entity.character.player.skill.SkillId
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inv.inventory
 
-@Script
-class Gargoyle : Api {
+class Gargoyle : Script {
 
     init {
-        npcOperate("Smash", "gargoyle") {
-            if (target.inCombat && target.attacker != player) {
-                player.message("Someone else is fighting that.")
+        npcOperate("Smash", "gargoyle") { (target) ->
+            if (target.inCombat && target.attacker != this) {
+                message("Someone else is fighting that.")
                 return@npcOperate
             }
-            smash(player, target)
+            smash(this, target)
         }
 
-        itemOnNPCOperate("rock_hammer", "gargoyle") {
-            if (target.inCombat && target.attacker != player) {
-                player.message("Someone else is fighting that.")
+        itemOnNPCOperate("rock_hammer", "gargoyle") { (target) ->
+            if (target.inCombat && target.attacker != this) {
+                message("Someone else is fighting that.")
                 return@itemOnNPCOperate
             }
-            smash(player, target)
+            smash(this, target)
         }
+
+        npcLevelChanged(Skill.Constitution, "gargoyle", ::killingBlow)
     }
 
     fun smash(player: Player, target: NPC) {
@@ -55,8 +52,7 @@ class Gargoyle : Api {
         player.message("You smash the gargoyle with the rock hammer and it shatters into pieces.")
     }
 
-    @SkillId(Skill.Constitution, "gargoyle")
-    override fun levelChanged(npc: NPC, skill: Skill, from: Int, to: Int) {
+    fun killingBlow(npc: NPC, skill: Skill, from: Int, to: Int) {
         if (to > 90) {
             return
         }

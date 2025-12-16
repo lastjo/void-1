@@ -2,42 +2,40 @@ package content.entity.player.bank
 
 import com.github.michaelbull.logging.InlineLogger
 import content.entity.player.dialogue.type.intEntry
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.menu
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.inventoryFull
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.MoveItemLimit.moveToLimit
 import world.gregs.voidps.engine.inv.transact.operation.ShiftItem.shiftToFreeIndex
 
-@Script
-class BankWithdraw {
+class BankWithdraw : Script {
 
     val logger = InlineLogger()
 
     init {
-        interfaceOption("Withdraw-*", "inventory", "bank") {
+        interfaceOption(id = "bank:inventory") { (item, itemSlot, option) ->
             val amount = when (option) {
                 "Withdraw-1" -> 1
                 "Withdraw-5" -> 5
                 "Withdraw-10" -> 10
-                "Withdraw-*" -> player["last_bank_amount", 0]
-                "Withdraw-All" -> player.bank.count(item.id)
+                "Withdraw-*" -> get("last_bank_amount", 0)
+                "Withdraw-All" -> bank.count(item.id)
                 "Withdraw-All but one" -> item.amount - 1
                 "Withdraw-X" -> intEntry("Enter amount:").also {
-                    player["last_bank_amount"] = it
+                    set("last_bank_amount", it)
                 }
                 else -> return@interfaceOption
             }
-            withdraw(player, item, itemSlot, amount)
+            withdraw(this, item, itemSlot, amount)
         }
 
-        interfaceOption("Toggle item/note withdrawl", "note_mode", "bank") {
-            player.toggle("bank_notes")
+        interfaceOption("Toggle item/note withdrawl", "bank:note_mode") {
+            toggle("bank_notes")
         }
     }
 

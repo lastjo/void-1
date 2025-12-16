@@ -1,8 +1,5 @@
 package content.area.misthalin.varrock
 
-import content.entity.combat.combatPrepare
-import content.entity.combat.npcCombatPrepare
-import content.entity.death.Death
 import content.entity.effect.transform
 import content.entity.gfx.areaGfx
 import content.entity.player.dialogue.*
@@ -11,54 +8,45 @@ import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import content.entity.player.dialogue.type.statement
 import content.entity.proj.shoot
-import content.entity.sound.jingle
-import content.entity.sound.sound
 import content.entity.world.music.playTrack
 import content.quest.Cutscene
 import content.quest.free.demon_slayer.DemonSlayerSpell
 import content.quest.questComplete
 import content.quest.questCompleted
 import content.quest.startCutscene
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.clearCamera
+import world.gregs.voidps.engine.client.instruction.handle.interactNpc
 import world.gregs.voidps.engine.client.moveCamera
 import world.gregs.voidps.engine.client.shakeCamera
 import world.gregs.voidps.engine.client.turnCamera
 import world.gregs.voidps.engine.client.variable.hasClock
 import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
+import world.gregs.voidps.engine.entity.character.Death
+import world.gregs.voidps.engine.entity.character.jingle
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
 import world.gregs.voidps.engine.entity.character.mode.PauseMode
-import world.gregs.voidps.engine.entity.character.mode.interact.Interact
-import world.gregs.voidps.engine.entity.character.mode.move.enterArea
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.NPCs
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.entity.character.player.skill.SkillId
+import world.gregs.voidps.engine.entity.character.sound
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.ObjectShape
-import world.gregs.voidps.engine.entity.playerDespawn
 import world.gregs.voidps.engine.event.AuditLog
-import world.gregs.voidps.engine.event.Context
-import world.gregs.voidps.engine.event.Events
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.queue.softQueue
 import world.gregs.voidps.engine.queue.strongQueue
 import world.gregs.voidps.engine.queue.weakQueue
-import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.engine.timer.toTicks
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Region
 import world.gregs.voidps.type.Tile
 import java.util.concurrent.TimeUnit
 
-@Script
-class Delrith : Api {
+class Delrith : Script {
 
     val objects: GameObjects by inject()
     val npcs: NPCs by inject()
@@ -75,41 +63,45 @@ class Delrith : Api {
 
     val words = listOf("Carlem", "Aber", "Camerinthum", "Purchai", "Gabindo")
 
-    override fun move(player: Player, from: Tile, to: Tile) {
-        if (exitArea(player, to)) {
-            val cutscene: Cutscene = player.remove("demon_slayer_cutscene") ?: return
-            Events.events.launch {
-                cutscene.end()
-            }
-        }
-    }
-
     init {
-        enterArea("demon_slayer_stone_circle") {
-            if (!player.questCompleted("demon_slayer") && player["demon_slayer_silverlight", false] && !player.hasClock("demon_slayer_instance_exit")) {
-                cutscene()
-            }
-        }
-
-        playerDespawn { player ->
-            val cutscene: Cutscene = player.remove("demon_slayer_cutscene") ?: return@playerDespawn
-            cutscene.destroy()
-        }
-
-        combatPrepare("melee") { player ->
-            if (target is NPC && target.id == "delrith" && target.transform == "delrith_weakened") {
-                cancel()
-                player.strongQueue("banish_delrith", 1) {
-                    player.mode = Interact(player, target, NPCOption(player, target, target.def, "Banish"))
+        moved {
+            if (exitArea(this, tile)) {
+                val cutscene: Cutscene = remove("demon_slayer_cutscene") ?: return@moved
+                Script.launch {
+                    cutscene.end()
                 }
             }
         }
 
-        npcOperate("Banish", "delrith") {
+        entered("demon_slayer_stone_circle") {
+            if (!questCompleted("demon_slayer") && get("demon_slayer_silverlight", false) && !hasClock("demon_slayer_instance_exit")) {
+                Script.launch {
+                    cutscene()
+                }
+            }
+        }
+
+        playerDespawn {
+            val cutscene: Cutscene = remove("demon_slayer_cutscene") ?: return@playerDespawn
+            cutscene.destroy()
+        }
+
+        combatPrepare("melee") { target ->
+            if (target is NPC && target.id == "delrith" && target.transform == "delrith_weakened") {
+                strongQueue("banish_delrith", 1) {
+                    interactNpc(target, "Banish")
+                }
+                false
+            } else {
+                true
+            }
+        }
+
+        npcOperate("Banish", "delrith") { (target) ->
             if (target.transform != "delrith_weakened") {
                 return@npcOperate
             }
-            player.weakQueue("banish_delrith") {
+            weakQueue("banish_delrith") {
                 player<Angry>("Now what was that incantation again?")
                 var correct = true
                 repeat(5) { index ->
@@ -117,7 +109,7 @@ class Delrith : Api {
                     val selected = words[choice - 1]
                     val suffix = if (index == 4) "!" else "..."
                     val text = "$selected$suffix"
-                    player.say(text)
+                    say(text)
                     player<Talk>(text, largeHead = true, clickToContinue = false)
                     val expected = DemonSlayerSpell.getWord(player, index + 1)
                     if (selected != expected) {
@@ -132,16 +124,16 @@ class Delrith : Api {
                 }
                 if (correct) {
                     target.anim("delrith_death")
-                    player.sound("demon_slayer_delrith_banished")
+                    sound("demon_slayer_delrith_banished")
                     statement("Delrith is sucked into the vortex...", clickToContinue = false)
                     delay(14)
                     npcs.remove(target)
                     statement("...back into the dark dimension from which he came.")
-                    val cutscene: Cutscene? = player.remove("demon_slayer_cutscene")
+                    val cutscene: Cutscene? = remove("demon_slayer_cutscene")
                     if (cutscene != null) {
                         cutscene.end()
                     } else {
-                        player.tele(defaultTile)
+                        tele(defaultTile)
                     }
                     questComplete()
                 } else {
@@ -151,14 +143,13 @@ class Delrith : Api {
         }
 
         npcCombatPrepare("delrith") {
-            if (it.levels.get(Skill.Constitution) <= 0) {
-                cancel()
-            }
+            levels.get(Skill.Constitution) > 0
         }
+
+        npcLevelChanged(Skill.Constitution, "delrith", ::weaken)
     }
 
-    @SkillId(Skill.Constitution, "delrith")
-    override fun levelChanged(npc: NPC, skill: Skill, from: Int, to: Int) {
+    fun weaken(npc: NPC, skill: Skill, from: Int, to: Int) {
         if (to > 0) {
             return
         }
@@ -166,7 +157,7 @@ class Delrith : Api {
             npc.queue.clear("death")
         }
         npc.strongQueue("death", TimeUnit.MINUTES.toTicks(5)) {
-            npc.emit(Death)
+            Death.killed(npc)
         }
         //    player.playSound("demon_slayer_portal_open")
         npc.transform("delrith_weakened")
@@ -179,12 +170,12 @@ class Delrith : Api {
         return !area.contains(actual) && !player.hasClock("demon_slayer_instance_exit")
     }
 
-    suspend fun SuspendableContext<Player>.cutscene() {
+    suspend fun Player.cutscene() {
         val region = Region(12852)
         val cutscene = startCutscene("demon_slayer_delrith", region)
-        player["demon_slayer_cutscene"] = cutscene
-        player.steps.clear()
-        player.mode = EmptyMode
+        set("demon_slayer_cutscene", cutscene)
+        steps.clear()
+        mode = EmptyMode
         val wizard1 = npcs.add("dark_wizard_water", cutscene.tile(3226, 3371), Direction.SOUTH_EAST)
         val wizard2 = npcs.add("dark_wizard_water_2", cutscene.tile(3229, 3371), Direction.SOUTH_WEST)
         val wizard3 = npcs.add("dark_wizard_earth", cutscene.tile(3226, 3368), Direction.NORTH_EAST)
@@ -199,35 +190,35 @@ class Delrith : Api {
         spawnEnergyBarrier(cutscene)
         delay(1)
         cutscene.onEnd {
-            player.start("demon_slayer_instance_exit", 2)
-            if (player.tile.region == cutscene.instance) {
-                player.tele(cutscene.original(player.tile))
+            start("demon_slayer_instance_exit", 2)
+            if (tile.region == cutscene.instance) {
+                tele(cutscene.original(tile))
             } else {
-                player.tele(defaultTile)
+                tele(defaultTile)
             }
-            player.clearCamera()
+            clearCamera()
         }
-        player.face(Direction.NORTH_EAST)
-        player.playTrack("delrith")
-        if (player["demon_slayer_summoned", false]) {
-            player.queue.clear("demon_slayer_delrith_cutscene_end")
+        face(Direction.NORTH_EAST)
+        playTrack("delrith")
+        if (get("demon_slayer_summoned", false)) {
+            queue.clear("demon_slayer_delrith_cutscene_end")
             delrith.tele(cutscene.tile(3227, 3367))
             denath.tele(cutscene.tile(3236, 3368))
-            player.tele(cutscene.convert(player.tile)) // TODO could be improved by getting nearest tile in inner circle area
+            tele(cutscene.convert(tile)) // TODO could be improved by getting nearest tile in inner circle area
             delrith.hide = false
             cutscene.showTabs()
             return
         }
-        player.tele(cutscene.tile(3222, 3367))
+        tele(cutscene.tile(3222, 3367))
         delay(1)
         for (wizard in wizards) {
             wizard.anim("summon_demon")
         }
 
-        player.clearCamera()
-        player.moveCamera(cutscene.tile(3224, 3376), 475, 232, 232)
-        player.turnCamera(cutscene.tile(3227, 3369), 300, 232, 232)
-        player.moveCamera(cutscene.tile(3231, 3376), 475, 1, 1)
+        clearCamera()
+        moveCamera(cutscene.tile(3224, 3376), 475, 232, 232)
+        turnCamera(cutscene.tile(3227, 3369), 300, 232, 232)
+        moveCamera(cutscene.tile(3231, 3376), 475, 1, 1)
         npc<Happy>("denath", "Arise, O mighty Delrith! Bring destruction to this soft, weak city!")
         for (wizard in wizards) {
             wizard.say("Arise, Delrith!")
@@ -237,20 +228,20 @@ class Delrith : Api {
         statement("The wizards cast an evil spell", clickToContinue = false)
         val regular = objects[cutscene.tile(3227, 3369), "demon_slayer_stone_table"]!!
         val table = objects.replace(regular, "demon_slayer_stone_table_summoning", ticks = 8)
-        player.clearCamera()
-        player.turnCamera(cutscene.tile(3227, 3369), 100, 232, 232)
-        player.moveCamera(cutscene.tile(3227, 3365), 500, 232, 232)
-        player.sound("summon_npc")
-        player.sound("demon_slayer_table_explosion")
+        clearCamera()
+        turnCamera(cutscene.tile(3227, 3369), 100, 232, 232)
+        moveCamera(cutscene.tile(3227, 3365), 500, 232, 232)
+        sound("summon_npc")
+        sound("demon_slayer_table_explosion")
         delay(1)
         table.anim("demon_slayer_table_light")
         delay(1)
-        player.shakeCamera(15, 0, 0, 0, 0)
+        shakeCamera(15, 0, 0, 0, 0)
         for ((source, target) in targets) {
             cutscene.convert(source).shoot("demon_slayer_spell", cutscene.convert(target))
         }
         delay(1)
-        player.shakeCamera(0, 0, 0, 0, 0)
+        shakeCamera(0, 0, 0, 0, 0)
         for ((_, target) in targets) {
             areaGfx("demon_slayer_spell_impact", cutscene.convert(target))
         }
@@ -258,16 +249,16 @@ class Delrith : Api {
         delrith.hide = false
         delrith.anim("delrith_appear")
         delay(2)
-        player.sound("demon_slayer_break_table", delay = 10)
-        player.sound("demon_slayer_delrith_appear")
-        player.turnCamera(cutscene.tile(3227, 3369), 400, 1, 1)
-        player["demon_slayer_summoned"] = true
+        sound("demon_slayer_break_table", delay = 10)
+        sound("demon_slayer_delrith_appear")
+        turnCamera(cutscene.tile(3227, 3369), 400, 1, 1)
+        set("demon_slayer_summoned", true)
         delay(5)
         delrith.walkOverDelay(cutscene.tile(3227, 3367))
         delay(2)
-        player.clearCamera()
-        player.moveCamera(cutscene.tile(3226, 3375), 500, 232, 232)
-        player.turnCamera(cutscene.tile(3227, 3367), 300, 232, 232)
+        clearCamera()
+        moveCamera(cutscene.tile(3226, 3375), 500, 232, 232)
+        turnCamera(cutscene.tile(3227, 3367), 300, 232, 232)
         delay(1)
         delrith.face(denath)
         for (wizard in wizards) {
@@ -283,32 +274,32 @@ class Delrith : Api {
         """,
         )
         for (wizard in wizards) {
-            wizard.face(player)
+            wizard.face(this)
         }
-        delrith.face(player)
+        delrith.face(this)
         npc<Surprised>("dark_wizard_earth", "Who's that?")
         npc<Afraid>("denath", "Noo! Not Silverlight! Delrith is not ready yet!")
         denath.walkToDelay(cutscene.tile(3236, 3368))
-        player.clearCamera()
-        player.moveCamera(cutscene.tile(3226, 3383), 1000, 1, 1)
+        clearCamera()
+        moveCamera(cutscene.tile(3226, 3383), 1000, 1, 1)
         npc<Shifty>("denath", "I've got to get out of here...")
-        player.queue.clear("demon_slayer_delrith_cutscene_end")
+        queue.clear("demon_slayer_delrith_cutscene_end")
         cutscene.end()
         for (wizard in wizards) {
             wizard.mode = EmptyMode
         }
     }
 
-    fun Context<Player>.questComplete() {
-        AuditLog.event(player, "quest_completed", "demon_slayer")
-        player.anim("silverlight_showoff")
-        player.gfx("silverlight_sparkle")
-        player.sound("equip_silverlight")
-        player.jingle("quest_complete_1")
-        player["demon_slayer"] = "completed"
-        player.inc("quest_points", 3)
-        DemonSlayerSpell.clear(player)
-        player.softQueue("quest_complete", 1) {
+    fun Player.questComplete() {
+        AuditLog.event(this, "quest_completed", "demon_slayer")
+        anim("silverlight_showoff")
+        gfx("silverlight_sparkle")
+        sound("equip_silverlight")
+        jingle("quest_complete_1")
+        set("demon_slayer", "completed")
+        inc("quest_points", 3)
+        DemonSlayerSpell.clear(this)
+        softQueue("quest_complete", 1) {
             player.questComplete(
                 "Demon Slayer",
                 "3 Quest Points",

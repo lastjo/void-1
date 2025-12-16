@@ -2,12 +2,10 @@ package content.entity.player.effect
 
 import content.area.wilderness.inWilderness
 import content.entity.combat.attackers
-import world.gregs.voidps.engine.Api
-import world.gregs.voidps.engine.entity.character.mode.combat.combatStart
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.appearance
 import world.gregs.voidps.engine.entity.character.player.flagAppearance
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.timer.*
 import java.util.concurrent.TimeUnit
 
@@ -29,43 +27,36 @@ fun Player.unskull() {
     softTimers.stop("skull")
 }
 
-@Script
-class Skull : Api {
-
-    override fun spawn(player: Player) {
-        if (player.skulled) {
-            player.softTimers.restart("skull")
-        }
-    }
-
-    @Timer("skull")
-    override fun start(player: Player, timer: String, restart: Boolean): Int {
-        player.appearance.skull = player["skull", 0]
-        player.flagAppearance()
-        return 50
-    }
-
-    @Timer("skull")
-    override fun tick(player: Player, timer: String): Int {
-        if (--player.skullCounter <= 0) {
-            return Timer.CANCEL
-        }
-        return Timer.CONTINUE
-    }
-
-    @Timer("skull")
-    override fun stop(player: Player, timer: String, logout: Boolean) {
-        player.clear("skull")
-        player.clear("skull_duration")
-        player.appearance.skull = -1
-        player.flagAppearance()
-    }
+class Skull : Script {
 
     init {
-        combatStart { player ->
-            if (player.inWilderness && target is Player && !player.attackers.contains(target)) {
-                player.skull()
+        playerSpawn {
+            if (skulled) {
+                softTimers.restart("skull")
             }
+        }
+
+        combatStart { target ->
+            if (inWilderness && target is Player && !attackers.contains(target)) {
+                skull()
+            }
+        }
+
+        timerStart("skull") {
+            appearance.skull = this["skull", 0]
+            flagAppearance()
+            50
+        }
+
+        timerTick("skull") {
+            if (--skullCounter <= 0) Timer.CANCEL else Timer.CONTINUE
+        }
+
+        timerStop("skull") {
+            clear("skull")
+            clear("skull_duration")
+            appearance.skull = -1
+            flagAppearance()
         }
     }
 }

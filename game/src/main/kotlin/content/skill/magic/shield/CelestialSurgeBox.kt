@@ -1,17 +1,14 @@
 package content.skill.magic.shield
 
-import content.entity.combat.hit.combatAttack
 import content.entity.player.dialogue.type.choice
-import content.entity.player.inv.inventoryItem
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
+import world.gregs.voidps.engine.client.ui.ItemOption
 import world.gregs.voidps.engine.client.ui.chat.plural
-import world.gregs.voidps.engine.client.ui.interact.itemOnItem
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.inventoryFull
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inv.*
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.charge
@@ -21,86 +18,95 @@ import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import kotlin.math.min
 
-@Script
-class CelestialSurgeBox : Api {
+class CelestialSurgeBox : Script {
 
-    override fun spawn(player: Player) {
-        val box = player.equipped(EquipSlot.Shield).id
-        if (box.startsWith("celestial_surgebox")) {
-            updateCharges(player, EquipSlot.Shield.index, box != "celestial_surgebox")
-        } else {
-            setCharges(player, 0, box != "celestial_surgebox")
+    init {
+        playerSpawn {
+            val box = equipped(EquipSlot.Shield).id
+            if (box.startsWith("celestial_surgebox")) {
+                updateCharges(this, EquipSlot.Shield.index, box != "celestial_surgebox")
+            } else {
+                setCharges(this, 0, box != "celestial_surgebox")
+            }
+        }
+
+        itemOption("Check", "celestial_surgebox*", handler = ::check)
+        itemOption("Check/Empty", "celestial_surgebox*", handler = ::check)
+
+        itemOption("Check-charges", "celestial_surgebox*", "worn_equipment") {
+            val surge = get("celestial_surgebox_mode", false)
+            val charges = equipment.charges(this, EquipSlot.Shield.index)
+            message("The box is currently charged with $charges ${if (surge) "Surge" else "Wave"} ${"spell".plural(charges)}.") // TODO proper message
+        }
+
+        itemAdded("celestial_surgebox*", "worn_equipment", EquipSlot.Shield) { (item, _, index) ->
+            updateCharges(this, index, item.id != "celestial_surgebox")
+        }
+
+        combatAttack("magic") {
+            if (!it.spell.endsWith("_wave")) {
+                return@combatAttack
+            }
+            val box = equipped(EquipSlot.Shield).id
+            if (box.startsWith("celestial_surgebox")) {
+                updateCharges(this, EquipSlot.Shield.index, box != "celestial_surgebox")
+            }
+        }
+
+        combatAttack("magic") {
+            if (!it.spell.endsWith("_surge")) {
+                return@combatAttack
+            }
+            val box = equipped(EquipSlot.Shield).id
+            if (box.startsWith("celestial_surgebox")) {
+                updateCharges(this, EquipSlot.Shield.index, box != "celestial_surgebox")
+            }
+        }
+
+        itemRemoved("celestial_surgebox*", "worn_equipment", EquipSlot.Shield) {
+            setCharges(this, 0, it.item.id != "celestial_surgebox")
+        }
+
+        itemOption("Charge", "celestial_surgebox*") { (item, slot) ->
+            charge(this, item, slot)
+        }
+
+        itemOnItem("air_rune", "celestial_surgebox*") { _, toItem, _, toSlot ->
+            charge(this, toItem, toSlot)
+        }
+
+        itemOnItem("blood_rune", "celestial_surgebox*") { _, toItem, _, toSlot ->
+            charge(this, toItem, toSlot)
+        }
+
+        itemOnItem("death_rune", "celestial_surgebox*") { _, toItem, _, toSlot ->
+            charge(this, toItem, toSlot)
         }
     }
 
-    init {
-        inventoryItem("Check*", "celestial_surgebox*", "inventory") {
-            val charges = player.inventory.charges(player, slot)
-            val dungeoneering = if (item.id == "celestial_surgebox") "" else "_dungeoneering"
-            val surge = player["celestial_surgebox_mode$dungeoneering", false]
-            choice("The box is currently charged with $charges ${if (surge) "Surge" else "Wave"} ${"spell".plural(charges)}.") {
-                option("I want to empty the ${if (surge) "Surge" else "Wave"} spells.", filter = { charges > 0 }) {
-                    // TODO proper message
-                    if (emptyRunes(player, surge, dungeoneering, slot, charges)) {
-                        player.message("You empty the box of ${if (surge) "Surge" else "Wave"} spells.") // TODO proper message
-                    } else {
-                        player.inventoryFull()
-                    }
-                }
-                option("I do not wish to change the box settings.", filter = { charges == 0 })
-                option("Switch to ${if (surge) "Wave" else "Surge"}.") {
-                    if (charges == 0 || emptyRunes(player, surge, dungeoneering, slot, charges)) {
-                        val surgeMode = player.toggle("celestial_surgebox_mode$dungeoneering")
-                        player.message("This box is set to be charged with ${if (surgeMode) "Surge" else "Wave"} spells.")
-                    } else {
-                        player.inventoryFull()
-                    }
+    suspend fun check(player: Player, it: ItemOption) = with(player) {
+        val (item, slot) = it
+        val charges = inventory.charges(this, slot)
+        val dungeoneering = if (item.id == "celestial_surgebox") "" else "_dungeoneering"
+        val surge = get("celestial_surgebox_mode$dungeoneering", false)
+        choice("The box is currently charged with $charges ${if (surge) "Surge" else "Wave"} ${"spell".plural(charges)}.") {
+            option("I want to empty the ${if (surge) "Surge" else "Wave"} spells.", filter = { charges > 0 }) {
+                // TODO proper message
+                if (emptyRunes(this, surge, dungeoneering, slot, charges)) {
+                    message("You empty the box of ${if (surge) "Surge" else "Wave"} spells.") // TODO proper message
+                } else {
+                    inventoryFull()
                 }
             }
-        }
-
-        inventoryItem("Check-charges", "celestial_surgebox*", "worn_equipment") {
-            val surge = player["celestial_surgebox_mode", false]
-            val charges = player.equipment.charges(player, EquipSlot.Shield.index)
-            player.message("The box is currently charged with $charges ${if (surge) "Surge" else "Wave"} ${"spell".plural(charges)}.") // TODO proper message
-        }
-
-        itemAdded("celestial_surgebox*", EquipSlot.Shield, "worn_equipment") { player ->
-            updateCharges(player, index, item.id != "celestial_surgebox")
-        }
-
-        combatAttack(spell = "*_wave") { player ->
-            val box = player.equipped(EquipSlot.Shield).id
-            if (box.startsWith("celestial_surgebox")) {
-                updateCharges(player, EquipSlot.Shield.index, box != "celestial_surgebox")
+            option("I do not wish to change the box settings.", filter = { charges == 0 })
+            option("Switch to ${if (surge) "Wave" else "Surge"}.") {
+                if (charges == 0 || emptyRunes(this, surge, dungeoneering, slot, charges)) {
+                    val surgeMode = toggle("celestial_surgebox_mode$dungeoneering")
+                    message("This box is set to be charged with ${if (surgeMode) "Surge" else "Wave"} spells.")
+                } else {
+                    inventoryFull()
+                }
             }
-        }
-
-        combatAttack(spell = "*_surge") { player ->
-            val box = player.equipped(EquipSlot.Shield).id
-            if (box.startsWith("celestial_surgebox")) {
-                updateCharges(player, EquipSlot.Shield.index, box != "celestial_surgebox")
-            }
-        }
-
-        itemRemoved("celestial_surgebox*", EquipSlot.Shield, "worn_equipment") { player ->
-            setCharges(player, 0, item.id != "celestial_surgebox")
-        }
-
-        inventoryItem("Charge", "celestial_surgebox*", "inventory") {
-            charge(player, item, slot)
-        }
-
-        itemOnItem("air_rune", "celestial_surgebox*") {
-            charge(it, toItem, toSlot)
-        }
-
-        itemOnItem("blood_rune", "celestial_surgebox*") {
-            charge(it, toItem, toSlot)
-        }
-
-        itemOnItem("death_rune", "celestial_surgebox*") {
-            charge(it, toItem, toSlot)
         }
     }
 

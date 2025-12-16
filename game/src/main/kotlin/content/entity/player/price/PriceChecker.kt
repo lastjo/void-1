@@ -6,107 +6,103 @@ import content.entity.player.dialogue.type.intEntry
 import content.entity.player.modal.Tab
 import content.entity.player.modal.tab
 import content.social.trade.offer
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.sendScript
 import world.gregs.voidps.engine.client.ui.close
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.character.player.chat.inventoryFull
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inv.inventory
-import world.gregs.voidps.engine.inv.inventoryUpdate
 import world.gregs.voidps.engine.inv.moveAll
 import world.gregs.voidps.engine.inv.sendInventory
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.MoveItemLimit.moveToLimit
 
-@Script
-class PriceChecker {
+class PriceChecker : Script {
 
     init {
-        interfaceOpen("price_checker") { player ->
-            player.interfaceOptions.unlockAll(id, "items", 0 until 28)
-            player["price_checker_total"] = 0
-            player["price_checker_limit"] = Int.MAX_VALUE
-            player.open("price_checker_side")
+
+        /*
+            Price checker interface
+         */
+
+        interfaceOpened("price_checker") { id ->
+            interfaceOptions.unlockAll(id, "items", 0 until 28)
+            set("price_checker_total", 0)
+            set("price_checker_limit", Int.MAX_VALUE)
+            open("price_checker_side")
         }
 
-        interfaceOption("Remove-*", "items", "price_checker") {
+        interfaceOption(id = "price_checker:items") { (item, _, option) ->
             val amount = when (option) {
                 "Remove-1" -> 1
                 "Remove-5" -> 5
                 "Remove-10" -> 10
-                "Remove-All" -> player.offer.count(item.id)
+                "Remove-All" -> offer.count(item.id)
                 "Remove-X" -> intEntry("Enter amount:")
                 else -> return@interfaceOption
             }
-            player.offer.transaction {
-                moveToLimit(item.id, amount, player.inventory)
+            offer.transaction {
+                moveToLimit(item.id, amount, this@interfaceOption.inventory)
             }
-            when (player.offer.transaction.error) {
-                is TransactionError.Full -> player.inventoryFull()
+            when (offer.transaction.error) {
+                is TransactionError.Full -> inventoryFull()
                 else -> {}
             }
         }
 
-        interfaceClose("price_checker") { player ->
-            player.close("price_checker_side")
-            player.sendScript("clear_dialogues")
-            player.offer.moveAll(player.inventory)
+        interfaceClosed("price_checker") {
+            close("price_checker_side")
+            sendScript("clear_dialogues")
+            offer.moveAll(inventory)
         }
 
-        interfaceOpen("price_checker_side") { player ->
-            player.tab(Tab.Inventory)
-            player.interfaceOptions.send(id, "items")
-            player.interfaceOptions.unlockAll(id, "items", 0 until 28)
-            player.sendInventory(player.inventory)
+        /*
+            Price checker inventory interface
+         */
+
+        interfaceOpened("price_checker_side") { id ->
+            tab(Tab.Inventory)
+            interfaceOptions.send(id, "items")
+            interfaceOptions.unlockAll(id, "items", 0 until 28)
+            sendInventory(inventory)
         }
 
-        interfaceOption("Add*", "items", "price_checker_side") {
+        interfaceOption(id = "price_checker_side:items") { (item, _, option) ->
             val amount = when (option) {
                 "Add" -> 1
                 "Add-5" -> 5
                 "Add-10" -> 10
-                "Add-All" -> player.inventory.count(item.id)
+                "Add-All" -> inventory.count(item.id)
                 "Add-X" -> intEntry("Enter amount:")
                 else -> return@interfaceOption
             }
-            player.inventory.transaction {
-                moveToLimit(item.id, amount, player.offer)
+            inventory.transaction {
+                moveToLimit(item.id, amount, offer)
             }
-            when (player.inventory.transaction.error) {
-                is TransactionError.Invalid -> player.message("That item is not tradeable.")
+            when (inventory.transaction.error) {
+                is TransactionError.Invalid -> message("That item is not tradeable.")
                 else -> {}
             }
         }
 
-        interfaceClose("price_checker_side") { player ->
-            player.open("inventory")
+        interfaceClosed("price_checker_side") {
+            open("inventory")
         }
 
-        inventoryUpdate("trade_offer") { player ->
+        inventoryUpdated("trade_offer") { _, _ ->
             var total = 0L
-            for (index in player.offer.indices) {
-                val item = player.offer[index]
+            for (index in offer.indices) {
+                val item = offer[index]
                 if (item.isEmpty()) {
                     continue
                 }
                 val notNoted = if (item.isNote) item.noted ?: item else item
                 val price = notNoted.def["price", notNoted.def.cost]
-                player["value_$index"] = price
+                set("value_$index", price)
                 total += price * item.amount
             }
-            player["price_checker_total"] = total.toInt()
+            set("price_checker_total", total.toInt())
         }
     }
-
-    /*
-        Price checker interface
-     */
-
-    /*
-        Price checker inventory interface
-     */
 }

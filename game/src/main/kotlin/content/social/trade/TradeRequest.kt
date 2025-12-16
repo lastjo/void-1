@@ -4,50 +4,47 @@ import content.entity.player.modal.Tab
 import content.entity.player.modal.tab
 import content.social.friend.friend
 import content.social.trade.Trade.getPartner
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.sendScript
 import world.gregs.voidps.engine.client.ui.closeType
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.name
-import world.gregs.voidps.engine.entity.character.player.playerOperate
 import world.gregs.voidps.engine.entity.character.player.req.hasRequest
 import world.gregs.voidps.engine.entity.character.player.req.removeRequest
 import world.gregs.voidps.engine.entity.character.player.req.request
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inv.clear
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.moveAll
 
-@Script
-class TradeRequest {
+class TradeRequest : Script {
 
     init {
-        playerOperate("Trade with") {
+        playerOperate("Trade with") { (target) ->
             val filter = target["trade_filter", "on"]
-            if (filter == "off" || (filter == "friends" && !target.friend(player))) {
+            if (filter == "off" || (filter == "friends" && !target.friend(this))) {
                 return@playerOperate
             }
-            if (target.hasRequest(player, "trade")) {
-                player.message("Sending trade offer...", ChatType.Trade)
+            if (target.hasRequest(this, "trade")) {
+                message("Sending trade offer...", ChatType.Trade)
             } else {
-                player.message("Sending trade offer...", ChatType.Trade)
-                target.message("wishes to trade with you.", ChatType.TradeRequest, name = player.name)
+                message("Sending trade offer...", ChatType.Trade)
+                target.message("wishes to trade with you.", ChatType.TradeRequest, name = name)
             }
-            player.request(target, "trade") { requester, acceptor ->
+            request(target, "trade") { requester, acceptor ->
                 startTrade(requester, acceptor)
                 startTrade(acceptor, requester)
             }
         }
 
-        interfaceClose("trade_main", "trade_confirm") { player ->
-            val other: Player = getPartner(player) ?: return@interfaceClose
-            if (player.hasRequest(other, "accept_trade")) {
-                return@interfaceClose
+        interfaceClosed("trade_main,trade_confirm") {
+            val other: Player = getPartner(this) ?: return@interfaceClosed
+            if (hasRequest(other, "accept_trade")) {
+                return@interfaceClosed
             }
-            reset(player, other)
-            reset(other, player)
+            reset(this, other)
+            reset(other, this)
         }
     }
 

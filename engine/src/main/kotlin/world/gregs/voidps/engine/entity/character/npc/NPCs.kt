@@ -88,10 +88,10 @@ data class NPCs(
         return false
     }
 
-    fun update(from: Tile, to: Tile, npc: NPC) {
-        if (from.regionLevel != to.regionLevel) {
+    fun update(npc: NPC, from: Tile) {
+        if (from.regionLevel != npc.tile.regionLevel) {
             map.remove(from.regionLevel, npc)
-            map.add(to.regionLevel, npc)
+            map.add(npc.tile.regionLevel, npc)
         }
     }
 
@@ -162,7 +162,7 @@ data class NPCs(
             npc["respawn_delay"] = respawnDelay
             npc["respawn_direction"] = npc.direction
         }
-        Spawn.spawn(npc)
+        Spawn.npc(npc)
         return true
     }
 
@@ -176,7 +176,7 @@ data class NPCs(
 
     fun clear() {
         for (npc in this) {
-            npc.emit(Despawn)
+            Despawn.npc(npc)
             npc.softTimers.stopAll()
         }
         indexArray.fill(null)

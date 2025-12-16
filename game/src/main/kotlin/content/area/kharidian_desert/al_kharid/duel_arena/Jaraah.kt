@@ -4,19 +4,17 @@ import content.entity.player.dialogue.*
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.Script
 
-@Script
-class Jaraah {
+class Jaraah : Script {
 
     init {
-        npcOperate("Talk-to", "jaraah") {
+        npcOperate("Talk-to", "jaraah") { (target) ->
             player<Happy>("Hi!")
             npc<Frustrated>("What? Can't you see I'm busy?!")
             choice {
                 option<Uncertain>("Can you heal me?") {
-                    heal()
+                    heal(target)
                 }
                 option<Uncertain>("You must see some gruesome things?") {
                     npc<Frustrated>("It's a gruesome business and with the tools they give me it gets more gruesome before it gets better!")
@@ -32,8 +30,8 @@ class Jaraah {
             }
         }
 
-        npcOperate("Heal", "jaraah") {
-            heal()
+        npcOperate("Heal", "jaraah") { (target) ->
+            heal(target)
         }
     }
 }

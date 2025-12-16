@@ -1,21 +1,19 @@
 package content.skill.ranged.weapon.special
 
 import content.entity.combat.hit.hit
-import content.entity.player.combat.special.specialAttack
 import content.entity.proj.shoot
-import content.entity.sound.sound
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.Script
+import world.gregs.voidps.engine.entity.character.sound
 
-@Script
-class MagicLongbow {
+class MagicLongbow : Script {
 
     init {
-        specialAttack("powershot") { player ->
-            player.anim("bow_accurate")
-            player.gfx("special_arrow_shoot")
-            player.sound("${id}_special")
-            val time = player.shoot(id = "special_arrow", target = target)
-            player.hit(target, delay = time)
+        specialAttack("powershot") { target, id ->
+            anim("bow_accurate")
+            gfx("special_arrow_shoot")
+            sound("${id}_special")
+            val time = shoot(id = "special_arrow", target = target)
+            hit(target, delay = time)
         }
     }
 }

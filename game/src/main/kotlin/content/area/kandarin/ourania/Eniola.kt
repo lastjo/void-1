@@ -1,28 +1,18 @@
 package content.area.kandarin.ourania
 
 import content.entity.player.dialogue.*
-import content.entity.player.dialogue.type.ChoiceBuilder
-import content.entity.player.dialogue.type.choice
-import content.entity.player.dialogue.type.npc
-import content.entity.player.dialogue.type.player
+import content.entity.player.dialogue.type.*
 import content.social.trade.lend.Loan.getSecondsRemaining
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.ui.close
-import world.gregs.voidps.engine.client.ui.dialogue.continueDialogue
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
-import world.gregs.voidps.engine.entity.character.npc.NPCOption
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.queue.queue
 import world.gregs.voidps.engine.suspend.StringSuspension
-import world.gregs.voidps.engine.suspend.SuspendableContext
 
-@Script
-class Eniola {
+class Eniola : Script {
 
     val runes = listOf(
         "air_rune",
@@ -44,7 +34,7 @@ class Eniola {
     init {
         npcOperate("Talk-to", "eniola") {
             npc<Quiz>("Well met, fellow adventurer! How can I help you?")
-            val loanReturned = getSecondsRemaining(player, "lend_timeout") < 0
+            val loanReturned = getSecondsRemaining(this, "lend_timeout") < 0
             val collection = false
             if (loanReturned) {
                 npc<Talk>("Before we go any further, I should inform you that an item you lent out has been returned to you.")
@@ -69,7 +59,7 @@ class Eniola {
                             npc<Quiz>("Would you like to pay the price of twenty runes to open your bank account?")
                             choice {
                                 option<Talk>("Yes please.") {
-                                    player.open("ourania_bank_charge")
+                                    open("ourania_bank_charge")
                                 }
                                 option("Let me open my account and then I'll give you the runes.") {
                                     player<Quiz>("I don't have the runes on me. Let me open my account and then I'll give them to you.")
@@ -100,64 +90,64 @@ class Eniola {
             openCollection()
         }
 
-        interfaceOpen("ourania_bank_charge") { player ->
+        interfaceOpened("ourania_bank_charge") { id ->
             for (rune in runes) {
-                player.interfaces.sendVisibility(id, "${rune}_hide", !player.inventory.contains(rune, 20))
+                interfaces.sendVisibility(id, "${rune}_hide", !inventory.contains(rune, 20))
             }
-            player.interfaces.sendText("ourania_bank_charge", "text", "Choose a highlighted rune to make your payment.")
+            interfaces.sendText("ourania_bank_charge", "text", "Choose a highlighted rune to make your payment.")
         }
 
-        continueDialogue("ourania_bank_charge", "*_rune") { player ->
-            (player.dialogueSuspension as? StringSuspension)?.resume(component)
+        continueDialogue("ourania_bank_charge:*_rune") {
+            (dialogueSuspension as? StringSuspension)?.resume(it.substringAfter(":"))
         }
 
-        interfaceOption("*", "*_rune", "ourania_bank_charge") {
-            if (player.inventory.remove(id, 20)) {
-                val id = player["ourania_interface", "bank"]
-                player.open(id)
+        interfaceOption(id = "ourania_bank_charge:*_rune") {
+            if (inventory.remove(it.component, 20)) {
+                val id = get("ourania_interface", "bank")
+                open(id)
             } else {
-                player.queue("not_enough_runes") {
+                queue("not_enough_runes") {
                     npc<Upset>("I'm afraid you don't have the necessary runes with you at this time, so I can't allow you to access your account. Please bring twenty runes of one type and you can open your account.")
                 }
             }
         }
     }
 
-    fun ChoiceBuilder<NPCOption<Player>>.accessBank() {
+    fun ChoiceOption.accessBank() {
         option("I'd like to access my bank account, please.") {
             openBank()
         }
     }
 
-    fun ChoiceBuilder<NPCOption<Player>>.collectionBox() {
+    fun ChoiceOption.collectionBox() {
         option("I'd like to see my collection box.") {
             openCollection()
         }
     }
 
-    fun ChoiceBuilder<NPCOption<Player>>.pinSettings() {
+    fun ChoiceOption.pinSettings() {
         option("I'd like to check my PIN settings.") {
         }
     }
 
-    suspend fun NPCOption<Player>.openCollection() {
+    suspend fun Player.openCollection() {
         if (runePayment()) {
-            player.open("collection_box")
+            open("collection_box")
         }
     }
 
-    suspend fun NPCOption<Player>.openBank() {
+    suspend fun Player.openBank() {
         if (runePayment()) {
-            player.open("bank")
+            open("bank")
         }
     }
 
-    suspend fun SuspendableContext<Player>.runePayment(): Boolean {
-        player.open("ourania_bank_charge")
-        val rune = StringSuspension.get(player)
-        player.close("ourania_bank_charge")
+    suspend fun Player.runePayment(): Boolean {
+        open("ourania_bank_charge")
+        val rune = StringSuspension.get(this)
+        close("ourania_bank_charge")
 
-        if (!player.inventory.remove(rune, 20)) {
+        if (!inventory.remove(rune, 20)) {
             npc<Upset>("I'm afraid you don't have the necessary runes with you at this time, so I can't allow you to access your account. Please bring twenty runes of one type and you can open your account.")
             return false
         }

@@ -1,14 +1,12 @@
 package content.skill.ranged.ammo
 
-import content.entity.combat.combatPrepare
-import content.entity.combat.combatSwing
 import content.entity.player.combat.special.specialAttack
-import content.entity.sound.sound
 import content.skill.melee.weapon.fightStyle
 import content.skill.melee.weapon.weapon
 import content.skill.ranged.Ammo
 import content.skill.ranged.ammo
 import net.pearx.kasechange.toLowerSpaceCase
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.data.definition.AmmoDefinitions
 import world.gregs.voidps.engine.data.definition.WeaponStyleDefinitions
@@ -16,39 +14,38 @@ import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.hasUseLevel
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.entity.character.sound
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 
-@Script
-class Ammo {
+class Ammo : Script {
 
     val ammoDefinitions: AmmoDefinitions by inject()
     val weaponStyles: WeaponStyleDefinitions by inject()
 
     init {
-        combatPrepare { player ->
-            if (player.fightStyle != "range" && player.weapon.def["weapon_style", 0] == 21 && !checkAmmo(player)) { // Salamanders
-                cancel()
+        combatPrepare {
+            !(fightStyle != "range" && weapon.def["weapon_style", 0] == 21 && !checkAmmo(this)) // Salamanders
+        }
+
+        combatSwing(style = "blaze") { target ->
+            if (weapon.def["weapon_style", 0] == 21) { // Salamanders
+                Ammo.remove(this, target, ammo, Ammo.requiredAmount(weapon, false))
             }
         }
 
-        combatSwing(style = "blaze") { player ->
-            if (player.weapon.def["weapon_style", 0] == 21) { // Salamanders
-                Ammo.remove(player, target, player.ammo, Ammo.requiredAmount(player.weapon, false))
+        combatSwing(style = "melee") { target ->
+            if (weapon.def["weapon_style", 0] == 21) { // Salamanders
+                Ammo.remove(this, target, ammo, Ammo.requiredAmount(weapon, false))
             }
         }
 
-        combatSwing(style = "melee") { player ->
-            if (player.weapon.def["weapon_style", 0] == 21) { // Salamanders
-                Ammo.remove(player, target, player.ammo, Ammo.requiredAmount(player.weapon, false))
-            }
-        }
-
-        combatPrepare("range") { player ->
-            if (!checkAmmo(player)) {
-                player.sound("out_of_ammo")
-                cancel()
+        combatPrepare("range") {
+            if (!checkAmmo(this)) {
+                sound("out_of_ammo")
+                false
+            } else {
+                true
             }
         }
     }

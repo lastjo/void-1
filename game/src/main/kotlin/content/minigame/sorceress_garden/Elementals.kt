@@ -1,45 +1,47 @@
 package content.minigame.sorceress_garden
 
 import content.entity.proj.shoot
-import content.entity.sound.sound
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.ui.open
+import world.gregs.voidps.engine.data.definition.HuntModeDefinitions
 import world.gregs.voidps.engine.data.definition.PatrolDefinitions
-import world.gregs.voidps.engine.entity.Id
 import world.gregs.voidps.engine.entity.character.mode.Patrol
 import world.gregs.voidps.engine.entity.character.move.tele
-import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.hunt.huntPlayer
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.entity.character.npc.hunt.Hunting
+import world.gregs.voidps.engine.entity.character.player.Players
+import world.gregs.voidps.engine.entity.character.sound
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.queue.strongQueue
 import world.gregs.voidps.type.Direction
 import kotlin.getValue
 
-@Script
-class Elementals : Api {
+class Elementals : Script {
     val patrols: PatrolDefinitions by inject()
-
-    @Id("autumn_elemental*,spring_elemental*,summer_elemental*,winter_elemental*")
-    override fun spawn(npc: NPC) {
-        val patrol = patrols.get(npc.id)
-        npc.mode = Patrol(npc, patrol.waypoints)
-    }
+    val hunting: Hunting by inject()
+    val players: Players by inject()
+    val huntModes: HuntModeDefinitions by inject()
 
     init {
-        huntPlayer("*_elemental*", "spotted") { npc ->
-            val direction = npc.direction
+        npcSpawn("autumn_elemental*,spring_elemental*,summer_elemental*,winter_elemental*") {
+            val patrol = patrols.get(id)
+            mode = Patrol(this, patrol.waypoints)
+        }
+
+        huntPlayer("*_elemental*", "spotted") {
+            val direction = direction
+            val modeDefinition = huntModes.get("spotted")
+            val targets = hunting.getCharacters(this, players, def["hunt_range", 5], modeDefinition)
             for (player in targets) {
-                if (direction != Direction.NONE && direction != player.tile.delta(npc.tile).toDirection()) {
+                if (direction != Direction.NONE && direction != player.tile.delta(tile).toDirection()) {
                     continue // Skip players that aren't in-front or under.
                 }
                 if (player.queue.contains("sorceress_garden_caught")) {
                     continue
                 }
                 player.strongQueue("sorceress_garden_caught") {
-                    npc.anim("elemental_pointing")
+                    anim("elemental_pointing")
                     player.sound("stun_all")
-                    npc.shoot("curse", player.tile)
+                    shoot("curse", player.tile)
                     player.gfx("curse_impact")
                     player.open("fade_out")
                     delay(4)

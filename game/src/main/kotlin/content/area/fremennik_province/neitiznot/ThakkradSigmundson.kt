@@ -6,19 +6,15 @@ import content.entity.player.dialogue.Uncertain
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
-import world.gregs.voidps.engine.client.ui.interact.itemOnNPCOperate
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItemLimit.removeToLimit
-import world.gregs.voidps.engine.suspend.SuspendableContext
 
-@Script
-class ThakkradSigmundson {
+class ThakkradSigmundson : Script {
 
     init {
         npcOperate("Talk-to", "thakkrad_sigmundson") {
@@ -43,12 +39,12 @@ class ThakkradSigmundson {
         }
     }
 
-    suspend fun SuspendableContext<Player>.cureHide() {
+    suspend fun Player.cureHide() {
         player<Talk>("Cure my yak hide please.")
         npc<Talk>("I will cure yak-hide for a fee of 5 gp per hide.")
         choice("How many hides do you want cured?") {
             option("Cure all my hides.") {
-                cure(player.inventory.count("yak_hide"))
+                cure(inventory.count("yak_hide"))
             }
             option("Cure one hide.") {
                 cure(1)
@@ -63,17 +59,17 @@ class ThakkradSigmundson {
         }
     }
 
-    suspend fun SuspendableContext<Player>.cure(amount: Int) {
-        if (!player.inventory.contains("yak_hide")) {
+    suspend fun Player.cure(amount: Int) {
+        if (!inventory.contains("yak_hide")) {
             npc<Talk>("You have no yak-hide to cure.")
             return
         }
-        player.inventory.transaction {
+        inventory.transaction {
             val removed = removeToLimit("yak_hide", amount)
             remove("coins", removed * 5)
             add("cured_yak_hide", removed)
         }
-        when (player.inventory.transaction.error) {
+        when (inventory.transaction.error) {
             is TransactionError.Deficient -> npc<Talk>("You don't have enough gold to pay me!.")
             TransactionError.None -> npc<Talk>("There you go.")
             else -> {}

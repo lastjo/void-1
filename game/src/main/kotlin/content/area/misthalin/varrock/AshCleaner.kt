@@ -1,16 +1,13 @@
 package content.area.misthalin.varrock
 
-import world.gregs.voidps.engine.entity.character.mode.interact.Interact
-import world.gregs.voidps.engine.entity.character.npc.hunt.huntFloorItem
-import world.gregs.voidps.engine.entity.item.floor.FloorItemOption
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.Script
+import world.gregs.voidps.engine.client.instruction.handle.interactFloorItem
 
-@Script
-class AshCleaner {
+class AshCleaner : Script {
 
     init {
-        huntFloorItem("ash_cleaner", mode = "ash_finder") { npc ->
-            npc.mode = Interact(npc, target, FloorItemOption(npc, target, "Take"))
+        huntFloorItem("ash_finder") { target ->
+            interactFloorItem(target, "Take")
         }
     }
 }

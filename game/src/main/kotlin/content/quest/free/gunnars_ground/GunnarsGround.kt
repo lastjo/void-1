@@ -1,34 +1,29 @@
 package content.quest.free.gunnars_ground
 
-import content.entity.player.inv.inventoryItem
-import content.entity.player.modal.tab.questJournalOpen
 import content.quest.letterScroll
 import content.quest.quest
 import content.quest.questJournal
-import world.gregs.voidps.engine.Api
-import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.inv.holdsItem
 
-@Script
-class GunnarsGround : Api {
-
-    override fun spawn(player: Player) {
-        player.sendVariable("gudrun_after_quest")
-        player.sendVariable("dororan_after_quest")
-        player.sendVariable("kjell")
-        player.sendVariable("dororan")
-        player.sendVariable("dororan_after_cutscene")
-        player.sendVariable("gudrun")
-        player.sendVariable("gudrun_after_cutscene")
-        player.sendVariable("dororan_ruby_bracelet")
-        player.sendVariable("dororan_dragonstone_necklace")
-        player.sendVariable("dororan_onyx_amulet")
-    }
+class GunnarsGround : Script {
 
     init {
-        inventoryItem("Read", "gunnars_ground", "inventory") {
-            player.letterScroll(
+        playerSpawn {
+            sendVariable("gudrun_after_quest")
+            sendVariable("dororan_after_quest")
+            sendVariable("kjell")
+            sendVariable("dororan")
+            sendVariable("dororan_after_cutscene")
+            sendVariable("gudrun")
+            sendVariable("gudrun_after_cutscene")
+            sendVariable("dororan_ruby_bracelet")
+            sendVariable("dororan_dragonstone_necklace")
+            sendVariable("dororan_onyx_amulet")
+        }
+
+        itemOption("Read", "gunnars_ground") {
+            letterScroll(
                 "Gunnar's Ground",
                 listOf(
                     "",
@@ -54,7 +49,7 @@ class GunnarsGround : Api {
         }
 
         questJournalOpen("gunnars_ground") {
-            val lines = when (player.quest("gunnars_ground")) {
+            val lines = when (quest("gunnars_ground")) {
                 "completed" -> listOf(
                     "<str>I met an unhappy dwarf named Dororan just outside the",
                     "<str>barbarian village.",
@@ -290,7 +285,7 @@ class GunnarsGround : Api {
                         "<maroon>Gold ring <navy>he Specifically wants a ring from <maroon>Jeffery <navy>in <maroon>Edgeville.",
                         "<navy>Items I need:",
                     )
-                    if (player.holdsItem("ring_from_jeffery")) {
+                    if (holdsItem("ring_from_jeffery")) {
                         list.add("<str>Ring from Jeffery")
                     } else {
                         list.add("<maroon>Ring from Jeffery")
@@ -306,7 +301,7 @@ class GunnarsGround : Api {
                     "<navy>just outside the <maroon>barbarian village.",
                 )
             }
-            player.questJournal("Gunnar's Ground", lines)
+            questJournal("Gunnar's Ground", lines)
         }
     }
 }

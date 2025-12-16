@@ -2,12 +2,11 @@ package content.activity.penguin_hide_and_seek
 
 import content.entity.effect.transform
 import content.entity.player.command.find
-import content.entity.player.inv.inventoryItem
 import content.quest.questCompleted
 import content.quest.questJournal
 import net.pearx.kasechange.toTitleCase
 import world.gregs.config.Config
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.command.adminCommand
 import world.gregs.voidps.engine.client.command.modCommand
 import world.gregs.voidps.engine.client.command.stringArg
@@ -24,12 +23,9 @@ import world.gregs.voidps.engine.data.find
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCs
-import world.gregs.voidps.engine.entity.character.npc.npcApproach
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.character.player.isAdmin
-import world.gregs.voidps.engine.entity.obj.objectApproach
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.timedLoad
 import world.gregs.voidps.engine.timer.toTicks
@@ -44,8 +40,7 @@ import java.time.temporal.TemporalAdjusters
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
-@Script
-class PenguinHideAndSeek : Api {
+class PenguinHideAndSeek : Script {
 
     val npcs: NPCs by inject()
     val areas: AreaDefinitions by inject()
@@ -66,62 +61,64 @@ class PenguinHideAndSeek : Api {
     )
 
     init {
-        npcApproach("Spy-on", "*_penguin", "*_turkey") {
+        npcApproach("Spy-on", "*_penguin,*_turkey") { (target) ->
             approachRange(5)
-            updateWeek(player)
-            if (!player.addVarbit("penguins_found", target.id.removePrefix("hidden_"))) {
+            updateWeek(this)
+            if (!addVarbit("penguins_found", target.id.removePrefix("hidden_"))) {
                 // https://youtu.be/E1roiyC8QD4?si=10fPzRMq_UMZ9nkb&t=83
-                player.message("You've already spotted this penguin spy.")
+                message("You've already spotted this penguin spy.")
                 return@npcApproach
             }
-            player.watch(target)
-            player.anim("spot_penguin")
+            watch(target)
+            anim("spot_penguin")
             // https://youtu.be/E1roiyC8QD4?si=C4nJB4swiJzlTtTQ&t=50
-            player.message("You spy on the penguin.")
-            val doublePoints = (Settings["quests.requirements.skipMissing", false] || player.questCompleted("cold_war")) && target.id.removePrefix("hidden_penguin_").toInt() > 4
-            player.inc("penguin_points", if (doublePoints) 2 else 1)
-            player.inc("penguins_found_weekly")
+            message("You spy on the penguin.")
+            val doublePoints = (Settings["quests.requirements.skipMissing", false] || questCompleted("cold_war")) && target.id.removePrefix("hidden_penguin_").toInt() > 4
+            inc("penguin_points", if (doublePoints) 2 else 1)
+            inc("penguins_found_weekly")
             delay(2)
-            player.clearWatch()
+            clearWatch()
         }
 
-        objectApproach("Inspect", "polar_bear_well*") {
+        objectApproach("Inspect", "polar_bear_well*") { (target) ->
             approachRange(5)
-            updateWeek(player)
-            if (!player.addVarbit("penguins_found", "polar_bear")) {
-                player.message("You've already spotted this polar bear agent.")
+            updateWeek(this)
+            if (!addVarbit("penguins_found", "polar_bear")) {
+                message("You've already spotted this polar bear agent.")
                 return@objectApproach
             }
-            player.face(target.tile)
-            player.anim("spot_penguin")
+            face(target.tile)
+            anim("spot_penguin")
             // https://youtu.be/PrkWAZmuEnw?si=qTL9V6MqLc3EUmSF&t=100
-            player.message("You found the polar bear agent.")
-            player.inc("penguin_points")
-            player.inc("penguins_found_weekly")
+            message("You found the polar bear agent.")
+            inc("penguin_points")
+            inc("penguins_found_weekly")
             delay(2)
         }
 
-        inventoryItem("Read", "spy_notebook") {
-            updateWeek(player)
-            val bear = player.containsVarbit("penguins_found", "polar_bear")
-            var found = player["penguins_found_weekly", 0]
+        itemOption("Read", "spy_notebook") {
+            updateWeek(this)
+            val bear = containsVarbit("penguins_found", "polar_bear")
+            var found = get("penguins_found_weekly", 0)
             if (bear) {
                 found--
             }
-            player.message("You have recently spotted $found ${"penguin".plural(found)}.")
+            message("You have recently spotted $found ${"penguin".plural(found)}.")
             if (bear) {
-                player.message("You have recently spotted the polar bear agent.")
+                message("You have recently spotted the polar bear agent.")
             }
-            player.message("You have ${player["penguin_points", 0]} Penguin Points to spend with Larry.")
+            message("You have ${get("penguin_points", 0)} Penguin Points to spend with Larry.")
         }
 
-        adminCommand("respawn_penguins", desc = "Respawn hide and seek penguins") { player, _ ->
+        adminCommand("respawn_penguins", desc = "Respawn hide and seek penguins") {
             clear()
-            worldSpawn(configFiles())
+            load(configFiles())
             sendBear()
         }
-        adminCommand("clear_penguins", desc = "Remove all hide and seek penguins") { player, _ -> clear() }
+        adminCommand("clear_penguins", desc = "Remove all hide and seek penguins") { clear() }
         modCommand("penguins", stringArg("player-name", autofill = accounts.displayNames.keys, optional = true), desc = "Get info about a hide and seek penguin", handler = ::listPenguins)
+        worldSpawn(::load)
+        playerSpawn(::sendBear)
     }
 
     private fun updateWeek(player: Player) {
@@ -133,7 +130,7 @@ class PenguinHideAndSeek : Api {
         player["penguin_week"] = week
     }
 
-    override fun worldSpawn(files: ConfigFiles) {
+    fun load(files: ConfigFiles) {
         if (!Settings["events.penguinHideAndSeek.enabled", false]) {
             return
         }
@@ -162,18 +159,18 @@ class PenguinHideAndSeek : Api {
         World.clearQueue("penguins_event_timer")
         World.queue("penguins_event_timer", ticksUntil(day)) {
             clear()
-            worldSpawn(files)
+            load(files)
             sendBear()
         }
     }
 
-    override fun spawn(player: Player) {
+    fun sendBear(player: Player) {
         player["polar_bear_well"] = if (Settings["quests.requirements.skipMissing", false] || player.questCompleted("hunt_for_red_rektuber")) bear else "hidden"
     }
 
     fun sendBear() {
         for (player in players) {
-            spawn(player)
+            sendBear(player)
         }
     }
 

@@ -1,15 +1,12 @@
 package content.skill.melee.weapon.special
 
 import content.entity.combat.hit.hit
-import content.entity.player.combat.special.specialAttackDamage
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.Script
 
-@Script
-class DragonDagger {
-
+class DragonDagger : Script {
     init {
-        specialAttackDamage("puncture", noHit = false) { player ->
-            player.hit(target)
+        specialAttackDamage("puncture") { target, _ ->
+            hit(target)
         }
     }
 }

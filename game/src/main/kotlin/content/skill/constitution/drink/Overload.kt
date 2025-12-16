@@ -2,20 +2,16 @@ package content.skill.constitution.drink
 
 import content.area.wilderness.inWilderness
 import content.entity.combat.hit.directHit
-import content.skill.constitution.canConsume
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.entity.character.mode.move.enterArea
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.queue.queue
 import world.gregs.voidps.engine.timer.*
 import java.util.concurrent.TimeUnit
 
-@Script
-class Overload : Api {
+class Overload : Script {
 
     val skills = listOf(
         Skill.Attack,
@@ -25,14 +21,48 @@ class Overload : Api {
         Skill.Ranged,
     )
 
-    override fun spawn(player: Player) {
-        if (player["overload_refreshes_remaining", 0] > 0) {
-            player.timers.restart("overload")
+    init {
+        playerSpawn {
+            if (get("overload_refreshes_remaining", 0) > 0) {
+                timers.restart("overload")
+            }
+        }
+
+        timerStart("overload", ::start)
+        timerTick("overload", ::tick)
+        timerStop("overload", ::stop)
+
+        consumable("overload*") {
+            if (inWilderness) {
+                message("You cannot drink an overload potion while you're in the wilderness.", ChatType.Game)
+                false
+            } else if (timers.contains("overload")) {
+                message("You may only use this potion every five minutes.")
+                false
+            } else if (levels.get(Skill.Constitution) < 500) {
+                message("You need more than 500 life points to survive the power of overload.")
+                false
+            } else {
+                true
+            }
+        }
+
+        entered("wilderness") {
+            if (!timers.contains("overload")) {
+                return@entered
+            }
+            for (skill in skills) {
+                val max = levels.get(skill)
+                val offset = levels.getOffset(skill)
+                val superBoost = (max * if (skill == Skill.Ranged) 0.1 else 0.15).toInt() + (if (skill == Skill.Ranged) 4 else 5)
+                if (offset > superBoost) {
+                    levels.drain(skill, offset - superBoost)
+                }
+            }
         }
     }
 
-    @Timer("overload")
-    override fun start(player: Player, timer: String, restart: Boolean): Int {
+    fun start(player: Player, restart: Boolean): Int {
         if (restart) {
             return TimeUnit.SECONDS.toTicks(15)
         }
@@ -48,8 +78,7 @@ class Overload : Api {
         return TimeUnit.SECONDS.toTicks(15)
     }
 
-    @Timer("overload")
-    override fun tick(player: Player, timer: String): Int {
+    fun tick(player: Player): Int {
         if (player.dec("overload_refreshes_remaining") <= 0) {
             return Timer.CANCEL
         }
@@ -59,8 +88,7 @@ class Overload : Api {
         return Timer.CONTINUE
     }
 
-    @Timer("overload")
-    override fun stop(player: Player, timer: String, logout: Boolean) {
+    fun stop(player: Player, logout: Boolean) {
         if (logout) {
             return
         }
@@ -68,35 +96,6 @@ class Overload : Api {
         player.levels.restore(Skill.Constitution, 500)
         player.message("<dark_red>The effects of overload have worn off and you feel normal again.")
         player["overload_refreshes_remaining"] = 0
-    }
-
-    init {
-        canConsume("overload*") { player ->
-            if (player.inWilderness) {
-                player.message("You cannot drink an overload potion while you're in the wilderness.", ChatType.Game)
-                cancel()
-            } else if (player.timers.contains("overload")) {
-                player.message("You may only use this potion every five minutes.")
-                cancel()
-            } else if (player.levels.get(Skill.Constitution) < 500) {
-                player.message("You need more than 500 life points to survive the power of overload.")
-                cancel()
-            }
-        }
-
-        enterArea("wilderness") {
-            if (!player.timers.contains("overload")) {
-                return@enterArea
-            }
-            for (skill in skills) {
-                val max = player.levels.get(skill)
-                val offset = player.levels.getOffset(skill)
-                val superBoost = (max * if (skill == Skill.Ranged) 0.1 else 0.15).toInt() + (if (skill == Skill.Ranged) 4 else 5)
-                if (offset > superBoost) {
-                    player.levels.drain(skill, offset - superBoost)
-                }
-            }
-        }
     }
 
     fun applyBoost(player: Player) {

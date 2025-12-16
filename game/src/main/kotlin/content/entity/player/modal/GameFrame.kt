@@ -2,19 +2,15 @@ package content.entity.player.modal
 
 import net.pearx.kasechange.toSnakeCase
 import net.pearx.kasechange.toTitleCase
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.instruction.instruction
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.event.interfaceRefresh
 import world.gregs.voidps.engine.client.ui.hasOpen
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.queue.weakQueue
 import world.gregs.voidps.network.client.instruction.ChangeDisplayMode
 
-@Script
-class GameFrame {
+class GameFrame : Script {
 
     val list = listOf(
         "chat_box",
@@ -47,8 +43,8 @@ class GameFrame {
     init {
         Tab.entries.forEach { tab ->
             val name = tab.name.toSnakeCase()
-            interfaceOption(name.toTitleCase(), name, "toplevel*") {
-                player["tab", false] = tab.name
+            interfaceOption(name.toTitleCase(), "toplevel*:$name") {
+                set("tab", false, tab.name)
             }
         }
 
@@ -59,14 +55,14 @@ class GameFrame {
             player.interfaces.setDisplayMode(displayMode)
         }
 
-        interfaceOpen("toplevel*") { player ->
-            openGamframe(player)
+        interfaceOpened("toplevel*") {
+            openGamframe(this)
         }
 
-        interfaceRefresh("toplevel*", "dialogue_npc*") { player ->
-            player.interfaces.sendVisibility(player.interfaces.gameFrame, "wilderness_level", false)
-            player.weakQueue("wild_level", 1, onCancel = null) {
-                player.interfaces.sendVisibility(player.interfaces.gameFrame, "wilderness_level", false)
+        interfaceRefresh("toplevel*,dialogue_npc*") {
+            interfaces.sendVisibility(interfaces.gameFrame, "wilderness_level", false)
+            weakQueue("wild_level", 1, onCancel = null) {
+                interfaces.sendVisibility(interfaces.gameFrame, "wilderness_level", false)
             }
         }
     }

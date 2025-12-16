@@ -1,8 +1,8 @@
 package content.bot
 
 import kotlinx.coroutines.*
-import world.gregs.voidps.engine.Api
 import world.gregs.voidps.engine.Contexts
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.PlayerAccountLoader
 import world.gregs.voidps.engine.client.command.adminCommand
 import world.gregs.voidps.engine.client.command.intArg
@@ -13,16 +13,12 @@ import world.gregs.voidps.engine.data.Settings
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.data.definition.EnumDefinitions
 import world.gregs.voidps.engine.data.definition.StructDefinitions
-import world.gregs.voidps.engine.data.settingsReload
 import world.gregs.voidps.engine.entity.MAX_PLAYERS
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.move.running
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.appearance
 import world.gregs.voidps.engine.entity.character.player.sex
-import world.gregs.voidps.engine.event.Event
-import world.gregs.voidps.engine.event.Events
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.add
@@ -34,11 +30,9 @@ import world.gregs.voidps.network.login.protocol.visual.update.player.BodyPart
 import world.gregs.voidps.type.random
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
-import kotlin.reflect.KClass
 import kotlin.text.toIntOrNull
 
-@Script
-class BotSpawns : Api {
+class BotSpawns : Script {
 
     val areas: AreaDefinitions by inject()
     val bots = mutableListOf<Player>()
@@ -51,28 +45,23 @@ class BotSpawns : Api {
 
     var counter = 0
 
-    override fun worldSpawn() {
-        if (Settings["bots.count", 0] > 0) {
-            World.timers.start("bot_spawn")
-        }
-        Events.events.all = { player, event ->
-            handleSuspensions(player, event)
-        }
-    }
-
-    @Timer("bot_spawn")
-    override fun start(timer: String): Int = TimeUnit.SECONDS.toTicks(Settings["bots.spawnSeconds", 60])
-
-    @Timer("bot_spawn")
-    override fun tick(timer: String): Int {
-        if (counter > Settings["bots.count", 0]) {
-            return Timer.CANCEL
-        }
-        spawn()
-        return Timer.CONTINUE
-    }
-
     init {
+        timerStart("bot_spawn") { TimeUnit.SECONDS.toTicks(Settings["bots.spawnSeconds", 60]) }
+
+        timerTick("bot_spawn") {
+            if (counter > Settings["bots.count", 0]) {
+                return@timerTick Timer.CANCEL
+            }
+            spawn()
+            return@timerTick Timer.CONTINUE
+        }
+
+        worldSpawn {
+            if (Settings["bots.count", 0] > 0) {
+                World.timers.start("bot_spawn")
+            }
+        }
+
         settingsReload {
             if (Settings["bots.count", 0] > bots.size) {
                 World.timers.start("bot_spawn")
@@ -117,11 +106,11 @@ class BotSpawns : Api {
             player.clear("bot")
             player.message("Bot disabled.")
         } else {
-            val bot = player.initBot()
+            player.initBot()
             if (args[0].isNotBlank()) {
                 player["task_bot"] = args[0]
             }
-            bot.emit(StartBot)
+            Bots.start(player)
             player.message("Bot enabled.")
         }
     }
@@ -136,7 +125,7 @@ class BotSpawns : Api {
             if (bot.inventory.isEmpty()) {
                 bot.inventory.add("coins", 10000)
             }
-            bot.emit(StartBot)
+            Bots.start(bot)
             bot.viewport?.loaded = true
             delay(3)
             bots.add(bot)
@@ -148,16 +137,6 @@ class BotSpawns : Api {
         val bot = Bot(this)
         this["bot"] = bot
         return bot
-    }
-
-    fun handleSuspensions(player: Player, event: Event) {
-        val suspensions: MutableMap<KClass<*>, Pair<Event.(Player) -> Boolean, CancellableContinuation<Unit>>> = player["bot_suspensions"] ?: return
-        val pair = suspensions[event::class] ?: return
-        val (condition, continuation) = pair
-        if (condition(event, player)) {
-            suspensions.remove(event::class)
-            continuation.resume(Unit)
-        }
     }
 
     fun setAppearance(player: Player): Player {

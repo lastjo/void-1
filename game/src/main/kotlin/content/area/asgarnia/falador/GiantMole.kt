@@ -2,41 +2,33 @@ package content.area.asgarnia.falador
 
 import com.github.michaelbull.logging.InlineLogger
 import content.entity.combat.attackers
-import content.entity.combat.hit.npcCombatDamage
 import content.entity.gfx.areaGfx
 import content.entity.player.dialogue.type.warning
-import content.entity.player.inv.inventoryItem
-import content.entity.sound.areaSound
 import content.skill.firemaking.Light
 import content.skill.firemaking.Light.hasLightSource
 import content.skill.melee.weapon.fightStyle
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.ui.close
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.client.variable.hasClock
 import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.entity.World
+import world.gregs.voidps.engine.entity.character.areaSound
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
-import world.gregs.voidps.engine.entity.character.mode.move.enterArea
-import world.gregs.voidps.engine.entity.character.mode.move.exitArea
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
-import world.gregs.voidps.engine.inv.inventoryUpdate
 import world.gregs.voidps.engine.map.collision.random
 import world.gregs.voidps.engine.queue.queue
 import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Tile
 import kotlin.random.Random
 
-@Script
-class GiantMole : Api {
+class GiantMole : Script {
 
     val logger = InlineLogger()
     val areas: AreaDefinitions by inject()
@@ -53,64 +45,64 @@ class GiantMole : Api {
     val gianMoleSpawns = areas["giant_mole_spawn_area"]
     val initialCaveTile: Tile = Tile(1752, 5237, 0)
 
-    override fun spawn(player: Player) {
-        if (giantMoleLair.contains(player.tile)) {
-            if (!hasLightSource(player)) {
-                player.open("level_three_darkness")
+    init {
+        playerSpawn {
+            if (giantMoleLair.contains(tile)) {
+                if (!hasLightSource(this)) {
+                    open("level_three_darkness")
+                }
             }
         }
-    }
 
-    init {
-        inventoryItem("Dig", "spade") {
-            val playerTile: Tile = player.tile
-            player.anim("dig_with_spade")
+        itemOption("Dig", "spade") {
+            val playerTile: Tile = tile
+            anim("human_dig")
             if (!acceptedTiles.contains(playerTile)) {
-                return@inventoryItem
+                return@itemOption
             }
             if (warning("mole_lair")) {
-                player.tele(initialCaveTile)
+                tele(initialCaveTile)
             }
         }
 
         objectOperate("Climb", "giant_mole_lair_escape_rope") {
-            player.anim("climb_up")
-            player.tele(acceptedTiles.random())
+            anim("climb_up")
+            tele(acceptedTiles.random())
         }
 
-        npcCombatDamage("giant_mole") {
-            val currentHealth = it.levels.get(Skill.Constitution)
+        npcCombatDamage("giant_mole") { (_, _, damage) ->
+            val currentHealth = levels.get(Skill.Constitution)
             var shouldBurrow = false
-            if (it.fightStyle == "magic" && damage != 0) {
+            if (fightStyle == "magic" && damage != 0) {
                 shouldBurrow = shouldBurrowAway(currentHealth)
-            } else if (it.fightStyle != "magic") {
+            } else if (fightStyle != "magic") {
                 shouldBurrow = shouldBurrowAway(currentHealth)
             }
-            if (shouldBurrow && !it.hasClock("awaiting_mole_burrow_complete")) {
-                it.start("awaiting_mole_burrow_complete", 4)
-                giantMoleBurrow(it)
+            if (shouldBurrow && !hasClock("awaiting_mole_burrow_complete")) {
+                start("awaiting_mole_burrow_complete", 4)
+                giantMoleBurrow(this)
             }
         }
 
-        enterArea("giant_mole_lair") {
-            if (!hasLightSource(player)) {
-                player.open("level_three_darkness")
+        entered("giant_mole_lair") {
+            if (!hasLightSource(this)) {
+                open("level_three_darkness")
             }
         }
 
-        exitArea("giant_mole_lair") {
-            if (player.interfaces.contains("level_three_darkness")) {
-                player.close("level_three_darkness")
+        exited("giant_mole_lair") {
+            if (interfaces.contains("level_three_darkness")) {
+                close("level_three_darkness")
             }
         }
 
-        inventoryUpdate("inventory") { player: Player ->
-            if (giantMoleLair.contains(player.tile)) {
-                val hasLightSource = hasLightSource(player)
-                if (!hasLightSource && !player.interfaces.contains("level_three_darkness")) {
-                    player.open("level_three_darkness")
-                } else if (hasLightSource && player.interfaces.contains("level_three_darkness")) {
-                    player.close("level_three_darkness")
+        inventoryUpdated("inventory") { _, _ ->
+            if (giantMoleLair.contains(tile)) {
+                val hasLightSource = hasLightSource(this)
+                if (!hasLightSource && !interfaces.contains("level_three_darkness")) {
+                    open("level_three_darkness")
+                } else if (hasLightSource && interfaces.contains("level_three_darkness")) {
+                    close("level_three_darkness")
                 }
             }
         }

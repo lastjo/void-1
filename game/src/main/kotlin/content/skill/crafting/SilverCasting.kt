@@ -3,13 +3,10 @@ package content.skill.crafting
 import content.entity.player.dialogue.type.intEntry
 import content.quest.quest
 import net.pearx.kasechange.toTitleCase
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.sendScript
 import world.gregs.voidps.engine.client.ui.closeMenu
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.interact.itemOnObjectOperate
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.data.definition.data.Silver
@@ -18,13 +15,11 @@ import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.*
 import world.gregs.voidps.engine.queue.weakQueue
 
-@Script
-class SilverCasting {
+class SilverCasting : Script {
 
     val itemDefinitions: ItemDefinitions by inject()
 
@@ -45,51 +40,51 @@ class SilverCasting {
         get() = def.getOrNull("silver_jewellery")
 
     init {
-        interfaceOpen("silver_mould") { player ->
+        interfaceOpened("silver_mould") { id ->
             for (mould in moulds) {
                 val silver = mould.silver ?: continue
                 val item = silver.item
                 val quest = silver.quest
-                player.interfaces.sendVisibility(id, mould.id, quest == null || player.quest(quest) != "unstarted")
-                val has = player.holdsItem(mould.id)
-                player.interfaces.sendText(
+                interfaces.sendVisibility(id, mould.id, quest == null || quest(quest) != "unstarted")
+                val has = holdsItem(mould.id)
+                interfaces.sendText(
                     id,
                     "${mould.id}_text",
                     if (has) {
-                        val colour = if (has && player.holdsItem("silver_bar")) "green" else "orange"
+                        val colour = if (holdsItem("silver_bar")) "green" else "orange"
                         "<$colour>Make ${itemDefinitions.get(item).name.toTitleCase()}"
                     } else {
                         "<orange>You need a ${silver.name ?: mould.def.name.lowercase()} to make this item."
                     },
                 )
-                player.interfaces.sendItem(id, "${mould.id}_model", if (has) itemDefinitions.get(item).id else mould.def.id)
+                interfaces.sendItem(id, "${mould.id}_model", if (has) itemDefinitions.get(item).id else mould.def.id)
             }
         }
 
         itemOnObjectOperate("silver_bar", "furnace*", arrive = false) {
-            player.open("silver_mould")
+            open("silver_mould")
         }
 
         itemOnObjectOperate(obj = "furnace*") {
-            if (!item.def.contains("silver_jewellery")) {
+            if (!it.item.def.contains("silver_jewellery")) {
                 return@itemOnObjectOperate
             }
-            player.make(item, 1)
+            make(it.item, 1)
         }
 
-        interfaceOption(component = "*_button", id = "silver_mould") {
-            val amount = when (option) {
+        interfaceOption(id = "silver_mould:*_button") {
+            val amount = when (it.option) {
                 "Make 1" -> 1
                 "Make 5" -> 5
                 "Make All" -> 28
                 "Make X" -> intEntry("Enter amount:")
                 else -> return@interfaceOption
             }
-            player.make(Item(component.removeSuffix("_button")), amount)
+            make(Item(it.component.removeSuffix("_button")), amount)
         }
 
-        interfaceClose("silver_mould") { player ->
-            player.sendScript("clear_dialogues")
+        interfaceClosed("silver_mould") {
+            sendScript("clear_dialogues")
         }
     }
 

@@ -1,71 +1,88 @@
 package content.entity.player.command
 
 import world.gregs.voidps.cache.definition.data.InterfaceDefinition
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.command.adminCommand
 import world.gregs.voidps.engine.client.command.intArg
+import world.gregs.voidps.engine.client.command.modCommand
 import world.gregs.voidps.engine.client.command.stringArg
+import world.gregs.voidps.engine.client.message
+import world.gregs.voidps.engine.data.definition.AccountDefinitions
 import world.gregs.voidps.engine.data.definition.InterfaceDefinitions
 import world.gregs.voidps.engine.data.definition.VariableDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.entity.character.player.Players
+import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.network.login.protocol.encode.*
 
-@Script
-class VariableCommands {
+class VariableCommands : Script {
 
     val definitions: InterfaceDefinitions by inject()
-    val variables: VariableDefinitions by inject()
+    val variableDefinitions: VariableDefinitions by inject()
+    val players: Players by inject()
+    val accounts: AccountDefinitions by inject()
 
     init {
-        adminCommand("var", stringArg("variable-name", autofill = variables.definitions.keys), stringArg("value"), desc = "Set a variable") { player, args ->
-            player[args.first()] = args.last().toBooleanStrictOrNull() ?: args.last().toIntOrNull() ?: args.last()
+        modCommand("vars", stringArg("variable-name", optional = true, autofill = variableDefinitions.definitions.keys), stringArg("player-name", "target player (default self)", optional = true, autofill = accounts.displayNames.keys), desc = "Search players variables") { args ->
+            val target = players.find(this, args.getOrNull(1)) ?: return@modCommand
+            val search = args.getOrNull(0)
+            for ((key, value) in target.variables.data) {
+                if (search != null && !key.contains(search)) {
+                    continue
+                }
+                message("[$key] - value: $value", ChatType.Console)
+            }
         }
 
-        adminCommand("varp", stringArg("id", autofill = variables.definitions.keys), intArg("value"), desc = "Send player-variable to client") { player, args ->
+        adminCommand("var", stringArg("variable-name", autofill = variableDefinitions.definitions.keys), stringArg("value"), desc = "Set a variable") { args ->
+            set(args.first(), args.last().toBooleanStrictOrNull() ?: args.last().toIntOrNull() ?: args.last())
+        }
+
+        adminCommand("varp", stringArg("id", autofill = variableDefinitions.definitions.keys), intArg("value"), desc = "Send player-variable to client") { args ->
             val intId = args.first().toIntOrNull()
             if (intId == null) {
-                player.variables.set(args.first(), args.last().toInt())
+                variables.set(args.first(), args.last().toInt())
                 return@adminCommand
             }
-            val name = variables.getVarp(intId)
+            val name = variableDefinitions.getVarp(intId)
             if (name == null) {
-                player.client?.sendVarp(intId, args.last().toInt())
+                client?.sendVarp(intId, args.last().toInt())
             } else {
-                player.variables.set(name, args.last().toInt())
+                variables.set(name, args.last().toInt())
             }
         }
 
-        adminCommand("varbit", stringArg("id", autofill = variables.definitions.keys), intArg("value"), desc = "Send variable-bit to client") { player, args ->
+        adminCommand("varbit", stringArg("id", autofill = variableDefinitions.definitions.keys), intArg("value"), desc = "Send variable-bit to client") { args ->
             val intId = args.first().toIntOrNull()
             if (intId == null) {
-                player.variables.set(args.first(), args.last().toInt())
+                variables.set(args.first(), args.last().toInt())
                 return@adminCommand
             }
-            val name = variables.getVarbit(intId)
+            val name = variableDefinitions.getVarbit(intId)
             if (name == null) {
-                player.client?.sendVarbit(intId, args.last().toInt())
+                client?.sendVarbit(intId, args.last().toInt())
             } else {
-                player.variables.set(name, args.last().toInt())
+                variables.set(name, args.last().toInt())
             }
         }
 
-        adminCommand("varc", stringArg("id", autofill = variables.definitions.keys), intArg("value"), desc = "Send client-variable to client") { player, args ->
+        adminCommand("varc", stringArg("id", autofill = variableDefinitions.definitions.keys), intArg("value"), desc = "Send client-variable to client") { args ->
             val intId = args.first().toIntOrNull()
             if (intId == null) {
-                player.variables.set(args.first(), args.last().toInt())
+                variables.set(args.first(), args.last().toInt())
             } else {
-                player.client?.sendVarc(intId, args.last().toInt())
+                client?.sendVarc(intId, args.last().toInt())
             }
         }
 
-        adminCommand("varcstr", stringArg("id", autofill = variables.definitions.keys), stringArg("value"), desc = "Send variable-client-string to client") { player, args ->
+        adminCommand("varcstr", stringArg("id", autofill = variableDefinitions.definitions.keys), stringArg("value"), desc = "Send variable-client-string to client") { args ->
             val intId = args.first().toIntOrNull()
             val string = args.drop(1).joinToString(" ")
             if (intId == null) {
-                player.variables.set(args.first(), string)
+                variables.set(args.first(), string)
             } else {
-                player.client?.sendVarcStr(intId, string)
+                client?.sendVarcStr(intId, string)
             }
         }
     }

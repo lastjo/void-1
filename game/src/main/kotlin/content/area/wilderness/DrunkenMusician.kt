@@ -4,17 +4,11 @@ import content.entity.player.dialogue.Drunk
 import content.entity.player.dialogue.Pleased
 import content.entity.player.dialogue.Quiz
 import content.entity.player.dialogue.RollEyes
-import content.entity.player.dialogue.type.PlayerChoice
-import content.entity.player.dialogue.type.choice
-import content.entity.player.dialogue.type.npc
-import content.entity.player.dialogue.type.player
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
+import content.entity.player.dialogue.type.*
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
-import world.gregs.voidps.engine.suspend.SuspendableContext
 
-@Script
-class DrunkenMusician {
+class DrunkenMusician : Script {
 
     init {
         npcOperate("Talk-to", "drunken_musician") {
@@ -22,7 +16,7 @@ class DrunkenMusician {
         }
     }
 
-    suspend fun SuspendableContext<Player>.choice() {
+    suspend fun Player.choice() {
         choice {
             option<Quiz>("Who are you?") {
                 npc<Drunk>("Me? I'sh mooshian! Lemme her help youse relaxsh: sit down, reshst your weery limz an' stuff. You'll feel mush better. Like me, I ffeel great!")
@@ -40,7 +34,7 @@ class DrunkenMusician {
         }
     }
 
-    suspend fun SuspendableContext<Player>.resting() {
+    suspend fun Player.resting() {
         choice("Can I ask you some questions about resting?") {
             option("How does resting work?") {
                 player<Quiz>("So how does resting work?")
@@ -61,7 +55,7 @@ class DrunkenMusician {
         }
     }
 
-    suspend fun PlayerChoice.exit(): Unit = option<Quiz>("That's all for now") {
+    fun ChoiceOption.exit(): Unit = option<Quiz>("That's all for now") {
         npc<Drunk>("Fanks. Sshtay relaxshed!")
     }
 }

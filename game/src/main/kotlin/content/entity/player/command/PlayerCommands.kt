@@ -13,11 +13,8 @@ import content.quest.refreshQuestJournal
 import content.skill.prayer.PrayerConfigs.PRAYERS
 import content.social.trade.exchange.GrandExchange
 import world.gregs.voidps.engine.GameLoop
-import world.gregs.voidps.engine.client.command.adminCommand
-import world.gregs.voidps.engine.client.command.commandAlias
-import world.gregs.voidps.engine.client.command.intArg
-import world.gregs.voidps.engine.client.command.modCommand
-import world.gregs.voidps.engine.client.command.stringArg
+import world.gregs.voidps.engine.Script
+import world.gregs.voidps.engine.client.command.*
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.client.variable.PlayerVariables
@@ -39,7 +36,6 @@ import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.event.AuditLog
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.map.collision.Collisions
@@ -47,8 +43,7 @@ import world.gregs.voidps.engine.timer.TimerQueue
 import kotlin.collections.iterator
 import kotlin.getValue
 
-@Script
-class PlayerCommands {
+class PlayerCommands : Script {
 
     val players: Players by inject()
     val accounts: AccountDefinitions by inject()
@@ -59,7 +54,7 @@ class PlayerCommands {
     val variables: VariableDefinitions by inject()
 
     init {
-        modCommand("save", desc = "Save all players") { _, _ ->
+        modCommand("save", desc = "Save all players") {
             players.forEach(saveQueue::save)
             exchange.save()
             AuditLog.save()
@@ -88,6 +83,10 @@ class PlayerCommands {
         )
         val spellbooks = setOf("ancient", "lunar", "modern", "dungeoneering")
         adminCommand("spellbook", stringArg("spellbook-type", autofill = spellbooks, optional = true), stringArg("player-name", optional = true, autofill = accounts.displayNames.keys), desc = "Switch spellbook", handler = ::spellbook)
+        commandSuggestion("spellbook lunar", "lunar", "lunars")
+        commandSuggestion("spellbook ancient", "ancient", "ancients")
+        commandSuggestion("spellbook modern", "modern", "moderns")
+
         val prayers = setOf("normal", "curses")
         adminCommand("prayers", stringArg("prayer-type", autofill = prayers, optional = true), stringArg("player-name", optional = true, autofill = accounts.displayNames.keys), desc = "Switch prayers", handler = ::prayers)
         adminCommand(

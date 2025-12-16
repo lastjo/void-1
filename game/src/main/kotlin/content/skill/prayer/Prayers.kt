@@ -1,45 +1,43 @@
 package content.skill.prayer
 
-import content.entity.sound.sound
 import content.skill.prayer.PrayerConfigs.ACTIVE_CURSES
 import content.skill.prayer.PrayerConfigs.ACTIVE_PRAYERS
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.flagAppearance
 import world.gregs.voidps.engine.entity.character.player.headIcon
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.entity.character.sound
 
-@Script
-class Prayers : Api {
-
-    override fun spawn(player: Player) {
-        player.sendVariable("attack_bonus")
-        player.sendVariable("strength_bonus")
-        player.sendVariable("defence_bonus")
-        player.sendVariable("ranged_bonus")
-        player.sendVariable("magic_bonus")
-    }
+class Prayers :
+    Script,
+    PrayerApi {
 
     init {
-        prayerStart { player ->
-            if (!restart) {
-                val curses = player.isCurses()
-                if (curses) {
-                    player.anim("activate_$prayer")
-                    player.gfx("activate_$prayer")
-                } else {
-                    player.sound("activate_$prayer")
-                }
-                updateOverheadIcon(player, curses)
-            }
-            player.softTimers.startIfAbsent("prayer_drain")
+        playerSpawn {
+            sendVariable("attack_bonus")
+            sendVariable("strength_bonus")
+            sendVariable("defence_bonus")
+            sendVariable("ranged_bonus")
+            sendVariable("magic_bonus")
         }
 
-        prayerStop { player ->
-            player.sound("deactivate_prayer")
-            val curses = player.isCurses()
-            stopPrayerDrain(player, curses)
-            updateOverheadIcon(player, curses)
+        prayerStart { prayer ->
+            val curses = isCurses()
+            if (curses) {
+                anim("activate_$prayer")
+                gfx("activate_$prayer")
+            } else {
+                sound("activate_$prayer")
+            }
+            updateOverheadIcon(curses)
+            softTimers.startIfAbsent("prayer_drain")
+        }
+
+        prayerStop {
+            sound("deactivate_prayer")
+            val curses = isCurses()
+            stopPrayerDrain(this, curses)
+            updateOverheadIcon(curses)
         }
     }
 
@@ -55,14 +53,14 @@ class Prayers : Api {
         }
     }
 
-    fun updateOverheadIcon(player: Player, curses: Boolean) {
+    fun Player.updateOverheadIcon(curses: Boolean) {
         val changed = if (curses) {
-            player.changedCurseIcon()
+            changedCurseIcon()
         } else {
-            player.changedPrayerIcon()
+            changedPrayerIcon()
         }
         if (changed) {
-            player.flagAppearance()
+            flagAppearance()
         }
     }
 

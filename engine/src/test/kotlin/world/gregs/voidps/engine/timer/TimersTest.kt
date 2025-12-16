@@ -1,5 +1,6 @@
 package world.gregs.voidps.engine.timer
 
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import world.gregs.voidps.engine.GameLoop
@@ -22,6 +23,7 @@ abstract class TimersTest {
     fun `Restart a timer`() {
         startInterval = 2
         timers.restart("timer")
+        assertEquals(2, timers.remaining("timer"))
         assertTrue(timers.contains("timer"))
         assertEquals("start_timer" to true, emitted.pop())
         assertTrue(emitted.isEmpty())
@@ -110,6 +112,7 @@ abstract class TimersTest {
         assertEquals("start_timer" to false, emitted.pop())
         assertEquals("stop_timer" to false, emitted.pop())
         assertTrue(emitted.isEmpty())
+        assertEquals(-1, timers.remaining("timer"))
     }
 
     @Test
@@ -130,5 +133,10 @@ abstract class TimersTest {
         assertEquals("start_timer" to false, emitted.pop())
         assertTrue(emitted.isEmpty())
         assertTrue(emitted.isEmpty())
+    }
+
+    @AfterEach
+    fun teardown() {
+        TimerApi.close()
     }
 }

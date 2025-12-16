@@ -4,11 +4,14 @@ import org.rsmod.game.pathfinder.collision.CollisionStrategy
 import org.rsmod.game.pathfinder.flag.CollisionFlag
 import world.gregs.voidps.cache.definition.data.NPCDefinition
 import world.gregs.voidps.engine.client.variable.Variables
+import world.gregs.voidps.engine.data.definition.NPCDefinitions
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
 import world.gregs.voidps.engine.entity.character.mode.Mode
 import world.gregs.voidps.engine.entity.character.mode.move.Steps
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.level.Levels
+import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.queue.ActionQueue
 import world.gregs.voidps.engine.suspend.Suspension
 import world.gregs.voidps.engine.timer.TimerSlot
@@ -59,6 +62,13 @@ data class NPC(
     var regenCounter = 0
     var huntMode: String? = null
     var huntCounter = 0
+
+    fun def(player: Player, definitions: NPCDefinitions = get()): NPCDefinition {
+        if (contains("transform_id")) {
+            return definitions.get(this["transform_id", ""])
+        }
+        return definitions.resolve(def, player)
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

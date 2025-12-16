@@ -39,7 +39,7 @@ internal class WeakInteractionTest : WorldTest() {
             player.equipment.set(EquipSlot.Weapon.index, "bronze_sword")
             var cancelled = false
             player.weakQueue("dialogue", onCancel = { cancelled = true }) {
-                npc<Pleased>("Bob", "Hello")
+                player.npc<Pleased>("Bob", "Hello")
             }
             tick()
             assertNotNull(player.dialogue)
@@ -47,8 +47,7 @@ internal class WeakInteractionTest : WorldTest() {
 
             when (it) {
                 "Interface switch" -> {
-                    val wool = Item("ball_of_wool")
-                    player.interfaceSwitch("inventory", "inventory", "inventory", wool, wool, 0, 1)
+                    player.interfaceSwitch("inventory", "inventory", 0, 1)
                 }
                 "Remove equipment" -> player.interfaceOption("worn_equipment", "weapon_slot", "*", 0, Item("bronze_sword"))
                 "Activate prayer" -> player.interfaceOption("prayer_list", "regular_prayers", "Activate", slot = 0)
@@ -71,7 +70,7 @@ internal class WeakInteractionTest : WorldTest() {
             val player = createPlayer()
             var cancelled = false
             player.weakQueue("dialogue", onCancel = { cancelled = true }) {
-                npc<Pleased>("Bob", "Hello")
+                player.npc<Pleased>("Bob", "Hello")
             }
             tick()
             assertNotNull(player.dialogue)

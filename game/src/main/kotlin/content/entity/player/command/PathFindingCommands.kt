@@ -8,14 +8,12 @@ import org.rsmod.game.pathfinder.PathFinder
 import org.rsmod.game.pathfinder.StepValidator
 import org.rsmod.game.pathfinder.collision.CollisionStrategies
 import org.rsmod.game.pathfinder.flag.CollisionFlag
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.command.adminCommand
 import world.gregs.voidps.engine.client.command.stringArg
 import world.gregs.voidps.engine.data.definition.PatrolDefinitions
 import world.gregs.voidps.engine.entity.character.mode.Patrol
 import world.gregs.voidps.engine.entity.character.move.tele
-import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.map.collision.CollisionFlags
@@ -26,20 +24,19 @@ import kotlin.getValue
 import kotlin.system.measureNanoTime
 import kotlin.system.measureTimeMillis
 
-@Script
-class PathFindingCommands : Api {
+class PathFindingCommands : Script {
 
     val patrols: PatrolDefinitions by inject()
     val collisions: Collisions by inject()
 
     init {
-        adminCommand("patrol", stringArg("patrol-id", autofill = patrols.definitions.keys), desc = "Walk along a patrol route") { player, args ->
+        adminCommand("patrol", stringArg("patrol-id", autofill = patrols.definitions.keys), desc = "Walk along a patrol route") { args ->
             val patrol = patrols.get(args[0])
-            player.tele(patrol.waypoints.first().first)
-            player.mode = Patrol(player, patrol.waypoints)
+            tele(patrol.waypoints.first().first)
+            mode = Patrol(this, patrol.waypoints)
         }
 
-        adminCommand("pf_bench") { player, _ ->
+        adminCommand("pf_bench") {
             val pf = PathFinder(flags = collisions, useRouteBlockerFlags = true)
             val start = Tile(3270, 3331, 0)
             val timeShort = measureTimeMillis {
@@ -73,8 +70,8 @@ class PathFindingCommands : Api {
             println("Invalid path: ${timeInvalid}ms")
         }
 
-        adminCommand("show_col", desc = "Show nearby collision") { player, _ ->
-            val area = player.tile.toCuboid(10)
+        adminCommand("show_col", desc = "Show nearby collision") {
+            val area = tile.toCuboid(10)
             val steps: StepValidator = get()
             val strategy = CollisionStrategies.Normal
             next@ for (tile in area) {
@@ -97,18 +94,18 @@ class PathFindingCommands : Api {
             }
         }
 
-        adminCommand("path", desc = "Show calculated walk paths") { player, _ ->
-            player.softTimers.toggle("show_path")
+        adminCommand("path", desc = "Show calculated walk paths") {
+            softTimers.toggle("show_path")
         }
 
-        adminCommand("col") { player, _ ->
+        adminCommand("col") {
             val collisions: Collisions = get()
-            println("Can move north? ${collisions[player.tile.x, player.tile.y, player.tile.level] and (CollisionFlag.BLOCK_NORTH or CollisionFlag.BLOCK_NORTH_ROUTE_BLOCKER) == 0}")
-            println("Can move north? ${collisions[player.tile.x, player.tile.y, player.tile.level] and CollisionFlag.BLOCK_NORTH == 0}")
-            println("Can move north? ${collisions[player.tile.x, player.tile.y, player.tile.level] and CollisionFlag.WALL_NORTH == 0}")
-            println("Can move north? ${collisions[player.tile.x, player.tile.y, player.tile.level] and CollisionFlag.BLOCK_NORTH_ROUTE_BLOCKER == 0}")
-            println(collisions[player.tile.x, player.tile.y, player.tile.level])
-            println(player.tile.minus(y = 1))
+            println("Can move north? ${collisions[tile.x, tile.y, tile.level] and (CollisionFlag.BLOCK_NORTH or CollisionFlag.BLOCK_NORTH_ROUTE_BLOCKER) == 0}")
+            println("Can move north? ${collisions[tile.x, tile.y, tile.level] and CollisionFlag.BLOCK_NORTH == 0}")
+            println("Can move north? ${collisions[tile.x, tile.y, tile.level] and CollisionFlag.WALL_NORTH == 0}")
+            println("Can move north? ${collisions[tile.x, tile.y, tile.level] and CollisionFlag.BLOCK_NORTH_ROUTE_BLOCKER == 0}")
+            println(collisions[tile.x, tile.y, tile.level])
+            println(tile.minus(y = 1))
 
             println(CollisionFlag.BLOCK_NORTH or CollisionFlag.BLOCK_NORTH_ROUTE_BLOCKER)
             println(CollisionFlag.BLOCK_NORTH)
@@ -119,7 +116,7 @@ class PathFindingCommands : Api {
             //    println(pf.findPath(3205, 3220, 3205, 3223, 2))
         }
 
-        adminCommand("walk_to_bank") { player, _ ->
+        adminCommand("walk_to_bank") {
             val east = Tile(3179, 3433).toCuboid(15, 14)
             val west = Tile(3250, 3417).toCuboid(7, 8)
             val dijkstra: Dijkstra = get()
@@ -129,37 +126,36 @@ class PathFindingCommands : Api {
             println(
                 "Path took ${
                     measureNanoTime {
-                        dijkstra.find(player, strategy, EdgeTraversal())
+                        dijkstra.find(this, strategy, EdgeTraversal())
                     }
                 }ns",
             )
-            /*player.action { FIXME
+            /*action { FIXME
                 var first = true
-                while (player.waypoints.isNotEmpty()) {
-                    val next = player.waypoints.poll()
+                while (waypoints.isNotEmpty()) {
+                    val next = waypoints.poll()
                     suspendCoroutine<Unit> { cont ->
-                        val tile = if (first && !player.tile.within(next.end as Tile, 20)) {
+                        val tile = if (first && !tile.within(next.end as Tile, 20)) {
                             next.start
                         } else {
                             next.end
                         } as Tile
                         first = false
                         scheduler.add {
-                            player.walkTo(tile)
+                            walkTo(tile)
                         }
                     }
                 }
             }*/
         }
-    }
 
-    @Timer("show_path")
-    override fun tick(player: Player, timer: String): Int {
-        var tile = player.tile
-        for (step in player.steps) {
-            tile = tile.add(step)
-            areaGfx("2000", tile)
+        timerTick("show_path") {
+            var tile = tile
+            for (step in steps) {
+                tile = tile.add(step)
+                areaGfx("2000", tile)
+            }
+            return@timerTick Timer.CONTINUE
         }
-        return Timer.CONTINUE
     }
 }

@@ -5,12 +5,9 @@ import content.entity.player.dialogue.Talk
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.Script
 
-@Script
-class Arheins {
+class Arheins : Script {
 
     init {
         npcOperate("Talk-to", "arhein") {
@@ -19,7 +16,7 @@ class Arheins {
             choice {
                 option("Yes.") {
                     player<Talk>("Sure.")
-                    player.openShop("arheins_store")
+                    openShop("arheins_store")
                 }
                 option("No thank you.") {
                     player<Talk>("No thanks.")

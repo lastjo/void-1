@@ -9,17 +9,15 @@ import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import content.entity.player.dialogue.type.statement
-import content.entity.sound.sound
 import content.quest.quest
 import org.rsmod.game.pathfinder.LineValidator
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.ui.dialogue.talkWith
 import world.gregs.voidps.engine.entity.character.mode.move.hasLineOfSight
 import world.gregs.voidps.engine.entity.character.npc.NPCs
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
+import world.gregs.voidps.engine.entity.character.sound
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
-import world.gregs.voidps.engine.entity.obj.objectOperate
 import world.gregs.voidps.engine.entity.obj.replace
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.holdsItem
@@ -27,42 +25,41 @@ import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.timer.toTicks
 import java.util.concurrent.TimeUnit
 
-@Script
-class SirVyvin {
+class SirVyvin : Script {
 
     val floorItems: FloorItems by inject()
     val npcs: NPCs by inject()
     val lineValidator: LineValidator by inject()
 
     init {
-        objectOperate("Open", "cupboard_the_knights_sword_closed") {
-            player.sound("cupboard_open")
+        objectOperate("Open", "cupboard_the_knights_sword_closed") { (target) ->
+            sound("cupboard_open")
             target.replace("cupboard_the_knights_sword_opened", ticks = TimeUnit.MINUTES.toTicks(3))
         }
 
-        objectOperate("Shut", "cupboard_the_knights_sword_opened") {
-            player.sound("cupboard_close")
+        objectOperate("Shut", "cupboard_the_knights_sword_opened") { (target) ->
+            sound("cupboard_close")
             target.replace("cupboard_the_knights_sword_closed")
         }
 
         objectOperate("Search", "cupboard_the_knights_sword_opened") {
-            when (player.quest("the_knights_sword")) {
+            when (quest("the_knights_sword")) {
                 "cupboard", "blurite_sword" -> {
-                    val sirVyvin = npcs[player.tile.regionLevel].firstOrNull { it.id == "sir_vyvin" }
-                    if (sirVyvin != null && lineValidator.hasLineOfSight(sirVyvin, player)) {
-                        player.talkWith(sirVyvin)
+                    val sirVyvin = npcs[tile.regionLevel].firstOrNull { it.id == "sir_vyvin" }
+                    if (sirVyvin != null && lineValidator.hasLineOfSight(sirVyvin, this)) {
+                        talkWith(sirVyvin)
                         npc<Frustrated>("HEY! Just WHAT do you THINK you are DOING??? STAY OUT of MY cupboard!")
                         return@objectOperate
                     }
-                    if (player.holdsItem("portrait")) {
+                    if (holdsItem("portrait")) {
                         statement("There is just a load of junk in here.")
                     } else {
                         statement("You find a small portrait in here which you take.")
-                        if (player.inventory.isFull()) {
-                            floorItems.add(player.tile, "portrait", disappearTicks = 300, owner = player)
+                        if (inventory.isFull()) {
+                            floorItems.add(tile, "portrait", disappearTicks = 300, owner = this)
                             return@objectOperate
                         }
-                        player.inventory.add("portrait")
+                        inventory.add("portrait")
                     }
                 }
                 else -> statement("There is just a load of junk in here.")
@@ -74,14 +71,14 @@ class SirVyvin {
             npc<Neutral>("Greetings traveller.")
             choice {
                 option<Quiz>("Do you have anything to trade?") {
-                    val kills = player["black_knight_kills", 0]
+                    val kills = get("black_knight_kills", 0)
                     when {
-                        kills >= 1300 -> player.openShop("white_knight_master_armoury")
-                        kills >= 800 -> player.openShop("white_knight_adept_armoury")
-                        kills >= 500 -> player.openShop("white_knight_noble_armoury")
-                        kills >= 300 -> player.openShop("white_knight_page_armoury")
-                        kills >= 200 -> player.openShop("white_knight_peon_armoury")
-                        kills >= 100 -> player.openShop("white_knight_novice_armoury")
+                        kills >= 1300 -> openShop("white_knight_master_armoury")
+                        kills >= 800 -> openShop("white_knight_adept_armoury")
+                        kills >= 500 -> openShop("white_knight_noble_armoury")
+                        kills >= 300 -> openShop("white_knight_page_armoury")
+                        kills >= 200 -> openShop("white_knight_peon_armoury")
+                        kills >= 100 -> openShop("white_knight_novice_armoury")
                         else -> npc<Neutral>("No, I'm sorry.")
                     }
                 }

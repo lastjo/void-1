@@ -1,31 +1,30 @@
 package content.entity.player.combat
 
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.entity.World
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.combatLevel
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Levels
-import world.gregs.voidps.engine.entity.character.player.skill.level.maxLevelChange
 import world.gregs.voidps.engine.entity.character.player.summoningCombatLevel
-import world.gregs.voidps.engine.event.Script
 import kotlin.math.max
 
-@Script
-class CombatLevel : Api {
-
-    val combatSkills = Skill.entries.filter { it.ordinal <= 6 || it.ordinal == 23 }.toTypedArray()
-
-    override fun spawn(player: Player) {
-        player.combatLevel = calculateCombatLevel(player.levels)
-        player.summoningCombatLevel = calculateCombatLevel(player.levels, true)
-    }
+class CombatLevel : Script {
 
     init {
-        maxLevelChange(skills = combatSkills) { player ->
-            player.combatLevel = calculateCombatLevel(player.levels)
-            player.summoningCombatLevel = calculateCombatLevel(player.levels, true)
+        playerSpawn {
+            combatLevel = calculateCombatLevel(levels)
+            summoningCombatLevel = calculateCombatLevel(levels, true)
         }
+
+        for (skill in Skill.entries.filter { it.ordinal <= 6 || it.ordinal == 23 }.toTypedArray()) {
+            maxLevelChanged(skill, ::recalculate)
+        }
+    }
+
+    fun recalculate(player: Player, skill: Skill, from: Int, to: Int) {
+        player.combatLevel = calculateCombatLevel(player.levels)
+        player.summoningCombatLevel = calculateCombatLevel(player.levels, true)
     }
 
     fun calculateCombatLevel(levels: Levels, summoning: Boolean = false): Int {

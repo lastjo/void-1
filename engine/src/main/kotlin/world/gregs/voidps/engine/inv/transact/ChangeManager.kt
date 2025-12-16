@@ -1,8 +1,7 @@
 package world.gregs.voidps.engine.inv.transact
 
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.event.Event
-import world.gregs.voidps.engine.event.EventDispatcher
 import world.gregs.voidps.engine.inv.*
 import java.util.*
 
@@ -12,8 +11,8 @@ import java.util.*
 class ChangeManager(
     private val inventory: Inventory,
 ) {
-    private val changes: Stack<Event> = Stack()
-    private val events = mutableSetOf<EventDispatcher>()
+    private val changes: Stack<Any> = Stack()
+    private val listeners = mutableSetOf<Player>()
 
     /**
      * Track a change of an item in the inventory.
@@ -28,23 +27,23 @@ class ChangeManager(
             changes.add(ItemRemoved(inventory.id, index, previous))
         }
         if (item.isNotEmpty()) {
-            changes.add(ItemAdded(inventory.id, index, item))
+            changes.add(ItemAdded(item, inventory.id, index))
         }
         changes.add(InventorySlotChanged(inventory.id, index, item, from, fromIndex, previous))
     }
 
     /**
-     * Adds [events] to the list of recipients of [InventorySlotChanged] updates in this inventory.
+     * Adds [player] to the list of recipients of [InventorySlotChanged] updates in this inventory.
      */
-    fun bind(events: EventDispatcher) {
-        this.events.add(events)
+    fun bind(player: Player) {
+        this.listeners.add(player)
     }
 
     /**
-     * Removes [events] to the list of recipients of [InventorySlotChanged] updates in this inventory.
+     * Removes [player] to the list of recipients of [InventorySlotChanged] updates in this inventory.
      */
-    fun unbind(events: EventDispatcher) {
-        this.events.remove(events)
+    fun unbind(player: Player) {
+        this.listeners.remove(player)
     }
 
     /**
@@ -54,11 +53,15 @@ class ChangeManager(
         if (changes.isEmpty()) {
             return
         }
-        val update = InventoryUpdate(inventory.id, changes.filterIsInstance<InventorySlotChanged>())
-        for (events in events) {
-            events.emit(update)
+        val changeList = changes.filterIsInstance<InventorySlotChanged>()
+        for (listener in listeners) {
+            InventoryApi.update(listener, inventory.id, changeList)
             for (change in changes) {
-                events.emit(change)
+                when (change) {
+                    is InventorySlotChanged -> InventoryApi.changed(listener, change)
+                    is ItemAdded -> InventoryApi.add(listener, change)
+                    is ItemRemoved -> InventoryApi.remove(listener, change)
+                }
             }
         }
     }

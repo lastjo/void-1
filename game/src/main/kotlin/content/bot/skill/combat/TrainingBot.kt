@@ -11,54 +11,53 @@ import content.entity.player.bank.ownsItem
 import content.skill.magic.spell.spellBook
 import content.skill.melee.weapon.attackRange
 import net.pearx.kasechange.toLowerSpaceCase
-import world.gregs.voidps.engine.Api
-import world.gregs.voidps.engine.client.ui.event.InterfaceOpened
+import world.gregs.voidps.engine.Script
+import world.gregs.voidps.engine.client.ui.dialogue
 import world.gregs.voidps.engine.client.update.view.Viewport
 import world.gregs.voidps.engine.client.variable.remaining
 import world.gregs.voidps.engine.data.definition.AreaDefinition
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.entity.character.mode.combat.CombatMovement
+import world.gregs.voidps.engine.entity.character.mode.interact.PlayerOnObjectInteract
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCs
-import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.has
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.ObjectOption
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.timer.epochSeconds
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 
-@Script
-class TrainingBot : Api {
+class TrainingBot : Script {
 
     val areas: AreaDefinitions by inject()
     val tasks: TaskManager by inject()
 
-    override fun worldSpawn() {
-        val area = areas.getOrNull("lumbridge_combat_tutors") ?: return@worldSpawn
-        val range = 1..5
-        val skills = listOf(Skill.Attack, Skill.Magic, Skill.Ranged)
-        val melees = listOf(Skill.Attack, Skill.Strength, Skill.Defence)
-        for (skill in skills) {
-            val melee = skill == Skill.Attack
-            val task = Task(
-                name = "train ${if (melee) "melee" else skill.name} at ${area.name}".toLowerSpaceCase(),
-                block = {
-                    val actualSkill = if (melee) melees.filter { levels.getMax(it) in range }.random() else skill
-                    bot.train(area, actualSkill, range)
-                },
-                area = area.area,
-                spaces = if (melee) 3 else 2,
-                requirements = listOf(
-                    { if (melee) melees.any { levels.getMax(it) in range } else levels.getMax(skill) in range },
-                    { bot.canGetGearAndAmmo(skill) },
-                ),
-            )
-            tasks.register(task)
+    init {
+        worldSpawn {
+            val area = areas.getOrNull("lumbridge_combat_tutors") ?: return@worldSpawn
+            val range = 1..5
+            val skills = listOf(Skill.Attack, Skill.Magic, Skill.Ranged)
+            val melees = listOf(Skill.Attack, Skill.Strength, Skill.Defence)
+            for (skill in skills) {
+                val melee = skill == Skill.Attack
+                val task = Task(
+                    name = "train ${if (melee) "melee" else skill.name} at ${area.name}".toLowerSpaceCase(),
+                    block = {
+                        val actualSkill = if (melee) melees.filter { levels.getMax(it) in range }.random() else skill
+                        bot.train(area, actualSkill, range)
+                    },
+                    area = area.area,
+                    spaces = if (melee) 3 else 2,
+                    requirements = listOf(
+                        { if (melee) melees.any { levels.getMax(it) in range } else levels.getMax(skill) in range },
+                        { bot.canGetGearAndAmmo(skill) },
+                    ),
+                )
+                tasks.register(task)
+            }
         }
     }
 
@@ -91,7 +90,7 @@ class TrainingBot : Api {
         while (player.levels.getMax(skill) < range.last + 1 && hasAmmo(skill)) {
             if (target is GameObject) {
                 objectOption(target, "Shoot-at")
-                await<Player, ObjectOption<Player>>()
+                await { mode is PlayerOnObjectInteract }
                 await("tick")
             } else if (target is NPC) {
                 npcOption(target, "Attack")
@@ -131,7 +130,7 @@ class TrainingBot : Api {
                 if (!player.inventory.contains("training_sword")) {
                     val tutor = get<NPCs>().first { it.tile.within(player.tile, Viewport.VIEW_RADIUS) && it.id == "harlan" }
                     npcOption(tutor, "Talk-to")
-                    await<Player, InterfaceOpened> { id.startsWith("dialogue_") }
+                    await { dialogue != null }
                     await("tick")
                     dialogueOption("continue")
                     dialogueOption("line4")
@@ -148,7 +147,7 @@ class TrainingBot : Api {
     suspend fun Bot.claim(npc: String) {
         val tutor = get<NPCs>().first { it.tile.within(player.tile, Viewport.VIEW_RADIUS) && it.id == npc }
         npcOption(tutor, "Talk-to")
-        await<Player, InterfaceOpened> { id.startsWith("dialogue_") }
+        await { dialogue != null }
         await("tick")
         dialogueOption("continue")
         dialogueOption("line3")

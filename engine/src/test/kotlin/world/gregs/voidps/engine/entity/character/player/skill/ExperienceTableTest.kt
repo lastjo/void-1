@@ -1,30 +1,24 @@
 package world.gregs.voidps.engine.entity.character.player.skill
 
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.verify
+import io.mockk.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import world.gregs.voidps.engine.data.Settings
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.character.player.skill.exp.BlockedExperience
 import world.gregs.voidps.engine.entity.character.player.skill.exp.Experience
-import world.gregs.voidps.engine.entity.character.player.skill.exp.GrantExp
 import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
-import world.gregs.voidps.engine.event.EventDispatcher
 
 internal class ExperienceTableTest {
 
     private lateinit var experience: Experience
-    private lateinit var events: EventDispatcher
+    private lateinit var player: Player
 
     @BeforeEach
     fun setup() {
-        events = mockk(relaxed = true)
-        experience = Experience(maximum = 200.0)
-        experience.events = events
+        player = mockk(relaxed = true)
+        experience = Experience()
+        experience.player = player
     }
 
     @Test
@@ -50,8 +44,8 @@ internal class ExperienceTableTest {
     @Test
     fun `Add experience with 10x rate`() {
         Settings.load(mapOf("world.experienceRate" to "10.0"))
-        experience = Experience(maximum = 500.0)
-        experience.events = events
+        experience = Experience()
+        experience.player = player
         experience.add(Skill.Attack, 10.0)
         experience.add(Skill.Attack, 10.0)
         assertEquals(200.0, experience.get(Skill.Attack))
@@ -73,9 +67,9 @@ internal class ExperienceTableTest {
 
     @Test
     fun `Experience can't exceed maximum`() {
-        experience.set(Skill.Attack, 10.0)
-        experience.set(Skill.Attack, 210.0)
-        experience.add(Skill.Attack, 200.0)
+        experience.set(Skill.Attack, 100)
+        experience.set(Skill.Attack, 2_100_000_000)
+        experience.add(Skill.Attack, 200_000_000.0)
         assertEquals(10.0, experience.get(Skill.Attack))
     }
 
@@ -87,11 +81,15 @@ internal class ExperienceTableTest {
 
     @Test
     fun `Experience for blocked skills aren't changed`() {
+        mockkObject(Skills)
         experience.set(Skill.Defence, 100.0)
         experience.addBlock(Skill.Defence)
         experience.add(Skill.Defence, 100.0)
         assertEquals(100.0, experience.get(Skill.Defence))
-        verify { events.emit(GrantExp(Skill.Defence, 0.0, 100.0)) }
+        verify {
+            Skills.exp(player, Skill.Defence, 0, 1000)
+        }
+        unmockkObject(Skills)
     }
 
     @Test
@@ -104,17 +102,21 @@ internal class ExperienceTableTest {
 
     @Test
     fun `Notified of change`() {
+        mockkObject(Skills)
         experience.set(Skill.Attack, 100.0)
         experience.add(Skill.Attack, 10.0)
-        verify { events.emit(GrantExp(Skill.Attack, 100.0, 110.0)) }
+        verify { Skills.exp(player, Skill.Attack, 1000, 1100) }
+        unmockkObject(Skills)
     }
 
     @Test
     fun `Listen for blocked exp`() {
+        mockkObject(Skills)
         experience.set(Skill.Attack, 100.0)
         experience.addBlock(Skill.Attack)
         experience.add(Skill.Attack, 10.0)
-        verify { events.emit(BlockedExperience(Skill.Attack, 10.0)) }
+        verify { Skills.blocked(player, Skill.Attack, 100) }
+        unmockkObject(Skills)
     }
 
     @Test

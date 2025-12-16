@@ -1,12 +1,10 @@
 package content.entity.player.dialogue.type
 
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.ui.close
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Context
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.suspend.IntSuspension
 
@@ -14,7 +12,7 @@ private const val INTERFACE_ID = "dialogue_skill_creation"
 private const val INTERFACE_AMOUNT_ID = "skill_creation_amount"
 private const val DEFAULT_TEXT = "Choose how many you wish to make, then<br>click on the chosen item to begin."
 
-suspend fun Context<Player>.makeAmount(
+suspend fun Player.makeAmount(
     items: List<String>,
     type: String,
     maximum: Int,
@@ -27,7 +25,7 @@ suspend fun Context<Player>.makeAmount(
     return id to amount
 }
 
-suspend fun Context<Player>.makeAmountIndex(
+suspend fun Player.makeAmountIndex(
     items: List<String>,
     type: String,
     maximum: Int,
@@ -35,21 +33,21 @@ suspend fun Context<Player>.makeAmountIndex(
     allowAll: Boolean = true,
     names: List<String>? = null,
 ): Pair<Int, Int> {
-    check(player.open(INTERFACE_ID) && player.open(INTERFACE_AMOUNT_ID)) { "Unable to open make amount dialogue for $player" }
+    check(open(INTERFACE_ID) && open(INTERFACE_AMOUNT_ID)) { "Unable to open make amount dialogue for $this" }
     if (allowAll) {
-        player.interfaceOptions.unlockAll(INTERFACE_AMOUNT_ID, "all")
+        interfaceOptions.unlockAll(INTERFACE_AMOUNT_ID, "all")
     }
-    player.interfaces.sendVisibility(INTERFACE_ID, "all", allowAll)
-    player.interfaces.sendVisibility(INTERFACE_ID, "custom", false)
-    player.interfaces.sendText(INTERFACE_AMOUNT_ID, "line1", text)
-    player["skill_creation_type"] = type
+    interfaces.sendVisibility(INTERFACE_ID, "all", allowAll)
+    interfaces.sendVisibility(INTERFACE_ID, "custom", false)
+    interfaces.sendText(INTERFACE_AMOUNT_ID, "line1", text)
+    set("skill_creation_type", type)
 
-    setItemOptions(player, items, names)
-    setMax(player, maximum.coerceAtLeast(1))
-    val choice: Int = IntSuspension.get(player)
-    player.close(INTERFACE_ID)
-    player.close(INTERFACE_AMOUNT_ID)
-    val amount = player["skill_creation_amount", 1]
+    setItemOptions(this, items, names)
+    setMax(this, maximum.coerceAtLeast(1))
+    val choice: Int = IntSuspension.get(this)
+    close(INTERFACE_ID)
+    close(INTERFACE_AMOUNT_ID)
+    val amount = get("skill_creation_amount", 1)
     return choice to amount
 }
 
@@ -76,44 +74,43 @@ private fun setMax(player: Player, maximum: Int) {
     }
 }
 
-@Script
-class MakeAmount {
+class MakeAmount : Script {
 
     init {
-        interfaceOption("1", "create1", "skill_creation_amount") {
-            player["skill_creation_amount", false] = 1
+        interfaceOption("1", "skill_creation_amount:create1") {
+            set("skill_creation_amount", false, 1)
         }
 
-        interfaceOption("5", "create5", "skill_creation_amount") {
-            player["skill_creation_amount", false] = 5
+        interfaceOption("5", "skill_creation_amount:create5") {
+            set("skill_creation_amount", false, 5)
         }
 
-        interfaceOption("10", "create10", "skill_creation_amount") {
-            player["skill_creation_amount", false] = 10
+        interfaceOption("10", "skill_creation_amount:create10") {
+            set("skill_creation_amount", false, 10)
         }
 
-        interfaceOption(component = "all", id = "skill_creation_amount") {
-            val max: Int = player["skill_creation_maximum", 1]
-            player["skill_creation_amount", false] = max
+        interfaceOption(id = "skill_creation_amount:all") {
+            val max: Int = get("skill_creation_maximum", 1)
+            set("skill_creation_amount", false, max)
         }
 
-        interfaceOption("+1", "increment", "skill_creation_amount") {
-            var current: Int = player["skill_creation_amount", 1]
-            val maximum: Int = player["skill_creation_maximum", 1]
+        interfaceOption("+1", "skill_creation_amount:increment") {
+            var current: Int = get("skill_creation_amount", 1)
+            val maximum: Int = get("skill_creation_maximum", 1)
             current++
             if (current > maximum) {
                 current = maximum
             }
-            player["skill_creation_amount"] = current
+            set("skill_creation_amount", current)
         }
 
-        interfaceOption("-1", "decrement", "skill_creation_amount") {
-            var current: Int = player["skill_creation_amount", 1]
+        interfaceOption("-1", "skill_creation_amount:decrement") {
+            var current: Int = get("skill_creation_amount", 1)
             current--
             if (current < 0) {
                 current = 0
             }
-            player["skill_creation_amount"] = current
+            set("skill_creation_amount", current)
         }
     }
 }

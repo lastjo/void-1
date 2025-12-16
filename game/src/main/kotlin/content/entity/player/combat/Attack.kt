@@ -1,127 +1,131 @@
 package content.entity.player.combat
 
-import content.entity.combat.CombatInteraction
-import content.entity.combat.combatPrepare
+import content.entity.combat.Combat
 import content.entity.player.dialogue.type.statement
 import content.skill.magic.spell.spell
 import content.skill.melee.weapon.attackRange
 import content.skill.melee.weapon.fightStyle
 import net.pearx.kasechange.toTitleCase
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interact.interfaceOnNPCApproach
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
+import world.gregs.voidps.engine.entity.character.mode.combat.CombatMovement
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
-import world.gregs.voidps.engine.entity.character.mode.interact.TargetInteraction
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.npcApproach
-import world.gregs.voidps.engine.entity.character.npc.npcApproachNPC
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.character.player.characterApproachPlayer
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 
-@Script
-class Attack {
+class Attack : Script {
 
     init {
         npcApproach("Attack") {
-            if (!player.has(Skill.Slayer, target.def["slayer_level", 0])) {
-                player.message("You need a higher slayer level to know how to wound this monster.")
-                cancel()
+            val target = it.target
+            if (!has(Skill.Slayer, target.def["slayer_level", 0])) {
+                message("You need a higher slayer level to know how to wound this monster.")
                 return@npcApproach
             }
-            if (player.equipped(EquipSlot.Weapon).id.endsWith("_greegree")) {
+            if (equipped(EquipSlot.Weapon).id.endsWith("_greegree")) {
                 statement("You cannot attack as a monkey.")
-                cancel()
                 return@npcApproach
             }
-            if (target.id.endsWith("_dummy") && !handleCombatDummies()) {
+            if (target.id.endsWith("_dummy") && !handleCombatDummies(target)) {
                 return@npcApproach
             }
-            if (character.attackRange != 1) {
-                approachRange(character.attackRange, update = false)
+            if (attackRange != 1) {
+                approachRange(attackRange, update = false)
             } else {
                 approachRange(null, update = true)
             }
-            combatInteraction(character, target)
+            it.combatInteraction(target)
         }
 
         npcApproach("Destroy", "door_support*") {
-            if (character.attackRange != 1) {
-                approachRange(character.attackRange, update = false)
+            if (attackRange != 1) {
+                approachRange(attackRange, update = false)
             } else {
                 approachRange(null, update = true)
             }
-            combatInteraction(character, target)
+            it.combatInteraction(it.target)
         }
 
         npcApproachNPC("Attack") {
-            if (character.attackRange != 1) {
-                approachRange(character.attackRange, update = false)
+            if (attackRange != 1) {
+                approachRange(attackRange, update = false)
             } else {
                 approachRange(null, update = true)
             }
-            combatInteraction(character, target)
+            it.combatInteraction(it.target)
         }
 
-        characterApproachPlayer("Attack") {
-            if (character.attackRange != 1) {
-                approachRange(character.attackRange, update = false)
+        playerApproach("Attack") {
+            if (attackRange != 1) {
+                approachRange(attackRange, update = false)
             } else {
                 approachRange(null, update = true)
             }
-            combatInteraction(character, target)
+            it.combatInteraction(it.target)
         }
 
-        interfaceOnNPCApproach(id = "*_spellbook") {
-            if (!player.has(Skill.Slayer, target.def["slayer_level", 0])) {
-                player.message("You need a higher slayer level to know how to wound this monster.")
-                cancel()
-                return@interfaceOnNPCApproach
+        npcApproachPlayer("Attack") {
+            if (attackRange != 1) {
+                approachRange(attackRange, update = false)
+            } else {
+                approachRange(null, update = true)
+            }
+            it.combatInteraction(it.target)
+        }
+
+        onNPCApproach("*_spellbook:*") {
+            val (target, id) = it
+            if (!has(Skill.Slayer, target.def["slayer_level", 0])) {
+                message("You need a higher slayer level to know how to wound this monster.")
+                return@onNPCApproach
             }
             approachRange(8, update = false)
-            player.spell = component
-            if (target.id.endsWith("_dummy") && !handleCombatDummies()) {
-                player.clear("spell")
-                return@interfaceOnNPCApproach
+            spell = id.substringAfter(":")
+            if (target.id.endsWith("_dummy") && !handleCombatDummies(target)) {
+                clear("spell")
+                return@onNPCApproach
             }
-            player["attack_speed"] = 5
-            player["one_time"] = true
-            player.attackRange = 8
-            player.face(target)
-            combatInteraction(player, target)
-            cancel()
+            set("attack_speed", 5)
+            set("one_time", true)
+            attackRange = 8
+            face(target)
+            it.combatInteraction(target)
         }
 
-        combatPrepare { player ->
-            if (player.contains("one_time")) {
-                player.mode = EmptyMode
-                player.clear("one_time")
+        combatPrepare {
+            if (contains("one_time")) {
+                mode = EmptyMode
+                clear("one_time")
             }
+            true
         }
     }
 
     /**
-     * Switch out the current Interaction with [CombatInteraction] to allow hits this tick
+     * Replaces the current [Interact.override] when combat is triggered via [Interact] to
+     * allow the first [CombatApi.combatSwing] to occur on the same tick.
+     * After [Interact] is complete it is switched to [CombatMovement]
      */
-    fun combatInteraction(character: Character, target: Character) {
-        val interact = character.mode as? Interact ?: return
-        interact.updateInteraction(CombatInteraction(character, target))
+    fun Interact.combatInteraction(target: Character) {
+        updateInteraction {
+            Combat.combat(character, target)
+        }
     }
 
-    suspend fun TargetInteraction<Player, NPC>.handleCombatDummies(): Boolean {
+    suspend fun Player.handleCombatDummies(target: NPC): Boolean {
         val type = target.id.removeSuffix("_dummy")
-        if (player.fightStyle == type) {
+        if (fightStyle == type) {
             return true
         }
-        player.message("You can only use ${type.toTitleCase()} against this dummy.")
+        message("You can only use ${type.toTitleCase()} against this dummy.")
         approachRange(10, false)
-        player.mode = EmptyMode
-        cancel()
+        mode = EmptyMode
         return false
     }
 }

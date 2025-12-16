@@ -9,7 +9,7 @@ import content.bot.skill.combat.hasExactGear
 import content.bot.skill.combat.setupGear
 import net.pearx.kasechange.toLowerSpaceCase
 import world.gregs.voidps.cache.definition.data.InterfaceDefinition
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.data.config.GearDefinition
 import world.gregs.voidps.engine.data.definition.AreaDefinition
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
@@ -17,47 +17,44 @@ import world.gregs.voidps.engine.data.definition.InterfaceDefinitions
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.data.definition.data.Smithing
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
-import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
-import world.gregs.voidps.engine.timer.Timer
 
-@Script
-class SmithingBot : Api {
+class SmithingBot : Script {
 
     val interfaceDefinitions: InterfaceDefinitions by inject()
     val itemDefinitions: ItemDefinitions by inject()
     val areas: AreaDefinitions by inject()
     val tasks: TaskManager by inject()
 
-    override fun worldSpawn() {
-        for (area in areas.getTagged("smithing")) {
-            val spaces: Int = area["spaces", 1]
-            val task = Task(
-                name = "smith on anvil at ${area.name}".toLowerSpaceCase(),
-                block = {
-                    val gear = bot.getGear(Skill.Smithing) ?: return@Task
-                    val types: List<String> = gear.getOrNull("types") ?: return@Task
-                    while (levels.getMax(Skill.Smithing) < gear.levels.last + 1) {
-                        bot.smith(area, types, gear)
-                    }
-                },
-                area = area.area,
-                spaces = spaces,
-                requirements = listOf { bot.hasExactGear(Skill.Smithing) },
-            )
-            tasks.register(task)
+    init {
+        worldSpawn {
+            for (area in areas.getTagged("smithing")) {
+                val spaces: Int = area["spaces", 1]
+                val task = Task(
+                    name = "smith on anvil at ${area.name}".toLowerSpaceCase(),
+                    block = {
+                        val gear = bot.getGear(Skill.Smithing) ?: return@Task
+                        val types: List<String> = gear.getOrNull("types") ?: return@Task
+                        while (levels.getMax(Skill.Smithing) < gear.levels.last + 1) {
+                            bot.smith(area, types, gear)
+                        }
+                    },
+                    area = area.area,
+                    spaces = spaces,
+                    requirements = listOf { bot.hasExactGear(Skill.Smithing) },
+                )
+                tasks.register(task)
+            }
         }
-    }
 
-    @Timer("smithing")
-    override fun stop(player: Player, timer: String, logout: Boolean) {
-        if (player.isBot) {
-            player.bot.resume(timer)
+        timerStop("smithing") {
+            if (isBot) {
+                bot.resume("smithing")
+            }
         }
     }
 

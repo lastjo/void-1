@@ -1,31 +1,29 @@
 package content.quest.member.fairy_tale_part_2.fairy_ring
 
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.interfaceOption
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 
-@Script
-class TravelLog {
+class TravelLog : Script {
 
     val fairyRing: FairyRingCodes by inject()
 
     init {
-        interfaceOption("Re-sort list", "re_sort_list", "travel_log") {
-            player.toggle("travel_log_re_sort")
+        interfaceOption("Re-sort list", "travel_log:re_sort_list") {
+            toggle("travel_log_re_sort")
         }
 
-        interfaceOption(id = "travel_log") {
-            player.setCode(component[0].toString(), component[1].toString(), component[2].toString())
+        interfaceOption(id = "travel_log:*") {
+            val component = it.component
+            setCode(component[0].toString(), component[1].toString(), component[2].toString())
         }
 
-        interfaceOpen("travel_log") { player ->
-            player.sendVariable("travel_log_re_sort")
-            val list: List<String> = player["travel_log_locations"] ?: return@interfaceOpen
+        interfaceOpened("travel_log") { id ->
+            sendVariable("travel_log_re_sort")
+            val list: List<String> = get("travel_log_locations") ?: return@interfaceOpened
             for ((code, def) in fairyRing.codes) {
                 if (list.contains(code)) {
-                    player.interfaces.sendText(id, def.id.lowercase(), "<br>${def.name}")
+                    interfaces.sendText(id, def.id.lowercase(), "<br>${def.name}")
                 }
             }
         }

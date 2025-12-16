@@ -14,18 +14,15 @@ import org.rsmod.game.pathfinder.LineValidator
 import org.rsmod.game.pathfinder.PathFinder
 import org.rsmod.game.pathfinder.StepValidator
 import org.rsmod.game.pathfinder.collision.CollisionStrategies
-import world.gregs.voidps.cache.definition.data.NPCDefinition
 import world.gregs.voidps.engine.GameLoop
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.sendScript
 import world.gregs.voidps.engine.client.ui.close
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
-import world.gregs.voidps.engine.entity.CharacterInteraction
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Events
 import world.gregs.voidps.engine.map.collision.Collisions
 import world.gregs.voidps.engine.script.KoinMock
 import world.gregs.voidps.engine.suspend.Suspension
@@ -40,7 +37,6 @@ internal class InteractTest : KoinMock() {
     private lateinit var player: Player
     private lateinit var target: NPC
     private lateinit var interact: Interact
-    private lateinit var interaction: Interaction<Player>
     private var approached = false
     private var operated = false
 
@@ -63,7 +59,6 @@ internal class InteractTest : KoinMock() {
 
     @BeforeEach
     fun setup() {
-        Events.setEvents(Events())
         mockkStatic("world.gregs.voidps.engine.client.ui.InterfacesKt")
         mockkStatic("world.gregs.voidps.engine.client.EncodeExtensionsKt")
         approached = false
@@ -82,26 +77,35 @@ internal class InteractTest : KoinMock() {
     }
 
     private fun interact(operate: Boolean, approach: Boolean, suspend: Boolean) {
-        interaction = NPCOption(player, target, NPCDefinition.EMPTY, "interact")
-        interact = Interact(player, target, interaction)
+        interact = object : Interact(player, target) {
+            override fun hasOperate() = operate
+
+            override fun hasApproach() = approach
+
+            override fun operate() {
+                if (operate) {
+                    Script.launch {
+                        if (suspend) {
+                            Suspension.start(player, 2)
+                        }
+                        operated = true
+                    }
+                }
+            }
+
+            override fun approach() {
+                if (approach) {
+                    Script.launch {
+                        if (suspend) {
+                            Suspension.start(player, 2)
+                        }
+                        approached = true
+                    }
+                }
+            }
+
+        }
         player.mode = interact
-        Events.events.clear()
-        if (operate) {
-            Events.handle<Player, NPCOption<Player>>("player_operate_npc", "*", "*") {
-                if (suspend) {
-                    Suspension.start(character, 2)
-                }
-                operated = true
-            }
-        }
-        if (approach) {
-            Events.handle<Player, NPCOption<Player>>("player_approach_npc", "*", "*") {
-                if (suspend) {
-                    Suspension.start(character, 2)
-                }
-                approached = true
-            }
-        }
     }
 
     @ParameterizedTest

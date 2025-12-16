@@ -1,5 +1,6 @@
 package content.entity.player.command
 
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.command.adminCommand
 import world.gregs.voidps.engine.client.command.modCommand
 import world.gregs.voidps.engine.client.command.stringArg
@@ -8,21 +9,19 @@ import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.data.definition.NPCDefinitions
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.type.Direction
 import kotlin.text.toIntOrNull
 
-@Script
-class NPCCommands {
+class NPCCommands : Script {
 
     val npcs: NPCs by inject()
     val npcDefinitions: NPCDefinitions by inject()
 
     init {
-        modCommand("npcs", desc = "Get total npc count") { player, _ ->
-            player.message("NPCs: ${npcs.count()}")
+        modCommand("npcs", desc = "Get total npc count") {
+            message("NPCs: ${npcs.count()}")
         }
         adminCommand("npc", stringArg("npc-id", autofill = npcDefinitions.ids.keys), desc = "Spawn an npc", handler = ::spawn)
     }

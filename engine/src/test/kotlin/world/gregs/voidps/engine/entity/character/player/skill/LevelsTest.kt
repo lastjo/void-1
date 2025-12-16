@@ -1,17 +1,12 @@
 package world.gregs.voidps.engine.entity.character.player.skill
 
 import io.mockk.mockk
-import io.mockk.spyk
-import io.mockk.verifyOrder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import world.gregs.voidps.engine.dispatch.MapDispatcher
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.exp.Experience
-import world.gregs.voidps.engine.entity.character.player.skill.level.LevelChanged
 import world.gregs.voidps.engine.entity.character.player.skill.level.Levels
-import world.gregs.voidps.engine.entity.character.player.skill.level.MaxLevelChanged
 import world.gregs.voidps.engine.entity.character.player.skill.level.PlayerLevels
 
 internal class LevelsTest {
@@ -19,22 +14,33 @@ internal class LevelsTest {
     private lateinit var exp: Experience
     private lateinit var levels: Levels
     private lateinit var player: Player
-    val calls = mutableListOf<Triple<Skill, Int, Int>>()
+    private val calls = mutableListOf<Triple<Skill, Int, Int>>()
 
     @BeforeEach
     fun setup() {
-        exp = Experience(maximum = 10000.0)
+        exp = Experience()
         player = mockk(relaxed = true)
         levels = Levels()
-        exp.events = player
+        exp.player = player
         levels.link(player, PlayerLevels(exp))
-        val levelChanged = spyk(MapDispatcher<LevelChanged>())
-        levelChanged.instances["*"] = mutableListOf(object : LevelChanged {
-            override fun levelChanged(player: Player, skill: Skill, from: Int, to: Int) {
-                calls.add(Triple(skill, from, to))
+        object : Skills {
+            init {
+                experience { skill, from, to ->
+                    val previousLevel = Experience.level(skill, from / 10.0)
+                    val currentLevel = Experience.level(skill, to / 10.0)
+                    if (currentLevel != previousLevel) {
+                        levels.restore(skill, currentLevel - previousLevel)
+                        Skills.maxChanged(player, skill, previousLevel, currentLevel)
+                    }
+                }
+                levelChanged { skill, from, to ->
+                    calls.add(Triple(skill, from, to))
+                }
+                maxLevelChanged { skill, from, to ->
+                    calls.add(Triple(skill, from, to))
+                }
             }
-        })
-        LevelChanged.playerDispatcher = levelChanged
+        }
     }
 
     @Test
@@ -64,6 +70,7 @@ internal class LevelsTest {
 
     @Test
     fun `Get drained offset`() {
+        Skills.close()
         exp.set(Skill.Attack, 1154.0)
         assertEquals(-9, levels.getOffset(Skill.Attack))
     }
@@ -128,7 +135,7 @@ internal class LevelsTest {
     @Test
     fun `Boosting with stack has arbitrary limit`() {
         exp = Experience()
-        exp.events = player
+        exp.player = player
         levels.link(player, PlayerLevels(exp))
 
         exp.set(Skill.Strength, 14000000.0)
@@ -307,8 +314,9 @@ internal class LevelsTest {
     @Test
     fun `Listen to level up`() {
         exp.set(Skill.Magic, 1154.0)
-        verifyOrder {
-            player.emit(any<MaxLevelChanged>()) // (Skill.Magic, 1, 10))
-        }
+        val (skill, from, to) = calls.first()
+        assertEquals(Skill.Magic, skill)
+        assertEquals(1, from)
+        assertEquals(10, to)
     }
 }

@@ -1,21 +1,17 @@
 package content.entity.player
 
-import world.gregs.voidps.engine.Api
-import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
-import world.gregs.voidps.type.Tile
+import world.gregs.voidps.engine.Script
 
-@Script
-class ForceMovement : Api {
+class ForceMovement : Script {
+    init {
+        moved {
+            val block: () -> Unit = remove("force_walk") ?: return@moved
+            block.invoke()
+        }
 
-    override fun move(player: Player, from: Tile, to: Tile) {
-        val block: () -> Unit = player.remove("force_walk") ?: return
-        block.invoke()
-    }
-
-    override fun move(npc: NPC, from: Tile, to: Tile) {
-        val block: () -> Unit = npc.remove("force_walk") ?: return
-        block.invoke()
+        npcMoved {
+            val block: () -> Unit = remove("force_walk") ?: return@npcMoved
+            block.invoke()
+        }
     }
 }

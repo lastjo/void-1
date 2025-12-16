@@ -3,11 +3,9 @@ package content.area.kandarin.tree_gnome_stronghold
 import content.entity.npc.shop.openShop
 import content.entity.player.dialogue.*
 import content.entity.player.dialogue.type.*
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.Script
 
-@Script
-class Hudo {
+class Hudo : Script {
 
     init {
         npcOperate("Talk-to", "gnome_hudo") {
@@ -19,7 +17,7 @@ class Hudo {
                 }
                 option<Neutral>("I'll have a look.") {
                     npc<Happy>("Great stuff.")
-                    player.openShop("grand_tree_groceries")
+                    openShop("grand_tree_groceries")
                 }
             }
         }

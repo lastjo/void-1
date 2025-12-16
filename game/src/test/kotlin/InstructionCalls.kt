@@ -4,17 +4,12 @@ import org.junit.jupiter.api.Assertions
 import world.gregs.voidps.cache.definition.data.InterfaceDefinition
 import world.gregs.voidps.engine.client.instruction.InstructionHandlers
 import world.gregs.voidps.engine.client.instruction.handle.ObjectOptionHandler
-import world.gregs.voidps.engine.client.ui.InterfaceSwitch
+import world.gregs.voidps.engine.client.instruction.handle.interactItemOn
+import world.gregs.voidps.engine.client.ui.InterfaceApi
 import world.gregs.voidps.engine.client.ui.dialogue
-import world.gregs.voidps.engine.client.ui.dialogue.ContinueDialogue
+import world.gregs.voidps.engine.client.ui.dialogue.Dialogues
 import world.gregs.voidps.engine.client.ui.hasOpen
-import world.gregs.voidps.engine.client.ui.interact.ItemOnItem
-import world.gregs.voidps.engine.client.ui.interact.ItemOnNPC
-import world.gregs.voidps.engine.client.ui.interact.ItemOnObject
-import world.gregs.voidps.engine.data.definition.InterfaceDefinitions
-import world.gregs.voidps.engine.data.definition.ItemDefinitions
-import world.gregs.voidps.engine.data.definition.NPCDefinitions
-import world.gregs.voidps.engine.data.definition.ObjectDefinitions
+import world.gregs.voidps.engine.data.definition.*
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
@@ -43,7 +38,7 @@ fun Player.itemOption(
 ) {
     Assertions.assertTrue(hasOpen(id)) { "Player $this doesn't have interface $id open" }
     val item = inventories.inventory(inventory).getOrNull(slot) ?: Item(item)
-    val definition = get<InterfaceDefinitions>().getComponent(id, component)!!
+    val definition = get<InterfaceDefinitions>().getComponent(id, component) ?: throw Exception("Component $component not found in Interface $id")
     get<InstructionHandlers>().interactInterface.validate(this, InteractInterface(InterfaceDefinition.id(definition.id), InterfaceDefinition.componentId(definition.id), item.def.id, slot, optionIndex))
 }
 
@@ -56,7 +51,7 @@ fun Player.interfaceOption(
     slot: Int = -1,
 ) {
     Assertions.assertTrue(hasOpen(id)) { "Player $this doesn't have interface $id open" }
-    val definition = get<InterfaceDefinitions>().getComponent(id, component)!!
+    val definition = get<InterfaceDefinitions>().getComponent(id, component) ?: throw Exception("Component $component not found in Interface $id")
     get<InstructionHandlers>().interactInterface.validate(this, InteractInterface(InterfaceDefinition.id(definition.id), InterfaceDefinition.componentId(definition.id), item.def.id, slot, optionIndex))
 }
 
@@ -78,49 +73,23 @@ fun Player.skillCreation(
 
 fun Player.interfaceUse(
     id: String,
-    inventory: String = "",
     fromItem: Item = Item("", -1),
     toItem: Item = Item("", -1),
     fromSlot: Int = -1,
     toSlot: Int = -1,
 ) {
     Assertions.assertTrue(hasOpen(id)) { "Player $this doesn't have interface $id open" }
-    emit(
-        ItemOnItem(
-            fromItem = fromItem,
-            toItem = toItem,
-            fromSlot = fromSlot,
-            toSlot = toSlot,
-            fromInventory = inventory,
-            toInventory = inventory,
-        ),
-    )
+    InterfaceApi.itemOnItem(this, fromItem, toItem, fromSlot, toSlot)
 }
 
 fun Player.interfaceSwitch(
     id: String,
     component: String,
-    inventory: String = "",
-    fromItem: Item = Item("", -1),
-    toItem: Item = Item("", -1),
     fromSlot: Int = -1,
     toSlot: Int = -1,
 ) {
     Assertions.assertTrue(hasOpen(id)) { "Player $this doesn't have interface $id open" }
-    emit(
-        InterfaceSwitch(
-            id = id,
-            component = component,
-            fromItem = fromItem,
-            fromSlot = fromSlot,
-            fromInventory = inventory,
-            toId = id,
-            toComponent = component,
-            toItem = toItem,
-            toSlot = toSlot,
-            toInventory = inventory,
-        ),
-    )
+    InterfaceApi.swap(this, "$id:$component", "$id:$component", fromSlot, toSlot)
 }
 
 fun Player.equipItem(
@@ -135,8 +104,8 @@ fun Player.dialogueOption(
     component: String,
     option: Int = -1,
     id: String = dialogue!!,
-) = runTest {
-    emit(ContinueDialogue(id, component, option))
+) {
+    Dialogues.continueDialogue(this, "$id:$component")
 }
 
 fun Player.dialogueContinue(repeat: Int = 1) {
@@ -180,32 +149,20 @@ fun Player.walk(toTile: Tile) = runTest {
 
 fun Player.itemOnObject(obj: GameObject, itemSlot: Int, inventory: String = "inventory") {
     val item = inventories.inventory(inventory)[itemSlot]
-    emit(ItemOnObject(this, obj, item, itemSlot, inventory))
+    interactItemOn(obj, inventory, inventory, item, itemSlot)
 }
 
 fun Player.itemOnNpc(npc: NPC, itemSlot: Int, inventory: String = "inventory") {
     val item = inventories.inventory(inventory)[itemSlot]
-    emit(ItemOnNPC(this, npc, item, itemSlot, inventory))
+    interactItemOn(npc, inventory, inventory, item, itemSlot)
 }
 
 fun Player.itemOnItem(
     firstSlot: Int,
     secondSlot: Int,
-    firstInventory: String = "inventory",
-    secondInventory: String = firstInventory,
 ) {
-    val one = inventories.inventory(firstInventory)
-    val two = inventories.inventory(secondInventory)
-    emit(
-        ItemOnItem(
-            one[firstSlot],
-            two[secondSlot],
-            firstSlot,
-            secondSlot,
-            firstInventory,
-            secondInventory,
-        ),
-    )
+    val inv = inventories.inventory("inventory")
+    InterfaceApi.itemOnItem(this, inv[firstSlot], inv[secondSlot], firstSlot, secondSlot)
 }
 
 fun Player.npcOption(npc: NPC, option: String) {
@@ -223,8 +180,8 @@ fun Player.npcOption(npc: NPC, option: Int) = runTest {
 }
 
 fun Player.objectOption(gameObject: GameObject, option: String = "", optionIndex: Int? = null) = runTest {
-    val def = get<ObjectDefinitions>().get(gameObject.intId)
-    instructions.send(InteractObject(def.id, gameObject.tile.x, gameObject.tile.y, (optionIndex ?: def.optionsIndex(option)) + 1))
+    val def = gameObject.def(this@objectOption)
+    instructions.send(InteractObject(gameObject.intId, gameObject.tile.x, gameObject.tile.y, (optionIndex ?: def.optionsIndex(option)) + 1))
 }
 
 fun Player.floorItemOption(floorItem: FloorItem, option: String) = runTest {

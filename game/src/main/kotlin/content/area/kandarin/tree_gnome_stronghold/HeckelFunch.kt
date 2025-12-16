@@ -3,11 +3,9 @@ package content.area.kandarin.tree_gnome_stronghold
 import content.entity.npc.shop.openShop
 import content.entity.player.dialogue.*
 import content.entity.player.dialogue.type.*
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.Script
 
-@Script
-class HeckelFunch {
+class HeckelFunch : Script {
 
     init {
         npcOperate("Talk-to", "gnome_heckelfunch") {
@@ -19,7 +17,7 @@ class HeckelFunch {
                 }
                 option<Neutral>("I'll have a look.") {
                     npc<Happy>("There's a good human.")
-                    player.openShop("funchs_fine_groceries")
+                    openShop("funchs_fine_groceries")
                 }
             }
         }

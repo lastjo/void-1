@@ -1,29 +1,25 @@
 package content.skill.magic.book.modern
 
-import content.entity.combat.hit.CombatAttack
-import content.entity.combat.hit.characterCombatAttack
 import content.entity.effect.freeze
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.data.definition.SpellDefinitions
 import world.gregs.voidps.engine.entity.character.Character
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 
-@Script
-class BindSpells {
+class BindSpells : Script {
 
     val definitions: SpellDefinitions by inject()
 
-    val attackHandler: suspend CombatAttack.(Character) -> Unit = { character ->
-        if (damage > 0) {
-            character.freeze(target, definitions.get(spell)["freeze_ticks"])
-        }
+    init {
+        combatAttack("magic", handler = ::attack)
+        npcCombatAttack(style = "magic", handler = ::attack)
     }
 
-    init {
-        characterCombatAttack(spell = "bind", type = "magic", handler = attackHandler)
-
-        characterCombatAttack(spell = "snare", type = "magic", handler = attackHandler)
-
-        characterCombatAttack(spell = "entangle", type = "magic", handler = attackHandler)
+    fun attack(source: Character, attack: world.gregs.voidps.engine.entity.character.mode.combat.CombatAttack) {
+        val (target, damage, _, _, spell) = attack
+        if (damage <= 0 || (spell != "bind" && spell != "snare" && spell != "entangle")) {
+            return
+        }
+        source.freeze(target, definitions.get(spell)["freeze_ticks"])
     }
 }

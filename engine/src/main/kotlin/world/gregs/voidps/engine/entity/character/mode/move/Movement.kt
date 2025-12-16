@@ -28,7 +28,7 @@ import world.gregs.voidps.type.equals
 import kotlin.math.sign
 
 open class Movement(
-    internal val character: Character,
+    open val character: Character,
     private val strategy: TargetStrategy? = null,
     private val shape: Int? = null,
 ) : Mode {
@@ -52,6 +52,7 @@ open class Movement(
     }
 
     override fun tick() {
+        val character = character
         if (character is Player && character.viewport?.loaded == false) {
             return
         }
@@ -116,6 +117,7 @@ open class Movement(
     }
 
     private fun setMovementType(run: Boolean, end: Boolean) {
+        val character = character
         if (character is Player) {
             character.steps.last = GameLoop.tick + 1 // faster than character.start("last_movement", 1)
             character.temporaryMoveType = if (run) MoveType.Run else MoveType.Walk
@@ -185,6 +187,7 @@ open class Movement(
         if (distance == -1) {
             return strategy.reached(character)
         }
+        val character = character
         if ((character !is NPC || !character.def["allowed_under", false]) && Overlap.isUnder(character.tile, character.size, character.size, strategy.tile, strategy.width, strategy.height)) {
             return false
         }
@@ -209,27 +212,24 @@ open class Movement(
             character.tile = character.tile.add(delta)
             val to = character.tile
             character.visuals.moved = true
-            if (character is Player && character.networked) {
-                character.emit(ReloadRegion)
-            }
             if (Settings["world.players.collision", false] && !character.contains("dead")) {
                 move(character, from, to)
             }
             if (character is Player) {
-                Moved.move(character, from, to)
+                Moved.player(character, from)
                 val areaDefinitions: AreaDefinitions = get()
                 for (def in areaDefinitions.get(from.zone)) {
                     if (from in def.area && to !in def.area) {
-                        character.emit(AreaExited(character, def.name, def.tags, def.area))
+                        Moved.exit(character, def.name, def.area)
                     }
                 }
                 for (def in areaDefinitions.get(to.zone)) {
                     if (to in def.area && from !in def.area) {
-                        character.emit(AreaEntered(character, def.name, def.tags, def.area))
+                        Moved.enter(character, def.name, def.area)
                     }
                 }
             } else if (character is NPC) {
-                Moved.move(character, from, to)
+                Moved.npc(character, from)
             }
         }
 

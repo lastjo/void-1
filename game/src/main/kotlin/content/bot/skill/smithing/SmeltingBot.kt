@@ -9,51 +9,48 @@ import content.bot.skill.combat.hasExactGear
 import content.bot.skill.combat.setupGear
 import content.skill.smithing.oreToBar
 import net.pearx.kasechange.toLowerSpaceCase
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.data.config.GearDefinition
 import world.gregs.voidps.engine.data.definition.AreaDefinition
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
-import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.inventory
-import world.gregs.voidps.engine.timer.Timer
 import world.gregs.voidps.network.client.instruction.InteractDialogue
 
-@Script
-class SmeltingBot : Api {
+class SmeltingBot : Script {
 
     val areas: AreaDefinitions by inject()
     val tasks: TaskManager by inject()
     val itemDefinitions: ItemDefinitions by inject()
 
-    override fun worldSpawn() {
-        for (area in areas.getTagged("smelting")) {
-            val spaces: Int = area["spaces", 1]
-            val task = Task(
-                name = "smelt bars at ${area.name}".toLowerSpaceCase(),
-                block = {
-                    val gear = bot.getGear("smelting", Skill.Smithing) ?: return@Task
-                    while (levels.getMax(Skill.Smithing) < gear.levels.last + 1) {
-                        bot.smelt(area, gear)
-                    }
-                },
-                area = area.area,
-                spaces = spaces,
-                requirements = listOf { bot.hasExactGear("smelting", Skill.Smithing) },
-            )
-            tasks.register(task)
+    init {
+        worldSpawn {
+            for (area in areas.getTagged("smelting")) {
+                val spaces: Int = area["spaces", 1]
+                val task = Task(
+                    name = "smelt bars at ${area.name}".toLowerSpaceCase(),
+                    block = {
+                        val gear = bot.getGear("smelting", Skill.Smithing) ?: return@Task
+                        while (levels.getMax(Skill.Smithing) < gear.levels.last + 1) {
+                            bot.smelt(area, gear)
+                        }
+                    },
+                    area = area.area,
+                    spaces = spaces,
+                    requirements = listOf { bot.hasExactGear("smelting", Skill.Smithing) },
+                )
+                tasks.register(task)
+            }
         }
-    }
 
-    @Timer("smelting")
-    override fun stop(player: Player, timer: String, logout: Boolean) {
-        if (player.isBot) {
-            player.bot.resume(timer)
+        timerStop("smelting") {
+            if (isBot) {
+                bot.resume("smelting")
+            }
         }
     }
 

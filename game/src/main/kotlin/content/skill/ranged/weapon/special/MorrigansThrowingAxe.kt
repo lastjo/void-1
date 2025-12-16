@@ -1,22 +1,20 @@
 package content.skill.ranged.weapon.special
 
 import content.entity.combat.hit.hit
-import content.entity.player.combat.special.specialAttack
 import content.entity.proj.shoot
 import content.skill.ranged.ammo
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.variable.start
-import world.gregs.voidps.engine.event.Script
 
-@Script
-class MorrigansThrowingAxe {
+class MorrigansThrowingAxe : Script {
 
     init {
-        specialAttack("hamstring") { player ->
-            val ammo = player.ammo
-            player.anim("throw_morrigans_throwing_axe_special")
-            player.gfx("${ammo}_special")
-            val time = player.shoot(id = ammo, target = target, height = 15)
-            if (player.hit(target, delay = time) != -1) {
+        specialAttack("hamstring") { target, id ->
+            val ammo = ammo
+            anim("throw_morrigans_throwing_axe_special")
+            gfx("${ammo}_special")
+            val time = shoot(id = ammo, target = target, height = 15)
+            if (hit(target, delay = time) != -1) {
                 target.start(id, 100)
             }
         }

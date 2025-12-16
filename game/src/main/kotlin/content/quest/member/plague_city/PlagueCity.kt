@@ -3,60 +3,51 @@ package content.quest.member.plague_city
 import content.entity.combat.hit.directHit
 import content.entity.player.dialogue.*
 import content.entity.player.dialogue.type.*
-import content.entity.player.inv.inventoryItem
-import content.entity.player.inv.item.ItemUsedOnItem
-import content.entity.player.modal.tab.questJournalOpen
-import content.entity.sound.sound
 import content.quest.messageScroll
 import content.quest.quest
 import content.quest.questJournal
-import world.gregs.voidps.engine.Api
-import world.gregs.voidps.engine.client.ui.interact.itemOnObjectOperate
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.noInterest
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.event.Script
-import world.gregs.voidps.engine.event.onEvent
+import world.gregs.voidps.engine.entity.character.sound
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.holdsItem
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 import world.gregs.voidps.engine.queue.queue
-import world.gregs.voidps.engine.suspend.SuspendableContext
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 
-@Script
-class PlagueCity : Api {
+class PlagueCity : Script {
 
     val areas: AreaDefinitions by inject()
 
     val stages = setOf("grill_open", "spoken_to_jethick", "returned_book", "spoken_to_ted", "spoken_to_milli", "need_clearance", "talk_to_bravek", "has_cure_paper", "gave_cure", "freed_elena", "completed", "completed_with_spell")
 
-    override fun spawn(player: Player) {
-        if (player["plaguecity_can_see_edmond_up_top", false]) {
-            player.sendVariable("plaguecity_can_see_edmond_up_top")
-        }
-        if (player["plaguecity_dug_mud_pile", false]) {
-            player.sendVariable("plaguecity_dug_mud_pile")
-        }
-        if (player["plaguecity_checked_grill", false]) {
-            player.sendVariable("plaguecity_checked_grill")
-        }
-        if (player["plaguecity_key_asked", false]) {
-            player.sendVariable("plaguecity_key_asked")
-        }
-        player.sendVariable("plaguecity_pipe")
-        player.sendVariable("plaguecity_elena_at_home")
-        player.sendVariable("plague_city")
-    }
-
     init {
+        playerSpawn {
+            if (get("plaguecity_can_see_edmond_up_top", false)) {
+                sendVariable("plaguecity_can_see_edmond_up_top")
+            }
+            if (get("plaguecity_dug_mud_pile", false)) {
+                sendVariable("plaguecity_dug_mud_pile")
+            }
+            if (get("plaguecity_checked_grill", false)) {
+                sendVariable("plaguecity_checked_grill")
+            }
+            if (get("plaguecity_key_asked", false)) {
+                sendVariable("plaguecity_key_asked")
+            }
+            sendVariable("plaguecity_pipe")
+            sendVariable("plaguecity_elena_at_home")
+            sendVariable("plague_city")
+        }
+
         questJournalOpen("plague_city") {
-            val lines = when (player.quest("plague_city")) {
+            val lines = when (quest("plague_city")) {
                 "started" -> {
                     val list = mutableListOf(
                         "<str>I've spoken to Edmond in East Ardougne. He's asked to",
@@ -65,7 +56,7 @@ class PlagueCity : Api {
                         "<maroon>Edmond <navy>told me that his wife, <maroon>Alrena, <navy>can make me a <maroon>gas",
                         "<maroon>Mask <navy>to protect myself from the <maroon>plague.",
                     )
-                    if (player.holdsItem("dwellberries")) {
+                    if (holdsItem("dwellberries")) {
                         list.add("<navy>I need to get some <maroon>Dwellberries<navy> for <maroon>Alrena<navy> so she can make")
                         list.add("<navy>me a <maroon>Gas Mask<navy> to protect myself from the <maroon>Plague<navy>. According")
                         list.add("<navy>to <maroon>Edmond<navy>, I can find some in <maroon>McGrubor's Wood<navy>, west of")
@@ -114,13 +105,13 @@ class PlagueCity : Api {
                         "<maroon>Bucket of Water <navy>to soften the ground.<maroon>Edmond <navy>reckons",
                         "<navy>four <maroon>Bucket of Water <navy>should be enough.",
                     )
-                    if (player.quest("plague_city") == "one_bucket_of_water") {
+                    if (quest("plague_city") == "one_bucket_of_water") {
                         list.add("<navy>I've used one <maroon>Bucket of Water <navy>so far.")
                     }
-                    if (player.quest("plague_city") == "two_bucket_of_water") {
+                    if (quest("plague_city") == "two_bucket_of_water") {
                         list.add("<navy>I've used two <maroon>Bucket of Water <navy>so far.")
                     }
-                    if (player.quest("plague_city") == "three_bucket_of_water") {
+                    if (quest("plague_city") == "three_bucket_of_water") {
                         list.add("<navy>I've used three <maroon>Bucket of Water <navy>so far.")
                     }
                     list.add("")
@@ -159,7 +150,7 @@ class PlagueCity : Api {
                         "<str>down into the Sewers.",
                         "<str>I've dug a tunnel into the Ardougne sewers from Edmond's garden",
                     )
-                    if (player["plaguecity_checked_grill", false]) {
+                    if (get("plaguecity_checked_grill", false)) {
                         list.add("<navy>I've found a pipe that leads out of the <maroon>Ardougne Sewers")
                         list.add("<navy>and into <maroon>West Ardougne. <navy>However, there's a <maroon>Grill <navy>blocking")
                         list.add("<navy>my way. I might be able to use some <maroon>Rope <navy>to pull it off.")
@@ -208,11 +199,11 @@ class PlagueCity : Api {
                         "<str>I've found a pipe that leads out of the Ardougne Sewers",
                         "<str>and into West Ardougne.",
                     )
-                    if (player["plaguecity_picture_asked", false]) {
+                    if (get("plaguecity_picture_asked", false)) {
                         list.add("<navy>I entered <maroon>West Ardougne <navy>and found <maroon>Jethick<navy>, an old friend")
                         list.add("<navy>of <maroon>Edmond. <navy>He seemed willing to help me find <maroon>Elena <navy>but")
                         list.add("<navy>didn't know what she looked like.")
-                        if (player.holdsItem("picture_plague_city")) {
+                        if (holdsItem("picture_plague_city")) {
                             list.add("<navy>I have a picture of her which might help. I should show it to <maroon>Jethick.")
                         }
                     } else {
@@ -242,18 +233,18 @@ class PlagueCity : Api {
                         "<str>I've found a pipe that leads out of the Ardougne Sewers",
                         "<str>and into West Ardougne.",
                     )
-                    if (player["plaguecity_picture_asked", false]) {
+                    if (get("plaguecity_picture_asked", false)) {
                         list.add("<navy>of <maroon>Edmond. <navy>He thinks that <maroon>Elena <navy>was staying with the")
                         list.add("<maroon>Rehnison Family. <navy>According to him, they live in a timber")
                         list.add("<navy>house in the north of the city. He asked me to return a")
                         list.add("<navy>book to them while I was there.")
-                        if (!player.holdsItem("book_turnip_growing_for_beginners")) {
+                        if (!holdsItem("book_turnip_growing_for_beginners")) {
                             list.add("<navy>but I don't have it with me.")
                         }
                     } else {
                         list.add("<navy>I entered <maroon>West Ardougne<navy> and found <maroon>Jethick<navy>, an old friend of")
                         list.add("<navy><maroon>Edmond<navy>. He seemed willing to help me find <maroon>Elena<navy> but didn't")
-                        if (player.holdsItem("picture_plague_city")) {
+                        if (holdsItem("picture_plague_city")) {
                             list.add("<navy>know what she looked like. I have a picture of her which might")
                             list.add("<navy>help. I should show it to <maroon>Jethick<navy>.")
                         } else {
@@ -424,12 +415,12 @@ class PlagueCity : Api {
                         "<str>Plague House in return for a Hangover Cure",
                     )
 
-                    if (!player["plaguecity_key_asked", false]) {
+                    if (!get("plaguecity_key_asked", false)) {
                         list.add("<navy>I entered the <maroon>Plague House <navy>and found <maroon>Elena. <navy>Now I just")
                         list.add("<navy>need to free her. She thinks the key to her cell is hidden")
                         list.add("<navy>somewhere in the house.")
                     } else {
-                        if (player.tile in areas["plague_house"] || player.tile in areas["plague_house_basement"]) {
+                        if (tile in areas["plague_house"] || tile in areas["plague_house_basement"]) {
                             list.add("<navy>I've managed to enter the <maroon>Plague House. <navy>Now I need to find")
                             list.add("<maroon>Elena.")
                         } else {
@@ -517,28 +508,28 @@ class PlagueCity : Api {
                     "",
                 )
             }
-            player.questJournal("Plague City", lines)
+            questJournal("Plague City", lines)
         }
 
         itemOnObjectOperate("rope", "plague_sewer_pipe_open") {
             player<Talk>("Maybe I should try opening it first.")
         }
 
-        itemOnObjectOperate("rope", "plague_grill") {
+        itemOnObjectOperate("rope", "plague_grill_vis") {
             ropeOnGrill()
         }
 
         objectOperate("Climb-up", "plague_sewer_pipe_open") {
-            if (player["plaguecity_pipe", "grill"] == "grill_open" &&
-                stages.contains(player.quest("plague_city"))
+            if (get("plaguecity_pipe", "grill") == "grill_open" &&
+                stages.contains(quest("plague_city"))
             ) {
-                if (player.equipped(EquipSlot.Hat).id == "gas_mask") {
-                    player.anim("4855", delay = 10)
+                if (equipped(EquipSlot.Hat).id == "gas_mask") {
+                    anim("4855", delay = 10)
                     statement("You climb up through the sewer pipe.", clickToContinue = false)
-                    player.open("fade_out")
+                    open("fade_out")
                     delay(3)
-                    player.tele(2529, 3304)
-                    player.open("fade_in")
+                    tele(2529, 3304)
+                    open("fade_in")
                     statement("You climb up through the sewer pipe.", clickToContinue = true)
                 } else {
                     npc<Neutral>("edmond", "I can't let you enter the city without your gas mask on.")
@@ -549,28 +540,28 @@ class PlagueCity : Api {
         }
 
         objectOperate("Open", "plague_grill_vis") {
-            player.animDelay("pull_on_pipe")
-            player.sound("irondoor_locked")
-            if (!player["plaguecity_checked_grill", false]) {
-                player["plaguecity_checked_grill"] = true
+            animDelay("pull_on_pipe")
+            sound("irondoor_locked")
+            if (!get("plaguecity_checked_grill", false)) {
+                set("plaguecity_checked_grill", true)
             }
             statement("The grill is too secure. <br> You can't pull it off alone.")
         }
 
-        inventoryItem("Read", "a_magic_scroll") {
-            if (player.quest("plague_city") == "completed_with_spell") {
-                player.directHit(0)
-//                player.gfx("explosion")
+        itemOption("Read", "a_magic_scroll") {
+            if (quest("plague_city") == "completed_with_spell") {
+                directHit(0)
+                //                gfx("explosion")
             } else {
-                player["plague_city"] = "completed_with_spell"
-                player.sound("wom_bless")
-                player.inventory.remove("a_magic_scroll")
+                set("plague_city", "completed_with_spell")
+                sound("wom_bless")
+                inventory.remove("a_magic_scroll")
                 item("a_magic_scroll", 600, "You memorise what is written on the scroll. You can now use the Ardougne Teleport Spell.")
             }
         }
 
-        inventoryItem("Read", "a_scruffy_note") {
-            player.messageScroll(
+        itemOption("Read", "a_scruffy_note") {
+            messageScroll(
                 listOf(
                     "",
                     "",
@@ -584,33 +575,33 @@ class PlagueCity : Api {
             )
         }
 
-        onEvent<Player, ItemUsedOnItem>("item_used_on_item", "*") { player ->
+        crafted { def ->
             if (def.add.any { it.id == "chocolatey_milk" }) {
-                player.queue("milk") {
+                queue("milk") {
                     item("chocolatey_milk", 400, "You mix the chocolate into the bucket.")
                 }
             }
         }
 
-        onEvent<Player, ItemUsedOnItem>("item_used_on_item", "*") { player ->
+        crafted { def ->
             if (def.add.any { it.id == "hangover_cure" }) {
-                player.queue("cure") {
+                queue("cure") {
                     item("hangover_cure", 400, "You mix the snape grass into the bucket.")
                 }
             }
         }
     }
 
-    suspend fun SuspendableContext<Player>.ropeOnGrill() {
-        if (player["plaguecity_pipe", "grill"] != "grill") {
-            player.noInterest()
+    suspend fun Player.ropeOnGrill() {
+        if (get("plaguecity_pipe", "grill") != "grill") {
+            noInterest()
             return
         }
-        player.sound("plague_attach")
-        player.animDelay("rope_tie")
-        player["plaguecity_pipe"] = "grill_rope"
-        player["plague_city"] = "grill_rope"
-        player.inventory.remove("rope", 1)
+        sound("plague_attach")
+        animDelay("rope_tie")
+        set("plaguecity_pipe", "grill_rope")
+        set("plague_city", "grill_rope")
+        inventory.remove("rope", 1)
         item("rope", 600, "You tie the end of the rope to the sewer pipe's grill.")
     }
 }

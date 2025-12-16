@@ -1,43 +1,42 @@
 package content.social.trade
 
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.sendScript
 import world.gregs.voidps.engine.data.definition.InterfaceDefinitions
 import world.gregs.voidps.engine.data.definition.InventoryDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.req.hasRequest
 import world.gregs.voidps.engine.entity.character.player.req.removeRequest
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.*
 
-@Script
-class TradeSync {
+class TradeSync : Script {
 
     val interfaceDefinitions: InterfaceDefinitions by inject()
     val inventoryDefinitions: InventoryDefinitions by inject()
 
     init {
-        inventoryChanged("trade_offer") { player ->
-            val other: Player = Trade.getPartner(player) ?: return@inventoryChanged
-            applyUpdates(other.otherOffer, this)
-            val warn = player.hasRequest(other, "accept_trade") && removedAnyItems(this)
+        slotChanged("trade_offer") {
+            val other: Player = Trade.getPartner(this) ?: return@slotChanged
+            applyUpdates(other.otherOffer, it)
+            val warn = hasRequest(other, "accept_trade") && removedAnyItems(it)
             if (warn) {
-                highlightRemovedSlots(player, other, this)
+                highlightRemovedSlots(this, other, it)
             }
-            modified(player, other, warn)
-            updateValue(player, other)
+            modified(this, other, warn)
+            updateValue(this, other)
         }
 
-        inventoryChanged("item_loan") { player ->
-            val other: Player = Trade.getPartner(player) ?: return@inventoryChanged
-            applyUpdates(other.otherLoan, this)
-            val warn = player.hasRequest(other, "accept_trade") && removedAnyItems(this)
-            modified(player, other, warn)
+        slotChanged("item_loan") {
+            val other: Player = Trade.getPartner(this) ?: return@slotChanged
+            applyUpdates(other.otherLoan, it)
+            val warn = hasRequest(other, "accept_trade") && removedAnyItems(it)
+            modified(this, other, warn)
         }
 
-        inventoryUpdate("inventory") { player ->
-            val other: Player = Trade.getPartner(player) ?: return@inventoryUpdate
-            updateInventorySpaces(other, player)
+        inventoryUpdated("inventory") { _, _ ->
+            val other: Player = Trade.getPartner(this) ?: return@inventoryUpdated
+            updateInventorySpaces(other, this)
         }
     }
 

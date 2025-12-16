@@ -2,77 +2,71 @@ package content.area.asgarnia.asgarnian_ice_dungeon
 
 import content.entity.combat.hit.Hit
 import content.entity.combat.hit.hit
-import content.entity.combat.hit.npcCombatAttack
-import content.entity.combat.npcCombatSwing
 import content.entity.effect.freeze
 import content.entity.effect.frozen
 import content.entity.proj.shoot
-import content.entity.sound.sound
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.mode.move.target.CharacterTargetStrategy
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
+import world.gregs.voidps.engine.entity.character.sound
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.random
 
-@Script
-class SkeletalWyvern {
+class SkeletalWyvern : Script {
 
     val specials = listOf("ice")
 
     init {
-        npcCombatSwing("skeletal_wyvern") { npc ->
-            val canMelee = CharacterTargetStrategy(npc).reached(target)
+        npcCombatSwing("skeletal_wyvern") { target ->
+            val canMelee = CharacterTargetStrategy(this).reached(target)
             when (random.nextInt(if (canMelee) 4 else 3)) {
                 0 -> {
                     // Regular Ranged orb shot
-                    npc.anim("wyvern_ranged")
-                    npc.gfx("wyvern_ranged")
+                    anim("wyvern_ranged")
+                    gfx("wyvern_ranged")
                     target.sound("wyvern_ranged")
-                    nearestTile(npc, target).shoot("wyvern_ranged", target)
-                    npc.hit(target, offensiveType = "range")
+                    nearestTile(this, target).shoot("wyvern_ranged", target)
+                    hit(target, offensiveType = "range")
                 }
-
                 1 -> {
                     // Ice breath
                     val type = specials.random()
-                    npc.anim("wyvern_ice_breath")
-                    npc.gfx("wyvern_ice_breath")
+                    anim("wyvern_ice_breath")
+                    gfx("wyvern_ice_breath")
                     target.sound("wyvern_ice_breath")
-                    nearestTile(npc, target).shoot("wyvern_ice_breath$type", target)
+                    nearestTile(this, target).shoot("wyvern_ice_breath$type", target)
                     // Always apply hit splash visual
                     target.gfx("wyvern_ice_breath_hit")
-                    npc.hit(target, offensiveType = "icy_breath", spell = "ice", special = true)
+                    hit(target, offensiveType = "icy_breath", spell = "ice", special = true)
                 }
-
                 2 -> {
                     // Melee tail whip
-                    npc.anim("wyvern_tail_whip")
+                    anim("wyvern_tail_whip")
                     target.sound("wyvern_tail_whip")
-                    npc.hit(target, offensiveType = "melee")
+                    hit(target, offensiveType = "melee")
                 }
-
                 3 -> {
                     // Melee orb melee variant (if seen in video)
-                    npc.anim("skeletal_wyvern_defend")
-                    npc.gfx("wyvern_ranged")
+                    anim("skeletal_wyvern_defend")
+                    gfx("wyvern_ranged")
                     target.sound("wyvern_ranged")
-                    npc.hit(target, offensiveType = "melee")
+                    hit(target, offensiveType = "melee")
                 }
             }
         }
 
-        npcCombatAttack("skeletal_wyvern") { npc ->
+        npcCombatAttack("skeletal_wyvern") { (target, _, _, _, spell, special) ->
             if (spell == "ice" && special) {
                 val hasShield = hasSpecificWyvernShield(target)
                 val shouldFreeze = if (hasShield) {
                     random.nextInt(7) == 0 // 1/7 chance with proper shield
                 } else {
-                    Hit.success(npc, target, "magic", Item.EMPTY, false)
+                    Hit.success(this, target, "magic", Item.EMPTY, false)
                 }
 
                 if (shouldFreeze && !target.frozen) {

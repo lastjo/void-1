@@ -10,14 +10,14 @@ import content.entity.gfx.areaGfx
 import content.entity.player.inv.item.tradeable
 import content.entity.player.kept.ItemsKeptOnDeath
 import content.entity.proj.shoot
-import content.entity.sound.jingle
 import content.skill.prayer.getActivePrayerVarKey
 import content.skill.prayer.praying
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.data.Settings
 import world.gregs.voidps.engine.data.definition.EnumDefinitions
 import world.gregs.voidps.engine.entity.character.Character
+import world.gregs.voidps.engine.entity.character.jingle
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Player
@@ -27,7 +27,6 @@ import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
 import world.gregs.voidps.engine.event.AuditLog
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.*
 import world.gregs.voidps.engine.map.Spiral
@@ -36,8 +35,7 @@ import world.gregs.voidps.type.Direction
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.random
 
-@Script
-class PlayerDeath : Api {
+class PlayerDeath : Script {
 
     val floorItems: FloorItems by inject()
     val enums: EnumDefinitions by inject()
@@ -49,41 +47,39 @@ class PlayerDeath : Api {
     val npcs: NPCs by inject()
 
     init {
-        playerDeath { player ->
-            player.dead = true
-            player.strongQueue("death") {
-                player.steps.clear()
-                val dealer = player.damageDealers.maxByOrNull { it.value }
+        playerDeath { onDeath ->
+            dead = true
+            strongQueue("death") {
+                steps.clear()
+                val dealer = damageDealers.maxByOrNull { it.value }
                 val killer = dealer?.key
-                AuditLog.event(player, "died", player.tile, killer)
+                AuditLog.event(player, "died", tile, killer)
                 while (true) {
-                    player.instructions.tryReceive().getOrNull() ?: break
+                    instructions.tryReceive().getOrNull() ?: break
                 }
-                val tile = player.tile.copy()
-                val wilderness = player.inWilderness
+                val tile = tile.copy()
+                val wilderness = inWilderness
                 retribution(player)
                 wrath(player)
-                player.message("Oh dear, you are dead!")
-                player.anim("human_death")
+                message("Oh dear, you are dead!")
+                anim("human_death")
                 delay(5)
-                val after = AfterDeath()
-                player.emit(after)
-                player.clearAnim()
-                player.attackers.clear()
-                player.damageDealers.clear()
-                player.jingle("death")
-                player.timers.stopAll()
-                player.softTimers.stopAll()
-                player.clear(player.getActivePrayerVarKey())
-                if (after.dropItems) {
+                clearAnim()
+                attackers.clear()
+                damageDealers.clear()
+                jingle("death")
+                timers.stopAll()
+                softTimers.stopAll()
+                clear(getActivePrayerVarKey())
+                if (onDeath.dropItems) {
                     dropItems(player, killer, tile, wilderness)
                 }
-                player.levels.clear()
-                if (after.teleport) {
-                    player.tele(respawnTile)
+                levels.clear()
+                if (onDeath.teleport) {
+                    tele(respawnTile)
                 }
-                player.face(Direction.SOUTH, update = false)
-                player.dead = false
+                face(Direction.SOUTH, update = false)
+                dead = false
             }
         }
     }

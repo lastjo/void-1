@@ -1,75 +1,71 @@
 package content.entity.player.modal.book
 
-import content.entity.player.inv.inventoryOption
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.ui.Interfaces
 import world.gregs.voidps.engine.client.ui.close
-import world.gregs.voidps.engine.client.ui.dialogue.ContinueDialogue
-import world.gregs.voidps.engine.client.ui.dialogue.continueDialogue
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
-import world.gregs.voidps.engine.client.ui.event.interfaceRefresh
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 
-@Script
-class BookPages {
+class BookPages : Script {
 
     val books: Books by inject()
 
-    val turnRight: suspend ContinueDialogue.(Player) -> Unit = { player ->
-        player.inc("book_page")
-        player.close(id)
-        player.open(id)
-    }
-    val turnLeft: suspend ContinueDialogue.(Player) -> Unit = { player ->
-        player.dec("book_page")
-        player.close(id)
-        player.open(id)
-    }
-
     init {
-        inventoryOption("Read") {
-            player.openBook(item.def.getOrNull("book") ?: return@inventoryOption)
+        itemOption("Read") { (item) ->
+            openBook(item.def.getOrNull("book") ?: return@itemOption)
         }
 
-        interfaceRefresh("book", "book_long", "book_indexed") { player ->
-            refreshBook(player, id)
+        interfaceRefresh("book,book_long,book_indexed") { id ->
+            refreshBook(this, id)
         }
 
-        continueDialogue("book", "turn_page_right", handler = turnRight)
+        continueDialogue("book:turn_page_right", ::turnRight)
+        continueDialogue("book_long:turn_page_right", ::turnRight)
+        continueDialogue("book_indexed:turn_page_right", ::turnRight)
 
-        continueDialogue("book_long", "turn_page_right", handler = turnRight)
+        continueDialogue("book:turn_page_left", ::turnLeft)
+        continueDialogue("book_long:turn_page_left", ::turnLeft)
+        continueDialogue("book_indexed:turn_page_left", ::turnLeft)
 
-        continueDialogue("book_indexed", "turn_page_right", handler = turnRight)
-
-        continueDialogue("book", "turn_page_left", handler = turnLeft)
-
-        continueDialogue("book_long", "turn_page_left", handler = turnLeft)
-
-        continueDialogue("book_indexed", "turn_page_left", handler = turnLeft)
-
-        continueDialogue("book_indexed", "index") { player ->
-            player["book_page"] = 0
-            player.close(id)
-            player.open(id)
+        continueDialogue("book_indexed:index") {
+            set("book_page", 0)
+            val type = it.substringAfter(":")
+            close(type)
+            open(type)
         }
 
-        continueDialogue("book_indexed", "line_click*") { player ->
-            val name: String = player["book"] ?: return@continueDialogue
+        continueDialogue("book_indexed:line_click*") {
+            val name: String = get("book") ?: return@continueDialogue
             val pages = books.get(name)
             val indices = pages.first()
+            val component = it.substringAfter(":")
             val index = component.removePrefix("line_click").toInt() - 1
             val selected = indices[index]
-            val page = pages.indexOfFirst { it.contains("<navy>$selected") }
-            player["book_page"] = page
-            player.close(id)
-            player.open(id)
+            val page = pages.indexOfFirst { page -> page.contains("<navy>$selected") }
+            val id = it.substringBefore(":")
+            set("book_page", page)
+            close(id)
+            open(id)
         }
 
-        interfaceClose("book") { player ->
-            player.clearAnim()
+        interfaceClosed("book") {
+            clearAnim()
         }
+    }
+
+    fun turnRight(player: Player, id: String) {
+        player.inc("book_page")
+        val type = id.substringBefore(":")
+        player.close(type)
+        player.open(type)
+    }
+
+    fun turnLeft(player: Player, id: String) {
+        player.dec("book_page")
+        val type = id.substringBefore(":")
+        player.close(type)
+        player.open(type)
     }
 
     fun refreshBook(player: Player, book: String) {

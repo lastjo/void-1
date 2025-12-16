@@ -14,7 +14,6 @@ import world.gregs.voidps.engine.entity.item.floor.ItemSpawns
 import world.gregs.voidps.engine.entity.item.floor.loadItemSpawns
 import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.entity.obj.loadObjectSpawns
-import world.gregs.voidps.engine.event.EventDispatcher
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.timer.TimerQueue
 import world.gregs.voidps.engine.timer.Timers
@@ -24,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap
 const val MAX_PLAYERS = 0x800 // 2048
 const val MAX_NPCS = 0x8000 // 32768
 
-object World : Entity, VariableStore, EventDispatcher, Runnable, KoinComponent {
+object World : Entity, VariableStore, Runnable, KoinComponent {
     override var tile = Tile.EMPTY
 
     override val variables = Variables(this)
@@ -37,7 +36,7 @@ object World : Entity, VariableStore, EventDispatcher, Runnable, KoinComponent {
         loadItemSpawns(get<FloorItems>(), get<ItemSpawns>(), files.list(Settings["spawns.items"]), get())
         loadObjectSpawns(get<GameObjects>(), files.list(Settings["spawns.objects"]), get())
         loadNpcSpawns(get<NPCs>(), files.list(Settings["spawns.npcs"]), get())
-        Spawn.worldSpawn(files)
+        Spawn.world(files)
     }
 
     val timers: Timers = TimerQueue(this)
@@ -81,6 +80,6 @@ object World : Entity, VariableStore, EventDispatcher, Runnable, KoinComponent {
     }
 
     fun shutdown() {
-        emit(Despawn)
+        Despawn.world()
     }
 }

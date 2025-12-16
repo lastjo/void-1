@@ -3,23 +3,16 @@ package content.area.asgarnia.falador
 import content.entity.effect.transform
 import content.entity.player.dialogue.*
 import content.entity.player.dialogue.type.*
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.ui.closeMenu
 import world.gregs.voidps.engine.client.ui.dialogue.talkWith
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.data.definition.EnumDefinitions
-import world.gregs.voidps.engine.entity.Id
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.NPCOption
 import world.gregs.voidps.engine.entity.character.npc.NPCs
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.notEnough
 import world.gregs.voidps.engine.entity.character.player.flagAppearance
 import world.gregs.voidps.engine.entity.character.player.male
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.holdsItem
 import world.gregs.voidps.engine.inv.inventory
@@ -33,13 +26,16 @@ import world.gregs.voidps.network.login.protocol.visual.update.player.BodyPart
 import world.gregs.voidps.type.random
 import java.util.concurrent.TimeUnit
 
-@Script
-class MakeoverMage : Api {
+class MakeoverMage : Script {
 
     val enums: EnumDefinitions by inject()
     val npcs: NPCs by inject()
 
     init {
+        npcSpawn("makeover_mage*") {
+            softTimers.start("makeover")
+        }
+
         npcOperate("Talk-to", "makeover_mage*") {
             npc<Pleased>("Hello there! I am known as the Makeover Mage! I have spent many years researching magicks that can change your physical appearance.")
             npc<Pleased>("I call it a 'makeover'. Would you like me to perform my magicks on you?")
@@ -56,41 +52,41 @@ class MakeoverMage : Api {
             openDressingRoom("skin_colour")
         }
 
-        interfaceClose("skin_colour") { player ->
-            player.softTimers.stop("dressing_room")
+        interfaceClosed("skin_colour") {
+            softTimers.stop("dressing_room")
         }
 
-        interfaceOpen("skin_colour") { player ->
-            player["makeover_female"] = !player.male
-            player["makeover_colour_skin"] = player.body.getColour(BodyColour.Skin)
-            player.interfaces.sendText(id, "confirm", "CONFIRM")
+        interfaceOpened("skin_colour") { id ->
+            set("makeover_female", !male)
+            set("makeover_colour_skin", body.getColour(BodyColour.Skin))
+            interfaces.sendText(id, "confirm", "CONFIRM")
         }
 
-        interfaceOption("Select Female", "female", "skin_colour") {
-            player["makeover_female"] = true
-            player.sendVariable("makeover_colour_skin")
+        interfaceOption("Select Female", "skin_colour:female") {
+            set("makeover_female", true)
+            sendVariable("makeover_colour_skin")
         }
 
-        interfaceOption("Select Male", "male", "skin_colour") {
-            player["makeover_female"] = false
-            player.sendVariable("makeover_colour_skin")
+        interfaceOption("Select Male", "skin_colour:male") {
+            set("makeover_female", false)
+            sendVariable("makeover_colour_skin")
         }
 
-        interfaceOption(component = "colour_*", id = "skin_colour") {
-            player["makeover_colour_skin"] = enums.get("character_skin").getInt(component.removePrefix("colour_").toInt())
+        interfaceOption(id = "skin_colour:colour_*") {
+            set("makeover_colour_skin", enums.get("character_skin").getInt(it.component.removePrefix("colour_").toInt()))
         }
 
-        interfaceOption("Confirm", "confirm", "skin_colour") {
-            val male = !player["makeover_female", false]
-            val changed = player.body.getColour(BodyColour.Skin) != player["makeover_colour_skin", 0] || player.body.male != male
-            player.body.setColour(BodyColour.Skin, player["makeover_colour_skin", 0])
-            if (player.body.male != male) {
-                swapSex(player, male)
+        interfaceOption("Confirm", "skin_colour:confirm") {
+            val male = !get("makeover_female", false)
+            val changed = body.getColour(BodyColour.Skin) != get("makeover_colour_skin", 0) || body.male != male
+            body.setColour(BodyColour.Skin, get("makeover_colour_skin", 0))
+            if (body.male != male) {
+                swapSex(this, male)
             }
-            player.flagAppearance()
-            player.closeMenu()
-            val mage = npcs[player.tile.regionLevel].first { it.id.startsWith("makeover_mage") }
-            player.talkWith(mage)
+            flagAppearance()
+            closeMenu()
+            val mage = npcs[tile.regionLevel].first { it.id.startsWith("makeover_mage") }
+            talkWith(mage)
             if (!changed) {
                 npc<Quiz>("That is no different from what you already have. I guess I shouldn't charge you if I'm not changing anything.")
                 return@interfaceOption
@@ -117,13 +113,12 @@ class MakeoverMage : Api {
             }
             player<Quiz>("Uh, thanks, I guess.")
         }
+
+        npcTimerStart("makeover") { TimeUnit.SECONDS.toTicks(250) }
+        npcTimerTick("makeover", ::makeover)
     }
 
-    @Timer("makeover")
-    override fun start(npc: NPC, timer: String, restart: Boolean): Int = TimeUnit.SECONDS.toTicks(250)
-
-    @Timer("makeover")
-    override fun tick(npc: NPC, timer: String): Int {
+    fun makeover(npc: NPC): Int {
         val current: String = npc["transform_id", "makeover_mage_male"]
         val toFemale = current == "makeover_mage_male"
         npc.transform(if (toFemale) "makeover_mage_female" else "makeover_mage_male")
@@ -135,12 +130,7 @@ class MakeoverMage : Api {
         return Timer.CONTINUE
     }
 
-    @Id("makeover_mage*")
-    override fun spawn(npc: NPC) {
-        npc.softTimers.start("makeover")
-    }
-
-    suspend fun ChoiceBuilder<NPCOption<Player>>.more(): Unit = option<Quiz>("Tell me more about this 'makeover'.") {
+    fun ChoiceOption.more(): Unit = option<Quiz>("Tell me more about this 'makeover'.") {
         npc<Happy>("Why, of course! Basically, and I will explain this so that you understand it correctly,")
         npc<Happy>("I use my secret magical technique to melt your body down into a puddle of its elements.")
         npc<Happy>("When I have broken down all components of your body, I then rebuild it into the form I am thinking of.")
@@ -150,7 +140,7 @@ class MakeoverMage : Api {
         whatDoYouSay()
     }
 
-    suspend fun NPCOption<Player>.whatDoYouSay() {
+    suspend fun Player.whatDoYouSay() {
         npc<Uncertain>("So, what do you say? Feel like a change?")
         choice {
             start()
@@ -158,32 +148,32 @@ class MakeoverMage : Api {
         }
     }
 
-    suspend fun ChoiceBuilder<NPCOption<Player>>.start(): Unit = option<Talk>("Sure, do it.") {
+    fun ChoiceOption.start(): Unit = option<Talk>("Sure, do it.") {
         npc<Happy>("You, of course, agree that if by some accident you are turned into a frog you have no rights for compensation or refund.")
         openDressingRoom("skin_colour")
     }
 
-    suspend fun ChoiceBuilder<NPCOption<Player>>.exit(): Unit = option("No, thanks.") {
+    fun ChoiceOption.exit(): Unit = option("No, thanks.") {
         player<Frustrated>("No, thanks. I'm happy as I am.")
         npc<Sad>("Ehhh..suit yourself.")
     }
 
-    suspend fun ChoiceBuilder<NPCOption<Player>>.amulet(): Unit = option<Pleased>("Cool amulet! Can I have one?") {
+    fun ChoiceOption.amulet(): Unit = option<Pleased>("Cool amulet! Can I have one?") {
         val cost = 100
         npc<Talk>("No problem, but please remember that the amulet I will sell you is only a copy of my own. It contains no magical powers and, as such, will only cost you $cost coins.")
-        if (!player.holdsItem("coins", cost)) {
+        if (!holdsItem("coins", cost)) {
             player<Upset>("Oh, I don't have enough money for that.")
             return@option
         }
         choice {
             option<Happy>("Sure, here you go.") {
-                player.inventory.transaction {
+                inventory.transaction {
                     remove("coins", cost)
                     add("yin_yang_amulet")
                 }
-                when (player.inventory.transaction.error) {
+                when (inventory.transaction.error) {
                     TransactionError.None -> item("yin_yang_amulet", 300, "You receive an amulet in exchange for $cost coins")
-                    is TransactionError.Deficient -> player.notEnough("coins")
+                    is TransactionError.Deficient -> notEnough("coins")
                     is TransactionError.Full -> {
                         npc<Quiz>("Um...you don't seem to have room to take the amulet. Maybe you should buy it some other time.")
                         player<Talk>("Oh yeah, that's true.")
@@ -198,7 +188,7 @@ class MakeoverMage : Api {
         }
     }
 
-    suspend fun NPCOption<Player>.explain() {
+    suspend fun Player.explain() {
         npc<Pleased>("I can alter your physical form if you wish. Would you like me to perform my magicks on you?")
         choice {
             more()
@@ -207,7 +197,7 @@ class MakeoverMage : Api {
         }
     }
 
-    suspend fun ChoiceBuilder<NPCOption<Player>>.colour(): Unit = option<Pleased>("Can you make me a different colour?") {
+    fun ChoiceOption.colour(): Unit = option<Pleased>("Can you make me a different colour?") {
         npc<Happy>("Why, of course! I have a wide array of colours for you to choose from.")
         whatDoYouSay()
     }

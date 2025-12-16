@@ -7,35 +7,30 @@ import content.entity.player.dialogue.Neutral
 import content.entity.player.dialogue.Shifty
 import content.entity.player.dialogue.type.item
 import content.entity.player.dialogue.type.player
-import content.entity.sound.sound
 import content.quest.quest
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interact.itemOnObjectOperate
-import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.entity.character.sound
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.replace
 
-@Script
-class VarrockPalaceDrain : Api {
+class VarrockPalaceDrain : Script {
 
     val logger = InlineLogger()
 
-    override fun spawn(player: Player) {
-        if (player["demon_slayer_drain_dislodged", false]) {
-            player.sendVariable("demon_slayer_drain_dislodged")
-        }
-    }
-
     init {
+        playerSpawn {
+            if (get("demon_slayer_drain_dislodged", false)) {
+                sendVariable("demon_slayer_drain_dislodged")
+            }
+        }
+
         objectOperate("Search", "varrock_palace_drain") {
-            player.anim("climb_down")
-            if (player["demon_slayer_drain_dislodged", false] || player.ownsItem("silverlight_key_sir_prysin")) {
-                player.message("Nothing interesting seems to have been dropped down here today.")
-            } else if (player.quest("demon_slayer") == "unstarted") {
+            anim("climb_down")
+            if (get("demon_slayer_drain_dislodged", false) || ownsItem("silverlight_key_sir_prysin")) {
+                message("Nothing interesting seems to have been dropped down here today.")
+            } else if (quest("demon_slayer") == "unstarted") {
                 player<Shifty>("This is the drainpipe running from the kitchen sink to the sewer. I can see a key just inside the drain.")
             } else {
                 player<Neutral>("That must be the key Sir Prysin dropped.")
@@ -43,7 +38,7 @@ class VarrockPalaceDrain : Api {
             }
         }
 
-        itemOnObjectOperate("*of_water", "varrock_palace_drain") {
+        itemOnObjectOperate("*of_water", "varrock_palace_drain") { (_, item, slot) ->
             val replacement = when {
                 item.id.startsWith("bucket_of") -> "bucket"
                 item.id.startsWith("jug_of") -> "jug"
@@ -51,17 +46,17 @@ class VarrockPalaceDrain : Api {
                 item.id.startsWith("bowl_of") -> "bowl"
                 else -> return@itemOnObjectOperate
             }
-            if (!player.inventory.replace(itemSlot, item.id, replacement)) {
+            if (!inventory.replace(slot, item.id, replacement)) {
                 logger.warn { "Issue emptying ${item.id} -> $replacement" }
                 return@itemOnObjectOperate
             }
-            player["demon_slayer_drain_dislodged"] = true
-            player.message("You pour the liquid down the drain.")
-            player.anim("toss_water")
-            player.gfx("toss_water")
-            player.sound("demon_slayer_drain")
-            player.sound("demon_slayer_key_fall")
-            if (player.quest("demon_slayer") == "key_hunt") {
+            set("demon_slayer_drain_dislodged", true)
+            message("You pour the liquid down the drain.")
+            anim("toss_water")
+            gfx("toss_water")
+            sound("demon_slayer_drain")
+            sound("demon_slayer_key_fall")
+            if (quest("demon_slayer") == "key_hunt") {
                 player<Happy>("OK, I think I've washed the key down into the sewer. I'd better go down and get it!")
             } else {
                 player<Shifty>("I think that dislodged something from the drain. It's probably gone down to the sewers below.")
@@ -69,8 +64,8 @@ class VarrockPalaceDrain : Api {
         }
 
         objectOperate("Take", "demon_slayer_rusty_key") {
-            if (player.inventory.add("silverlight_key_sir_prysin")) {
-                player["demon_slayer_drain_dislodged"] = false
+            if (inventory.add("silverlight_key_sir_prysin")) {
+                set("demon_slayer_drain_dislodged", false)
                 item("silverlight_key_sir_prysin", 400, "You pick up an old rusty key.")
             }
         }

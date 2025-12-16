@@ -1,25 +1,19 @@
 package content.area.troll_country.god_wars_dungeon.saradomin
 
 import content.entity.combat.hit.hit
-import content.entity.combat.hit.npcCombatAttack
-import content.entity.combat.npcCombatSwing
 import content.entity.gfx.areaGfx
-import content.entity.sound.areaSound
-import content.entity.sound.sound
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
-import world.gregs.voidps.engine.entity.Id
+import world.gregs.voidps.engine.entity.character.areaSound
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Players
-import world.gregs.voidps.engine.entity.npcDespawn
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.entity.character.sound
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.random
 
-@Script
-class CommanderZilyana : Api {
+class CommanderZilyana : Script {
 
     val players: Players by inject()
     val areas: AreaDefinitions by inject()
@@ -29,36 +23,35 @@ class CommanderZilyana : Api {
     var bree: NPC? = null
     var growler: NPC? = null
 
-    @Id("commander_zilyana")
-    override fun spawn(npc: NPC) {
-        if (starlight == null) {
-            starlight = npcs.add("starlight", Tile(2903, 5260))
-        }
-        if (bree == null) {
-            bree = npcs.add("bree", Tile(2902, 5270))
-        }
-        if (growler == null) {
-            growler = npcs.add("growler", Tile(2898, 5262))
-        }
-    }
-
     init {
-        npcCombatSwing("commander_zilyana") { npc ->
+        npcSpawn("commander_zilyana") {
+            if (starlight == null) {
+                starlight = npcs.add("starlight", Tile(2903, 5260))
+            }
+            if (bree == null) {
+                bree = npcs.add("bree", Tile(2902, 5270))
+            }
+            if (growler == null) {
+                growler = npcs.add("growler", Tile(2898, 5262))
+            }
+        }
+
+        npcCombatSwing("commander_zilyana") { target ->
             when (random.nextInt(2)) {
                 0 -> { // Magic
-                    npc.anim("commander_zilyana_magic")
+                    anim("commander_zilyana_magic")
                     areaSound("commander_zilyana_magic", target.tile, delay = 1)
                     val targets = players.filter { it.tile in areas["saradomin_chamber"] }
-                    for (target in targets) {
-                        val hit = npc.hit(target, offensiveType = "magic")
+                    for (t in targets) {
+                        val hit = hit(t, offensiveType = "magic")
                         if (hit > 0) {
-                            target.gfx("commander_zilyana_magic_strike")
+                            t.gfx("commander_zilyana_magic_strike")
                         }
                     }
                 }
                 else -> { // Melee
                     target.sound("commander_zilyana_attack")
-                    npc.hit(target, offensiveType = "melee")
+                    hit(target, offensiveType = "melee")
                 }
             }
         }
@@ -75,7 +68,7 @@ class CommanderZilyana : Api {
             growler = null
         }
 
-        npcCombatAttack("commander_zilyana") {
+        npcCombatAttack("commander_zilyana") { (target, damage, type) ->
             if (type == "magic") {
                 if (damage > 0) {
                     areaSound("commander_zilyana_magic_impact", target.tile)

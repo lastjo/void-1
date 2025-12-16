@@ -4,9 +4,9 @@ import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.makeAmount
 import net.pearx.kasechange.toSentenceCase
 import world.gregs.voidps.engine.GameLoop
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.closeDialogue
-import world.gregs.voidps.engine.client.ui.interact.itemOnObjectOperate
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.data.definition.data.Uncooked
 import world.gregs.voidps.engine.entity.character.player.Player
@@ -20,7 +20,6 @@ import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.GameObjects
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
@@ -28,8 +27,7 @@ import world.gregs.voidps.engine.inv.replace
 import world.gregs.voidps.engine.queue.weakQueue
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 
-@Script
-class Cooking {
+class Cooking : Script {
 
     val definitions: ItemDefinitions by inject()
     val objects: GameObjects by inject()
@@ -37,7 +35,7 @@ class Cooking {
     val GameObject.cookingRange: Boolean get() = id.startsWith("cooking_range")
 
     init {
-        itemOnObjectOperate(objects = setOf("fire_*", "cooking_range*")) {
+        itemOnObjectOperate(obj = "fire_*,cooking_range*") { (target, item) ->
             val start = GameLoop.tick
             var sinew = false
             if (item.id == "raw_beef" && target.id.startsWith("cooking_range")) {
@@ -52,19 +50,19 @@ class Cooking {
                 item.def
             }
             val cooking: Uncooked = definition.getOrNull("cooking") ?: return@itemOnObjectOperate
-            var amount = player.inventory.count(item.id)
+            var amount = inventory.count(item.id)
             if (amount != 1) {
                 amount = makeAmount(
                     listOf(item.id),
                     type = cooking.type.toSentenceCase(),
-                    maximum = player.inventory.count(item.id),
+                    maximum = inventory.count(item.id),
                     text = "How many would you like to ${cooking.type}?",
                 ).second
             }
             val offset = (4 - (GameLoop.tick - start)).coerceAtLeast(0)
-            player.closeDialogue()
-            player.softTimers.start("cooking")
-            player.cook(item, amount, target, cooking, offset)
+            closeDialogue()
+            softTimers.start("cooking")
+            cook(item, amount, target, cooking, offset)
         }
     }
 

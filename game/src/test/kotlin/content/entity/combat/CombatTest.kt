@@ -2,7 +2,6 @@ package content.entity.combat
 
 import FakeRandom
 import WorldTest
-import content.entity.combat.hit.npcCombatDamage
 import content.entity.player.effect.skull
 import equipItem
 import interfaceOption
@@ -12,6 +11,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import playerOption
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.entity.character.player.appearance
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.level.Levels
@@ -111,7 +111,7 @@ internal class CombatTest : WorldTest() {
         assertEquals(emptyTile, player.tile)
         assertTrue(player.equipment[EquipSlot.Ammo.index].amount < 100)
         assertTrue(drops.any { it.id == "bones" })
-        assertTrue(floorItems[emptyTile.addY(3)].any { it.id == "rune_arrow" })
+        assertTrue(floorItems[emptyTile.addY(4)].any { it.id == "rune_arrow" })
         assertTrue(player.experience.get(Skill.Ranged) > EXPERIENCE)
         assertTrue(player.experience.get(Skill.Defence) > EXPERIENCE)
         assertTrue(player.inventory.count("rune_arrow") < 100)
@@ -120,8 +120,12 @@ internal class CombatTest : WorldTest() {
     @Test
     fun `Dragon dagger special attack`() {
         var hits = 0
-        npcCombatDamage {
-            hits++
+        object : Script {
+            init {
+                npcCombatDamage {
+                    hits++
+                }
+            }
         }
         val player = createPlayer(emptyTile)
         player.experience.set(Skill.Attack, EXPERIENCE)

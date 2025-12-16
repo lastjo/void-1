@@ -1,25 +1,22 @@
 package content.area.misthalin.draynor_village
 
+import world.gregs.voidps.engine.Script
+import world.gregs.voidps.engine.client.instruction.handle.interactPlayer
 import world.gregs.voidps.engine.client.variable.hasClock
-import world.gregs.voidps.engine.entity.character.mode.interact.Interact
-import world.gregs.voidps.engine.entity.character.npc.hunt.huntPlayer
-import world.gregs.voidps.engine.entity.character.player.PlayerOption
-import world.gregs.voidps.engine.event.Script
 
-@Script
-class DraynorGuards {
+class DraynorGuards : Script {
     init {
-        huntPlayer("guard_ardougne", "guarding") { npc ->
+        huntPlayer("guard_ardougne", "guarding") { target ->
             if (target.hasClock("thieving")) {
-                npc.say("Hey, what do you think you are doing!")
-                npc.mode = Interact(npc, target, PlayerOption(npc, target, "Attack"))
+                say("Hey, what do you think you are doing!")
+                interactPlayer(target, "Attack")
             }
         }
 
-        huntPlayer("knight_of_ardougne", "guarding") { npc ->
+        huntPlayer("knight_of_ardougne", "guarding") { target ->
             if (target.hasClock("thieving") && target["stall_level", 0] >= 20) {
-                npc.say("Hey, what do you think you are doing!")
-                npc.mode = Interact(npc, target, PlayerOption(npc, target, "Attack"))
+                say("Hey, what do you think you are doing!")
+                interactPlayer(target, "Attack")
             }
         }
     }

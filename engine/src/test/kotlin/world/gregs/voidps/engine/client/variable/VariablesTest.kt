@@ -1,13 +1,12 @@
 package world.gregs.voidps.engine.client.variable
 
 import io.mockk.*
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import world.gregs.voidps.engine.data.config.VariableDefinition
 import world.gregs.voidps.engine.data.definition.VariableDefinitions
-import world.gregs.voidps.engine.dispatch.ListDispatcher
-import world.gregs.voidps.engine.dispatch.MapDispatcher
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.network.client.Client
 
@@ -19,7 +18,7 @@ internal class VariablesTest {
     private lateinit var player: Player
     private lateinit var client: Client
     private lateinit var map: MutableMap<String, Any>
-    private lateinit var varSet: VariableSet
+    private lateinit var calls: MutableList<Pair<Any?, Any?>>
 
     private val id = 0
     private val default = "First"
@@ -43,13 +42,23 @@ internal class VariablesTest {
         every { definitions.get(KEY) } returns variable
         variables.definitions = definitions
         variables.client = client
-        val dispatcher = MapDispatcher<VariableSet>()
-        varSet = spyk(object : VariableSet {
-            override fun variableSet(player: Player, key: String, from: Any?, to: Any?) {
+        calls = mutableListOf()
+        object : VariableApi {
+            init {
+                variableSet { id, from, to ->
+                    assertEquals(player, player)
+                    assertEquals(KEY, id)
+                    calls.add(from to to)
+                }
             }
-        })
-        dispatcher.instances["*"] = mutableListOf(varSet)
-        VariableSet.playerDispatcher = dispatcher
+        }
+        mockkObject(VariableApi)
+    }
+
+    @AfterEach
+    fun teardown() {
+        VariableApi.close()
+        unmockkObject(VariableApi)
     }
 
     @Test
@@ -63,8 +72,8 @@ internal class VariablesTest {
         assertEquals(42, map[KEY])
         verify {
             variables.send(any())
-            varSet.variableSet(player, KEY, 1, 42)
         }
+        assertEquals(1 to 42, calls.first())
     }
 
     @Test
@@ -134,7 +143,7 @@ internal class VariablesTest {
         assertEquals(arrayListOf("First"), map[KEY])
         verify {
             variables.send(KEY)
-            player.emit(VariableBitAdded(KEY, "First"))
+            VariableApi.add(player, KEY, "First")
         }
     }
 
@@ -150,7 +159,7 @@ internal class VariablesTest {
         assertEquals(arrayListOf("First", "Second"), map[KEY])
         verify {
             variables.send(KEY)
-            player.emit(VariableBitAdded(KEY, "Second"))
+            VariableApi.add(player, KEY, "Second")
         }
     }
 
@@ -192,7 +201,7 @@ internal class VariablesTest {
         assertEquals(emptyList<Any>(), map[KEY])
         verify {
             variables.send(KEY)
-            player.emit(VariableBitRemoved(KEY, "First"))
+            VariableApi.remove(player, KEY, "First")
         }
     }
 
@@ -234,8 +243,8 @@ internal class VariablesTest {
         assertNull(map[KEY])
         verifyOrder {
             variables.send(KEY)
-            varSet.variableSet(player, KEY, arrayListOf("Third"), null)
         }
+        assertEquals(arrayListOf("Third") to null, calls.first())
     }
 
     companion object {

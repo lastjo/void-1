@@ -1,16 +1,13 @@
 package content.area.wilderness
 
 import content.entity.player.dialogue.*
-import content.entity.player.dialogue.type.PlayerChoice
+import content.entity.player.dialogue.type.ChoiceOption
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
-import world.gregs.voidps.engine.suspend.SuspendableContext
 
-@Script
-class GoblinMusician {
+class GoblinMusician : Script {
 
     init {
         npcOperate("Talk-to", "goblin_musician") {
@@ -18,7 +15,7 @@ class GoblinMusician {
         }
     }
 
-    suspend fun SuspendableContext<Player>.choice() {
+    suspend fun Player.choice() {
         choice {
             option<Quiz>("Who are you?") {
                 npc<Happy>("Me? Thump-Thump. Me make thump-thumps with thump-thump drum. Other goblins listen.")
@@ -31,7 +28,7 @@ class GoblinMusician {
         }
     }
 
-    suspend fun SuspendableContext<Player>.resting() {
+    suspend fun Player.resting() {
         choice("Can I ask you some questions about resting?") {
             option<Quiz>("How does resting work?") {
                 npc<Neutral>("You stoopid. Goblin sit down, goblin rest, goblin feel better.")
@@ -49,7 +46,7 @@ class GoblinMusician {
         }
     }
 
-    suspend fun PlayerChoice.exit(): Unit = option<Quiz>("That's all for now.") {
+    fun ChoiceOption.exit(): Unit = option<Quiz>("That's all for now.") {
         npc<Happy>("You listen to boom boom. Good!")
     }
 }

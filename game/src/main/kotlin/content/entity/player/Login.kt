@@ -1,26 +1,25 @@
 package content.entity.player
 
 import content.bot.isBot
-import world.gregs.voidps.engine.Api
-import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.entity.character.player.flagAppearance
 import world.gregs.voidps.engine.entity.character.player.flagMovementType
 import world.gregs.voidps.engine.entity.character.player.flagTemporaryMoveType
-import world.gregs.voidps.engine.event.Script
 
-@Script
-class Login : Api {
+class Login : Script {
 
-    override fun spawn(player: Player) {
-        if (player.isBot) {
-            return
+    init {
+        playerSpawn {
+            if (isBot) {
+                return@playerSpawn
+            }
+            options.send(2)
+            options.send(4)
+            options.send(7)
+            flagTemporaryMoveType()
+            flagMovementType()
+            flagAppearance()
+            clearFace()
         }
-        player.options.send(2)
-        player.options.send(4)
-        player.options.send(7)
-        player.flagTemporaryMoveType()
-        player.flagMovementType()
-        player.flagAppearance()
-        player.clearFace()
     }
 }

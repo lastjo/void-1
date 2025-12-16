@@ -2,30 +2,32 @@ package content.skill.constitution.drink
 
 import content.entity.player.effect.antifire
 import content.entity.player.effect.superAntifire
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.timer.*
 
-@Script
-class Antifire : Api {
+class Antifire : Script {
 
-    override fun spawn(player: Player) {
-        if (player.antifire) {
-            player.timers.restart("fire_resistance")
+    init {
+        playerSpawn {
+            if (antifire) {
+                timers.restart("fire_resistance")
+            }
+            if (superAntifire) {
+                timers.restart("fire_immunity")
+            }
         }
-        if (player.superAntifire) {
-            player.timers.restart("fire_immunity")
-        }
+
+        timerStart("fire_resistance") { 30 }
+        timerStart("fire_immunity") { 20 }
+        timerTick("fire_resistance") { decrease(this, "antifire") }
+        timerTick("fire_immunity") { decrease(this, "super_antifire") }
+        timerStop("fire_resistance,fire_immunity", ::clear)
     }
 
-    @Timer("fire_resistance,fire_immunity")
-    override fun start(player: Player, timer: String, restart: Boolean): Int = if (timer == "fire_resistance") 30 else 20
-
-    @Timer("fire_resistance,fire_immunity")
-    override fun tick(player: Player, timer: String): Int {
-        val remaining = player.dec(if (timer == "fire_immunity") "super_antifire" else "antifire", 0)
+    fun decrease(player: Player, key: String): Int {
+        val remaining = player.dec(key, 0)
         if (remaining <= 0) {
             return Timer.CANCEL
         }
@@ -35,8 +37,7 @@ class Antifire : Api {
         return Timer.CONTINUE
     }
 
-    @Timer("fire_resistance,fire_immunity")
-    override fun stop(player: Player, timer: String, logout: Boolean) {
+    fun clear(player: Player, logout: Boolean) {
         player.message("<dark_red>Your resistance to dragonfire has run out.")
         player["antifire"] = 0
         player["super_antifire"] = 0

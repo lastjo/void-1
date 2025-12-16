@@ -1,22 +1,24 @@
 package content.social.assist
 
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.ui.closeMenu
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.temporaryMoveType
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.network.login.protocol.visual.update.player.MoveType
 import world.gregs.voidps.type.Tile
 
-@Script
-class AssistArea : Api {
+class AssistArea : Script {
 
     val maximumTileDistance = 20
+
+    init {
+        moved(::leavingArea)
+    }
 
     /**
      * Player leaving assistance range
      */
-    override fun move(player: Player, from: Tile, to: Tile) {
+    fun leavingArea(player: Player, from: Tile) {
         if (!player.contains("assistant")) {
             return
         }

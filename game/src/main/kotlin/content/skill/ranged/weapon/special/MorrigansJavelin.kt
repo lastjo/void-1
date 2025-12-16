@@ -2,24 +2,41 @@ package content.skill.ranged.weapon.special
 
 import content.entity.combat.hit.directHit
 import content.entity.combat.hit.hit
-import content.entity.player.combat.special.specialAttack
 import content.entity.proj.shoot
 import content.skill.ranged.ammo
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.timer.*
 
-@Script
-class MorrigansJavelin : Api {
+class MorrigansJavelin : Script {
 
-    @Timer("phantom_strike")
-    override fun start(character: Character, timer: String, restart: Boolean): Int = 3
+    init {
+        specialAttack("phantom_strike") { target, id ->
+            val ammo = ammo
+            anim("throw_javelin")
+            gfx("${ammo}_special")
+            val time = shoot(id = ammo, target = target)
+            val damage = hit(target, delay = time)
+            if (damage != -1) {
+                target["phantom_damage"] = damage
+                target["phantom"] = this
+                target["phantom_first"] = "start"
+                target.softTimers.start(id)
+            }
+        }
+        timerStart("phantom_strike", ::start)
+        npcTimerStart("phantom_strike", ::start)
+        timerTick("phantom_strike", ::tick)
+        npcTimerTick("phantom_strike", ::tick)
+        timerStop("phantom_strike", ::stop)
+        npcTimerStop("phantom_strike", ::stop)
+    }
 
-    @Timer("phantom_strike")
-    override fun tick(character: Character, timer: String): Int {
+    fun start(character: Character, restart: Boolean): Int = 3
+
+    fun tick(character: Character): Int {
         val remaining = character["phantom_damage", 0]
         val damage = remaining.coerceAtMost(50)
         if (remaining - damage <= 0) {
@@ -32,26 +49,9 @@ class MorrigansJavelin : Api {
         return Timer.CONTINUE
     }
 
-    @Timer("phantom_strike")
-    override fun stop(character: Character, timer: String, logout: Boolean) {
+    fun stop(character: Character, logout: Boolean) {
         character.clear("phantom")
         character.clear("phantom_damage")
         character.clear("phantom_first")
-    }
-
-    init {
-        specialAttack("phantom_strike") { player ->
-            val ammo = player.ammo
-            player.anim("throw_javelin")
-            player.gfx("${ammo}_special")
-            val time = player.shoot(id = ammo, target = target)
-            val damage = player.hit(target, delay = time)
-            if (damage != -1) {
-                target["phantom_damage"] = damage
-                target["phantom"] = player
-                target["phantom_first"] = "start"
-                target.softTimers.start(id)
-            }
-        }
     }
 }

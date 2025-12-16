@@ -1,47 +1,46 @@
 package content.area.kandarin.ourania
 
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.data.definition.PatrolDefinitions
-import world.gregs.voidps.engine.entity.Id
 import world.gregs.voidps.engine.entity.character.mode.Patrol
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.obj.GameObjects
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.queue.strongQueue
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.equals
 
-@Script
-class ZamorakCrafter : Api {
+class ZamorakCrafter : Script {
 
     val objects: GameObjects by inject()
     val patrols: PatrolDefinitions by inject()
 
-    @Id("zamorak_crafter*")
-    override fun spawn(npc: NPC) {
-        val patrol = patrols.get(if (npc.id == "zamorak_crafter_start") "zamorak_crafter_to_altar" else "zamorak_crafter_to_bank")
-        npc.mode = Patrol(npc, patrol.waypoints)
+    init {
+        npcSpawn("zamorak_crafter*") {
+            val patrol = patrols.get(if (id == "zamorak_crafter_start") "zamorak_crafter_to_altar" else "zamorak_crafter_to_bank")
+            mode = Patrol(this, patrol.waypoints)
+        }
+
+        npcMoved("zamorak_crafter*", ::checkRoute)
     }
 
-    @Id("zamorak_crafter*")
-    override fun move(npc: NPC, from: Tile, to: Tile) {
-        if (to.equals(3314, 4811)) {
+    fun checkRoute(npc: NPC, from: Tile) {
+        if (npc.tile.equals(3314, 4811)) {
             npc.strongQueue("craft_runes") {
                 val altar = objects[Tile(3315, 4810), "ourania_altar"]
                 if (altar != null) {
                     npc.face(altar)
                 }
-                delay(4)
+                npc.delay(4)
                 npc.anim("bind_runes")
                 npc.gfx("bind_runes")
-                delay(4)
+                npc.delay(4)
                 val patrol = patrols.get("zamorak_crafter_to_bank")
                 npc.mode = Patrol(npc, patrol.waypoints)
             }
-        } else if (to.equals(3270, 4856)) {
+        } else if (npc.tile.equals(3270, 4856)) {
             npc.strongQueue("return_home") {
-                delay(5)
+                npc.delay(5)
                 val patrol = patrols.get("zamorak_crafter_to_altar")
                 npc.mode = Patrol(npc, patrol.waypoints)
             }

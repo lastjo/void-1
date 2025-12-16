@@ -1,50 +1,45 @@
 package content.entity.player.kept
 
 import content.entity.player.effect.skulled
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.sendScript
 import world.gregs.voidps.engine.client.ui.chat.toInt
-import world.gregs.voidps.engine.client.ui.event.interfaceRefresh
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.definition.EnumDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.timer.Timer
 
-@Script
-class ItemsKeptOnDeathScreen : Api {
+class ItemsKeptOnDeathScreen : Script {
 
     val enums: EnumDefinitions by inject()
 
-    @Timer("skull")
-    override fun start(player: Player, timer: String, restart: Boolean): Int {
-        if (player.interfaces.contains("items_kept_on_death")) {
-            player.open("items_kept_on_death", close = true)
-        }
-        return Timer.CONTINUE
-    }
-
-    @Timer("skull")
-    override fun stop(player: Player, timer: String, logout: Boolean) {
-        if (player.interfaces.contains("items_kept_on_death")) {
-            player.open("items_kept_on_death", close = true)
-        }
-    }
-
     init {
-        interfaceRefresh("items_kept_on_death") { player ->
-            val items = ItemsKeptOnDeath.getAllOrdered(player)
-            val savedItems = ItemsKeptOnDeath.kept(player, items, enums)
+        interfaceRefresh("items_kept_on_death") {
+            val items = ItemsKeptOnDeath.getAllOrdered(this)
+            val savedItems = ItemsKeptOnDeath.kept(this, items, enums)
             val carriedWealth = items.sumOf { it.def.cost * it.amount }
             val savedWealth = savedItems.sumOf { it.def.cost * it.amount }
-            player.updateItemsOnDeath(
+            updateItemsOnDeath(
                 savedItems,
                 carriedWealth = carriedWealth,
                 riskedWealth = carriedWealth - savedWealth,
-                skull = player.skulled,
+                skull = skulled,
             )
+        }
+
+        timerStart("skull") {
+            if (interfaces.contains("items_kept_on_death")) {
+                open("items_kept_on_death", close = true)
+            }
+            return@timerStart Timer.CONTINUE
+        }
+
+        timerStop("skull") {
+            if (interfaces.contains("items_kept_on_death")) {
+                open("items_kept_on_death", close = true)
+            }
         }
     }
 

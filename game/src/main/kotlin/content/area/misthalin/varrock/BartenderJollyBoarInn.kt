@@ -8,21 +8,17 @@ import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import content.quest.miniquest.alfred_grimhands_barcrawl.barCrawlDrink
-import content.quest.miniquest.alfred_grimhands_barcrawl.barCrawlFilter
+import content.quest.miniquest.alfred_grimhands_barcrawl.onBarCrawl
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interact.itemOnNPCOperate
-import world.gregs.voidps.engine.entity.character.mode.interact.TargetInteraction
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.event.Script
 
-@Script
-class BartenderJollyBoarInn {
+class BartenderJollyBoarInn : Script {
 
     init {
-        npcOperate("Talk-to", "bartender_jolly_boar_inn") {
+        npcOperate("Talk-to", "bartender_jolly_boar_inn") { (target) ->
             npc<Quiz>("Can I help you?")
             choice {
                 option("I'll have a beer please.") {
@@ -30,7 +26,7 @@ class BartenderJollyBoarInn {
                     npc<Talk>("Ok, that'll be two coins please.")
                     if (buy("beer", 2)) {
                         player<Talk>("Ok, here you go.")
-                        player.message("You buy a pint of beer!")
+                        message("You buy a pint of beer!")
                     }
                 }
                 option<Talk>("Any hints where I can go adventuring?") {
@@ -43,27 +39,30 @@ class BartenderJollyBoarInn {
                     npc<Talk>("I'm not that well up on the gossip out here. I've heard that the bartender in the Blue Moon Inn has gone a little crazy, he keeps claiming he is part of something called an online game.")
                     player<Talk>("What that means, I don't know. That's probably old news by now though.")
                 }
-                option("I'm doing Alfred Grimhand's barcrawl.", filter = barCrawlFilter) {
-                    barCrawl()
+                if (onBarCrawl(target)) {
+                    option("I'm doing Alfred Grimhand's barcrawl.") {
+                        barCrawl(target)
+                    }
                 }
             }
         }
 
-        itemOnNPCOperate("barcrawl_card", "bartender_jolly_boar_inn") {
-            if (player.containsVarbit("barcrawl_signatures", "olde_suspiciouse")) {
+        itemOnNPCOperate("barcrawl_card", "bartender_jolly_boar_inn") { (target) ->
+            if (containsVarbit("barcrawl_signatures", "olde_suspiciouse")) {
                 return@itemOnNPCOperate
             }
-            barCrawl()
+            barCrawl(target)
         }
     }
 
-    suspend fun TargetInteraction<Player, NPC>.barCrawl() = barCrawlDrink(
+    suspend fun Player.barCrawl(target: NPC) = barCrawlDrink(
+        target,
         effects = {
-            player.levels.drain(Skill.Attack, 6)
-            player.levels.drain(Skill.Defence, 6)
-            player.levels.drain(Skill.Mining, 5)
-            player.levels.drain(Skill.Crafting, 6)
-            player.levels.drain(Skill.Magic, 6)
+            levels.drain(Skill.Attack, 6)
+            levels.drain(Skill.Defence, 6)
+            levels.drain(Skill.Mining, 5)
+            levels.drain(Skill.Crafting, 6)
+            levels.drain(Skill.Magic, 6)
             player<Drunk>("Thanksh very mush...")
         },
     )

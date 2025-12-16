@@ -3,37 +3,31 @@ package content.skill.slayer
 import content.entity.player.dialogue.Happy
 import content.entity.player.dialogue.Quiz
 import content.entity.player.dialogue.Talk
-import content.entity.player.dialogue.type.ChoiceBuilder
+import content.entity.player.dialogue.type.ChoiceOption
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
-import content.entity.player.inv.inventoryItem
 import net.pearx.kasechange.toLowerSpaceCase
 import net.pearx.kasechange.toSentenceCase
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.data.definition.SlayerTaskDefinitions
-import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.character.player.name
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
-import world.gregs.voidps.engine.queue.Action
 import world.gregs.voidps.engine.queue.strongQueue
 
-@Script
-class EnchantedGem : Api {
+class EnchantedGem : Script {
 
     val slayerDefinitions: SlayerTaskDefinitions by inject()
 
-    override fun spawn(player: Player) {
-        player.sendVariable("slayer_count")
-        player.sendVariable("slayer_target")
-    }
-
     init {
-        inventoryItem("Activate", "enchanted_gem") {
-            player.strongQueue("enchanted_gem_activate") {
-                val master = player.slayerMaster
-                npc<Happy>(master, "Hello there ${player.name}, what can I help you with?")
+        playerSpawn {
+            sendVariable("slayer_count")
+            sendVariable("slayer_target")
+        }
+
+        itemOption("Activate", "enchanted_gem") {
+            strongQueue("enchanted_gem_activate") {
+                val master = slayerMaster
+                npc<Happy>(master, "Hello there $name, what can I help you with?")
                 choice {
                     howAmIDoing()
                     whoAreYou()
@@ -44,21 +38,21 @@ class EnchantedGem : Api {
             }
         }
 
-        inventoryItem("Kills-left", "enchanted_gem") {
-            if (player.slayerTask == "nothing") {
-                player.message("") // TODO
+        itemOption("Kills-left", "enchanted_gem") {
+            if (slayerTask == "nothing") {
+                message("") // TODO
             } else {
-                player.message("Your current assignment is: ${player.slayerTask.lowercase()}; only ${player.slayerTaskRemaining} more to go.")
+                message("Your current assignment is: ${slayerTask.lowercase()}; only $slayerTaskRemaining more to go.")
             }
         }
     }
 
-    fun ChoiceBuilder<Action<Player>>.howAmIDoing() {
+    fun ChoiceOption.howAmIDoing() {
         option<Quiz>("How am I doing so far?") {
-            if (player.slayerTask == "nothing") {
+            if (slayerTask == "nothing") {
                 // TODO
             } else {
-                npc<Happy>(player.slayerMaster, "You're currently assigned to kill ${player.slayerTask.toLowerSpaceCase()}; only ${player.slayerTaskRemaining} more to go. Your reward point tally is ${player.slayerPoints}.")
+                npc<Happy>(slayerMaster, "You're currently assigned to kill ${slayerTask.toLowerSpaceCase()}; only $slayerTaskRemaining more to go. Your reward point tally is $slayerPoints.")
             }
             choice {
                 whoAreYou()
@@ -69,9 +63,9 @@ class EnchantedGem : Api {
         }
     }
 
-    fun ChoiceBuilder<Action<Player>>.whoAreYou() {
+    fun ChoiceOption.whoAreYou() {
         option<Quiz>("Who are you?") {
-            npc<Talk>(player.slayerMaster, "My name's ${player.slayerMaster.toSentenceCase()}, I'm the Slayer Master best able to train you.")
+            npc<Talk>(slayerMaster, "My name's ${slayerMaster.toSentenceCase()}, I'm the Slayer Master best able to train you.")
             choice {
                 howAmIDoing()
                 whereAreYou()
@@ -81,9 +75,9 @@ class EnchantedGem : Api {
         }
     }
 
-    fun ChoiceBuilder<Action<Player>>.whereAreYou() {
+    fun ChoiceOption.whereAreYou() {
         option<Quiz>("Where are you?") {
-            val location = when (player.slayerMaster) {
+            val location = when (slayerMaster) {
                 "turael" -> "Burthorpe"
                 "duradel" -> "Shilo Village"
                 else -> "unknown"
@@ -98,10 +92,10 @@ class EnchantedGem : Api {
         }
     }
 
-    fun ChoiceBuilder<Action<Player>>.anyTips() {
+    fun ChoiceOption.anyTips() {
         option<Quiz>("Got any tips for me?") {
-            val definition = slayerDefinitions.get(player.slayerMaster)[player.slayerTask]!!
-            npc<Talk>(player.slayerMaster, definition.tip)
+            val definition = slayerDefinitions.get(slayerMaster)[slayerTask]!!
+            npc<Talk>(slayerMaster, definition.tip)
             choice {
                 howAmIDoing()
                 whoAreYou()

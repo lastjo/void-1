@@ -3,11 +3,9 @@ package content.area.kandarin.catherby
 import content.entity.npc.shop.openShop
 import content.entity.player.dialogue.*
 import content.entity.player.dialogue.type.*
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.Script
 
-@Script
-class CandleMaker {
+class CandleMaker : Script {
 
     init {
         npcOperate("Talk-to", "candle_maker") {
@@ -16,7 +14,7 @@ class CandleMaker {
             choice {
                 option("Yes please.") {
                     player<Talk>("Yes please.")
-                    player.openShop("candle_shop")
+                    openShop("candle_shop")
                 }
 
                 option("No thank you.") {

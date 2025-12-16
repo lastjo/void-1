@@ -7,21 +7,16 @@ import content.entity.player.dialogue.type.item
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import content.quest.quest
-import world.gregs.voidps.engine.client.ui.interact.itemOnNPCOperate
-import world.gregs.voidps.engine.entity.character.npc.NPCOption
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
-import world.gregs.voidps.engine.suspend.SuspendableContext
 
-@Script
-class Jethick {
+class Jethick : Script {
 
     init {
         npcOperate("Talk-to", "jethick") {
-            when (player.quest("plague_city")) {
+            when (quest("plague_city")) {
                 "grill_open" -> grillOpen()
                 "spoken_to_jethick" -> {
                     npc<Neutral>("Hello. We don't get many newcomers around here.")
@@ -32,7 +27,7 @@ class Jethick {
         }
 
         itemOnNPCOperate("*", "jethick") {
-            if (item.id == "picture_plague_city") {
+            if (it.item.id == "picture_plague_city") {
                 player<Talk>("Hi, I'm looking for a woman from East Ardougne.")
                 showPicture()
             } else {
@@ -41,9 +36,9 @@ class Jethick {
         }
     }
 
-    suspend fun NPCOption<Player>.grillOpen() {
-        if (player["plaguecity_picture_asked", false]) {
-            player["plague_city"] = "spoken_to_jethick"
+    suspend fun Player.grillOpen() {
+        if (get("plaguecity_picture_asked", false)) {
+            set("plague_city", "spoken_to_jethick")
             spokenToJethick()
         } else {
             npc<Neutral>("Hello, I don't recognise you. We don't get many newcomers around here.")
@@ -61,34 +56,34 @@ class Jethick {
         }
     }
 
-    private suspend fun NPCOption<Player>.looking() {
+    private suspend fun Player.looking() {
         player<Happy>("I'm looking for a woman from East Ardougne called Elena.")
         npc<Uncertain>("East Ardougnian women are easier to find in East Ardougne. Not many would come to West Ardougne to find one. Although the name is familiar, what does she look like?")
-        if (player.inventory.contains("picture_plague_city")) {
+        if (inventory.contains("picture_plague_city")) {
             showPicture()
         } else {
             player<Uncertain>("Um... brown hair... in her twenties...")
-            if (!player["plaguecity_picture_asked", false]) {
-                player["plaguecity_picture_asked"] = true
+            if (!get("plaguecity_picture_asked", false)) {
+                set("plaguecity_picture_asked", true)
             }
             npc<Uncertain>("Hmmm, that doesn't narrow it down a huge amount... I'll need to know more than that, or see a picture?")
         }
     }
 
-    private suspend fun SuspendableContext<Player>.showPicture() {
+    private suspend fun Player.showPicture() {
         item("picture_plague_city", 600, "You show Jethick the picture.")
         npc<Neutral>("Ah yes. She came over here to help the plague victims. I think she is staying over with the Rehnison family.")
-        player["plague_city"] = "spoken_to_jethick"
+        set("plague_city", "spoken_to_jethick")
         spokenToJethick()
     }
 
-    suspend fun SuspendableContext<Player>.spokenToJethick() {
+    suspend fun Player.spokenToJethick() {
         npc<Neutral>("They live in the small timbered building at the far north side of town. I've not seen her around here in a while, mind.")
-        if (!player.ownsItem("book_turnip_growing_for_beginners")) {
+        if (!ownsItem("book_turnip_growing_for_beginners")) {
             npc<Neutral>("I don't suppose you could run me a little errand while you're over there? I borrowed this book from them, can you return it?")
             choice {
                 option<Happy>("Yes, I'll return it for you.") {
-                    if (player.inventory.add("book_turnip_growing_for_beginners")) {
+                    if (inventory.add("book_turnip_growing_for_beginners")) {
                         item("book_turnip_growing_for_beginners", 500, "Jethick gives you a book.")
                     } else {
                         item("book_turnip_growing_for_beginners", 500, "Jethick shows you the book, but you don't have room to take it.")

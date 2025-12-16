@@ -5,31 +5,25 @@ import content.entity.npc.shop.openShop
 import content.entity.player.dialogue.Happy
 import content.entity.player.dialogue.Quiz
 import content.entity.player.dialogue.Talk
-import content.entity.player.dialogue.type.PlayerChoice
+import content.entity.player.dialogue.type.ChoiceOption
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.modal.CharacterStyle.onStyle
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.ui.closeDialogue
 import world.gregs.voidps.engine.client.ui.closeMenu
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.interfaceOption
 import world.gregs.voidps.engine.data.definition.EnumDefinitions
-import world.gregs.voidps.engine.entity.character.mode.interact.Interaction
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.BodyParts
 import world.gregs.voidps.engine.entity.character.player.flagAppearance
 import world.gregs.voidps.engine.entity.character.player.male
 import world.gregs.voidps.engine.entity.character.player.sex
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.equipment
 import world.gregs.voidps.network.login.protocol.visual.update.player.BodyColour
 import world.gregs.voidps.network.login.protocol.visual.update.player.BodyPart
 
-@Script
-class Thessalia {
+class Thessalia : Script {
 
     val enums: EnumDefinitions by inject()
 
@@ -61,77 +55,77 @@ class Thessalia {
             startMakeover()
         }
 
-        interfaceOpen("thessalias_makeovers") { player ->
-            player.interfaces.sendText(id, "confirm_text", "Change")
-            player.interfaceOptions.unlockAll(id, "styles", 0 until 100)
-            player.interfaceOptions.unlockAll(id, "colours", 0 until enums.get("colour_top").length * 2)
-            player["makeover_top"] = player.body.getLook(BodyPart.Chest)
-            player["makeover_arms"] = player.body.getLook(BodyPart.Arms)
-            player["makeover_wrists"] = player.body.getLook(BodyPart.Hands)
-            player["makeover_legs"] = player.body.getLook(BodyPart.Legs)
-            player["makeover_colour_top"] = player.body.getColour(BodyColour.Top)
-            player["makeover_colour_legs"] = player.body.getColour(BodyColour.Legs)
+        interfaceOpened("thessalias_makeovers") { id ->
+            interfaces.sendText(id, "confirm_text", "Change")
+            interfaceOptions.unlockAll(id, "styles", 0 until 100)
+            interfaceOptions.unlockAll(id, "colours", 0 until enums.get("colour_top").length * 2)
+            set("makeover_top", body.getLook(BodyPart.Chest))
+            set("makeover_arms", body.getLook(BodyPart.Arms))
+            set("makeover_wrists", body.getLook(BodyPart.Hands))
+            set("makeover_legs", body.getLook(BodyPart.Legs))
+            set("makeover_colour_top", body.getColour(BodyColour.Top))
+            set("makeover_colour_legs", body.getColour(BodyColour.Legs))
         }
 
-        interfaceClose("thessalias_makeovers") { player ->
-            player.softTimers.stop("dressing_room")
+        interfaceClosed("thessalias_makeovers") {
+            softTimers.stop("dressing_room")
         }
 
-        interfaceOption(component = "part_*", id = "thessalias_makeovers") {
-            player["makeover_body_part"] = component.removePrefix("part_")
+        interfaceOption(id = "thessalias_makeovers:part_*") {
+            set("makeover_body_part", it.component.removePrefix("part_"))
         }
 
-        interfaceOption(component = "styles", id = "thessalias_makeovers") {
-            val part = player["makeover_body_part", "top"]
-            val previous = fullBodyChest(player["makeover_top", 0], player.male)
+        interfaceOption(id = "thessalias_makeovers:styles") { (_, itemSlot) ->
+            val part = get("makeover_body_part", "top")
+            val previous = fullBodyChest(get("makeover_top", 0), male)
             if ((part == "arms" || part == "wrists") && previous) {
                 return@interfaceOption
             }
-            val value = enums.get("look_${part}_${player.sex}").getInt(itemSlot / 2)
+            val value = enums.get("look_${part}_$sex").getInt(itemSlot / 2)
             if (part == "top") {
-                val current = fullBodyChest(value, player.male)
+                val current = fullBodyChest(value, male)
                 if (previous && !current) {
-                    setDefaultArms(player)
+                    setDefaultArms(this)
                 } else if (current) {
                     onStyle(value) {
-                        player["makeover_arms"] = it.get<Int>("character_style_arms")
-                        player["makeover_wrists"] = it.get<Int>("character_style_wrists")
+                        set("makeover_arms", it.get<Int>("character_style_arms"))
+                        set("makeover_wrists", it.get<Int>("character_style_wrists"))
                     }
                 }
             }
-            player["makeover_$part"] = value
+            set("makeover_$part", value)
         }
 
-        interfaceOption(component = "colours", id = "thessalias_makeovers") {
-            val part = player["makeover_body_part", "top"]
+        interfaceOption(id = "thessalias_makeovers:colours") { (_, itemSlot) ->
+            val part = get("makeover_body_part", "top")
             val colour = when (part) {
                 "top", "arms" -> "makeover_colour_top"
                 "legs" -> "makeover_colour_legs"
                 else -> return@interfaceOption
             }
-            player[colour] = enums.get("colour_$part").getInt(itemSlot / 2)
+            set(colour, enums.get("colour_$part").getInt(itemSlot / 2))
         }
 
-        interfaceOption("Confirm", "confirm", "thessalias_makeovers") {
-            player.body.setLook(BodyPart.Chest, player["makeover_top", 0])
-            player.body.setLook(BodyPart.Arms, player["makeover_arms", 0])
-            player.body.setLook(BodyPart.Hands, player["makeover_wrists", 0])
-            player.body.setLook(BodyPart.Legs, player["makeover_legs", 0])
-            player.body.setColour(BodyColour.Top, player["makeover_colour_top", 0])
-            player.body.setColour(BodyColour.Legs, player["makeover_colour_legs", 0])
-            player.flagAppearance()
-            player.closeMenu()
+        interfaceOption("Confirm", "thessalias_makeovers:confirm") {
+            body.setLook(BodyPart.Chest, get("makeover_top", 0))
+            body.setLook(BodyPart.Arms, get("makeover_arms", 0))
+            body.setLook(BodyPart.Hands, get("makeover_wrists", 0))
+            body.setLook(BodyPart.Legs, get("makeover_legs", 0))
+            body.setColour(BodyColour.Top, get("makeover_colour_top", 0))
+            body.setColour(BodyColour.Legs, get("makeover_colour_legs", 0))
+            flagAppearance()
+            closeMenu()
             npc<Happy>("thessalia", "A marvellous choice. You look splendid!")
         }
     }
 
-    fun PlayerChoice.openShop(): Unit = option("I'd just like to buy some clothes.") {
-        player.openShop("thessalias_fine_clothes")
+    fun ChoiceOption.openShop(): Unit = option("I'd just like to buy some clothes.") {
+        openShop("thessalias_fine_clothes")
     }
 
-    suspend fun Interaction<Player>.startMakeover() {
-        player.closeDialogue()
-        if (!player.equipment.isEmpty()) {
+    suspend fun Player.startMakeover() {
+        closeDialogue()
+        if (!equipment.isEmpty()) {
             npc<Talk>("You're not able to try on my clothes with all that armour. Take it off and then speak to me again.")
             return
         }

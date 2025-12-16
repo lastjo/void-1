@@ -1,6 +1,5 @@
 package content.area.kandarin.tree_gnome_stronghold
 
-import content.entity.obj.objTeleportTakeOff
 import content.entity.player.dialogue.Happy
 import content.entity.player.dialogue.Quiz
 import content.entity.player.dialogue.Talk
@@ -9,16 +8,15 @@ import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import content.quest.questCompleted
 import content.skill.runecrafting.EssenceMine
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.entity.character.player.Teleport
 
-@Script
-class Brimstail {
+class Brimstail : Script {
 
     init {
-        npcOperate("Talk-to", "brimstail") {
-            if (!player.questCompleted("rune_mysteries")) {
+        npcOperate("Talk-to", "brimstail") { (target) ->
+            if (!questCompleted("rune_mysteries")) {
                 npc<Happy>("Hello adventurer, what can I do for you?")
                 player<Quiz>("What's that cute creature wandering around?")
                 npc<Talk>("Oh Izzie? He's my pet.")
@@ -33,7 +31,7 @@ class Brimstail {
             choice {
                 option<Quiz>("Can you teleport me to the Rune Essence Mine?") {
                     npc<Happy>("Okay. Hold onto your hat!")
-                    EssenceMine.teleport(target, player)
+                    EssenceMine.teleport(target, this)
                 }
                 option<Happy>("Nothing for now, thanks!") {
                     npc<Happy>("Okay. Just remember that a friend of a wizard is a friend of mine!")
@@ -41,20 +39,22 @@ class Brimstail {
             }
         }
 
-        npcOperate("Teleport", "brimstail") {
-            if (player.questCompleted("rune_mysteries")) {
-                EssenceMine.teleport(target, player)
+        npcOperate("Teleport", "brimstail") { (target) ->
+            if (questCompleted("rune_mysteries")) {
+                EssenceMine.teleport(target, this)
             } else {
-                player.message("You need to have completed the Rune Mysteries Quest to use this feature.")
+                message("You need to have completed the Rune Mysteries Quest to use this feature.")
             }
         }
 
-        objTeleportTakeOff("Enter", "brimstails_cave_entrance") {
-            player.message("You duck down as you enter this small door.")
+        objTeleportTakeOff("Enter", "brimstails_cave_entrance") { _, _ ->
+            message("You duck down as you enter this small door.")
+            Teleport.CONTINUE
         }
 
-        objTeleportTakeOff("Exit", "brimstails_cave_exit_*") {
-            player.message("You crouch your way through a cramped tunnel.")
+        objTeleportTakeOff("Exit", "brimstails_cave_exit_*") { _, _ ->
+            message("You crouch your way through a cramped tunnel.")
+            Teleport.CONTINUE
         }
     }
 }

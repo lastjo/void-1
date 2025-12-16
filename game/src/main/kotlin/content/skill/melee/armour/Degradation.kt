@@ -1,17 +1,14 @@
 package content.skill.melee.armour
 
-import content.entity.combat.hit.combatAttack
-import content.entity.combat.hit.combatDamage
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.variable.hasClock
 import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inv.*
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 
-@Script
-class Degradation {
+class Degradation : Script {
 
     val slots = arrayOf(
         EquipSlot.Hat.index,
@@ -22,28 +19,28 @@ class Degradation {
     )
 
     init {
-        combatDamage { player ->
-            degrade(player)
+        combatDamage {
+            degrade(this)
         }
 
-        combatAttack { player ->
-            degrade(player)
+        combatAttack {
+            degrade(this)
         }
 
-        inventoryChanged { player ->
-            val inventory = player.inventories.inventory(inventory)
-            val degrade: String = fromItem.def.getOrNull("degrade") ?: return@inventoryChanged
-            if (degrade == "destroy" && item.isNotEmpty()) {
-                return@inventoryChanged
+        slotChanged {
+            val inventory = inventories.inventory(it.inventory)
+            val degrade: String = it.fromItem.def.getOrNull("degrade") ?: return@slotChanged
+            if (degrade == "destroy" && it.item.isNotEmpty()) {
+                return@slotChanged
             }
-            if (item.id != degrade) {
-                return@inventoryChanged
+            if (it.item.id != degrade) {
+                return@slotChanged
             }
-            if (inventory.charges(player, fromIndex) != 0) {
-                return@inventoryChanged
+            if (inventory.charges(this, it.fromIndex) != 0) {
+                return@slotChanged
             }
-            val message: String = fromItem.def.getOrNull("degrade_message") ?: return@inventoryChanged
-            player.message(message)
+            val message: String = it.fromItem.def.getOrNull("degrade_message") ?: return@slotChanged
+            message(message)
         }
     }
 

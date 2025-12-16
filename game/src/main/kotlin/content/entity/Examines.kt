@@ -1,43 +1,50 @@
 package content.entity
 
-import content.entity.player.inv.inventoryOption
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.instruction.instruction
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.client.ui.interfaceOption
+import world.gregs.voidps.engine.client.ui.InterfaceOption
 import world.gregs.voidps.engine.data.definition.ItemDefinitions
 import world.gregs.voidps.engine.data.definition.NPCDefinitions
 import world.gregs.voidps.engine.data.definition.ObjectDefinitions
-import world.gregs.voidps.engine.entity.character.npc.npcApproach
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
-import world.gregs.voidps.engine.entity.obj.objectApproach
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.network.client.instruction.ExamineItem
 import world.gregs.voidps.network.client.instruction.ExamineNpc
 import world.gregs.voidps.network.client.instruction.ExamineObject
 
-@Script
-class Examines {
+class Examines : Script {
 
     val itemDefinitions: ItemDefinitions by inject()
     val npcDefinitions: NPCDefinitions by inject()
     val objectDefinitions: ObjectDefinitions by inject()
 
     init {
-        interfaceOption("Examine", id = "*") {
-            player.message(item.def.getOrNull("examine") ?: return@interfaceOption, ChatType.ItemExamine)
+        interfaceOption("Examine", "inventory:inventory", ::examineItem)
+        interfaceOption("Examine", "worn_equipment:item", ::examineItem)
+        interfaceOption("Examine", "bank:inventory", ::examineItem)
+        interfaceOption("Examine", "price_checker:items", ::examineItem)
+        interfaceOption("Examine", "equipment_bonuses:inventory", ::examineItem)
+        interfaceOption("Examine", "trade_main:offer_options", ::examineItem)
+        interfaceOption("Examine", "trade_main:offer_warning", ::examineItem)
+        interfaceOption("Examine<col=FF9040>", "trade_main:other_options", ::examineItem)
+        interfaceOption("Examine", "trade_main:other_warning", ::examineItem)
+        interfaceOption("Examine", "trade_main:loan_item", ::examineItem)
+        interfaceOption("Examine", "trade_main:other_loan_item", ::examineItem)
+        interfaceOption("Examine", "farming_equipment_store_side:*", ::examineItem)
+        interfaceOption("Examine", "farming_equipment_store:*", ::examineItem)
+
+        itemOption("Examine", inventory = "*") { (item) ->
+            message(item.def.getOrNull("examine") ?: return@itemOption, ChatType.ItemExamine)
         }
 
-        inventoryOption("Examine") {
-            player.message(item.def.getOrNull("examine") ?: return@inventoryOption, ChatType.ItemExamine)
+        objectApproach("Examine") { (target) ->
+            message(target.def.getOrNull("examine") ?: return@objectApproach, ChatType.ObjectExamine)
         }
 
-        objectApproach("Examine") {
-            player.message(def.getOrNull("examine") ?: return@objectApproach, ChatType.ObjectExamine)
-        }
-
-        npcApproach("Examine") {
-            player.message(def.getOrNull("examine") ?: return@npcApproach, ChatType.NPCExamine)
+        npcApproach("Examine") { (target) ->
+            message(target.def(this).getOrNull("examine") ?: return@npcApproach, ChatType.NPCExamine)
         }
 
         instruction<ExamineItem> { player ->
@@ -60,5 +67,9 @@ class Examines {
                 player.message(definition["examine"], ChatType.Game)
             }
         }
+    }
+
+    private fun examineItem(player: Player, option: InterfaceOption) {
+        player.message(option.item.def.getOrNull("examine") ?: return, ChatType.ItemExamine)
     }
 }

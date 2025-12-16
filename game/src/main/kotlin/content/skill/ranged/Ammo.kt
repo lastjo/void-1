@@ -5,7 +5,6 @@ import content.entity.combat.hit.directHit
 import content.entity.effect.freeze
 import content.entity.effect.toxin.poison
 import content.entity.player.equip.Equipment
-import content.entity.sound.sound
 import content.skill.slayer.undead
 import org.rsmod.game.pathfinder.flag.CollisionFlag
 import world.gregs.voidps.engine.client.message
@@ -14,6 +13,7 @@ import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
+import world.gregs.voidps.engine.entity.character.sound
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
 import world.gregs.voidps.engine.get
@@ -60,15 +60,13 @@ object Ammo {
     private fun remove(player: Player, target: Character, ammo: String, required: Int, recoverChance: Double, dropChance: Double) {
         val random = random.nextDouble()
         if (random <= recoverChance) return
-        player.softQueue("remove_ammo") {
-            player.equipment.remove(ammo, required)
-            if (!player.equipment.contains(ammo)) {
-                player.message("That was your last one!")
-            }
+        player.equipment.remove(ammo, required)
+        if (!player.equipment.contains(ammo)) {
+            player.message("That was your last one!")
+        }
 
-            if (random > 1.0 - dropChance && !get<Collisions>().check(target.tile.x, target.tile.y, target.tile.level, CollisionFlag.FLOOR)) {
-                get<FloorItems>().add(target.tile, ammo, required, revealTicks = 100, disappearTicks = 200, owner = player)
-            }
+        if (random > 1.0 - dropChance && !get<Collisions>().check(target.tile.x, target.tile.y, target.tile.level, CollisionFlag.FLOOR)) {
+            get<FloorItems>().add(target.tile, ammo, required, revealTicks = 100, disappearTicks = 200, owner = player)
         }
     }
 

@@ -5,7 +5,6 @@ import world.gregs.voidps.engine.client.ui.close
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.suspend.IntSuspension
-import world.gregs.voidps.engine.suspend.SuspendableContext
 
 private val CHOICE_LINE_RANGE = 2..5
 private const val APPROXIMATE_WIDE_TITLE_LENGTH = 30
@@ -22,8 +21,8 @@ private const val APPROXIMATE_WIDE_TITLE_LENGTH = 30
  *      }
  *  }
  */
-suspend fun <T : SuspendableContext<Player>> T.choice(title: String? = null, block: suspend ChoiceBuilder<T>.() -> Unit) {
-    val builder = ChoiceBuilder<T>()
+suspend fun Player.choice(title: String? = null, block: suspend ChoiceOption.() -> Unit) {
+    val builder = ChoiceOption()
     block.invoke(builder)
     val lines = builder.build(this)
     if (lines.size == 1) {
@@ -41,23 +40,23 @@ suspend fun <T : SuspendableContext<Player>> T.choice(title: String? = null, blo
  *     // ...
  *  }
  */
-suspend fun SuspendableContext<Player>.choice(lines: List<String>, title: String? = null): Int {
-    check(lines.size in CHOICE_LINE_RANGE) { "Invalid choice line count ${lines.size} for $player" }
+suspend fun Player.choice(lines: List<String>, title: String? = null): Int {
+    check(lines.size in CHOICE_LINE_RANGE) { "Invalid choice line count ${lines.size} for $this" }
     val question = title?.trimIndent()?.replace("\n", "<br>")
     val multilineTitle = question?.contains("<br>") ?: false
     val multilineOptions = lines.any { isMultiline(it) }
     val id = getChoiceId(multilineTitle, multilineOptions, lines.size)
-    check(player.open(id)) { "Unable to open choice dialogue for $player" }
+    check(open(id)) { "Unable to open choice dialogue for $this" }
     if (question != null) {
         val longestLine = question.split("<br>").maxByOrNull { it.length }?.length ?: 0
         val wide = longestLine > APPROXIMATE_WIDE_TITLE_LENGTH
-        player.interfaces.sendVisibility(id, "wide_swords", wide)
-        player.interfaces.sendVisibility(id, "thin_swords", !wide)
-        player.interfaces.sendText(id, "title", question)
+        interfaces.sendVisibility(id, "wide_swords", wide)
+        interfaces.sendVisibility(id, "thin_swords", !wide)
+        interfaces.sendText(id, "title", question)
     }
-    player.interfaces.sendLines(id, lines)
-    val result = IntSuspension.get(player)
-    player.close(id)
+    interfaces.sendLines(id, lines)
+    val result = IntSuspension.get(this)
+    close(id)
     return result
 }
 

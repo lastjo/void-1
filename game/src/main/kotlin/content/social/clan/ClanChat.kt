@@ -1,7 +1,7 @@
 package content.social.clan
 
 import content.social.friend.*
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.instruction.instruction
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.variable.hasClock
@@ -11,8 +11,6 @@ import world.gregs.voidps.engine.data.definition.AccountDefinitions
 import world.gregs.voidps.engine.entity.character.player.*
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.chat.clan.*
-import world.gregs.voidps.engine.entity.playerDespawn
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.timer.epochSeconds
 import world.gregs.voidps.engine.timer.toTicks
@@ -23,8 +21,7 @@ import world.gregs.voidps.network.login.protocol.encode.appendClanChat
 import world.gregs.voidps.network.login.protocol.encode.updateClanChat
 import java.util.concurrent.TimeUnit
 
-@Script
-class ClanChat : Api {
+class ClanChat : Script {
 
     val accounts: AccountDefinitions by inject()
     val maxMembers = 100
@@ -35,23 +32,23 @@ class ClanChat : Api {
 
     val accountDefinitions: AccountDefinitions by inject()
 
-    override fun spawn(player: Player) {
-        val current = player["clan_chat", ""]
-        if (current.isNotEmpty()) {
-            val account = accountDefinitions.getByAccount(current)
-            joinClan(player, account?.displayName ?: "")
-        }
-        val ownClan = accounts.clan(player.name.lowercase()) ?: return
-        player.ownClan = ownClan
-        ownClan.friends = player.friends
-        ownClan.ignores = player.ignores
-    }
-
     init {
-        playerDespawn { player ->
-            val clan = player.clan ?: return@playerDespawn
-            clan.members.remove(player)
-            updateMembers(player, clan, ClanRank.Anyone)
+        playerSpawn {
+            val current = get("clan_chat", "")
+            if (current.isNotEmpty()) {
+                val account = accountDefinitions.getByAccount(current)
+                joinClan(this, account?.displayName ?: "")
+            }
+            val ownClan = accounts.clan(name.lowercase()) ?: return@playerSpawn
+            this.ownClan = ownClan
+            ownClan.friends = friends
+            ownClan.ignores = ignores
+        }
+
+        playerDespawn {
+            val clan = clan ?: return@playerDespawn
+            clan.members.remove(this)
+            updateMembers(this, clan, ClanRank.Anyone)
         }
 
         instruction<ClanChatKick> { player ->
@@ -78,14 +75,14 @@ class ClanChat : Api {
             }
 
             if (clan.members.contains(target)) {
-                target.emit(LeaveClanChat(forced = true))
+                FriendsList.leaveClan(target, true)
             }
             player.message("Your request to kick/ban this user was successful.", ChatType.ClanChat)
         }
 
         instruction<ClanChatJoin> { player ->
             if (name.isBlank()) {
-                player.emit(LeaveClanChat(forced = false))
+                FriendsList.leaveClan(player, false)
                 return@instruction
             }
             joinClan(player, name)
@@ -131,7 +128,7 @@ class ClanChat : Api {
             if (clan.hasRank(player, ClanRank.Recruit)) {
                 val victim = clan.members.minByOrNull { clan.getRank(it).value }
                 if (victim != null) {
-                    victim.emit(LeaveClanChat(forced = true))
+                    FriendsList.leaveClan(victim, true)
                     space = true
                 }
             }

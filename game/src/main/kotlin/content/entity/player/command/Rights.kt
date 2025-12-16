@@ -1,7 +1,7 @@
 package content.entity.player.command
 
 import net.pearx.kasechange.toSentenceCase
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.command.adminCommand
 import world.gregs.voidps.engine.client.command.commandSuggestion
 import world.gregs.voidps.engine.client.command.stringArg
@@ -14,23 +14,21 @@ import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
 import world.gregs.voidps.engine.entity.character.player.name
 import world.gregs.voidps.engine.entity.character.player.rights
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.engine.inject
 
-@Script
-class Rights : Api {
+class Rights : Script {
 
     val accounts: AccountDefinitions by inject()
 
-    override fun spawn(player: Player) {
-        if (player.name == Settings.getOrNull("development.admin.name") && player.rights != PlayerRights.Admin) {
-            player.rights = PlayerRights.Admin
-            player.message("Rights set to Admin. Please re-log to activate.")
-        }
-    }
-
     init {
+        playerSpawn {
+            if (name == Settings.getOrNull("development.admin.name") && rights != PlayerRights.Admin) {
+                rights = PlayerRights.Admin
+                message("Rights set to Admin. Please re-log to activate.")
+            }
+        }
+
         val rights = PlayerRights.entries.map { it.name }.toSet()
         adminCommand("rights", stringArg("player-name", autofill = accounts.displayNames.keys), stringArg("rights-name", autofill = rights), desc = "Set the rights for another player", handler = ::grant)
         commandSuggestion("rights", "promote")

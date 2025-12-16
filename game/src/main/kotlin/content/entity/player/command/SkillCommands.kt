@@ -3,12 +3,9 @@ package content.entity.player.command
 import content.skill.prayer.PrayerConfigs
 import content.skill.prayer.isCurses
 import net.pearx.kasechange.toSentenceCase
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.clearCamera
-import world.gregs.voidps.engine.client.command.adminCommand
-import world.gregs.voidps.engine.client.command.adminCommands
-import world.gregs.voidps.engine.client.command.command
-import world.gregs.voidps.engine.client.command.intArg
-import world.gregs.voidps.engine.client.command.stringArg
+import world.gregs.voidps.engine.client.command.*
 import world.gregs.voidps.engine.data.definition.AccountDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
@@ -16,13 +13,11 @@ import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.exp.Experience
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level
 import world.gregs.voidps.engine.entity.character.player.skill.level.Levels
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.queue.softQueue
 import kotlin.getValue
 
-@Script
-class SkillCommands {
+class SkillCommands : Script {
 
     val players: Players by inject()
     val accounts: AccountDefinitions by inject()
@@ -43,7 +38,8 @@ class SkillCommands {
             desc = "Set any players skill to a specific level",
             handler = ::set,
         )
-        adminCommands("set_level", self, other)
+        adminCommands("level", self, other)
+        commandSuggestion("level", "set_level")
         adminCommand("reset", stringArg("player-name", "target player (default self)", optional = true, autofill = accounts.displayNames.keys), desc = "Set all skills to level 1", handler = ::reset)
     }
 
@@ -72,11 +68,11 @@ class SkillCommands {
     fun reset(player: Player, args: List<String>) {
         val target = players.find(player, args.getOrNull(0)) ?: return
         for ((index, skill) in Skill.all.withIndex()) {
-            target.experience.set(skill, Experience.defaultExperience[index])
+            target.experience.set(skill, Experience.defaultExperience[index] / 10.0)
             target.levels.set(skill, Levels.defaultLevels[index])
         }
         target[if (target.isCurses()) PrayerConfigs.QUICK_CURSES else PrayerConfigs.QUICK_PRAYERS] = emptyList<Any>()
-        target["xp_counter"] = 0.0
+        target["xp_counter"] = 0
         target.clearCamera()
     }
 }

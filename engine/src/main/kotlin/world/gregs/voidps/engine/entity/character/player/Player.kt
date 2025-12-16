@@ -1,5 +1,6 @@
 package world.gregs.voidps.engine.entity.character.player
 
+import com.github.michaelbull.logging.InlineLogger
 import kotlinx.coroutines.channels.Channel
 import org.rsmod.game.pathfinder.collision.CollisionStrategy
 import org.rsmod.game.pathfinder.flag.CollisionFlag
@@ -14,7 +15,6 @@ import world.gregs.voidps.engine.data.exchange.ExchangeOffer
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
 import world.gregs.voidps.engine.entity.character.mode.Mode
-import world.gregs.voidps.engine.entity.character.mode.move.AreaQueue
 import world.gregs.voidps.engine.entity.character.mode.move.Steps
 import world.gregs.voidps.engine.entity.character.player.chat.clan.ClanRank
 import world.gregs.voidps.engine.entity.character.player.equip.BodyParts
@@ -69,6 +69,9 @@ class Player(
     override var mode: Mode = EmptyMode
         set(value) {
             field.stop(value)
+            if (value !is EmptyMode && get("debug", false)) {
+                logger.debug { "$value" }
+            }
             field = value
             value.start()
         }
@@ -78,7 +81,7 @@ class Player(
     lateinit var interfaces: Interfaces
     lateinit var interfaceOptions: InterfaceOptions
     override lateinit var collision: CollisionStrategy
-    val area: AreaQueue = AreaQueue(this)
+//    val area: AreaQueue = AreaQueue(this)
 
     val networked: Boolean
         get() = client != null && viewport != null
@@ -115,4 +118,8 @@ class Player(
     override fun hashCode(): Int = index
 
     override fun toString(): String = "Player($accountName, tile=$tile)"
+
+    companion object {
+        private val logger = InlineLogger("Player")
+    }
 }

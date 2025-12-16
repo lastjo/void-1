@@ -2,9 +2,10 @@ package world.gregs.voidps.engine.inv
 
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.event.Events
+import world.gregs.voidps.engine.script
 import kotlin.test.assertEquals
 
 class InventorySlotChangedTest {
@@ -16,14 +17,15 @@ class InventorySlotChangedTest {
         inventory = Inventory.debug(1, id = "inventory")
         val dispatcher = Player()
         inventory.transaction.changes.bind(dispatcher)
-        Events.events.clear()
     }
 
     @Test
     fun `Track changes`() {
         var changes = 0
-        inventoryUpdate {
-            changes++
+        script {
+            inventoryUpdated { _, _ ->
+                changes++
+            }
         }
         val manager = inventory.transaction.changes
         manager.track("inventory", 1, Item.EMPTY, 1, Item("item", 1))
@@ -36,10 +38,11 @@ class InventorySlotChangedTest {
     @Test
     fun `Track additions`() {
         var additions = 0
-        itemAdded("coins", inventory = "inventory") {
-            additions++
+        script {
+            itemAdded("coins", inventory = "inventory") {
+                additions++
+            }
         }
-
         val manager = inventory.transaction.changes
         manager.track("", 1, Item.EMPTY, 0, Item("coins", 1))
         manager.send()
@@ -51,10 +54,11 @@ class InventorySlotChangedTest {
     @Test
     fun `Track removals`() {
         var removals = 0
-        itemRemoved("coins", inventory = "inventory") {
-            removals++
+        script {
+            itemRemoved("coins", inventory = "inventory") {
+                removals++
+            }
         }
-
         val manager = inventory.transaction.changes
         manager.track("bank", 1, Item("coins", 1), 0, Item.EMPTY)
         manager.send()
@@ -67,13 +71,14 @@ class InventorySlotChangedTest {
     fun `Replacing identical items counts as both additions and removals`() {
         var additions = 0
         var removals = 0
-        itemAdded("coins", inventory = "inventory") {
-            additions++
+        script {
+            itemAdded("coins", inventory = "inventory") {
+                additions++
+            }
+            itemRemoved("coins", inventory = "inventory") {
+                removals++
+            }
         }
-        itemRemoved("coins", inventory = "inventory") {
-            removals++
-        }
-
         val manager = inventory.transaction.changes
         manager.track("inventory", 1, Item("coins", 1), 0, Item("coins", 1))
         manager.send()

@@ -5,20 +5,15 @@ import content.entity.player.dialogue.Talk
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.social.trade.lend.Loan.getSecondsRemaining
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.ui.dialogue.talkWith
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.Settings
 import world.gregs.voidps.engine.entity.character.npc.NPCs
-import world.gregs.voidps.engine.entity.character.npc.npcApproach
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.event.Context
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
-import world.gregs.voidps.engine.suspend.SuspendableContext
 
-@Script
-class Banker {
+class Banker : Script {
 
     val npcs: NPCs by inject()
 
@@ -26,7 +21,7 @@ class Banker {
         npcApproach("Talk-to", "banker*") {
             approachRange(2)
             npc<Quiz>("Good day. How may I help you?")
-            val loanReturned = getSecondsRemaining(player, "lend_timeout") < 0
+            val loanReturned = getSecondsRemaining(this, "lend_timeout") < 0
             val collection = false
 
             if (loanReturned) {
@@ -37,29 +32,33 @@ class Banker {
             menu()
         }
 
-        objectOperate("Use", "bank_*", arrive = false) {
+        objectOperate("Use", "bank_chest_*") {
+            open("bank")
+        }
+
+        objectOperate("Use", "bank_booth_*", arrive = false) { (target) ->
             val banker = npcs.first { it.def.name == "Banker" }
-            player.talkWith(banker)
+            talkWith(banker)
             menu()
         }
 
         npcApproach("Bank", "banker*") {
             approachRange(2)
-            player.open("bank")
+            open("bank")
         }
 
         npcApproach("Collect", "banker*") {
             approachRange(2)
-            player.open("collection_box")
+            open("collection_box")
         }
     }
 
-    suspend fun SuspendableContext<Player>.menu() {
+    suspend fun Player.menu() {
         choice {
-            option("I'd like to access my bank account, please.", block = { player.open("bank") })
-            option("I'd like to check my PIN settings.", block = { player.open("bank_pin") })
-            option("I'd like to see my collection box.", block = { player.open("collection_box") })
-            option("I'd like to see my Returned Items box.", block = { player.open("returned_items") })
+            option("I'd like to access my bank account, please.", block = { open("bank") })
+            option("I'd like to check my PIN settings.", block = { open("bank_pin") })
+            option("I'd like to see my collection box.", block = { open("collection_box") })
+            option("I'd like to see my Returned Items box.", block = { open("returned_items") })
             option("What is this place?") {
                 npc<Talk>("This is a branch of the Bank of ${Settings["server.name"]}. We have branches in many towns.")
                 choice {
@@ -76,10 +75,10 @@ class Banker {
         }
     }
 
-    fun Context<Player>.achievement() {
-        if (!player["you_can_bank_on_us_task", false]) {
-            player["you_can_bank_on_us_task"] = true
-            player.addVarbit("task_reward_items", "red_dye")
+    fun Player.achievement() {
+        if (!get("you_can_bank_on_us_task", false)) {
+            set("you_can_bank_on_us_task", true)
+            addVarbit("task_reward_items", "red_dye")
         }
     }
 }

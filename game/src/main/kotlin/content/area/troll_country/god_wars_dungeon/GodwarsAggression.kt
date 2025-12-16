@@ -1,95 +1,82 @@
 package content.area.troll_country.god_wars_dungeon
 
 import content.entity.combat.killer
-import content.entity.death.npcDeath
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
+import world.gregs.voidps.engine.client.instruction.handle.interactNpc
+import world.gregs.voidps.engine.client.instruction.handle.interactPlayer
 import world.gregs.voidps.engine.client.ui.close
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
 import world.gregs.voidps.engine.client.ui.open
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
-import world.gregs.voidps.engine.entity.character.mode.interact.Interact
-import world.gregs.voidps.engine.entity.character.mode.move.enterArea
-import world.gregs.voidps.engine.entity.character.mode.move.exitArea
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.NPCOption
-import world.gregs.voidps.engine.entity.character.npc.hunt.huntNPC
-import world.gregs.voidps.engine.entity.character.npc.hunt.huntPlayer
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.character.player.PlayerOption
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.equipment
-import world.gregs.voidps.engine.inv.itemAdded
-import world.gregs.voidps.engine.inv.itemRemoved
 import world.gregs.voidps.type.random
 
-@Script
-class GodwarsAggression : Api {
+class GodwarsAggression : Script {
 
     val areas: AreaDefinitions by inject()
     val dungeon = areas["godwars_dungeon_multi_area"]
 
-    override fun spawn(npc: NPC) {
-        randomHuntMode(npc)
-    }
-
     init {
-        enterArea("godwars_dungeon_multi_area") {
-            player.open("godwars_overlay")
-            player["gods"] = player.equipment.items.mapNotNull { it.def.getOrNull<String>("god") }.toMutableSet()
+        npcSpawn(handler = ::randomHuntMode)
+
+        entered("godwars_dungeon_multi_area") {
+            open("godwars_overlay")
+            set("gods", equipment.items.mapNotNull { it.def.getOrNull<String>("god") }.toMutableSet())
         }
 
-        interfaceOpen("godwars_overlay") { player ->
-            player.sendVariable("armadyl_killcount")
-            player.sendVariable("bandos_killcount")
-            player.sendVariable("saradomin_killcount")
-            player.sendVariable("zamorak_killcount")
-            player.sendVariable("godwars_darkness")
+        interfaceOpened("godwars_overlay") {
+            sendVariable("armadyl_killcount")
+            sendVariable("bandos_killcount")
+            sendVariable("saradomin_killcount")
+            sendVariable("zamorak_killcount")
+            sendVariable("godwars_darkness")
         }
 
-        exitArea("godwars_dungeon_multi_area") {
-            player.close("godwars_overlay")
-            if (logout) {
-                return@exitArea
+        exited("godwars_dungeon_multi_area") {
+            close("godwars_overlay")
+            if (get("logged_out", false)) {
+                return@exited
             }
-            player["godwars_darkness"] = false
-            player.clear("armadyl_killcount")
-            player.clear("bandos_killcount")
-            player.clear("saradomin_killcount")
-            player.clear("zamorak_killcount")
+            set("godwars_darkness", false)
+            clear("armadyl_killcount")
+            clear("bandos_killcount")
+            clear("saradomin_killcount")
+            clear("zamorak_killcount")
         }
 
-        itemAdded(inventory = "worn_equipment") { player ->
+        itemAdded(inventory = "worn_equipment") { (item) ->
             val god = item.def.getOrNull<String>("god") ?: return@itemAdded
-            if (player.tile in dungeon) {
-                player.get<MutableSet<String>>("gods")!!.add(god)
+            if (tile in dungeon) {
+                get<MutableSet<String>>("gods")!!.add(god)
             }
         }
 
-        itemRemoved(inventory = "worn_equipment") { player ->
-            if (player.tile in dungeon) {
-                player["gods"] = player.equipment.items.mapNotNull { it.def.getOrNull<String>("god") }.toMutableSet()
+        itemRemoved(inventory = "worn_equipment") {
+            if (tile in dungeon) {
+                set("gods", equipment.items.mapNotNull { it.def.getOrNull<String>("god") }.toMutableSet())
             }
         }
 
-        huntPlayer(mode = "godwars_aggressive") { npc ->
-            npc.mode = Interact(npc, target, PlayerOption(npc, target, "Attack"))
+        huntPlayer(mode = "godwars_aggressive") { target ->
+            interactPlayer(target, "Attack")
         }
 
-        huntNPC(mode = "zamorak_aggressive") { npc ->
-            npc.mode = Interact(npc, target, NPCOption(npc, target, target.def, "Attack"))
+        huntNPC(mode = "zamorak_aggressive") { target ->
+            interactNpc(target, "Attack")
         }
 
-        huntNPC(mode = "anti_zamorak_aggressive") { npc ->
-            npc.mode = Interact(npc, target, NPCOption(npc, target, target.def, "Attack"))
+        huntNPC(mode = "anti_zamorak_aggressive") { target ->
+            interactNpc(target, "Attack")
         }
 
-        npcDeath { npc ->
-            val killer = npc.killer
+        npcDeath {
+            val killer = killer
             if (killer is NPC) {
-                randomHuntMode(npc)
+                randomHuntMode(this)
             } else if (killer is Player) {
-                val god = npc.def["god", ""]
+                val god = def["god", ""]
                 if (god != "") {
                     killer.inc("${god}_killcount")
                 }

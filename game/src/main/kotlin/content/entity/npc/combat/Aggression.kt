@@ -1,64 +1,60 @@
 package content.entity.npc.combat
 
+import world.gregs.voidps.engine.Script
+import world.gregs.voidps.engine.client.instruction.handle.interactNpc
+import world.gregs.voidps.engine.client.instruction.handle.interactPlayer
 import world.gregs.voidps.engine.data.Settings
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.mode.combat.CombatMovement
 import world.gregs.voidps.engine.entity.character.mode.interact.Interact
 import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.NPCOption
-import world.gregs.voidps.engine.entity.character.npc.hunt.HuntNPC
-import world.gregs.voidps.engine.entity.character.npc.hunt.HuntPlayer
-import world.gregs.voidps.engine.entity.character.npc.hunt.huntNPC
-import world.gregs.voidps.engine.entity.character.npc.hunt.huntPlayer
-import world.gregs.voidps.engine.entity.character.player.PlayerOption
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.inject
 
-@Script
-class Aggression {
+class Aggression : Script {
 
     val areas: AreaDefinitions by inject()
 
-    val playerHandler: suspend HuntPlayer.(npc: NPC) -> Unit = huntPlayer@{ npc ->
-        if (!Settings["world.npcs.aggression", true] || attacking(npc, target)) {
-            return@huntPlayer
-        }
-        if (Settings["world.npcs.safeZone", false] && npc.tile in areas["lumbridge"]) {
-            return@huntPlayer
-        }
-        npc.mode = Interact(npc, target, PlayerOption(npc, target, "Attack"))
-    }
-    val npcHandler: suspend HuntNPC.(npc: NPC) -> Unit = { npc ->
-        if (!attacking(npc, target)) {
-            npc.mode = Interact(npc, target, NPCOption(npc, target, target.def, "Attack"))
-        }
-    }
-
     init {
-        huntPlayer(mode = "aggressive", handler = playerHandler)
+        huntPlayer(mode = "aggressive", handler = ::playerHandler)
 
-        huntPlayer(mode = "aggressive_intolerant", handler = playerHandler)
+        huntPlayer(mode = "aggressive_intolerant", handler = ::playerHandler)
 
-        huntPlayer(mode = "cowardly") { npc ->
-            if (!Settings["world.npcs.aggression", true] || attacking(npc, target)) {
+        huntPlayer(mode = "cowardly") { target ->
+            if (!Settings["world.npcs.aggression", true] || attacking(this, target)) {
                 return@huntPlayer
             }
-            if (Settings["world.npcs.safeZone", false] && npc.tile in areas["lumbridge"]) {
+            if (Settings["world.npcs.safeZone", false] && tile in areas["lumbridge"]) {
                 return@huntPlayer
             }
-            npc.mode = Interact(npc, target, PlayerOption(npc, target, "Attack"))
+            interactPlayer(target, "Attack")
         }
 
-        huntNPC(mode = "aggressive", handler = npcHandler)
+        huntNPC(mode = "aggressive", handler = ::npcHandler)
+        huntNPC(mode = "aggressive_intolerant", handler = ::npcHandler)
 
-        huntNPC(mode = "aggressive_intolerant", handler = npcHandler)
-
-        huntNPC(mode = "cowardly") { npc ->
-            if (attacking(npc, target)) {
+        huntNPC(mode = "cowardly") { target ->
+            if (attacking(this, target)) {
                 return@huntNPC
             }
-            npc.mode = Interact(npc, target, NPCOption(npc, target, target.def, "Attack"))
+            interactNpc(target, "Attack")
+        }
+    }
+
+    fun playerHandler(npc: NPC, target: Player) {
+        if (!Settings["world.npcs.aggression", true] || attacking(npc, target)) {
+            return
+        }
+        if (Settings["world.npcs.safeZone", false] && npc.tile in areas["lumbridge"]) {
+            return
+        }
+        npc.interactPlayer(target, "Attack")
+    }
+
+    fun npcHandler(npc: NPC, target: NPC) {
+        if (!attacking(npc, target)) {
+            npc.interactNpc(target, "Attack")
         }
     }
 

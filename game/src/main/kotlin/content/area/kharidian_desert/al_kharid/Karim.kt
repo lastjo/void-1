@@ -4,15 +4,13 @@ import content.entity.player.dialogue.*
 import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inv.add
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.remove
 
-@Script
-class Karim {
+class Karim : Script {
 
     init {
         npcOperate("Talk-to", "karim") {
@@ -20,9 +18,9 @@ class Karim {
             choice {
                 option<Uncertain>("I think I'll give it a miss.")
                 option<Neutral>("Yes please.") {
-                    if (player.inventory.remove("coins", 1)) {
-                        player.inventory.add("kebab")
-                        player.message("You buy a kebab.")
+                    if (inventory.remove("coins", 1)) {
+                        inventory.add("kebab")
+                        message("You buy a kebab.")
                     } else {
                         player<Sad>("Oops, I forgot to bring any money with me.")
                         npc<Neutral>("Come back when you have some.")

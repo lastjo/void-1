@@ -3,10 +3,10 @@ package content.skill.crafting
 import content.entity.player.dialogue.type.makeAmount
 import content.entity.player.dialogue.type.makeAmountIndex
 import net.pearx.kasechange.toLowerSpaceCase
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.chat.an
 import world.gregs.voidps.engine.client.ui.chat.plural
-import world.gregs.voidps.engine.client.ui.interact.itemOnObjectOperate
 import world.gregs.voidps.engine.data.definition.data.Weaving
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
@@ -14,17 +14,13 @@ import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
 import world.gregs.voidps.engine.entity.item.Item
 import world.gregs.voidps.engine.entity.obj.GameObject
-import world.gregs.voidps.engine.entity.obj.objectOperate
-import world.gregs.voidps.engine.event.Context
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.TransactionError
 import world.gregs.voidps.engine.inv.transact.operation.AddItem.add
 import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.queue.weakQueue
 
-@Script
-class Weaving {
+class Weaving : Script {
 
     val materials = listOf(
         Item("willow_branch"),
@@ -37,7 +33,7 @@ class Weaving {
         get() = def["weaving"]
 
     init {
-        objectOperate("Weave", "loom_*", arrive = false) {
+        objectOperate("Weave", "loom_*", arrive = false) { (target) ->
             val strings = materials.map { it.weaving.to }
             val (index, amount) = makeAmountIndex(
                 items = strings,
@@ -49,30 +45,18 @@ class Weaving {
             weave(target, item, amount)
         }
 
-        itemOnObjectOperate(obj = "loom_*", arrive = false) {
+        itemOnObjectOperate(obj = "loom_*", arrive = false) { (target, item) ->
             if (!item.def.contains("weaving")) {
                 return@itemOnObjectOperate
             }
             val (_, amount) = makeAmount(
                 items = listOf(item.weaving.to),
                 type = "Make",
-                maximum = player.inventory.count(item.id) / item.weaving.amount,
+                maximum = inventory.count(item.id) / item.weaving.amount,
                 text = "How many would you like to make?",
             )
             weave(target, item, amount)
         }
-    }
-
-    fun Context<Player>.weave(obj: GameObject, item: Item, amount: Int) {
-        val data = item.weaving
-        val current = player.inventory.count(item.id)
-        if (current < data.amount) {
-            val name = data.to.toLowerSpaceCase()
-            player.message("You need ${data.amount} ${plural(item)} in order to make${name.an()} $name.")
-            return
-        }
-        val actualAmount = if (current < amount * data.amount) current / data.amount else amount
-        player.weave(obj, item, actualAmount)
     }
 
     fun Player.weave(obj: GameObject, item: Item, amount: Int) {

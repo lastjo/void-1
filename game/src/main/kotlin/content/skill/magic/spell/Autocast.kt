@@ -1,47 +1,40 @@
 package content.skill.magic.spell
 
 import content.skill.melee.weapon.attackRange
-import world.gregs.voidps.engine.Api
-import world.gregs.voidps.engine.client.ui.InterfaceOption
-import world.gregs.voidps.engine.client.ui.interfaceOption
-import world.gregs.voidps.engine.client.variable.Variable
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.data.definition.InterfaceDefinitions
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
-import world.gregs.voidps.engine.inv.inventoryChanged
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 
-@Script
-class Autocast : Api {
+class Autocast : Script {
 
     val interfaceDefinitions: InterfaceDefinitions by inject()
 
-    @Variable("autocast")
-    override fun variableSet(player: Player, key: String, from: Any?, to: Any?) {
-        if (to == null) {
-            player.clear("autocast_spell")
-        }
-    }
-
     init {
-        interfaceOption("Autocast", id = "*_spellbook") {
-            toggle()
+        variableSet("autocast") { _, _, to ->
+            if (to == null) {
+                clear("autocast_spell")
+            }
         }
 
-        inventoryChanged("worn_equipment", EquipSlot.Weapon) { player ->
-            player.clear("autocast")
+        interfaceOption("Autocast", id = "*_spellbook:*") {
+            toggle(it.id, it.component)
+        }
+
+        slotChanged("worn_equipment", EquipSlot.Weapon) {
+            clear("autocast")
         }
     }
 
-    fun InterfaceOption.toggle() {
+    fun Player.toggle(id: String, component: String) {
         val value: Int? = interfaceDefinitions.getComponent(id, component)?.getOrNull("cast_id")
-        if (value == null || player["autocast", 0] == value) {
-            player.clear("autocast")
+        if (value == null || get("autocast", 0) == value) {
+            clear("autocast")
         } else {
-            player["autocast_spell"] = component
-            player.attackRange = 8
-            player["autocast"] = value
+            set("autocast_spell", component)
+            attackRange = 8
+            set("autocast", value)
         }
     }
 }

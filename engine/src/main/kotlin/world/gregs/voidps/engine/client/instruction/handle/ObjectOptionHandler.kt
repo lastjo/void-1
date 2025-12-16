@@ -7,12 +7,12 @@ import world.gregs.voidps.engine.client.ui.closeInterfaces
 import world.gregs.voidps.engine.data.definition.DefinitionsDecoder
 import world.gregs.voidps.engine.data.definition.ObjectDefinitions
 import world.gregs.voidps.engine.data.definition.VariableDefinitions
-import world.gregs.voidps.engine.entity.CharacterInteraction
-import world.gregs.voidps.engine.entity.character.mode.interact.Interact
+import world.gregs.voidps.engine.entity.character.mode.interact.NPCOnObjectInteract
+import world.gregs.voidps.engine.entity.character.mode.interact.PlayerOnObjectInteract
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.GameObjects
-import world.gregs.voidps.engine.entity.obj.ObjectOption
 import world.gregs.voidps.engine.get
 import world.gregs.voidps.network.client.instruction.InteractObject
 import world.gregs.voidps.type.Tile
@@ -44,11 +44,11 @@ class ObjectOptionHandler(
         val index = option - 1
         val selectedOption = options.getOrNull(index)
         if (selectedOption == null) {
-            logger.warn { "Invalid object option $target $index" }
+            logger.warn { "Invalid object option $target $index ${definition.options.contentToString()}" }
             return
         }
         player.closeInterfaces()
-        player.mode = Interact(player, target, ObjectOption(player, target, definition, selectedOption), type = CharacterInteraction(definition, selectedOption))
+        player.interactObject(target, selectedOption)
     }
 
     private fun getObject(tile: Tile, objectId: Int): GameObject? {
@@ -99,4 +99,12 @@ class ObjectOptionHandler(
             return definition
         }
     }
+}
+
+fun Player.interactObject(target: GameObject, option: String, approachRange: Int? = null) {
+    mode = PlayerOnObjectInteract(target, option, this, approachRange)
+}
+
+fun NPC.interactObject(target: GameObject, option: String, approachRange: Int? = null) {
+    mode = NPCOnObjectInteract(target, option, this, approachRange)
 }

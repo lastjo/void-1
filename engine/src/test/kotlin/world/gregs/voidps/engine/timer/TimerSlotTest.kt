@@ -13,27 +13,22 @@ internal class TimerSlotTest : TimersTest() {
     @BeforeEach
     override fun setup() {
         super.setup()
-        val list: MutableList<TimerApi> = mutableListOf(
+        for (timer in listOf("timer", "1", "2")) {
             object : TimerApi {
-                override fun start(npc: NPC, timer: String, restart: Boolean): Int {
-                    emitted.add("start_$timer" to restart)
-                    return startInterval
-                }
-
-                override fun tick(npc: NPC, timer: String): Int {
-                    emitted.add("tick_$timer" to false)
-                    return tickInterval
-                }
-
-                override fun stop(npc: NPC, timer: String, death: Boolean) {
-                    emitted.add("stop_$timer" to death)
+                init {
+                    npcTimerStart(timer) { restart ->
+                        emitted.add("start_$timer" to restart)
+                        startInterval
+                    }
+                    npcTimerTick(timer) {
+                        emitted.add("tick_$timer" to false)
+                        tickInterval
+                    }
+                    npcTimerStop(timer) { logout ->
+                        emitted.add("stop_$timer" to logout)
+                    }
                 }
             }
-        )
-        for (dispatcher in listOf(TimerApi.npcStartDispatcher, TimerApi.npcTickDispatcher, TimerApi.npcStopDispatcher)) {
-            dispatcher.instances["timer"] = list
-            dispatcher.instances["1"] = list
-            dispatcher.instances["2"] = list
         }
         timers = TimerSlot(npc)
     }

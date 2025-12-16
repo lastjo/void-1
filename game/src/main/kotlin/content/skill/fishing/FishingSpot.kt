@@ -3,25 +3,21 @@ package content.skill.fishing
 import org.rsmod.game.pathfinder.collision.CollisionStrategies
 import org.rsmod.game.pathfinder.collision.CollisionStrategy
 import org.rsmod.game.pathfinder.flag.CollisionFlag
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.data.definition.AreaDefinitions
-import world.gregs.voidps.engine.entity.Id
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
 import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Players
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.map.collision.Collisions
 import world.gregs.voidps.engine.map.collision.random
 import world.gregs.voidps.engine.queue.softQueue
-import world.gregs.voidps.engine.timer.*
 import world.gregs.voidps.type.Area
 import world.gregs.voidps.type.Tile
 import world.gregs.voidps.type.random
 
-@Script
-class FishingSpot : Api {
+class FishingSpot : Script {
 
     val areas: AreaDefinitions by inject()
     val players: Players by inject()
@@ -33,21 +29,20 @@ class FishingSpot : Api {
     private val minRespawnTick = 280
     private val maxRespawnTick = 530
 
-    @Id("fishing_spot*")
-    override fun spawn(npc: NPC) {
-        npc.softTimers.start("fishing_spot_respawn")
-        val area: Area = npc["area"] ?: return
-        move(npc, area)
-    }
+    init {
+        npcSpawn("fishing_spot*") {
+            softTimers.start("fishing_spot_respawn")
+            val area: Area = this["area"] ?: return@npcSpawn
+            move(this, area)
+        }
 
-    @Timer("fishing_spot_respawn")
-    override fun start(npc: NPC, timer: String, restart: Boolean): Int = random.nextInt(280, 530)
+        npcTimerStart("fishing_spot_respawn") { random.nextInt(280, 530) }
 
-    @Timer("fishing_spot_respawn")
-    override fun tick(npc: NPC, timer: String): Int {
-        move(npc)
-        // https://x.com/JagexAsh/status/1604892218380021761
-        return random.nextInt(280, 530)
+        npcTimerTick("fishing_spot_respawn") {
+            move(this)
+            // https://x.com/JagexAsh/status/1604892218380021761
+            random.nextInt(280, 530)
+        }
     }
 
     fun move(npc: NPC, area: Area) {

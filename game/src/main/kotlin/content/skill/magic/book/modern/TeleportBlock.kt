@@ -1,15 +1,13 @@
 package content.skill.magic.book.modern
 
-import content.entity.combat.combatPrepare
 import content.skill.magic.spell.spell
 import content.skill.prayer.protectMagic
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.chat.ChatType
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.timer.Timer
 import kotlin.math.sign
 
@@ -42,11 +40,22 @@ fun Character.unblockTeleport() {
     softTimers.stop("teleport_block")
 }
 
-@Script
-class TeleportBlock : Api {
+class TeleportBlock : Script {
+    init {
+        combatPrepare("magic") { target ->
+            if (spell == "teleport_block" && target is NPC) {
+                message("You can't use that against an NPC.")
+                false
+            } else {
+                true
+            }
+        }
 
-    @Timer("teleport_block")
-    override fun start(player: Player, timer: String, restart: Boolean): Int {
+        timerStart("teleport_block", ::block)
+        timerTick("teleport_block", ::tick)
+    }
+
+    fun block(player: Player, restart: Boolean): Int {
         if (player.teleBlockImmune) {
             return Timer.CANCEL
         }
@@ -59,8 +68,7 @@ class TeleportBlock : Api {
         return 50
     }
 
-    @Timer("teleport_block")
-    override fun tick(player: Player, timer: String): Int {
+    fun tick(player: Player): Int {
         val blocked = player.teleBlocked
         player.teleBlockCounter -= player.teleBlockCounter.sign
         when (player.teleBlockCounter) {
@@ -76,14 +84,5 @@ class TeleportBlock : Api {
             1 -> player.message("Your teleblock is about to wear off.")
         }
         return Timer.CONTINUE
-    }
-
-    init {
-        combatPrepare("magic") { player ->
-            if (player.spell == "teleport_block" && target is NPC) {
-                player.message("You can't use that against an NPC.")
-                cancel()
-            }
-        }
     }
 }

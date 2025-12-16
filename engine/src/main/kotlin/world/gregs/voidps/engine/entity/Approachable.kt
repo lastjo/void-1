@@ -1,12 +1,11 @@
 package world.gregs.voidps.engine.entity
 
-import world.gregs.voidps.engine.dispatch.MapDispatcher
-import world.gregs.voidps.engine.entity.character.mode.interact.arriveDelay
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
+import world.gregs.voidps.engine.entity.character.mode.interact.*
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.entity.item.floor.FloorItem
-import world.gregs.voidps.engine.entity.obj.GameObject
+import world.gregs.voidps.engine.event.Wildcard
+import world.gregs.voidps.engine.event.Wildcards
 
 /**
  * Target Entity interaction whilst approaching from any distance
@@ -14,137 +13,155 @@ import world.gregs.voidps.engine.entity.obj.GameObject
  */
 interface Approachable {
 
-    /**
-     * Player option
+
+    /*
+        Player approaches
      */
-    suspend fun approach(player: Player, target: Player, option: String) {}
 
-    /**
-     * Interface on Player
-     */
-    suspend fun approach(player: Player, id: String, target: Player) {}
+    fun playerApproach(option: String, handler: suspend Player.(PlayerOnPlayerInteract) -> Unit) {
+        playerPlayer.getOrPut(option) { mutableListOf() }.add(handler)
+    }
 
-    /**
-     * Item on Player
-     */
-    suspend fun approach(player: Player, id: String, item: Item, target: Player) {}
-
-
-    /**
-     * Npc option
-     */
-    suspend fun approach(player: Player, target: NPC, option: String) {}
-
-    /**
-     * Interface on NPC
-     */
-    suspend fun approach(player: Player, id: String, target: NPC) {}
-
-    /**
-     * Item on NPC
-     */
-    suspend fun approach(player: Player, id: String, item: Item, target: NPC) {}
-
-
-    /**
-     * GameObject option
-     */
-    suspend fun approach(player: Player, target: GameObject, option: String) {}
-
-    /**
-     * Interface on GameObject
-     */
-    suspend fun approach(player: Player, id: String, target: GameObject) {}
-
-    /**
-     * Item on GameObject
-     */
-    suspend fun approach(player: Player, id: String, item: Item, target: GameObject) {}
-
-
-    /**
-     * FloorItem option
-     */
-    suspend fun approach(player: Player, target: FloorItem, option: String) {}
-
-    /**
-     * Interface on FloorItem
-     */
-    suspend fun approach(player: Player, id: String, target: FloorItem) {}
-
-    /**
-     * Item on FloorItem
-     */
-    suspend fun approach(player: Player, id: String, item: Item, target: FloorItem) {}
-
-
-    /**
-     * Npc player option
-     */
-    suspend fun approach(npc: NPC, target: Player, option: String) {}
-
-    /**
-     * Npc npc option
-     */
-    suspend fun approach(npc: NPC, target: NPC, option: String) {}
-
-    /**
-     * Npc game object option
-     */
-    suspend fun approach(npc: NPC, target: GameObject, option: String) {}
-
-    /**
-     * Player option
-     */
-    suspend fun approach(npc: NPC, target: FloorItem, option: String) {}
-
-    companion object : Approachable {
-        var playerPlayerDispatcher = MapDispatcher<Approachable>("@Approach")
-        var playerNpcDispatcher = MapDispatcher<Approachable>("@Approach")
-        private val noDelays = mutableSetOf<Approachable>()
-        var playerObjectDispatcher = NoDelayDispatcher(noDelays)
-        var playerFloorItemDispatcher = NoDelayDispatcher(noDelays)
-        var npcPlayerDispatcher = MapDispatcher<Approachable>("@Approach")
-        var npcNpcDispatcher = MapDispatcher<Approachable>("@Approach")
-        var npcObjectDispatcher = MapDispatcher<Approachable>("@Approach")
-        var npcFloorItemDispatcher = MapDispatcher<Approachable>("@Approach")
-
-        override suspend fun approach(player: Player, target: Player, option: String) = playerPlayerDispatcher.onFirst(option) { instance ->
-            instance.approach(player, target, option)
+    fun npcApproach(option: String, npc: String = "*", handler: suspend Player.(PlayerOnNPCInteract) -> Unit) {
+        Wildcards.find(npc, Wildcard.Npc) { id ->
+            playerNpc.getOrPut("$option:$id") { mutableListOf() }.add(handler)
         }
+    }
 
-        override suspend fun approach(player: Player, target: NPC, option: String) = playerNpcDispatcher.onFirst("$option:${target.id}", option) { instance ->
-            instance.approach(player, target, option)
+    fun objectApproach(option: String, obj: String = "*", handler: suspend Player.(PlayerOnObjectInteract) -> Unit) {
+        Wildcards.find(obj, Wildcard.Object) { id ->
+            playerObject.getOrPut("$option:$id") { mutableListOf() }.add(handler)
         }
+    }
 
-        override suspend fun approach(player: Player, target: GameObject, option: String) = playerObjectDispatcher.onFirst("$option:${target.id}", option) { instance ->
-            if (!noDelays.contains(instance)) {
-                player.arriveDelay()
+    fun floorItemApproach(option: String, handler: suspend Player.(PlayerOnFloorItemInteract) -> Unit) {
+        playerFloorItem.getOrPut(option) { mutableListOf() }.add(handler)
+    }
+
+    /*
+        Interface on
+     */
+
+    fun onPlayerApproach(id: String = "*", handler: suspend Player.(ItemOnPlayerInteract) -> Unit) {
+        Wildcards.find(id, Wildcard.Component) { i ->
+            onPlayer.getOrPut(i) { mutableListOf() }.add(handler)
+        }
+    }
+
+    fun itemOnPlayerApproach(item: String = "*", block: suspend Player.(ItemOnPlayerInteract) -> Unit) {
+        Wildcards.find(item, Wildcard.Item) { id ->
+            onPlayer.getOrPut(id) { mutableListOf() }.add(block)
+        }
+    }
+
+    fun onNPCApproach(id: String = "*", npc: String = "*", handler: suspend Player.(InterfaceOnNPCInteract) -> Unit) {
+        Wildcards.find(id, Wildcard.Component) { i ->
+            Wildcards.find(npc, Wildcard.Npc) { n ->
+                onNpc.getOrPut("$i:$n") { mutableListOf() }.add(handler)
             }
-            instance.approach(player, target, option)
         }
+    }
 
-        override suspend fun approach(player: Player, target: FloorItem, option: String) = playerFloorItemDispatcher.onFirst("$option:${target.id}", option) { instance ->
-            if (!noDelays.contains(instance)) {
-                player.arriveDelay()
+    fun itemOnNPCApproach(item: String = "*", npc: String = "*", handler: suspend Player.(ItemOnNPCInteract) -> Unit) {
+        Wildcards.find(item, Wildcard.Item) { itm ->
+            Wildcards.find(npc, Wildcard.Npc) { id ->
+                itemOnNpc.getOrPut("$itm:$id") { mutableListOf() }.add(handler)
             }
-            instance.approach(player, target, option)
         }
+    }
 
-        override suspend fun approach(npc: NPC, target: Player, option: String) = npcPlayerDispatcher.onFirst(option) { instance ->
-            instance.approach(npc, target, option)
+    fun onObjectApproach(id: String = "*", obj: String = "*", handler: suspend Player.(InterfaceOnObjectInteract) -> Unit) {
+        Wildcards.find(id, Wildcard.Component) { i ->
+            Wildcards.find(obj, Wildcard.Object) { o ->
+                onObject.getOrPut("$i:$o") { mutableListOf() }.add(handler)
+            }
         }
+    }
 
-        override suspend fun approach(npc: NPC, target: NPC, option: String) = npcNpcDispatcher.onFirst("$option:${target.id}", option) { instance ->
-            instance.approach(npc, target, option)
+    fun itemOnObjectApproach(item: String = "*", obj: String = "*", arrive: Boolean = true, handler: suspend Player.(ItemOnObjectInteract) -> Unit) {
+        Wildcards.find(item, Wildcard.Item) { itm ->
+            Wildcards.find(obj, Wildcard.Object) { id ->
+                itemOnObject.getOrPut("$itm:$id") { mutableListOf() }.add(handler)
+            }
         }
+    }
 
-        override suspend fun approach(npc: NPC, target: GameObject, option: String) = npcObjectDispatcher.onFirst("$option:${target.id}", option) { instance ->
-            instance.approach(npc, target, option)
+    fun onFloorItemApproach(id: String = "*", floorItem: String = "*", handler: suspend Player.(InterfaceOnFloorItemInteract) -> Unit) {
+        Wildcards.find(id, Wildcard.Component) { i ->
+            Wildcards.find(floorItem, Wildcard.Item) { floor ->
+                onFloorItem.getOrPut("$i:$floor") { mutableListOf() }.add(handler)
+            }
         }
+    }
 
-        override suspend fun approach(npc: NPC, target: FloorItem, option: String) = npcFloorItemDispatcher.onFirst("$option:${target.id}", option) { instance ->
-            instance.approach(npc, target, option)
+    fun itemOnFloorItemApproach(item: String = "*", floorItem: String = "*", handler: suspend Player.(ItemOnFloorItemInteract) -> Unit) {
+        Wildcards.find(item, Wildcard.Item) { itm ->
+            Wildcards.find(floorItem, Wildcard.Item) { id ->
+                itemOnFloorItem.getOrPut("$itm:$id") { mutableListOf() }.add(handler)
+            }
+        }
+    }
+
+
+    /*
+        NPC approaches
+     */
+
+    fun npcApproachPlayer(option: String, handler: suspend NPC.(NPCOnPlayerInteract) -> Unit) {
+        npcPlayer.getOrPut(option) { mutableListOf() }.add(handler)
+    }
+
+    fun npcApproachNPC(option: String, handler: suspend NPC.(NPCOnNPCInteract) -> Unit) {
+        npcNpc.getOrPut(option) { mutableListOf() }.add(handler)
+    }
+
+    fun npcApproachObject(option: String, obj: String = "*", block: suspend NPC.(NPCOnObjectInteract) -> Unit) {
+        Wildcards.find(obj, Wildcard.Object) { id ->
+            npcObject.getOrPut("$option:$id") { mutableListOf() }.add(block)
+        }
+    }
+
+    fun npcApproachFloorItem(option: String, block: suspend NPC.(NPCOnFloorItemInteract) -> Unit) {
+        npcFloorItem.getOrPut(option) { mutableListOf() }.add(block)
+    }
+
+    companion object : AutoCloseable {
+        val playerPlayer = Object2ObjectOpenHashMap<String, MutableList<suspend Player.(PlayerOnPlayerInteract) -> Unit>>(2)
+        val onPlayer = Object2ObjectOpenHashMap<String, MutableList<suspend Player.(ItemOnPlayerInteract) -> Unit>>(10)
+
+        val playerNpc = Object2ObjectOpenHashMap<String, MutableList<suspend Player.(PlayerOnNPCInteract) -> Unit>>(150)
+        val onNpc = Object2ObjectOpenHashMap<String, MutableList<suspend Player.(InterfaceOnNPCInteract) -> Unit>>(250)
+        val itemOnNpc = Object2ObjectOpenHashMap<String, MutableList<suspend Player.(ItemOnNPCInteract) -> Unit>>(25)
+
+        val playerObject = Object2ObjectOpenHashMap<String, MutableList<suspend Player.(PlayerOnObjectInteract) -> Unit>>(50)
+        val onObject = Object2ObjectOpenHashMap<String, MutableList<suspend Player.(InterfaceOnObjectInteract) -> Unit>>(2)
+        val itemOnObject = Object2ObjectOpenHashMap<String, MutableList<suspend Player.(ItemOnObjectInteract) -> Unit>>(2)
+
+        val playerFloorItem = Object2ObjectOpenHashMap<String, MutableList<suspend Player.(PlayerOnFloorItemInteract) -> Unit>>(2)
+        val onFloorItem = Object2ObjectOpenHashMap<String, MutableList<suspend Player.(InterfaceOnFloorItemInteract) -> Unit>>(2)
+        val itemOnFloorItem = Object2ObjectOpenHashMap<String, MutableList<suspend Player.(ItemOnFloorItemInteract) -> Unit>>(2)
+
+        val npcPlayer = Object2ObjectOpenHashMap<String, MutableList<suspend NPC.(NPCOnPlayerInteract) -> Unit>>(2)
+        val npcNpc = Object2ObjectOpenHashMap<String, MutableList<suspend NPC.(NPCOnNPCInteract) -> Unit>>(2)
+        val npcObject = Object2ObjectOpenHashMap<String, MutableList<suspend NPC.(NPCOnObjectInteract) -> Unit>>(2)
+        val npcFloorItem = Object2ObjectOpenHashMap<String, MutableList<suspend NPC.(NPCOnFloorItemInteract) -> Unit>>(2)
+
+        override fun close() {
+            playerPlayer.clear()
+            onPlayer.clear()
+            playerNpc.clear()
+            onNpc.clear()
+            itemOnNpc.clear()
+            playerObject.clear()
+            onObject.clear()
+            itemOnObject.clear()
+            playerFloorItem.clear()
+            onFloorItem.clear()
+            itemOnFloorItem.clear()
+            npcPlayer.clear()
+            npcNpc.clear()
+            npcObject.clear()
+            npcFloorItem.clear()
         }
     }
 }

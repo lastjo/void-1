@@ -1,11 +1,12 @@
 package world.gregs.voidps.engine.client.variable
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
-import world.gregs.voidps.engine.event.EventDispatcher
+import world.gregs.voidps.engine.entity.Entity
+import world.gregs.voidps.engine.entity.character.player.Player
 
 class VariableBits(
     private val variables: Variables,
-    private val events: EventDispatcher,
+    private val entity: Entity,
 ) {
 
     fun contains(key: String, id: Any): Boolean {
@@ -19,7 +20,9 @@ class VariableBits(
             if (refresh) {
                 variables.send(key)
             }
-            events.emit(VariableBitAdded(key, value))
+            if (entity is Player) {
+                VariableApi.add(entity, key, value)
+            }
             return true
         }
         return false
@@ -31,7 +34,9 @@ class VariableBits(
             if (refresh) {
                 variables.send(key)
             }
-            events.emit(VariableBitRemoved(key, value))
+            if (entity is Player) {
+                VariableApi.remove(entity, key, value)
+            }
             return true
         }
         return false
@@ -43,8 +48,10 @@ class VariableBits(
         if (refresh) {
             variables.send(key)
         }
-        for (value in values) {
-            events.emit(VariableBitRemoved(key, value))
+        if (entity is Player) {
+            for (value in values) {
+                VariableApi.remove(entity, key, value)
+            }
         }
     }
 }

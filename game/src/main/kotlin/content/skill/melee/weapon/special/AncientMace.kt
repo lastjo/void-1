@@ -1,18 +1,18 @@
 package content.skill.melee.weapon.special
 
-import content.entity.player.combat.special.specialAttackDamage
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.event.Script
 
-@Script
-class AncientMace {
-
+class AncientMace : Script {
     init {
-        specialAttackDamage("favour_of_the_war_god") { player ->
+        specialAttackDamage("favour_of_the_war_god") { target, damage ->
+            if (damage < 0) {
+                return@specialAttackDamage
+            }
             val drain = damage / 10
             if (drain > 0) {
                 target.levels.drain(Skill.Prayer, drain)
-                player.levels.restore(Skill.Prayer, drain)
+                levels.restore(Skill.Prayer, drain)
             }
         }
     }

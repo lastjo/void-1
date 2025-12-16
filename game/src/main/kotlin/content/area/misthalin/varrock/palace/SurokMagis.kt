@@ -4,11 +4,9 @@ import content.entity.player.dialogue.Frustrated
 import content.entity.player.dialogue.Surprised
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.Script
 
-@Script
-class SurokMagis {
+class SurokMagis : Script {
 
     init {
         npcOperate("Talk-to", "surok_magis_*") {

@@ -1,13 +1,10 @@
 package content.entity.combat
 
 import content.area.wilderness.inSingleCombat
-import content.entity.combat.hit.characterCombatDamage
-import content.entity.death.characterDeath
 import content.entity.player.combat.special.specialAttack
-import content.skill.melee.weapon.attackRange
-import content.skill.melee.weapon.attackSpeed
-import content.skill.melee.weapon.fightStyle
-import content.skill.melee.weapon.weapon
+import content.skill.magic.Magic
+import content.skill.melee.weapon.*
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.dialogue
 import world.gregs.voidps.engine.client.variable.hasClock
@@ -17,124 +14,92 @@ import world.gregs.voidps.engine.entity.character.Character
 import world.gregs.voidps.engine.entity.character.mode.EmptyMode
 import world.gregs.voidps.engine.entity.character.mode.PauseMode
 import world.gregs.voidps.engine.entity.character.mode.combat.*
-import world.gregs.voidps.engine.entity.character.mode.interact.Interact
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.entity.character.player.name
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
-import world.gregs.voidps.engine.entity.characterDespawn
-import world.gregs.voidps.engine.event.Script
-import world.gregs.voidps.engine.event.onEvent
 
-@Script
-class Combat {
+class Combat :
+    Script,
+    CombatApi {
 
     init {
-        onEvent<CombatInteraction<*>> {
-            combat(character, target)
+        CombatMovement.combatReached = { target ->
+            combat(this, target)
         }
 
-        onEvent<Character, CombatReached> { character ->
-            combat(character, target)
-        }
-
-        characterDespawn { character ->
-            for (attacker in character.attackers) {
+        playerDespawn {
+            for (attacker in attackers) {
                 attacker.mode = EmptyMode
             }
         }
 
-        characterCombatStart { character ->
+        npcDespawn {
+            for (attacker in attackers) {
+                attacker.mode = EmptyMode
+            }
+        }
+
+        combatStart { target ->
             if (target.inSingleCombat) {
                 target.attackers.clear()
-                target.attacker = character
+                target.attacker = this
             }
-            target.attackers.add(character)
-            retaliate(target, character)
+            target.attackers.add(this)
+            retaliate(target, this)
         }
 
-        characterCombatStop { character ->
+        npcCombatStart { target ->
+            if (target.inSingleCombat) {
+                target.attackers.clear()
+                target.attacker = this
+            }
+            target.attackers.add(this)
+            retaliate(target, this)
+        }
+
+        combatStop { target ->
             if (target.dead) {
-                character["face_entity"] = target
+                set("face_entity", target)
             } else {
-                character.clearWatch()
+                clearWatch()
             }
-            character.target?.attackers?.remove(character)
-            character.target = null
+            this.target?.attackers?.remove(this)
+            this.target = null
         }
 
-        characterDeath { character ->
-            character.stop("in_combat")
-            for (attacker in character.attackers) {
-                if (attacker.target == character) {
-                    attacker.stop("in_combat")
-                }
-            }
+        playerDeath {
+            stop(this)
         }
 
-        characterCombatDamage { character ->
-            if (source == character || type == "poison" || type == "disease" || type == "healed") {
-                return@characterCombatDamage
-            }
-            if (character.mode !is CombatMovement && character.mode !is PauseMode) {
-                retaliate(character, source)
+        npcDeath(handler = ::stop)
+
+        combatDamage(handler = ::damage)
+        npcCombatDamage(handler = ::damage)
+    }
+
+    fun damage(character: Character, it: CombatDamage) {
+        val (source, type) = it
+        if (source == character || type == "poison" || type == "disease" || type == "healed") {
+            return
+        }
+        if (character.mode !is CombatMovement && character.mode !is PauseMode) {
+            retaliate(character, source)
+        }
+    }
+
+    fun stop(character: Character) {
+        character.stop("in_combat")
+        for (attacker in character.attackers) {
+            if (attacker.target == character) {
+                attacker.stop("in_combat")
             }
         }
     }
 
     /**
-     * When triggered via [Interact] replace the Interaction with [CombatInteraction]
-     * to allow movement & [Interact] to complete and start [combat] on the same tick
-     * After [Interact] is complete switch to using [CombatMovement]
+     * [CombatMovement.combatReached] is emitted by [CombatMovement] every tick the [Character] is within range of the target
      */
-
-    /**
-     * [CombatReached] is emitted by [CombatMovement] every tick the [Character] is within range of the target
-     */
-
-    fun combat(character: Character, target: Character) {
-        if (character.mode !is CombatMovement || character.target != target) {
-            character.mode = CombatMovement(character, target)
-            character.target = target
-        }
-        val movement = character.mode as CombatMovement
-        if (character is Player && character.dialogue != null) {
-            return
-        }
-        if (character.target == null || !Target.attackable(character, target)) {
-            character.mode = EmptyMode
-            return
-        }
-        val attackRange = character.attackRange
-        if (!movement.arrived(if (attackRange == 1 && character.weapon.def["weapon_type", ""] != "salamander") -1 else attackRange)) {
-            return
-        }
-        if (character.hasClock("action_delay")) {
-            return
-        }
-        val prepare = CombatPrepare(target)
-        character.emit(prepare)
-        if (prepare.cancelled) {
-            character.mode = EmptyMode
-            return
-        }
-        if (character["debug", false] || target["debug", false]) {
-            val player = if (character["debug", false] && character is Player) character else target as Player
-            player.message("---- Swing (${character.identifier}) -> (${target.identifier}) -----")
-        }
-        if (!target.hasClock("in_combat")) {
-            character.emit(CombatStart(target))
-        }
-        target.start("in_combat", 8)
-        val swing = CombatSwing(target)
-        character.emit(swing)
-        (character as? Player)?.specialAttack = false
-        var nextDelay = character.attackSpeed
-        if (character.hasClock("miasmic") && (character.fightStyle == "range" || character.fightStyle == "melee")) {
-            nextDelay *= 2
-        }
-        character.start("action_delay", nextDelay)
-    }
-
     fun retaliates(character: Character) = if (character is NPC) {
         character.def["retaliates", true]
     } else {
@@ -156,5 +121,77 @@ class Combat {
         val delay = character.attackSpeed / 2
         character.start("action_delay", delay)
         character.start("in_combat", delay + 8)
+    }
+
+    companion object {
+        fun combat(character: Character, target: Character) {
+            if (character.mode !is CombatMovement || character.target != target) {
+                character.mode = CombatMovement(character, target)
+                character.target = target
+            }
+            val movement = character.mode as CombatMovement
+            if (character is Player && character.dialogue != null) {
+                return
+            }
+            if (character.target == null || !Target.attackable(character, target)) {
+                character.mode = EmptyMode
+                return
+            }
+            val attackRange = character.attackRange
+            if (!movement.arrived(if (attackRange == 1 && character.weapon.def["weapon_type", ""] != "salamander") -1 else attackRange)) {
+                return
+            }
+            if (character.hasClock("action_delay")) {
+                return
+            }
+            val prepared = when (character) {
+                is Player -> CombatApi.prepare(character, target, character.fightStyle)
+                is NPC -> CombatApi.prepare(character, target)
+                else -> return
+            }
+            if (!prepared) {
+                character.mode = EmptyMode
+                return
+            }
+            if (character["debug", false] || target["debug", false]) {
+                val player = if (character["debug", false] && character is Player) character else target as Player
+                val id = when (character) {
+                    is NPC -> character.id
+                    is Player -> character.name
+                    else -> ""
+                }
+                val targetId = when (target) {
+                    is NPC -> target.id
+                    is Player -> target.name
+                    else -> ""
+                }
+                player.message("---- Swing ($id) -> ($targetId) -----")
+            }
+            if (!target.hasClock("in_combat")) {
+                if (character is Player) {
+                    CombatApi.start(character, target)
+                } else if (character is NPC) {
+                    CombatApi.start(character, target)
+                }
+            }
+            target.start("in_combat", 8)
+            if (character is NPC) {
+                CombatApi.swing(character, target, character.fightStyle)
+            } else if (character is Player) {
+                if (character.fightStyle == "magic" || character.fightStyle == "blaze") {
+                    if (Magic.castSpell(character, target)) {
+                        CombatApi.swing(character, target, character.weapon.id, character.fightStyle)
+                    }
+                } else {
+                    CombatApi.swing(character, target, character.weapon.id, character.fightStyle)
+                }
+            }
+            (character as? Player)?.specialAttack = false
+            var nextDelay = character.attackSpeed
+            if (character.hasClock("miasmic") && (character.fightStyle == "range" || character.fightStyle == "melee")) {
+                nextDelay *= 2
+            }
+            character.start("action_delay", nextDelay)
+        }
     }
 }

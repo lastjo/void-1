@@ -2,44 +2,43 @@
 
 package content.skill.prayer.list
 
+import content.skill.prayer.PrayerApi
 import content.skill.prayer.PrayerConfigs.ACTIVE_CURSES
 import content.skill.prayer.PrayerConfigs.ACTIVE_PRAYERS
-import content.skill.prayer.PrayerStart
-import content.skill.prayer.PrayerStop
 import net.pearx.kasechange.toSnakeCase
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.ui.closeInterfaces
-import world.gregs.voidps.engine.client.variable.Variable
-import world.gregs.voidps.engine.client.variable.variableBitAdd
-import world.gregs.voidps.engine.client.variable.variableBitRemove
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.event.Script
 
-@Script
-class PrayerToggle : Api {
-
-    @Variable("activated_*")
-    override fun variableSet(player: Player, key: String, from: Any?, to: Any?) {
-        player.closeInterfaces()
-        val from = (from as? List<String>)?.toSet() ?: emptySet()
-        val to = (to as? List<String>)?.toSet() ?: emptySet()
-        for (prayer in from.subtract(to)) {
-            player.emit(PrayerStop(prayer))
-        }
-        for (prayer in to.subtract(from)) {
-            player.emit(PrayerStart(prayer))
-        }
-    }
+class PrayerToggle : Script {
 
     init {
-        variableBitAdd(ACTIVE_PRAYERS, ACTIVE_CURSES) { player ->
-            player.closeInterfaces()
-            player.emit(PrayerStart((value as String).toSnakeCase()))
+        variableSet("activated_*") { _, from, to ->
+            closeInterfaces()
+            val from = (from as? List<String>)?.toSet() ?: emptySet()
+            val to = (to as? List<String>)?.toSet() ?: emptySet()
+            for (prayer in from.subtract(to)) {
+                PrayerApi.stop(this, prayer)
+            }
+            for (prayer in to.subtract(from)) {
+                PrayerApi.start(this, prayer)
+            }
         }
 
-        variableBitRemove(ACTIVE_PRAYERS, ACTIVE_CURSES) { player ->
-            player.closeInterfaces()
-            player.emit(PrayerStop((value as String).toSnakeCase()))
-        }
+        variableBitAdded(ACTIVE_PRAYERS, ::added)
+        variableBitAdded(ACTIVE_CURSES, ::added)
+
+        variableBitRemoved(ACTIVE_PRAYERS, ::removed)
+        variableBitRemoved(ACTIVE_CURSES, ::removed)
+    }
+
+    fun added(player: Player, value: Any) {
+        player.closeInterfaces()
+        PrayerApi.start(player, (value as String).toSnakeCase())
+    }
+
+    fun removed(player: Player, value: Any) {
+        player.closeInterfaces()
+        PrayerApi.stop(player, (value as String).toSnakeCase())
     }
 }

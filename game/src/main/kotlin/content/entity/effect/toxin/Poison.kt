@@ -1,15 +1,14 @@
 package content.entity.effect.toxin
 
-import content.entity.combat.hit.characterCombatAttack
 import content.entity.combat.hit.directHit
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.entity.character.Character
+import world.gregs.voidps.engine.entity.character.mode.combat.CombatAttack
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.equip.equipped
 import world.gregs.voidps.engine.entity.item.Item
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.timer.*
 import world.gregs.voidps.network.login.protocol.visual.update.player.EquipSlot
 import world.gregs.voidps.type.random
@@ -55,23 +54,30 @@ fun Player.antiPoison(duration: Int, timeUnit: TimeUnit) {
     timers.startIfAbsent("poison")
 }
 
-@Script
-class Poison : Api {
+class Poison : Script {
 
-    override fun spawn(player: Player) {
-        if (player.poisonCounter != 0) {
-            player.timers.restart("poison")
+    init {
+        playerSpawn {
+            if (poisonCounter != 0) {
+                timers.restart("poison")
+            }
         }
+
+        npcSpawn {
+            if (poisonCounter != 0) {
+                softTimers.restart("poison")
+            }
+        }
+
+        timerStart("poison", ::start)
+        npcTimerStart("poison", ::start)
+        timerTick("poison", ::tick)
+        npcTimerTick("poison", ::tick)
+        timerStop("poison", ::stop)
+        npcTimerStop("poison", ::stop)
     }
 
-    override fun spawn(npc: NPC) {
-        if (npc.poisonCounter != 0) {
-            npc.softTimers.restart("poison")
-        }
-    }
-
-    @Timer("poison")
-    override fun start(character: Character, timer: String, restart: Boolean): Int {
+    fun start(character: Character, restart: Boolean): Int {
         if (character.antiPoison || immune(character)) {
             return Timer.CANCEL
         }
@@ -82,8 +88,7 @@ class Poison : Api {
         return 30
     }
 
-    @Timer("poison")
-    override fun tick(character: Character, timer: String): Int {
+    fun tick(character: Character): Int {
         val poisoned = character.poisoned
         character.poisonCounter -= character.poisonCounter.sign
         when {
@@ -99,24 +104,27 @@ class Poison : Api {
         return Timer.CONTINUE
     }
 
-    @Timer("poison")
-    override fun stop(character: Character, timer: String, logout: Boolean) {
+    fun stop(character: Character, logout: Boolean) {
         character.poisonCounter = 0
         character.clear("poison_damage")
         character.clear("poison_source")
     }
 
     init {
-        characterCombatAttack { source ->
-            if (damage <= 0 || !poisonous(source, weapon)) {
-                return@characterCombatAttack
-            }
-            val poison = 20 + weapon.id.count { it == '+' } * 10
-            if (type == "range" && random.nextDouble() < 0.125) {
-                source.poison(target, if (weapon.id == "emerald_bolts_e") 50 else poison)
-            } else if (type == "melee" && random.nextDouble() < 0.25) {
-                source.poison(target, poison + 20)
-            }
+        combatAttack(handler = ::attack)
+        npcCombatAttack(handler = ::attack)
+    }
+
+    fun attack(source: Character, attack: CombatAttack) {
+        val (target, damage, type, weapon) = attack
+        if (damage <= 0 || !poisonous(source, weapon)) {
+            return
+        }
+        val poison = 20 + weapon.id.count { it == '+' } * 10
+        if (type == "range" && random.nextDouble() < 0.125) {
+            source.poison(target, if (weapon.id == "emerald_bolts_e") 50 else poison)
+        } else if (type == "melee" && random.nextDouble() < 0.25) {
+            source.poison(target, poison + 20)
         }
     }
 

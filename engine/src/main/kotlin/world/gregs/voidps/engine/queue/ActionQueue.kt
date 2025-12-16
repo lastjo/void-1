@@ -60,13 +60,18 @@ class ActionQueue(
     fun contains(name: String): Boolean = queue.any { it.name == name } || pending.any { it.name == name }
 
     fun clearWeak() {
-        if (action?.priority == ActionPriority.Weak) {
+        clear(ActionPriority.Weak)
+    }
+
+    fun clear(priority: ActionPriority) {
+        val current = action?.priority?.ordinal
+        if (current != null && current <= priority.ordinal) {
             character.suspension = null
             action = null
         }
-        pending.removeIf { it.priority == ActionPriority.Weak }
+        pending.removeIf { it.priority.ordinal <= priority.ordinal }
         queue.removeIf {
-            if (it.priority == ActionPriority.Weak) {
+            if (it.priority.ordinal <= priority.ordinal) {
                 it.cancel()
                 return@removeIf true
             }

@@ -2,15 +2,12 @@ package content.entity.player.inv.item
 
 import content.entity.combat.inCombat
 import content.entity.player.dialogue.type.makeAmount
-import content.entity.sound.sound
 import net.pearx.kasechange.toSentenceCase
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.ui.chat.plural
 import world.gregs.voidps.engine.client.ui.closeDialogue
 import world.gregs.voidps.engine.client.ui.closeInterfaces
-import world.gregs.voidps.engine.client.ui.event.interfaceClose
-import world.gregs.voidps.engine.client.ui.event.interfaceOpen
-import world.gregs.voidps.engine.client.ui.interact.itemOnItem
 import world.gregs.voidps.engine.data.config.ItemOnItemDefinition
 import world.gregs.voidps.engine.data.definition.ItemOnItemDefinitions
 import world.gregs.voidps.engine.entity.World
@@ -21,9 +18,10 @@ import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.entity.character.sound
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.inv.Inventory
+import world.gregs.voidps.engine.inv.Items
 import world.gregs.voidps.engine.inv.charges
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.inv.transact.Transaction
@@ -33,24 +31,23 @@ import world.gregs.voidps.engine.inv.transact.operation.RemoveItem.remove
 import world.gregs.voidps.engine.inv.transact.operation.SetCharge.setCharge
 import world.gregs.voidps.engine.queue.weakQueue
 
-@Script
-class ItemOnItems {
+class ItemOnItems : Script {
 
     val itemOnItemDefs: ItemOnItemDefinitions by inject()
 
     init {
-        itemOnItem(bidirectional = false) { player ->
+        itemOnItem(bidirectional = false) { fromItem, toItem ->
             val overlaps = itemOnItemDefs.getOrNull(fromItem, toItem)?.filter { !it.members || World.members }
             if (overlaps.isNullOrEmpty()) {
-                player.noInterest()
+                noInterest()
                 return@itemOnItem
             }
-            player.closeInterfaces()
-            player.weakQueue("item_on_item") {
-                player.softTimers.start("item_on_item")
-                val maximum = getMaximum(overlaps, player)
-                val (def, amount) = if (makeImmediately(player, overlaps, maximum, player.inventory)) {
-                    player.closeDialogue()
+            closeInterfaces()
+            weakQueue("item_on_item") {
+                softTimers.start("item_on_item")
+                val maximum = getMaximum(overlaps, this@itemOnItem)
+                val (def, amount) = if (makeImmediately(this@itemOnItem, overlaps, maximum, inventory)) {
+                    closeDialogue()
                     overlaps.first() to 1
                 } else {
                     val definition = overlaps.first()
@@ -67,12 +64,12 @@ class ItemOnItems {
             }
         }
 
-        interfaceClose("dialogue_skill_creation") { player ->
-            player.clear("selecting_amount")
+        interfaceClosed("dialogue_skill_creation") {
+            clear("selecting_amount")
         }
 
-        interfaceOpen("dialogue_skill_creation") { player ->
-            player["selecting_amount"] = true
+        interfaceOpened("dialogue_skill_creation") {
+            set("selecting_amount", true)
         }
     }
 
@@ -120,7 +117,7 @@ class ItemOnItems {
         }
     }
 
-    fun replaceItems(
+    suspend fun replaceItems(
         def: ItemOnItemDefinition,
         player: Player,
         skill: Skill?,
@@ -142,7 +139,7 @@ class ItemOnItems {
             if (skill != null) {
                 player.exp(skill, def.xp)
             }
-            player.emit(ItemUsedOnItem(def))
+            Items.craft(player, def)
         } else {
             if (def.failure.isNotEmpty()) {
                 player.message(def.failure, ChatType.Filter)
@@ -166,7 +163,6 @@ class ItemOnItems {
             val min = overlap.remove.distinct().minOf { item ->
                 val count = player.inventory.count(item.id)
                 val required = overlap.remove.filter { it.id == item.id }.sumOf { it.amount }
-                println("Required $item $required")
                 if (required == 0) 0 else count / required
             }
             if (min > max) {

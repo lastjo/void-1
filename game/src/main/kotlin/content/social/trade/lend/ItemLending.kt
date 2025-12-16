@@ -1,15 +1,13 @@
 package content.social.trade.lend
 
 import content.social.trade.lend.Loan.returnLoan
-import content.social.trade.returnedItems
-import world.gregs.voidps.engine.Api
+import content.social.trade.loanReturnedItems
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.client.message
 import world.gregs.voidps.engine.client.variable.remaining
 import world.gregs.voidps.engine.client.variable.stop
 import world.gregs.voidps.engine.entity.character.player.Player
 import world.gregs.voidps.engine.entity.character.player.Players
-import world.gregs.voidps.engine.entity.playerDespawn
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.engine.timer.*
 import java.util.concurrent.TimeUnit
@@ -18,30 +16,45 @@ import java.util.concurrent.TimeUnit
  * Reschedule timers on player login
  * On logout return items borrowed or lent until logout
  */
-@Script
-class ItemLending : Api {
+
+class ItemLending : Script {
 
     val players: Players by inject()
 
-    override fun spawn(player: Player) {
-        checkBorrowComplete(player)
-        checkLoanComplete(player)
+    init {
+        playerSpawn {
+            checkBorrowComplete(this)
+            checkLoanComplete(this)
+        }
+
+        playerDespawn {
+            checkBorrowUntilLogout(this)
+            checkLoanUntilLogout(this)
+        }
+
+        timerStart("borrow_message") { TimeUnit.MINUTES.toTicks(1) }
+
+        timerStart("loan_message") {
+            val remaining = remaining("lend_timeout", epochSeconds())
+            if (remaining == -1) 0 else TimeUnit.SECONDS.toTicks(remaining)
+        }
+
+        timerTick("borrow_message", ::checkExpiry)
+
+        timerStop("loan_message") { logout ->
+            if (!logout) {
+                stopLending(this)
+            }
+        }
+
+        timerStop("borrow_message") { logout ->
+            if (!logout) {
+                returnLoan(this)
+            }
+        }
     }
 
-    @Timer("loan_message,borrow_message")
-    override fun start(player: Player, timer: String, restart: Boolean): Int {
-        if (timer == "borrow_message") {
-            return TimeUnit.MINUTES.toTicks(1)
-        }
-        val remaining = player.remaining("lend_timeout", epochSeconds())
-        if (remaining == -1) {
-            return 0
-        }
-        return TimeUnit.SECONDS.toTicks(remaining)
-    }
-
-    @Timer("borrow_message")
-    override fun tick(player: Player, timer: String): Int {
+    fun checkExpiry(player: Player): Int {
         val remaining = player.remaining("borrow_timeout", epochSeconds())
         if (remaining <= 0) {
             player.message("Your loan has expired; the item you borrowed will now be returned to its owner.")
@@ -50,24 +63,6 @@ class ItemLending : Api {
             player.message("The item you borrowed will be returned to its owner in a minute.")
         }
         return Timer.CONTINUE
-    }
-
-    @Timer("loan_message,borrow_message")
-    override fun stop(player: Player, timer: String, logout: Boolean) {
-        if (!logout) {
-            if (timer == "loan_message") {
-                stopLending(player)
-            } else {
-                returnLoan(player)
-            }
-        }
-    }
-
-    init {
-        playerDespawn { player ->
-            checkBorrowUntilLogout(player)
-            checkLoanUntilLogout(player)
-        }
     }
 
     fun checkBorrowComplete(player: Player) {
@@ -84,7 +79,7 @@ class ItemLending : Api {
     }
 
     fun checkLoanComplete(player: Player) {
-        if (!player.returnedItems.isFull()) {
+        if (!player.loanReturnedItems.isFull()) {
             return
         }
         val remaining = player.remaining("lend_timeout", epochSeconds())
@@ -102,7 +97,7 @@ class ItemLending : Api {
     }
 
     fun checkLoanUntilLogout(player: Player) {
-        if (!player.contains("lend_timeout") && player.returnedItems.isFull() && player.contains("lent_to")) {
+        if (!player.contains("lend_timeout") && player.loanReturnedItems.isFull() && player.contains("lent_to")) {
             val name: String? = player["lent_to"]
             player.stop("lend_timeout")
             player.softTimers.stop("loan_message")

@@ -3,11 +3,11 @@ package world.gregs.voidps.engine.client.instruction.handle
 import com.github.michaelbull.logging.InlineLogger
 import world.gregs.voidps.engine.client.instruction.InstructionHandler
 import world.gregs.voidps.engine.client.ui.closeInterfaces
-import world.gregs.voidps.engine.entity.CharacterInteraction
 import world.gregs.voidps.engine.entity.character.mode.Follow
-import world.gregs.voidps.engine.entity.character.mode.interact.Interact
+import world.gregs.voidps.engine.entity.character.mode.interact.NPCOnPlayerInteract
+import world.gregs.voidps.engine.entity.character.mode.interact.PlayerOnPlayerInteract
+import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.player.Player
-import world.gregs.voidps.engine.entity.character.player.PlayerOption
 import world.gregs.voidps.engine.entity.character.player.PlayerOptions
 import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.network.client.instruction.InteractPlayer
@@ -33,7 +33,15 @@ class PlayerOptionHandler(
         if (option == "Follow") {
             player.mode = Follow(player, target)
         } else {
-            player.mode = Interact(player, target, PlayerOption(player, target, option), type = CharacterInteraction(option))
+            player.interactPlayer(target, option)
         }
     }
+}
+
+fun Player.interactPlayer(target: Player, option: String) {
+    mode = PlayerOnPlayerInteract(target, option, this)
+}
+
+fun NPC.interactPlayer(target: Player, option: String) {
+    mode = NPCOnPlayerInteract(target, option, this)
 }

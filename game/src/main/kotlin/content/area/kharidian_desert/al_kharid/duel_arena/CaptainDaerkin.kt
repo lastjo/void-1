@@ -4,11 +4,9 @@ import content.entity.player.dialogue.Happy
 import content.entity.player.dialogue.Neutral
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
-import world.gregs.voidps.engine.event.Script
+import world.gregs.voidps.engine.Script
 
-@Script
-class CaptainDaerkin {
+class CaptainDaerkin : Script {
 
     init {
         npcOperate("Talk-to", "captain_daerkin") {

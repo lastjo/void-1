@@ -5,23 +5,23 @@ import content.entity.player.dialogue.type.choice
 import content.entity.player.dialogue.type.npc
 import content.entity.player.dialogue.type.player
 import content.entity.player.dialogue.type.statement
-import world.gregs.voidps.engine.Api
+import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.data.definition.PatrolDefinitions
-import world.gregs.voidps.engine.entity.Id
 import world.gregs.voidps.engine.entity.character.mode.Patrol
-import world.gregs.voidps.engine.entity.character.npc.NPC
-import world.gregs.voidps.engine.entity.character.npc.npcOperate
 import world.gregs.voidps.engine.entity.character.player.name
-import world.gregs.voidps.engine.event.Script
 import world.gregs.voidps.engine.inject
 import world.gregs.voidps.type.random
 
-@Script
-class PortSarimGuard : Api {
+class PortSarimGuard : Script {
 
     val patrols: PatrolDefinitions by inject()
 
     init {
+        npcSpawn("port_sarim_guard_6") {
+            val patrol = patrols.get("port_sarim_guard")
+            mode = Patrol(this, patrol.waypoints)
+        }
+
         npcOperate("Talk-to", "port_sarim_guard_sleeping") {
             npc<Asleep>(
                 "port_sarim_guard_6",
@@ -42,7 +42,7 @@ class PortSarimGuard : Api {
                     npc<Neutral>("But you shouldn't be here - be off with you!")
                     player<Neutral>("I was going anyway.")
                 }
-                option<Happy>("I am ${player.name} the Mighty!") {
+                option<Happy>("I am $name the Mighty!") {
                     npc<Neutral>("Mighty? You look like another of those silly adventurers who thinks they're the bee's knees just because they've done a few lousy quests!")
                     player<Neutral>("Well it sounds better than sitting on this rooftop all day looking at trees!")
                     npc<Angry>("I'll have you know it's a very important job guarding this jail!")
@@ -61,11 +61,5 @@ class PortSarimGuard : Api {
                 }
             }
         }
-    }
-
-    @Id("port_sarim_guard_6")
-    override fun spawn(npc: NPC) {
-        val patrol = patrols.get("port_sarim_guard")
-        npc.mode = Patrol(npc, patrol.waypoints)
     }
 }
