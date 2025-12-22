@@ -1,7 +1,6 @@
 package content.skill.mining
 
 import content.activity.shooting_star.ShootingStarHandler
-import content.entity.obj.Replace.objects
 import content.entity.player.bank.bank
 import net.pearx.kasechange.toLowerSpaceCase
 import world.gregs.voidps.engine.Script
@@ -135,49 +134,6 @@ class Mining : Script {
             }
         }
     }
-
-    fun hasRequirements(player: Player, pickaxe: Item?, message: Boolean = false): Boolean {
-        if (pickaxe == null) {
-            if (message) {
-                player.message("You need a pickaxe to mine this rock.")
-                player.message("You do not have a pickaxe which you have the mining level to use.")
-            }
-            return false
-        }
-        return player.hasRequirementsToUse(pickaxe, message, setOf(Skill.Mining, Skill.Firemaking))
-    }
-
-    fun addOre(player: Player, ore: String): Boolean {
-        if (ore == "stardust") {
-            ShootingStarHandler.addStarDustCollected()
-            val totalStarDust = player.inventory.count(ore) + player.bank.count(ore)
-            if (totalStarDust >= 200) {
-                player.message("You have the maximum amount of stardust but was still rewarded experience.")
-                return true
-            }
-        }
-        val added = player.inventory.add(ore)
-        if (added) {
-            player.message("You manage to mine some ${ore.toLowerSpaceCase()}.")
-        } else {
-            player.inventoryFull()
-        }
-        return added
-    }
-
-    fun deplete(rock: Rock, obj: GameObject): Boolean {
-        if (obj.id.startsWith("crashed_star_tier_")) {
-            ShootingStarHandler.handleMinedStarDust(obj)
-            return false
-        }
-        if (rock.life >= 0) {
-            objects.replace(obj, "depleted${obj.id.dropWhile { it != '_' }}", ticks = rock.life)
-            return true
-        }
-        return false
-    }
-}
-
 
     fun hasRequirements(player: Player, pickaxe: Item?, message: Boolean = false): Boolean {
         if (pickaxe == null) {
